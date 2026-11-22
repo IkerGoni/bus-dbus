@@ -1,6 +1,6 @@
 # Estado — bus-dbus
 
-Actualizado: 2026-11-22 12:02 · Última sesión: remediación consolidada en main (sin desplegar)
+Actualizado: 2026-11-22 12:07 · Última sesión: remediación consolidada en main y desplegada
 
 > **`AGENTS.md` es la fuente de verdad.** Este archivo es el estado de sesión;
 > si algo aquí contradice a `AGENTS.md`, manda `AGENTS.md`.
@@ -9,9 +9,9 @@ Actualizado: 2026-11-22 12:02 · Última sesión: remediación consolidada en ma
 
 Bot de Telegram operativo con datos reales de Dbus. A (índice local de
 coordenadas) y B (`/ubicacion` sobre índice local) están hechos, verificados y
-desplegados. Remediación de la auditoría terminada, verificada, commiteada y
-pusheada en `main`; **pendiente solo del reinicio (regla 9) para que exista en
-producción**.
+desplegados. Remediación de la auditoría terminada, verificada, commiteada,
+pusheada en `main` **y reiniciada en producción (regla 9)**. Bot vivo con PID
+`80402` (npm `80382`), lock `80402`; arranque limpio, sin errores ni conflictos.
 
 ## Remediación de auditoría (esta sesión, sin desplegar)
 
@@ -126,10 +126,11 @@ R6 (token en claro en `.env`, gitignored) sigue pendiente de rotación.
 
 ## Esperando a Iker
 
-- **Autorización para reiniciar** (regla 9): commit+push ya hechos; el bot vivo
-  (PID 64221) todavía ejecuta el `dist` anterior.
+- [x] **Reinicio (regla 9) completado** con autorización de Iker: PID 64221
+  detenido con SIGTERM, lock liberado, recompilado y arrancado con `npm run
+  start` desde `apps/bot`, `BOT_TOKEN` solo por entorno. PID nuevo 80402.
 - Rotación del token de Telegram (no bloquea nada).
-- Validación conversacional real en Telegram con el bot vivo (PID 64221).
+- Validación conversacional real en Telegram con el bot vivo (PID 80402).
 - Nada sobre `84db974`: fue superado por `6fdf763` y por el commit externo
   `fbcb70e` (`docs/06-api-externa/**`).
 
@@ -139,15 +140,15 @@ R6 (token en claro en `.env`, gitignored) sigue pendiente de rotación.
 `main` · worktrees: 1 (raíz) · stash: vacío · **árbol limpio**:
 remediación de auditoría commiteada y pusheada (24 ficheros modificados + 5
 nuevos, incluye 2 docs). El commit externo `fbcb70e` añadió
-`docs/06-api-externa/**` y no solapó estos cambios. El bot en
-producción sigue ejecutando el `dist` anterior (PID 64221): estos cambios
-solo existirán en producción tras el reinicio de la regla 9.
+`docs/06-api-externa/**` y no solapó estos cambios. **Despliegue completado:**
+PID anterior 64221 detenido, lock liberado, `dist` recompilado y bot vivo con
+PID `80402` (npm `80382`), lock `80402`, log sin errores desde el arranque.
 
 ## Siguiente sesión
 
 - Leer primero: `AGENTS.md`, `ESTADO.md`.
-- Bot desplegado en PID `64221`; comprobar lock + `ps` antes de cualquier
-  reinicio (los PIDs cambian).
+- Bot desplegado en PID `80402` (npm `80382`), lock `80402`; comprobar lock +
+  `ps` antes de cualquier reinicio (los PIDs cambian).
 - Reglas específicas: alcance solo `apps/bot/` y `packages/**` aditivo; no
   tocar `apps/mobile`, CI ni state/kanban; secretos solo por entorno; todo
   cambio termina con `pnpm --filter @dbus/bot verify` y `pnpm verify`, commit +
