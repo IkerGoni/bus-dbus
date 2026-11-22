@@ -130,7 +130,7 @@ fun StopDetailScreen(
         val selected = state.selectedLine
         if (selected != null) {
             TextButton(
-                onClick = vm::toggleLineStar,
+                onClick = { vm.toggleLineStar() },
                 modifier = Modifier.padding(horizontal = 8.dp).heightIn(min = 48.dp),
             ) {
                 Icon(
@@ -145,7 +145,11 @@ fun StopDetailScreen(
             }
         }
         Box(Modifier.weight(1f)) {
-            Arrivals(state, vm::refresh) { arrival -> onCreateAlert(stopId, arrival.lineId, arrival.destination.ifEmpty { null }) }
+            Arrivals(
+                state = state,
+                onRetry = vm::refresh,
+                onStar = { vm.toggleLineStar(it.lineId) },
+            ) { arrival -> onCreateAlert(stopId, arrival.lineId, arrival.destination.ifEmpty { null }) }
         }
         // Pie fijo: aviso en esta parada (A06 con la parada precargada).
         HorizontalDivider(color = LocalStatusColors.current.border)
@@ -191,7 +195,7 @@ private fun LineChips(state: StopDetailUiState, onSelect: (String?) -> Unit) {
 }
 
 @Composable
-private fun Arrivals(state: StopDetailUiState, onRetry: () -> Unit, onBell: (Arrival) -> Unit) {
+private fun Arrivals(state: StopDetailUiState, onRetry: () -> Unit, onStar: (Arrival) -> Unit, onBell: (Arrival) -> Unit) {
     val view = state.view
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 16.dp)) {
         item {
@@ -216,7 +220,7 @@ private fun Arrivals(state: StopDetailUiState, onRetry: () -> Unit, onBell: (Arr
             }
             is ArrivalsView.Live -> {
                 notice(view.notice)
-                arrivalRows(view.arrivals, state, onBell)
+                arrivalRows(view.arrivals, state, onStar, onBell)
             }
             is ArrivalsView.Degraded -> when (view.reason) {
                 DegradedReason.NO_SERVICE -> item {
@@ -239,7 +243,7 @@ private fun Arrivals(state: StopDetailUiState, onRetry: () -> Unit, onBell: (Arr
                         }
                     }
                     notice(view.notice)
-                    arrivalRows(view.arrivals, state, onBell)
+                    arrivalRows(view.arrivals, state, onStar, onBell)
                 }
             }
             ArrivalsView.Error -> item {
@@ -277,7 +281,12 @@ private fun LazyListScope.notice(text: String?) {
     }
 }
 
-private fun LazyListScope.arrivalRows(arrivals: List<Arrival>, state: StopDetailUiState, onBell: (Arrival) -> Unit) {
+private fun LazyListScope.arrivalRows(
+    arrivals: List<Arrival>,
+    state: StopDetailUiState,
+    onStar: (Arrival) -> Unit,
+    onBell: (Arrival) -> Unit,
+) {
     val rows = filterArrivals(arrivals, state.selectedLine)
     if (rows.isEmpty()) {
         item {
@@ -290,13 +299,32 @@ private fun LazyListScope.arrivalRows(arrivals: List<Arrival>, state: StopDetail
         return
     }
     items(rows) { arrival ->
-        ArrivalRow(arrival, remainingMinutes(arrival, state.nowMs), state.lineColors[arrival.lineId]) { onBell(arrival) }
+        ArrivalRow(
+            arrival = arrival,
+            minutes = remainingMinutes(arrival, state.nowMs),
+            colorArgb = state.lineColors[arrival.lineId],
+            stopName = state.name ?: state.stopId,
+            starred = arrival.lineId in state.starredLines,
+            onStar = { onStar(arrival) },
+        ) { onBell(arrival) }
         HorizontalDivider(Modifier.padding(start = 60.dp), color = LocalStatusColors.current.border)
     }
 }
 
+/**
+ * Llegada: badge, destino (con la hora debajo), minutos y dos acciones de 48 dp sobre
+ * esa línea en esta parada: ★ favorita parada+línea y 🔔 aviso.
+ */
 @Composable
-private fun ArrivalRow(arrival: Arrival, minutes: Int, colorArgb: Int?, onBell: () -> Unit) {
+private fun ArrivalRow(
+    arrival: Arrival,
+    minutes: Int,
+    colorArgb: Int?,
+    stopName: String,
+    starred: Boolean,
+    onStar: () -> Unit,
+    onBell: () -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -306,30 +334,39 @@ private fun ArrivalRow(arrival: Arrival, minutes: Int, colorArgb: Int?, onBell: 
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         LineBadge(arrival.lineId, colorArgb)
-        Text(
-            text = arrival.destination.ifEmpty { stringResource(R.string.destination_unknown) },
-            style = MaterialTheme.typography.bodyLarge,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f),
-        )
-        arrival.clockTime?.let {
+        // Hora bajo el destino: deja sitio a ★ y 🔔 sin recortar el destino en móviles estrechos.
+        Column(Modifier.weight(1f)) {
             Text(
-                text = it,
-                fontFamily = MonoFamily,
-                style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum"),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text = arrival.destination.ifEmpty { stringResource(R.string.destination_unknown) },
+                style = MaterialTheme.typography.bodyLarge,
                 maxLines = 1,
-                softWrap = false,
+                overflow = TextOverflow.Ellipsis,
             )
+            arrival.clockTime?.let {
+                Text(
+                    text = it,
+                    fontFamily = MonoFamily,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum"),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    softWrap = false,
+                )
+            }
         }
         MinutesLabel(minutes, arrival.source)
-        // 🔔 48 dp: A06 con parada, línea y destino de esta llegada.
-        IconButton(onClick = onBell) {
-            Icon(
-                Icons.Outlined.NotificationAdd,
-                contentDescription = stringResource(R.string.a11y_alert_for_arrival, arrival.lineId, arrival.destination),
+        Row {
+            FavoriteStar(
+                checked = starred,
+                onToggle = onStar,
+                description = stringResource(R.string.a11y_favorite_stop_line, arrival.lineId, stopName),
             )
+            // 🔔 48 dp: A06 con parada, línea y destino de esta llegada.
+            IconButton(onClick = onBell) {
+                Icon(
+                    Icons.Outlined.NotificationAdd,
+                    contentDescription = stringResource(R.string.a11y_alert_for_arrival, arrival.lineId, arrival.destination),
+                )
+            }
         }
     }
 }

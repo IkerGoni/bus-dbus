@@ -40,6 +40,8 @@ data class StopDetailUiState(
     val starred: Boolean = false,
     /** ★ parada+línea de [selectedLine]. */
     val lineStarred: Boolean = false,
+    /** Líneas guardadas como favorita parada+línea en esta parada (★ de cada llegada). */
+    val starredLines: Set<String> = emptySet(),
     val lineColors: Map<String, Int> = emptyMap(),
     /** Atribución ODbL de las coordenadas (se usan en `Cómo llegar`). */
     val coordinatesAttribution: String? = null,
@@ -90,6 +92,9 @@ class StopDetailViewModel(
             refreshing = feed.refreshing,
             starred = favoriteId(FavoriteType.STOP, stopId, null) in ids,
             lineStarred = selected != null && favoriteId(FavoriteType.STOP_LINE, stopId, selected) in ids,
+            starredLines = favorites
+                .filter { it.type == FavoriteType.STOP_LINE && it.stopId == stopId }
+                .mapNotNullTo(HashSet()) { it.lineId },
             lineColors = colors,
             coordinatesAttribution = catalog?.coordinates?.attribution,
         )
@@ -129,8 +134,11 @@ class StopDetailViewModel(
     fun toggleStopStar() = toggle(FavoriteType.STOP, null)
 
     fun toggleLineStar() {
-        state.value.selectedLine?.let { toggle(FavoriteType.STOP_LINE, it) }
+        state.value.selectedLine?.let(::toggleLineStar)
     }
+
+    /** ★ de una llegada: favorita parada+línea. */
+    fun toggleLineStar(lineId: String) = toggle(FavoriteType.STOP_LINE, lineId)
 
     private fun toggle(type: FavoriteType, lineId: String?) {
         container.appScope.launch {

@@ -50,7 +50,7 @@
 - **Cabecera sticky:** volver, `{stopName}` + pill `{stopId}`, botón `Cómo llegar` (intent `geo:lat,lon`; oculto si la parada no tiene coordenadas) y estrella ★ persistente (`STOP`).
 - **Filtro de líneas:** chips `Todas` + líneas reales de la parada con color oficial Dbus.
 - **Próximas llegadas (auto-refresco 30 s + botón refrescar):**
-  - Cada fila: badge Dbus + destino + hora estimada + `● X min` / reloj `X min` + **botón campana 🔔 (`48×48dp`)** que abre `A06` con `stopId`, `lineId` y `destination` precargados.
+  - Cada fila: badge Dbus + destino (hora estimada debajo) + `● X min` / reloj `X min` + **★ (`48×48dp`)** que guarda la favorita parada+línea (`STOP_LINE`) y **campana 🔔 (`48×48dp`)** que abre `A06` con `stopId`, `lineId` y `destination` precargados.
   - Estados degradados: `NO_SERVICE` (`🌙 Sin servicio en este momento` + texto real de `avisos` de Dbus si llega), `EMPTY` (`📭 No hay llegadas próximas`), `API_ERROR` (`⚠️ Error al consultar Dbus` + `Reintentar`).
 - **Pie fijo:** botón primary full-width `🔔 Crear aviso en esta parada` → `A06?stopId={stopId}`.
 - **Prohibido:** saldo Mugi y ocupación ficticia.

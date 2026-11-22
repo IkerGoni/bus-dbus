@@ -18,6 +18,29 @@ fun isWatching(rule: AlertRule, nowMs: Long): Boolean = computeAlertStatus(rule,
 fun stopsToPoll(rules: List<AlertRule>, nowMs: Long): Set<String> =
     rules.filter { isWatching(it, nowMs) }.mapTo(sortedSetOf()) { it.stopId }
 
+/**
+ * Sondeo adaptativo (cada [baseMs] = `pollIntervalSec`, 30 s): cuanto más le falta al bus
+ * para entrar en la antelación del aviso ([gapMinutes] = minutos restantes − antelación),
+ * menos se consulta. Dbus da minutos enteros y a veces salta varios de golpe, así que
+ * se deja mucho margen (decisión de Iker):
+ * ≤ 7 min → base (30 s) · 8–14 min → 2× (1 min) · ≥ 15 min → 4× (2 min) ·
+ * sin bus de la línea en la respuesta (o sin servicio / error) → 2× (1 min).
+ */
+fun pollDelayMs(gapMinutes: Int?, baseMs: Long): Long = when {
+    gapMinutes == null -> 2 * baseMs
+    gapMinutes <= 7 -> baseMs
+    gapMinutes <= 14 -> 2 * baseMs
+    else -> 4 * baseMs
+}
+
+/** Espera hasta la próxima vuelta: la del aviso más urgente entre los que siguen en vigilancia. */
+fun nextPollDelayMs(watching: List<AlertRule>, views: Map<String, ArrivalsView>, nowMs: Long, baseMs: Long): Long =
+    watching.minOfOrNull { rule ->
+        val arrivals = usableArrivals(views[rule.stopId] ?: ArrivalsView.Loading)
+        val next = nextArrivalFor(arrivals, rule.lineId, rule.destination, nowMs)
+        pollDelayMs(next?.let { remainingMinutes(it, nowMs) - rule.minutesAhead }, baseMs)
+    } ?: baseMs
+
 /** Hay que consultar si nunca se ha hecho o la última respuesta tiene casi un intervalo (la UI también sondea). */
 fun isFetchDue(lastFetchedAtMs: Long?, nowMs: Long, intervalMs: Long): Boolean =
     lastFetchedAtMs == null || nowMs - lastFetchedAtMs >= intervalMs - FETCH_SLACK_MS

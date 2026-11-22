@@ -52,8 +52,12 @@ class AlertStatusTest {
         val fetched = created
         val a = arrival(minutes = 7, fetchedAtMs = fetched)
         val alert = once(created, minutesAhead = 5)
-        assertEquals(ACTIVE, computeAlertStatus(alert, fetched + 119_999, a)) // aún 6 min
-        assertEquals(TRIGGERED, computeAlertStatus(alert, fetched + 120_000, a)) // 5 min
+        // Avisa 30 s antes (NOTIFY_EARLY_MS): mejor pronto que tarde.
+        assertEquals(ACTIVE, computeAlertStatus(alert, fetched + 89_999, a)) // aún 6 min dentro de 30 s
+        assertEquals(TRIGGERED, computeAlertStatus(alert, fetched + 90_000, a)) // en 30 s serán 5 min
+        // Un bus que llega con un minuto de más que la antelación ya dispara: está a menos de 30 s de entrar.
+        assertEquals(ACTIVE, computeAlertStatus(alert, fetched, arrival(minutes = 6, fetchedAtMs = fetched)))
+        assertEquals(TRIGGERED, computeAlertStatus(alert, fetched + 30_000, arrival(minutes = 6, fetchedAtMs = fetched)))
     }
 
     @Test

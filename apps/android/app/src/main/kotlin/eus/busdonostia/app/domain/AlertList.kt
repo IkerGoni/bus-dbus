@@ -51,7 +51,8 @@ fun usableArrivals(view: ArrivalsView): List<Arrival> = when (view) {
 }
 
 fun alertItem(rule: AlertRule, arrivals: List<Arrival>, nowMs: Long): AlertItem {
-    val matching = findMatchingArrival(arrivals, rule.lineId, rule.destination, rule.minutesAhead, nowMs)
+    // Misma anticipación que `computeAlertStatus`: el bus que entra en la antelación dentro de 30 s ya cuenta.
+    val matching = findMatchingArrival(arrivals, rule.lineId, rule.destination, rule.minutesAhead, nowMs + NOTIFY_EARLY_MS)
     val status = computeAlertStatus(rule, nowMs, matching)
     val detail = when (status) {
         ComputedAlertStatus.INACTIVE -> if (rule.active) AlertDetail.EXPIRED else AlertDetail.PAUSED

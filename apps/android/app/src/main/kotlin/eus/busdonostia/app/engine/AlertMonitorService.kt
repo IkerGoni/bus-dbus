@@ -16,6 +16,7 @@ import eus.busdonostia.app.domain.EngineAction
 import eus.busdonostia.app.domain.evaluateTick
 import eus.busdonostia.app.domain.isFetchDue
 import eus.busdonostia.app.domain.isWatching
+import eus.busdonostia.app.domain.nextPollDelayMs
 import eus.busdonostia.app.domain.stopsToPoll
 import eus.busdonostia.app.ui.alerts.feedView
 import eus.busdonostia.app.ui.alerts.fetchStops
@@ -33,7 +34,8 @@ import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Motor de avisos (04-android-platform.md §1): Foreground Service `dataSync` que,
- * mientras haya avisos en vigilancia, consulta sus paradas cada `pollIntervalSec`
+ * mientras haya avisos en vigilancia, consulta sus paradas (cada `pollIntervalSec`,
+ * o más espaciado si el bus aún está lejos: [nextPollDelayMs])
  * (una petición por parada, por `AppContainer.fetchStop`) y dispara lo que esté
  * `TRIGGERED`: notifica y borra el aviso (un solo uso). La decisión es [evaluateTick];
  * aquí solo se consulta, borra y notifica.
@@ -113,12 +115,14 @@ class AlertMonitorService : Service() {
     private suspend fun watchUntilDone(): EngineAction {
         var troubleSinceMs: Long? = null
         while (true) {
-            val intervalMs = pollIntervalSec() * 1_000L
+            val baseMs = pollIntervalSec() * 1_000L
+            var delayMs = baseMs
             val action = try {
                 val rules = container.database.alerts().getAll().map { it.toDomain() }
-                val tick = tick(rules, intervalMs, troubleSinceMs)
-                troubleSinceMs = tick.first
-                tick.second
+                val result = tick(rules, baseMs, troubleSinceMs)
+                troubleSinceMs = result.troubleSinceMs
+                delayMs = result.delayMs
+                result.action
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {
@@ -126,15 +130,17 @@ class AlertMonitorService : Service() {
                 EngineAction.CONTINUE
             }
             if (action != EngineAction.CONTINUE) return action
-            withTimeoutOrNull(intervalMs) { wake.receive() }
+            withTimeoutOrNull(delayMs) { wake.receive() }
         }
     }
 
-    private suspend fun tick(rules: List<AlertRule>, intervalMs: Long, troubleSinceMs: Long?): Pair<Long?, EngineAction> {
+    private class TickResult(val troubleSinceMs: Long?, val action: EngineAction, val delayMs: Long)
+
+    private suspend fun tick(rules: List<AlertRule>, baseMs: Long, troubleSinceMs: Long?): TickResult {
         val startMs = System.currentTimeMillis()
         val known = container.liveFeeds.feeds.value
         container.fetchStops(
-            stopsToPoll(rules, startMs).filterTo(sortedSetOf()) { isFetchDue(known[it]?.latest?.fetchedAtMs, startMs, intervalMs) },
+            stopsToPoll(rules, startMs).filterTo(sortedSetOf()) { isFetchDue(known[it]?.latest?.fetchedAtMs, startMs, baseMs) },
         )
         val now = System.currentTimeMillis()
         val feeds = container.liveFeeds.feeds.value
@@ -144,8 +150,10 @@ class AlertMonitorService : Service() {
             container.database.alerts().delete(firing.rule.id)
             notifyArrival(this, firing, now)
         }
-        if (tick.action == EngineAction.CONTINUE) updateMonitoringNotification(this, tick.watching, pollIntervalSec())
-        return tick.troubleSinceMs to tick.action
+        // Sondeo adaptativo: más espaciado cuanto más lejos está el bus de la antelación.
+        val delayMs = nextPollDelayMs(tick.watching, views, now, baseMs)
+        if (tick.action == EngineAction.CONTINUE) updateMonitoringNotification(this, tick.watching, (delayMs / 1_000).toInt())
+        return TickResult(tick.troubleSinceMs, tick.action, delayMs)
     }
 
     companion object {

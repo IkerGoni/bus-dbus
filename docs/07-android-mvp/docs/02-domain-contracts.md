@@ -119,7 +119,8 @@ export function computeAlertStatus(
 ): ComputedAlertStatus {
   if (!alert.active) return 'INACTIVE';
   if (nowMs - alert.createdAtMs > 7 * 86_400_000) return 'INACTIVE';
-  if (nextArrival !== undefined && remainingMinutes(nextArrival, nowMs) <= alert.minutesAhead) {
+  // Avisa 30 s antes (NOTIFY_EARLY_MS, decisión de Iker): mejor pronto que tarde.
+  if (nextArrival !== undefined && remainingMinutes(nextArrival, nowMs + 30_000) <= alert.minutesAhead) {
     return 'TRIGGERED';
   }
   return 'ACTIVE';
@@ -127,7 +128,8 @@ export function computeAlertStatus(
 ```
 
 El motor de avisos dispara cuando el estado pasa a `TRIGGERED`: notifica y
-borra el aviso.
+borra el aviso. El matching (§2) usa la misma hora adelantada 30 s, y la
+notificación muestra los minutos con los que disparó.
 
 ### Prioridad de ordenación en `Inicio` y `Mis avisos`
 1. `TRIGGERED`
