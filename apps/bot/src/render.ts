@@ -156,7 +156,8 @@ export const HELP_TEXT =
   '`/linea <linea>` — destinos y paradas de una línea\n' +
   '`/lineas` — todas las líneas · `/lineas <parada>` — líneas en esa parada\n' +
   '`/fav` — tus favoritos · `/fav add <parada> [linea]` · `/fav linea <linea>`\n' +
-  '`/actualizar` — refrescar datos · `/estado` — diagnóstico\n\n' +
+  '`/actualizar` — refrescar datos · `/estado` — diagnóstico\n' +
+  '`/ubicacion` — paradas cercanas con OpenStreetMap (sin guardar tu posición)\n\n' +
   'Busca por código (`1`), nombre (`Boulevard`), línea (`28`) o destino ' +
   '(`Ospitaleak`). Sin línea en `/fav add` guardas la parada completa.\n' +
   'También acepto el id interno de Dbus (p. ej. `32` = línea pública `28`).\n' +

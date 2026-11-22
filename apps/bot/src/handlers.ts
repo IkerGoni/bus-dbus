@@ -45,6 +45,7 @@ import {
 } from './commands.js';
 import { config } from './config.js';
 import { fetchStopTimes, getDataSource } from './dbus-client.js';
+import { handleLocation, handleUbicacion } from './location.js';
 
 export {
   getSessionCount,
@@ -86,6 +87,7 @@ export function setupBot(bot: Telegraf<Context>): void {
   bot.command('actualizar', handleActualizar);
   bot.command('estado', handleEstado);
   bot.command('fav', handleFavCommand);
+  bot.command('ubicacion', handleUbicacion);
 
   // Menú y flujos
   bot.action(/^menu_.*/, handleMenuCallback);
@@ -108,7 +110,8 @@ export function setupBot(bot: Telegraf<Context>): void {
   bot.action(/^fav_remove_\d+$/, handleFavRemove);
   bot.action(/^adel_\d+$/, handleAlertDelete);
 
-  // Texto libre (código de parada)
+  // Ubicación efímera (nunca se persiste) y texto libre (código de parada)
+  bot.on('location', handleLocation);
   bot.on('text', handleText);
 
   startAlertScheduler();

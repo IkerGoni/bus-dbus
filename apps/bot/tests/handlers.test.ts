@@ -296,6 +296,22 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
     );
   });
 
+  it('/ubicacion pide compartir la posición sin persistirla', async () => {
+    const target = { ...chat, id: 555555572 };
+    const start = sent.length;
+    await bot.handleUpdate(messageUpdate('/ubicacion', 93, target) as never);
+    const output = textsSince(start);
+    expect(output).toContain('Paradas cercanas');
+    expect(output).toContain('No guardo tu ubicación');
+    expect(
+      sent
+        .slice(start)
+        .some((call) =>
+          JSON.stringify(call.payload).includes('request_location')
+        )
+    ).toBe(true);
+  });
+
   it('/linea muestra destinos reales de la línea', async () => {
     const start = sent.length;
     await bot.handleUpdate(messageUpdate('/linea 28', 42) as never);

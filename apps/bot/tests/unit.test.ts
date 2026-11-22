@@ -26,6 +26,12 @@ import { config } from '../src/config.js';
 import { evictOldestEntries } from '../src/dbus-client.js';
 import { getSessionCount, pruneSessions } from '../src/handlers.js';
 import {
+  buildOverpassQuery,
+  haversineMeters,
+  parseStopRefs,
+  rankNearbyStops,
+} from '../src/nearby.js';
+import {
   acquireInstanceLock,
   releaseInstanceLock,
 } from '../src/single-instance.js';
@@ -219,6 +225,66 @@ describe('stop cache eviction', () => {
     expect([...cache.keys()]).toEqual(['4', '5']);
     expect(evictOldestEntries(cache, 2)).toBe(0);
     expect([...cache.keys()]).toEqual(['4', '5']);
+  });
+});
+
+describe('paradas cercanas (OSM + catálogo)', () => {
+  it('construye una consulta Overpass acotada a la posición', () => {
+    const query = buildOverpassQuery(43.318012345, -1.985, 500);
+    expect(query).toContain('around:500,43.318012,-1.985000');
+    expect(query).toContain('["ref"]');
+    expect(query).toContain('out center;');
+  });
+
+  it('extrae refs de paradas con varios operadores', () => {
+    expect(parseStopRefs('39 (dbus);4779 (Lurraldebus)')).toEqual([
+      '39',
+      '4779',
+    ]);
+    expect(parseStopRefs('034')).toEqual(['34']);
+    expect(parseStopRefs(undefined)).toEqual([]);
+  });
+
+  it('calcula distancias y cruza solo refs presentes en el catálogo', () => {
+    expect(haversineMeters(43.318, -1.985, 43.318, -1.985)).toBe(0);
+    // ~111 m por milésima de grado de latitud.
+    expect(haversineMeters(43.318, -1.985, 43.319, -1.985)).toBeGreaterThan(
+      100
+    );
+    expect(haversineMeters(43.318, -1.985, 43.319, -1.985)).toBeLessThan(120);
+
+    const ranked = rankNearbyStops(
+      [
+        {
+          type: 'node',
+          id: 1,
+          lat: 43.318,
+          lon: -1.985,
+          tags: { ref: '39 (dbus);4779 (TBH)' },
+        },
+        {
+          type: 'node',
+          id: 2,
+          lat: 43.318,
+          lon: -1.985,
+          tags: { ref: '99999' },
+        },
+        {
+          type: 'node',
+          id: 3,
+          lat: 43.32,
+          lon: -1.985,
+          tags: { ref: '39 (dbus)' },
+        },
+      ],
+      43.318,
+      -1.985,
+      (cod) => (cod === '39' ? { desc: 'Zubieta plaza' } : null)
+    );
+    expect(ranked).toHaveLength(1);
+    expect(ranked[0].cod).toBe('39');
+    expect(ranked[0].desc).toBe('Zubieta plaza');
+    expect(ranked[0].distanceM).toBeLessThan(1);
   });
 });
 
