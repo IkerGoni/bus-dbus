@@ -1,7 +1,7 @@
 # ADR 007: Hosting & CI/CD: Cloudflare Pages + GitHub Actions
 
 ## Status
-Accepted
+Accepted — Superseded por ADR 009 para el cliente móvil (2026-11-22)
 
 ## Context
 Need free, global, edge-hosted PWA with: custom headers (CSP, COOP, COEP, Permissions-Policy), serverless functions for VAPID key rotation / push subscriptions, preview deployments, analytics. GitHub Pages lacks edge functions and header control. Netlify/Vercel have vendor lock-in and function limits.

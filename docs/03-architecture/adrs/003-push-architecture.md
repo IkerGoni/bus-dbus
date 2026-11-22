@@ -1,7 +1,7 @@
 # ADR 003: Push Architecture: Web Push API + VAPID
 
 ## Status
-Accepted
+Accepted — Superseded por ADR 009 para el cliente móvil (2026-11-22)
 
 ## Context
 Need native push notifications for arrival alerts without proprietary backend. Requirements: iOS 16.4+ / Android support, VAPID standard (no FCM lock-in), payload encryption, delivery acknowledgment, key rotation procedure, fallback for denied permission / older iOS.

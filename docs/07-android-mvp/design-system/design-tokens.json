@@ -1,0 +1,191 @@
+{
+  "$schema": "https://tr.designtokens.org/format/",
+  "meta": {
+    "product": "bus-dbus-android-mvp",
+    "version": "2.0.0",
+    "platform": "Android Material 3",
+    "languages": [
+      "es",
+      "eu"
+    ],
+    "accessibility": "WCAG AA (>=4.5:1)",
+    "touchTargetMinDp": 48
+  },
+  "color": {
+    "light": {
+      "bg": "#F8FAFC",
+      "surface": "#FFFFFF",
+      "surfaceVariant": "#F1F5F9",
+      "border": "#E2E8F0",
+      "text": "#0F172A",
+      "textMuted": "#475569",
+      "outline": "#64748B",
+      "primary": "#005BB5",
+      "primaryHover": "#004890",
+      "onPrimary": "#FFFFFF",
+      "primaryContainer": "#EFF6FF",
+      "onPrimaryContainer": "#005BB5",
+      "live": "#059669",
+      "liveContainer": "#D1FAE5",
+      "onLiveContainer": "#065F46",
+      "scheduled": "#64748B",
+      "scheduledContainer": "#F1F5F9",
+      "warning": "#D97706",
+      "warningContainer": "#FEF3C7",
+      "onWarningContainer": "#92400E",
+      "error": "#DC2626",
+      "onError": "#FFFFFF",
+      "favorite": "#F59E0B"
+    },
+    "dark": {
+      "bg": "#0B1120",
+      "surface": "#1E293B",
+      "surfaceVariant": "#273549",
+      "border": "#334155",
+      "text": "#F1F5F9",
+      "textMuted": "#94A3B8",
+      "outline": "#64748B",
+      "primary": "#60A5FA",
+      "primaryHover": "#3B82F6",
+      "onPrimary": "#082F49",
+      "primaryContainer": "#1E3A5F",
+      "onPrimaryContainer": "#DBEAFE",
+      "live": "#34D399",
+      "liveContainer": "#064E3B",
+      "onLiveContainer": "#A7F3D0",
+      "scheduled": "#94A3B8",
+      "scheduledContainer": "#334155",
+      "warning": "#FBBF24",
+      "warningContainer": "#451A03",
+      "onWarningContainer": "#FDE68A",
+      "error": "#F87171",
+      "onError": "#450A0A",
+      "favorite": "#FBBF24"
+    },
+    "dbusLines": {
+      "5": {
+        "bg": "#52A535",
+        "fg": "#FFFFFF"
+      },
+      "8": {
+        "bg": "#9B8BBF",
+        "fg": "#FFFFFF"
+      },
+      "9": {
+        "bg": "#6E9E93",
+        "fg": "#FFFFFF"
+      },
+      "13": {
+        "bg": "#D9001B",
+        "fg": "#FFFFFF"
+      },
+      "14": {
+        "bg": "#5B7798",
+        "fg": "#FFFFFF"
+      },
+      "16": {
+        "bg": "#3898C4",
+        "fg": "#FFFFFF"
+      },
+      "17": {
+        "bg": "#008BBF",
+        "fg": "#FFFFFF"
+      },
+      "18": {
+        "bg": "#C2007F",
+        "fg": "#FFFFFF"
+      },
+      "19": {
+        "bg": "#7677B3",
+        "fg": "#FFFFFF"
+      },
+      "24": {
+        "bg": "#5B7798",
+        "fg": "#FFFFFF"
+      },
+      "25": {
+        "bg": "#005BB5",
+        "fg": "#FFFFFF"
+      },
+      "27": {
+        "bg": "#005BB5",
+        "fg": "#FFFFFF"
+      },
+      "28": {
+        "bg": "#005BB5",
+        "fg": "#FFFFFF"
+      },
+      "33": {
+        "bg": "#008BBF",
+        "fg": "#FFFFFF"
+      },
+      "_default": {
+        "bg": "#334155",
+        "fg": "#FFFFFF"
+      }
+    }
+  },
+  "spacingDp": {
+    "xs": 4,
+    "sm": 8,
+    "md": 16,
+    "lg": 24,
+    "xl": 32
+  },
+  "radiusDp": {
+    "badge": 8,
+    "button": 12,
+    "card": 16,
+    "sheet": 24,
+    "pill": 999
+  },
+  "typography": {
+    "fontFamilySans": "Plus Jakarta Sans, Roboto, system-ui, sans-serif",
+    "fontFamilyMono": "JetBrains Mono, Roboto Mono, ui-monospace, monospace",
+    "numericFeatureSettings": "tnum",
+    "scale": {
+      "countdownHero": {
+        "sizeSp": 30,
+        "weight": 800,
+        "lineHeightSp": 34,
+        "font": "mono"
+      },
+      "countdownRow": {
+        "sizeSp": 16,
+        "weight": 700,
+        "lineHeightSp": 20,
+        "font": "mono"
+      },
+      "screenTitle": {
+        "sizeSp": 24,
+        "weight": 700,
+        "lineHeightSp": 32,
+        "font": "sans"
+      },
+      "cardTitle": {
+        "sizeSp": 16,
+        "weight": 700,
+        "lineHeightSp": 22,
+        "font": "sans"
+      },
+      "body": {
+        "sizeSp": 14,
+        "weight": 500,
+        "lineHeightSp": 20,
+        "font": "sans"
+      },
+      "sectionLabel": {
+        "sizeSp": 12,
+        "weight": 600,
+        "lineHeightSp": 16,
+        "font": "sans"
+      },
+      "navLabel": {
+        "sizeSp": 11,
+        "weight": 600,
+        "lineHeightSp": 14,
+        "font": "sans"
+      }
+    }
+  }
+}

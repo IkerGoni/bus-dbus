@@ -3,6 +3,7 @@
 Fuente de verdad del proyecto. Si este archivo contradice a un doc antiguo,
 manda aquí. `README.md` = visión y uso; `ESTADO.md` = estado de sesión;
 `docs/05-ui/` = inventario de UI + wireframes (exportable para diseño);
+`docs/07-android-mvp/` = spec del MVP Android (ADR 009);
 `docs/03-architecture/` = ADRs; `docs/04-planning/` y `docs/plan/` = planning;
 `docs/plan/repo-split.md` = plan de separación en workspaces (trabajo en curso).
 
@@ -10,14 +11,17 @@ manda aquí. `README.md` = visión y uso; `ESTADO.md` = estado de sesión;
 
 - **Bot de Telegram** (`apps/bot/`): activo, datos reales de la API JSON de
   Dbus. Paquete `@dbus/bot`. SQLite en `apps/bot/bot.db`.
-- **PWA / móvil** (`apps/mobile/`): Sprint 3 bloqueado por errores
-  preexistentes de TS/lint. Paquete `@dbus/mobile`.
+- **App Android** (`apps/android/`, por crear): MVP v1 nativo, Kotlin +
+  Compose, Gradle fuera de pnpm. Spec en `docs/07-android-mvp/`, prompt en
+  `docs/07-android-mvp/prompts/PROMPT-IMPLEMENTACION.md`, decisión en ADR 009.
+- **PWA** (`apps/mobile/`): **congelada** por ADR 009 (build roto, ver
+  `KNOWN_ISSUES.md`). No arreglar ni borrar sin acuerdo. Paquete `@dbus/mobile`.
 - **Shared** (`packages/core/`, `packages/contracts/`): dominio y contratos
   extraídos en el split. `@dbus/core`, `@dbus/contracts`.
 - Monorepo pnpm (`pnpm-workspace.yaml`), Node >= 22.
 
 **Convención de lanes:** `apps/bot/**` es propiedad del lane bot;
-`apps/mobile/**` del lane mobile; `packages/**` es compartido y solo se
+`apps/android/**` del lane android; `apps/mobile/**` del lane mobile (congelado); `packages/**` es compartido y solo se
 modifica de forma aditiva. No tocar el lane ajeno salvo acuerdo explícito.
 
 ## Reglas del bot (no negociables)
@@ -59,6 +63,20 @@ modifica de forma aditiva. No tocar el lane ajeno salvo acuerdo explícito.
    proceso vivo sigue ejecutando el `dist` anterior. No dar una versión por
    terminada sin este paso; pedir autorización si el reinicio requiere
    intervención en producción.
+
+## Reglas de la app Android
+
+Las reglas 1 (datos reales), 2 (llegadas en vivo), 5 (identidad de línea),
+6 (favoritos) y 7 (dedup, caducidad 7 días, preferencia GPS, filtro de
+destino) del bot aplican igual. Además:
+
+- Sin SDK de mapas, sin Firebase/FCM y sin servidor propio. Único elemento
+  remoto nuestro permitido: un `config.json` estático opcional con copia
+  empaquetada (ADR 009); la app nunca depende de él para arrancar.
+- Cleartext HTTP solo para `app.dbus.eus` (network security config).
+- Nunca mostrar segundos: la API da `minutos` enteros.
+- El catálogo empaquetado se genera desde `apps/bot/data/*.json`; no se edita.
+- Textos en `strings.xml` `es` + `eu` con las mismas claves.
 
 ## Verificación
 

@@ -1,7 +1,7 @@
 # ADR 002: PWA Offline Strategy: Workbox GenerateSW
 
 ## Status
-Accepted
+Accepted — Superseded por ADR 009 para el cliente móvil (2026-11-22)
 
 ## Context
 PWA must work offline-first: shell cached, GTFS static cached for weeks, GTFS-RT cached for 35s with stale-while-revalidate. iOS Safari lacks periodicBackgroundSync and kills SW aggressively. Need fallback strategy for background updates.
