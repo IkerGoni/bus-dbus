@@ -5,11 +5,14 @@ import { describe, expect, it } from 'vitest';
 import {
   UNKNOWN_DESTINATION,
   findMatchingArrival,
+  formatArrivalsList,
   matchesLine,
   normalizeLine,
+  toPublicLineId,
 } from '../src/arrival.js';
 import {
   getAllStopsForLine,
+  getCatalogLinesForStop,
   getCatalogMeta,
   getLineByCode,
   getStopsForItinerary,
@@ -215,6 +218,29 @@ describe('stop cache eviction', () => {
     expect([...cache.keys()]).toEqual(['4', '5']);
     expect(evictOldestEntries(cache, 2)).toBe(0);
     expect([...cache.keys()]).toEqual(['4', '5']);
+  });
+});
+
+describe('índice de descubrimiento sin service en vivo', () => {
+  it('resuelve el id interno en el contexto de la parada, sin contexto gana la pública', () => {
+    expect(toPublicLineId('32', '2')).toBe('28');
+    expect(toPublicLineId('32')).toBe('32');
+    expect(toPublicLineId('L028', '2')).toBe('28');
+  });
+
+  it('ofrece líneas reales del índice para la parada sin servicio', () => {
+    const lines = getCatalogLinesForStop('340');
+    expect(lines.length).toBeGreaterThan(0);
+    expect(lines.map((line) => line.lineId)).toContain('5');
+    expect(lines.every((line) => line.destination.length > 0)).toBe(true);
+  });
+
+  it('muestra el aviso real de Dbus cuando no hay servicio', () => {
+    const msg = formatArrivalsList('Pío Baroja 10', [], 'SIN_SERVICIO', '340', [
+      'sin servicio hasta las 14:00',
+    ]);
+    expect(msg).toContain('Sin servicio en este momento');
+    expect(msg).toContain('sin servicio hasta las 14:00');
   });
 });
 

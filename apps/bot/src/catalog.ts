@@ -11,6 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Catalog } from '@dbus/contracts';
+import { normalizeLine } from '@dbus/core';
 import {
   getCatalogMeta as catalogMeta,
   searchKey as coreSearchKey,
@@ -47,6 +48,35 @@ export function searchLines(query: string, limit = 8) {
 
 export function getStopByCode(cod: string) {
   return stopByCode(data, cod);
+}
+
+/**
+ * Nombre del índice para una parada. Es dato real del catálogo (descubierto
+ * desde la API), nunca una invención: solo se usa para rotular cuando la
+ * respuesta en vivo no trae `parada.desc` (por ejemplo, sin servicio).
+ */
+export function getCatalogStopName(cod: string): string {
+  return getStopByCode(cod)?.desc ?? '';
+}
+
+/** Líneas del índice que pasan por una parada, con destino real del índice. */
+export function getCatalogLinesForStop(cod: string): {
+  lineId: string;
+  internalLineId: string;
+  destination: string;
+}[] {
+  const stop = getStopByCode(cod);
+  if (!stop) return [];
+  return stop.lines.flatMap((code) => {
+    const line = getLineByCode(code);
+    return [
+      {
+        lineId: line?.cod ?? normalizeLine(code),
+        internalLineId: line?.id ?? '',
+        destination: line?.destinations[0] ?? '',
+      },
+    ];
+  });
 }
 
 /** Acepta código público (`28`) o id interno (`32`). */
@@ -86,6 +116,26 @@ export function getAllStopsForLine(lineId: string) {
     getItinerariesForLine(lineId).flatMap((itinerario) => itinerario.stops)
   );
   return data.stops.filter((stop) => codes.has(stop.cod));
+}
+
+/**
+ * Código público de una línea. Con datos en vivo la llegada ya trae el código
+ * público; sin servicio usamos el índice (id interno 32 → código público 28)
+ * para no persistir ni mostrar el id interno como si fuera la línea.
+ *
+ * Si se conoce la parada, el id interno se resuelve entre las líneas de esa
+ * parada: `32` es a la vez línea pública y id interno de la `28`, y en el
+ * contexto de una parada debe valer la que realmente pasa por ella.
+ */
+export function toPublicLineId(lineId: string, stopId?: string): string {
+  const key = normalizeLine(lineId);
+  if (stopId) {
+    const atStop = getCatalogLinesForStop(stopId);
+    const byInternal = atStop.find((line) => line.internalLineId === key);
+    if (byInternal) return byInternal.lineId;
+    if (atStop.some((line) => line.lineId === key)) return key;
+  }
+  return getLineByCode(key)?.cod ?? key;
 }
 
 export interface Page<T> {

@@ -1,7 +1,12 @@
 /** Comandos del bot y texto libre (flujo interactivo). */
 import { type Context, Markup } from 'telegraf';
 import { getAlertStats } from './alerts.js';
-import { escapeMd, getStopLines, normalizeLine } from './arrival.js';
+import {
+  displayStopName,
+  escapeMd,
+  getStopLinesWithSource,
+  normalizeLine,
+} from './arrival.js';
 import {
   getCatalogMeta,
   getLineByCode,
@@ -25,7 +30,6 @@ import {
   getCacheStats,
   getCachedStopCodes,
   getDataSource,
-  getStopName,
 } from './dbus-client.js';
 import {
   HELP_TEXT,
@@ -109,14 +113,19 @@ export async function handleLineas(ctx: Context): Promise<void> {
     );
     return;
   }
-  const lines = await getStopLines(stopId);
+  const { lines, source } = await getStopLinesWithSource(stopId);
+  const note =
+    source === 'catalog' && lines.length
+      ? '\n\n_(índice Dbus: ahora mismo no hay datos en vivo; sin horarios)_'
+      : '';
   await ctx.reply(
     lines.length
-      ? `🚌 **Líneas en ${escapeMd(getStopName(stopId))} (${stopId}):**\n\n${lines
+      ? `🚌 **Líneas en ${escapeMd(displayStopName(stopId))} (${stopId}):**\n\n${lines
           .map(
-            (l) => `• **L${escapeMd(l.lineId)}** → ${escapeMd(l.destination)}`
+            (l) =>
+              `• **L${escapeMd(l.lineId)}**${l.destination ? ` → ${escapeMd(l.destination)}` : ''}`
           )
-          .join('\n')}`
+          .join('\n')}${note}`
       : `📭 Sin líneas con datos en la parada **${stopId}**.`,
     { parse_mode: 'Markdown' }
   );

@@ -8,13 +8,15 @@
 import { type Context, Markup } from 'telegraf';
 import {
   UNKNOWN_DESTINATION,
+  displayStopName,
   escapeMd,
   formatArrivalsList,
   getNextArrival,
   getNextArrivals,
-  getStopLines,
+  getStopLinesWithSource,
   matchesLine,
   normalizeLine,
+  toPublicLineId,
 } from './arrival.js';
 import {
   getAllStopsForLine,
@@ -38,7 +40,7 @@ import {
   getFavoriteLines,
   getFavorites,
 } from './db.js';
-import { fetchStopTimes, getStopName } from './dbus-client.js';
+import { fetchStopTimes } from './dbus-client.js';
 import { clearSession, getSession } from './session.js';
 import type { UserAlert } from './types.js';
 
@@ -114,7 +116,7 @@ export async function validateLineAtStop(
   stopId: string,
   lineId: string
 ): Promise<string | null> {
-  const lines = await getStopLines(stopId);
+  const { lines } = await getStopLinesWithSource(stopId);
   if (!lines.length || lines.some((line) => matchesLine(line, lineId))) {
     return null;
   }
@@ -197,8 +199,10 @@ export async function askSearch(ctx: Context): Promise<void> {
   if (chatId) getSession(chatId).step = 'searching';
   await safeEdit(
     ctx,
-    '🔎 **Buscar**\n\nEscribe un código de parada, nombre de calle, línea o destino:\n' +
-      '`1` · `Boulevard` · `28` · `Ospitaleak`',
+    '🔎 **Buscar parada o línea**\n\n' +
+      'Escribe el nombre de la parada o de la calle, el número de la marquesina, ' +
+      'el número de línea o su destino. Verás opciones para elegir.\n\n' +
+      'Ejemplos: `Boulevard` · `1` · `28` · `Ospitaleak`',
     {
       parse_mode: 'Markdown',
       ...Markup.inlineKeyboard([
@@ -459,7 +463,7 @@ export async function showArrivalsForStop(
 
   const times = await fetchStopTimes(stopId);
   const arrivals = await getNextArrivals(stopId, lineId);
-  const stopName = times?.parada?.desc || getStopName(stopId);
+  const stopName = displayStopName(stopId, times?.parada?.desc);
 
   const favoriteLine = lineId || arrivals[0]?.lineId;
   const keyboard = Markup.inlineKeyboard([
@@ -479,14 +483,36 @@ export async function showArrivalsForStop(
     [Markup.button.callback('⬅️ Menú', 'menu_main')],
   ]);
 
-  await safeEdit(
-    ctx,
-    formatArrivalsList(stopName, arrivals, times?.estado, stopId),
-    {
-      parse_mode: 'Markdown',
-      ...keyboard,
-    }
+  // `avisos` viene en la respuesta real de Dbus pero no está en el tipo de
+  // @dbus/core; se lee aquí, sin tocar el paquete compartido.
+  const avisos = (times as unknown as { avisos?: string[] | null } | null)
+    ?.avisos;
+  let text = formatArrivalsList(
+    stopName,
+    arrivals,
+    times?.estado,
+    stopId,
+    avisos
   );
+  if (!arrivals.length) {
+    // Sin servicio la API no devuelve líneas. El índice sí sabe qué líneas
+    // pasan por la parada: se muestra como dato de descubrimiento, jamás como
+    // llegada ni horario.
+    const { lines, source } = await getStopLinesWithSource(stopId);
+    if (source === 'catalog' && lines.length) {
+      text += `\n\n🚌 Líneas que pasan por la parada (índice Dbus, sin horarios ahora):\n${lines
+        .map(
+          (line) =>
+            `• **L${escapeMd(line.lineId)}**${line.destination ? ` → ${escapeMd(line.destination)}` : ''}`
+        )
+        .join('\n')}`;
+    }
+  }
+
+  await safeEdit(ctx, text, {
+    parse_mode: 'Markdown',
+    ...keyboard,
+  });
 }
 
 export async function showStopLines(
@@ -499,9 +525,9 @@ export async function showStopLines(
   const session = getSession(chatId);
   session.step = 'select_line_alert';
   session.stopId = stopId;
-  session.stopName = getStopName(stopId);
+  session.stopName = displayStopName(stopId);
 
-  const lines = await getStopLines(stopId);
+  const { lines, source } = await getStopLinesWithSource(stopId);
   if (!lines.length) {
     await safeEdit(
       ctx,
@@ -522,9 +548,13 @@ export async function showStopLines(
       `aline_${line.lineId}`
     )
   );
+  const sourceNote =
+    source === 'catalog'
+      ? '\n(Mostrando líneas del índice: ahora mismo no hay datos en vivo.)'
+      : '';
   await safeEdit(
     ctx,
-    `🔔 **Aviso en ${escapeMd(session.stopName)} (${stopId})**\nSelecciona la línea:`,
+    `🔔 **Aviso en ${escapeMd(session.stopName)} (${stopId})**\nSelecciona la línea:${sourceNote}`,
     {
       parse_mode: 'Markdown',
       ...Markup.inlineKeyboard([
@@ -642,13 +672,13 @@ export async function saveFavorite(
   stopId: string,
   rawLineId = ''
 ): Promise<boolean> {
-  const lineId = normalizeLine(rawLineId);
+  const lineId = toPublicLineId(rawLineId, stopId);
   if (findFavorite(chatId, stopId, lineId)) return false;
   const arrival = lineId ? await getNextArrival(stopId, lineId) : null;
   addFavorite({
     chatId,
     stopId,
-    stopName: getStopName(stopId),
+    stopName: displayStopName(stopId),
     lineId,
     lineName: lineId ? `L${lineId}` : 'Todas',
     destination:
@@ -682,9 +712,10 @@ export async function createAndConfirmAlert(
 
   const arrival = await getNextArrival(stopId, lineId);
   // El usuario puede escribir el id interno (32); guardamos siempre el
-  // código público (28) para que avisos y mensajes sean coherentes.
-  const publicLineId = normalizeLine(arrival?.lineId || lineId);
-  const stopName = getStopName(stopId);
+  // código público (28) para que avisos y mensajes sean coherentes. Sin datos
+  // en vivo, el índice resuelve el alias en el contexto de esta parada.
+  const publicLineId = toPublicLineId(arrival?.lineId || lineId, stopId);
+  const stopName = displayStopName(stopId);
   const existing = findActiveAlert(chatId, stopId, publicLineId);
   if (existing) {
     clearSession(chatId);

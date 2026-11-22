@@ -284,6 +284,18 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
     expect(output).not.toContain('Ha ocurrido un error');
   });
 
+  it('el botón de búsqueda explica qué escribir', async () => {
+    const target = { ...chat, id: 555555571 };
+    const start = sent.length;
+    await bot.handleUpdate(callbackUpdate('menu_search', 92, target) as never);
+    const output = textsSince(start);
+    expect(output).toContain('Buscar parada o línea');
+    expect(output).toContain('Escribe el nombre de la parada');
+    expect(output).not.toContain(
+      'Escribe un código de parada, nombre de calle'
+    );
+  });
+
   it('/linea muestra destinos reales de la línea', async () => {
     const start = sent.length;
     await bot.handleUpdate(messageUpdate('/linea 28', 42) as never);

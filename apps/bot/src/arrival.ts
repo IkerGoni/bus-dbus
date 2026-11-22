@@ -13,8 +13,30 @@ import {
   matchesLine,
   normalizeLine,
 } from '@dbus/core';
+import {
+  getCatalogLinesForStop,
+  getCatalogStopName,
+  toPublicLineId,
+} from './catalog.js';
 import { fetchStopTimes, getStopName } from './dbus-client.js';
 import type { NextArrivalResult } from './types.js';
+
+export { getCatalogLinesForStop, toPublicLineId };
+
+/**
+ * Nombre para mostrar. La respuesta en vivo manda; si no trae descripción
+ * (SIN_SERVICIO / NO DATOS) se usa el nombre real del índice, nunca un invento.
+ */
+export function displayStopName(
+  stopId: string,
+  liveName?: string | null
+): string {
+  const live = liveName?.trim();
+  if (live) return live;
+  const cached = getStopName(stopId);
+  if (cached && cached !== `Parada ${stopId}`) return cached;
+  return getCatalogStopName(stopId) || cached;
+}
 
 export {
   escapeMd,
@@ -59,6 +81,19 @@ export async function getStopLines(stopId: string): Promise<StopLine[]> {
   return linesFromStopTimes(times);
 }
 
+/**
+ * Líneas de una parada y su procedencia. Sin servicio, la API no devuelve
+ * líneas: el índice (generado de la API real) permite seguir mostrando qué
+ * líneas pasan, siempre etiquetado como índice y sin horarios inventados.
+ */
+export async function getStopLinesWithSource(
+  stopId: string
+): Promise<{ lines: StopLine[]; source: 'live' | 'catalog' }> {
+  const live = await getStopLines(stopId);
+  if (live.length) return { lines: live, source: 'live' };
+  return { lines: getCatalogLinesForStop(stopId), source: 'catalog' };
+}
+
 export function formatArrival(arrival: NextArrivalResult): string {
   const line = escapeMd(arrival.lineId);
   const destination = escapeMd(arrival.destination);
@@ -73,19 +108,27 @@ export function formatArrivalsList(
   stopName: string,
   arrivals: NextArrivalResult[],
   estado?: string,
-  stopId?: string
+  stopId?: string,
+  /** Avisos de servicio reales devueltos por la API de Dbus. */
+  avisos?: string[] | null
 ): string {
   const code = arrivals[0]?.stopId ?? stopId ?? '';
   const header = `🚏 **${escapeMd(stopName)}**${code ? ` (${code})` : ''}`;
+  const notice = avisos?.length
+    ? `\n\n📢 ${avisos
+        .map((aviso) => escapeMd(aviso.trim()))
+        .filter(Boolean)
+        .join('\n📢 ')}`
+    : '';
 
   if (!arrivals.length) {
     if (estado === 'SIN_SERVICIO' || estado === 'NO DATOS') {
-      return `${header}\n\n🌙 Sin servicio en este momento.`;
+      return `${header}\n\n🌙 Sin servicio en este momento.${notice}`;
     }
     if (estado) {
-      return `${header}\n\n📭 No hay llegadas (${escapeMd(estado)}).`;
+      return `${header}\n\n📭 No hay llegadas (${escapeMd(estado)}).${notice}`;
     }
-    return `${header}\n\n⚠️ No se pudo consultar la API de Dbus. Inténtalo de nuevo.`;
+    return `${header}\n\n⚠️ No se pudo consultar la API de Dbus. Inténtalo de nuevo.${notice}`;
   }
 
   const shown = arrivals.slice(0, 8);
@@ -94,5 +137,5 @@ export function formatArrivalsList(
     arrivals.length > shown.length
       ? `\n\n…y ${arrivals.length - shown.length} más`
       : '';
-  return `${header}\n\n${body}${more}`;
+  return `${header}\n\n${body}${more}${notice}`;
 }
