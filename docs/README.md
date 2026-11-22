@@ -15,6 +15,7 @@ Qué doc mirar para cada cosa. Si un doc contradice a
 | Por qué Android nativo y sin backend | [ADR 009](03-architecture/adrs/009-android-nativo-mvp.md) |
 | Plan y resultado de los sprints Android | [`07-android-mvp/SPRINTS.md`](07-android-mvp/SPRINTS.md) |
 | Prompt del próximo sprint (5, publicación) | [`07-android-mvp/prompts/SPRINT-5.md`](07-android-mvp/prompts/SPRINT-5.md) |
+| Prompt para rehacer los wireframes Android | [`07-android-mvp/prompts/WIREFRAMES.md`](07-android-mvp/prompts/WIREFRAMES.md) |
 | Reglas duras para implementar Android | [`07-android-mvp/docs/00-agent-guardrails.md`](07-android-mvp/docs/00-agent-guardrails.md) |
 | Modelos, estados de aviso y matching | [`07-android-mvp/docs/02-domain-contracts.md`](07-android-mvp/docs/02-domain-contracts.md) |
 | Spec de pantallas A01–A08 | [`07-android-mvp/docs/03-android-screens.md`](07-android-mvp/docs/03-android-screens.md) |
@@ -54,6 +55,7 @@ prompts ejecutados, que se conservan tal cual.
 
 Los wireframes `.excalidraw` y `stitch-references/` de `07-android-mvp/` son
 anteriores a los avisos de un solo uso (aún muestran recurrentes y
-«Posponer»/«Descartar»): manda `03-android-screens.md`.
+«Posponer»/«Descartar»): manda `03-android-screens.md`. Para corregirlos:
+[`prompts/WIREFRAMES.md`](07-android-mvp/prompts/WIREFRAMES.md).
 
 `docs/auditoria/` es de la sesión de auditoría de arquitectura.
