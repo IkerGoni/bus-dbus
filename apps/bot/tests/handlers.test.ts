@@ -256,6 +256,34 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
     expect(textsSince(start)).toContain('srch_l_28');
   });
 
+  it('la búsqueda por texto responde aunque Telegram rechace editar el mensaje del usuario', async () => {
+    // Error real visto en producción: el prompt del botón es nuestro, pero el
+    // texto que escribe el usuario no se puede editar (400 can't be edited).
+    const target = { ...chat, id: 555555570 };
+    const previous = Telegram.prototype.callApi;
+    Telegram.prototype.callApi = (async (
+      method: string,
+      payload: Record<string, unknown>
+    ) => {
+      if (method === 'editMessageText') {
+        throw new Error("400: Bad Request: message can't be edited");
+      }
+      return previous(method, payload);
+    }) as never;
+    const start = sent.length;
+    try {
+      await bot.handleUpdate(
+        callbackUpdate('menu_search', 90, target) as never
+      );
+      await bot.handleUpdate(messageUpdate('Boulevard', 91, target) as never);
+    } finally {
+      Telegram.prototype.callApi = previous;
+    }
+    const output = textsSince(start);
+    expect(output).toContain('srch_s_1');
+    expect(output).not.toContain('Ha ocurrido un error');
+  });
+
   it('/linea muestra destinos reales de la línea', async () => {
     const start = sent.length;
     await bot.handleUpdate(messageUpdate('/linea 28', 42) as never);

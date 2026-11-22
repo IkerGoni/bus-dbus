@@ -1,6 +1,6 @@
 # Estado — bus-dbus
 
-Actualizado: 2026-11-22 07:05 · Última sesión: verificación de buscador/favoritos, ajuste de rutas tras el split y reinicio del bot
+Actualizado: 2026-11-22 07:55 · Última sesión: fix del buscador por texto, split de `handlers.ts` y reinicio del bot
 
 > **`AGENTS.md` es la fuente de verdad.** Este archivo es el estado de sesión;
 > si algo aquí contradice a `AGENTS.md`, manda `AGENTS.md`.
@@ -10,7 +10,7 @@ Actualizado: 2026-11-22 07:05 · Última sesión: verificación de buscador/favo
 | Área | Estado |
 |------|--------|
 | Bot de Telegram | ✅ Activo con datos reales desde `apps/bot`, build de `8445239`, PID `73125`, `node dist/index.js`, lock y log verificados |
-| Calidad del bot | ✅ 51/51 tests · `pnpm --filter @dbus/bot verify` (tsc + biome + tests) · `build` OK |
+| Calidad del bot | ✅ 52/52 tests · `pnpm --filter @dbus/bot verify` (tsc + biome + tests) · `build` OK |
 | Descubrimiento | ✅ `/buscar` + `/linea` sobre catálogo real (39 líneas, 127 itinerarios, 548 paradas) |
 | Favoritos | ✅ parada completa, parada+línea y línea favorita |
 | PWA (Sprint 3) | 🔧 Bloqueada: errores TS/lint preexistentes en `apps/mobile/src/` |
@@ -54,8 +54,20 @@ petición explícita.
 - GPS descartado: la API de Dbus no devuelve coordenadas; datos de prueba
   quedaron solo en TMPDIR, nunca en el repo.
 
+### Fix del buscador y split de handlers (sesión actual)
+- Bug real en producción: al buscar por texto tras pulsar el botón aparecía el
+  error genérico. Log: `400: Bad Request: message can't be edited`. `safeEdit`
+  intentaba editar el mensaje del usuario (Telegram solo permite editar los
+  suyos) y re-lanzaba el error. Ahora los updates de texto/comando se responden
+  con `reply`, y los callbacks que no se pueden editar caen al `reply`.
+- `apps/bot/src/handlers.ts` dividido en `session.ts` (estado), `render.ts`
+  (vistas/acciones y helpers de `Context`), `commands.ts` y `callbacks.ts`.
+  `handlers.ts` queda como composition root y conserva la API pública.
+- Test de regresión: simula el 400 real y exige resultados sin error genérico.
+  Verificado que falla con el código anterior.
+
 ### Verificación de buscador y favoritos
-- Suite completa 51/51 en `apps/bot/` con `BOT_TOKEN` inyectado por entorno y BD en memoria.
+- Suite completa 52/52 en `apps/bot/` con `BOT_TOKEN` inyectado por entorno y BD en memoria.
 - 4 flujos comprobados contra la API real con un test temporal (borrado):
   búsqueda por nombre → llegadas; búsqueda por línea → destinos → paradas →
   llegadas; guardar/ver/borrar parada completa (con dedup); guardar/ver/borrar

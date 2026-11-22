@@ -11,7 +11,7 @@ Aplicación PWA móvil para notificaciones push de llegada de autobús Dbus (San
 | **Planning (Sprints 0-2)** | ✅ Completo | 3 docs en `docs/04-planning/`, 12 wireframes en `docs/02-wireframes/`, 8 ADRs en `docs/03-architecture/adrs/` |
 | **PWA Shell (Sprint 3)** | 🔧 Bloqueado | Errores TS/lint preexistentes en `apps/mobile/src/` |
 | **Bot: datos reales** | ✅ Activo | API JSON de Dbus (`tiemposParada`), sin mocks en producción |
-| **Tests del bot** | ✅ 51/51 pasan | `pnpm --filter @dbus/bot test` (18 unit + 15 integración + 18 E2E) |
+| **Tests del bot** | ✅ 52/52 pasan | `pnpm --filter @dbus/bot test` (18 unit + 15 integración + 19 E2E) |
 | **TypeScript del bot** | ✅ 0 errores | `pnpm --filter @dbus/bot typecheck` |
 | **Lint del bot** | ✅ 0 errores | `pnpm --filter @dbus/bot verify` |
 | **Workspace** | 🔧 En curso | Split a pnpm workspaces (`apps/`, `packages/`, `docs/`); ver `docs/plan/repo-split.md` |
@@ -73,7 +73,7 @@ pnpm verify             # lint + typecheck + tests de todos los paquetes
 pnpm dev                # PWA (apps/mobile)
 
 # Bot de Telegram (apps/bot)
-pnpm --filter @dbus/bot verify   # tsc -b + biome + 51 tests
+pnpm --filter @dbus/bot verify   # tsc -b + biome + 52 tests
 pnpm --filter @dbus/bot build    # -> apps/bot/dist
 pnpm --filter @dbus/bot start    # node dist/index.js (cwd apps/bot)
 cd apps/bot && pnpm run build:catalog  # regenerar el catálogo desde Dbus
