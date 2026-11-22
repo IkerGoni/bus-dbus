@@ -122,3 +122,12 @@ fun failedTick(troubleSinceMs: Long?, nowMs: Long): FailedTick {
  */
 fun firingsToDelete(firings: List<Firing>, canNotify: Boolean): List<Firing> = if (canNotify) firings else emptyList()
 
+/**
+ * Tras decidir parar y soltar `running`, el servicio vuelve a leer la BD: si entretanto se
+ * guardó un aviso, `ensureMonitoring` vio el servicio vivo y no lo arrancó, así que hay que
+ * seguir (H15). Solo tras [EngineAction.STOP_IDLE]: sin servicio los avisos siguen ahí a
+ * propósito, y sin permiso de notificaciones ([canNotify] false) el disparado no se borra
+ * y reanudar sería un bucle.
+ */
+fun resumeAfterStop(action: EngineAction, rules: List<AlertRule>, nowMs: Long, canNotify: Boolean): Boolean =
+    action == EngineAction.STOP_IDLE && canNotify && rules.any { isWatching(it, nowMs) }

@@ -22,6 +22,7 @@ import eus.busdonostia.app.domain.isFetchDue
 import eus.busdonostia.app.domain.isWatching
 import eus.busdonostia.app.domain.nextPollDelayMs
 import eus.busdonostia.app.domain.pollDelayMs
+import eus.busdonostia.app.domain.resumeAfterStop
 import eus.busdonostia.app.domain.stopsToPoll
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -104,14 +105,28 @@ class AlertMonitorService : Service() {
             while (true) {
                 val action = watchUntilDone()
                 if (action == EngineAction.STOP_NO_SERVICE) notifyStopped(this, R.string.notif_stopped_no_service)
-                // Si llegó otro arranque mientras se decidía parar, se sigue vigilando.
                 running = false
+                // Un aviso guardado antes de soltar `running` no arrancó el servicio (lo veía vivo): se relee la BD.
+                if (resumeAfterStop(action, savedRules(), System.currentTimeMillis(), canNotifyArrivals(this))) {
+                    running = true
+                    continue
+                }
+                // Uno guardado después sí pidió arranque: entonces stopSelfResult falla y se sigue vigilando.
                 if (stopSelfResult(lastStartId)) return
                 running = true
             }
         } finally {
             ruleChanges.cancel()
         }
+    }
+
+    private suspend fun savedRules(): List<AlertRule> = try {
+        container.database.alerts().getAll().map { it.toDomain() }
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Log.w(TAG, "no se pudieron releer los avisos al parar", e)
+        emptyList()
     }
 
     /** Vueltas cada `pollIntervalSec` hasta que el motor decide parar; devuelve el motivo. */

@@ -142,6 +142,20 @@ class AlertEngineTest {
     }
 
     @Test
+    fun trasPararSeSigueSiSeGuardoUnAvisoEntretanto() {
+        val saved = listOf(once("nuevo"))
+        // Decidió STOP_IDLE, pero en la BD ya hay otro aviso en vigilancia (H15): se sigue.
+        assertTrue(resumeAfterStop(EngineAction.STOP_IDLE, saved, now, canNotify = true))
+        // Nada en vigilancia (vacío, pausado o caducado): se para.
+        assertFalse(resumeAfterStop(EngineAction.STOP_IDLE, emptyList(), now, canNotify = true))
+        assertFalse(resumeAfterStop(EngineAction.STOP_IDLE, listOf(once("p").copy(active = false)), now, canNotify = true))
+        // Sin servicio: los avisos siguen en la BD a propósito; no se reanuda.
+        assertFalse(resumeAfterStop(EngineAction.STOP_NO_SERVICE, saved, now, canNotify = true))
+        // Sin permiso de notificaciones el aviso disparado no se borra: reanudar sería un bucle.
+        assertFalse(resumeAfterStop(EngineAction.STOP_IDLE, saved, now, canNotify = false))
+    }
+
+    @Test
     fun destinoDelTitulo() {
         assertEquals("Amara", firingDestination(once("a"), arrival("5", 3)))
         assertEquals("Ospitaleak", firingDestination(once("a").copy(destination = "Ospitaleak"), arrival("5", 3, destination = " ")))
