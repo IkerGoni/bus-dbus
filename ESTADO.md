@@ -1,141 +1,88 @@
 # Estado — bus-dbus
 
-Actualizado: 2026-11-22 09:15 · Última sesión: sin servicio real, catálogo dinámico, GPS con Overpass, logger, revisión y deriva de docs
+Actualizado: 2026-11-22 09:30 · Última sesión: reinicio en producción y diagnosis de SIN_SERVICIO
 
 > **`AGENTS.md` es la fuente de verdad.** Este archivo es el estado de sesión;
 > si algo aquí contradice a `AGENTS.md`, manda `AGENTS.md`.
 
-## Resumen actual
+## Objetivo actual
 
-| Área | Estado |
-|------|--------|
-| Bot de Telegram | ✅ Activo con datos reales desde `apps/bot`, desplegado con `9d02d4b`, PID `12954`, `node dist/index.js`, lock y log verificados |
-| Calidad del bot | ✅ 62/62 tests (26 unit + 15 integración + 21 E2E) · `pnpm --filter @dbus/bot verify` y `pnpm verify` OK |
-| Descubrimiento | ✅ `/buscar` + `/linea` sobre catálogo real (39 líneas, 127 itinerarios, 548 paradas, ids 1..1000 sondeados) |
-| Favoritos | ✅ parada completa, parada+línea y línea favorita |
-| PWA (Sprint 3) | 🔧 Bloqueada: errores TS/lint preexistentes en `apps/mobile/src/` |
-| Workspace | 🔧 Split a pnpm en curso en el working tree (`apps/`, `packages/`, `docs/`); ver `docs/plan/repo-split.md` |
-| Docs | ✅ `README.md`, `AGENTS.md` y `ESTADO.md` con las rutas nuevas; ADR 005 avisa de que los `.pb` dan 403 |
-| Seguridad | ⚠️ Token compartido en texto plano: pendiente de rotación por Iker |
+Bot de Telegram operativo con datos reales de Dbus. Cerrada la versión `a7ff1a4`
+(catálogo con escaneo de ids 1..1000) ya desplegada. Prioridad siguiente: dos
+tareas en paralelo — (A) índice local de coordenadas de paradas desde OSM y
+(B) `/ubicacion` sin depender de Overpass en caliente.
 
-## Objetivo
+## Hecho en la última sesión
 
-PWA de llegadas Dbus (San Sebastián) + bot de Telegram con avisos. Hoy solo
-el bot está operativo y desplegado. La PWA sigue fuera del alcance salvo
-petición explícita.
-
-## Historial (comprimido)
-
-### Datos reales y endurecimiento (`f1ed9a0`)
-- Migración de GTFS-RT/protobuf (`.pb` → S3 con 403) a la API JSON de Dbus
-  `SSIIMovilWSv2/ws/cons/tiemposParada` (HTTP, sin auth). Sin mocks.
-- Alias de línea: id interno `32` = código público `28`; se acepta como entrada,
-  se persiste el código público.
-- Bug real: `updateAlert()` enlazaba booleanos y SQLite fallaba; ahora `1/0`.
-  Esto rompía desactivación y caducidad de avisos.
-- Avisos: dedup por `(chat, parada, línea)`, 7 días, preferencia GPS, filtro de
-  destino, guard de reentrada y aislamiento de envíos por chat.
-- Arranque: lock PID + retry de 409 (12 intentos, hasta 30 s). Sin `tsx watch`.
-
-### Consolidación y QoL (`65d2b08`, `e10eb3c`)
-- `validateLineAtStop`/`CATALOG_ERROR`, `findRow<T>` y `normalizeLine`
-  centralizados. Sin cambios de comportamiento.
-- Catálogo en paralelo, caché limitada a 200 entradas con evicción, ETA en la
-  confirmación de avisos, feedback correcto ante duplicados y `/estado`.
-
-### Búsqueda y favoritos libres (`8445239`)
-- Eliminadas "paradas populares": lista arbitraria de 3 itinerarios semilla.
-- `apps/bot/data/dbus-catalog.json` generado con `cd apps/bot && npm run build:catalog`: índice de
-  descubrimiento, **no** fuente de llegadas (estas siguen en vivo).
-- `/buscar` (código, nombre, línea o destino) y `/linea 28` → destinos →
-  paradas → llegadas. Callbacks stateless.
-- Favoritos: parada completa (`line_id=''`), parada+línea y línea
-  (`user_favorite_lines`). Aceptadas líneas alfanuméricas (`B4`, `B9`).
-- GPS descartado: la API de Dbus no devuelve coordenadas; datos de prueba
-  quedaron solo en TMPDIR, nunca en el repo.
-
-### Fix del buscador y split de handlers (sesión actual)
-- Bug real en producción: al buscar por texto tras pulsar el botón aparecía el
-  error genérico. Log: `400: Bad Request: message can't be edited`. `safeEdit`
-  intentaba editar el mensaje del usuario (Telegram solo permite editar los
-  suyos) y re-lanzaba el error. Ahora los updates de texto/comando se responden
-  con `reply`, y los callbacks que no se pueden editar caen al `reply`.
-- `apps/bot/src/handlers.ts` dividido en `session.ts` (estado), `render.ts`
-  (vistas/acciones y helpers de `Context`), `commands.ts` y `callbacks.ts`.
-  `handlers.ts` queda como composition root y conserva la API pública.
-- Test de regresión: simula el 400 real y exige resultados sin error genérico.
-  Verificado que falla con el código anterior.
-
-### Sin servicio, catálogo dinámico, GPS y logger (`5c4f759`..`9d02d4b`)
-- API Dbus en `SIN_SERVICIO` global: se muestran nombre y líneas reales del
-  índice (etiquetados como índice, sin horarios) y el aviso real de la API.
-- Corregido el prompt del botón de búsqueda; alias id interno→público resuelto
-  con el índice en contexto de parada (el código público gana en 5/27/28/32).
-- `build-catalog.mjs` sin `MAX_LINE_ID` hardcodeado: sondeo de ids, `coverage`
-  en el JSON, guarda ante catálogo vacío. La regeneración semanal es un script
-  + plantilla launchd/cron, **NO instalada** (el destino final es RS).
-- `/ubicacion` + `bot.on('location')`: Overpass read-only, refs OSM cruzados con
-  el catálogo, coordenadas efímeras, circuit breaker si Overpass falla.
-- `logger.ts` con `LOG_LEVEL` (default info); eliminado `menu_cancel`.
-- Revisión de código: corregido `28 → 26` en paradas con 26 y 28, PATH de cron
-  y `Array.isArray(avisos)`. 62/62 tests.
-- Producción reiniciada dos veces (regla 9): PID final `12954`, lock verificado.
-
-### Verificación de buscador y favoritos
-- Suite completa 52/52 en `apps/bot/` con `BOT_TOKEN` inyectado por entorno y BD en memoria.
-- 4 flujos comprobados contra la API real con un test temporal (borrado):
-  búsqueda por nombre → llegadas; búsqueda por línea → destinos → paradas →
-  llegadas; guardar/ver/borrar parada completa (con dedup); guardar/ver/borrar
-  línea favorita.
-- El split había dejado `apps/bot/package.json` sin `BOT_TOKEN` en los scripts
-  `test`/`verify`: corregido.
-
-### Documentación
-- `AGENTS.md`, `README.md` y `ESTADO.md` actualizados a las rutas del workspace
-  (`apps/bot`, `apps/mobile`, `packages/*`, `docs/*`).
-- `README.md`: recuento de tests 40/40, rutas de lint correctas, secretos por
-  entorno (sin `.env`), identidad de línea, semántica real de favoritos y
-  estado de GTFS-RT.
-- `ESTADO.md`: reescrito como estado actual + historial comprimido.
-- ADR 005 y `docs/04-planning/mvp-scope.md`: aviso de que el diseño `.pb` no aplica
-  al bot porque los feeds devuelven 403.
+- **Reinicio de producción (regla 9) con autorización explícita del usuario.**
+  - Git limpio, `HEAD = origin/main = a7ff1a4`.
+  - `pnpm --filter @dbus/bot verify` → 62/62; `pnpm verify` → OK. `build` → OK.
+  - SIGTERM a PID `12954`, lock liberado; arranque desde `apps/bot` con
+    `npm run start` y `BOT_TOKEN` por entorno (clave literal `$BOT_TOKEN=` en
+    `.env` de la raíz; parseada sin imprimirla).
+  - Proceso vivo: **PID `31382`**, un solo `node dist/index.js`, lock `31382`,
+    log con `Bot handlers registered` / `Dbus Telegram Bot started` y sin
+    errores tras el arranque.
+- **Diagnosis de `SIN_SERVICIO`**: no fuimos nosotros. Llamadas directas con
+  `curl` (sin pasar por el bot) devuelven HTTP 200 y el estado literal de Dbus,
+  con `avisos` reales de supresiones/traslados. `/itinerariosLinea?idLinea=28`
+  sigue en `DATOS`. Muestreo de 20 paradas del índice: 12 `DATOS` con tiempos
+  reales (p. ej. parada 100 → L9 a Boulevard en 14 min) y 8 `SIN_SERVICIO`.
+  Nuestro build solo consulta `/itinerariosLinea`, nunca `/tiemposParada`, y el
+  patrón ya existía antes del reinicio de hoy. No hay indicios de sobrecarga
+  provocada por nuestro escaneo (ni 429/403 ni 5xx).
+- **`/ubicacion`**: el bot respondió correctamente sin inventar paradas cuando
+  Overpass no respondió. Sondeo directo a `overpass-api.de` dio HTTP 406.
+  Cookbook: migrar a índice local de coordenadas (tarea A + B).
 
 ## Pendiente (por prioridad)
 
-- [ ] **Tras el cambio de `apps/bot/scripts/build-catalog.mjs`: reiniciar el bot
-      (regla 9).** Pendiente a propósito para la siguiente sesión.
-- [ ] Rotar el token de Telegram y reiniciar con el nuevo valor por entorno.
-- [ ] Validar conversación real: enviar `/start` a `@dbus_alarm_bot`.
-- [ ] Comprobar disparo de aviso con bus en servicio (`tipo=1`, GPS).
-- [ ] PWA Sprint 3: 30 errores TS y 233 de lint (tareas en kanban `dbus-app`).
-- [ ] M4/M5: notificaciones push y beta con testers.
+- [ ] **A · Índice local de coordenadas**: script en `apps/bot/scripts/` que
+      consiga una vez las coordenadas de todas las paradas desde OSM y guarde
+      `apps/bot/data/dbus-stop-coordinates.json` (solo datos reales, sin
+      relleno; con `generatedAt`, `source`, `attribution` y cobertura). Luego
+      commit + push. Ver prompts en el chat de la sesión anterior.
+- [ ] **B · `/ubicacion` sobre índice local**: que `nearby.ts` use ese JSON en
+      vez de Overpass en caliente; eliminar el circuit breaker de red; test de
+      regresión; `verify` + commit + push + **reinicio con autorización**.
+      A y B son paralelizables si B define primero el contrato del JSON.
+- [ ] Rotar el token de Telegram (aviso de seguridad de sesiones previas).
+- [ ] Validar conversación real: `/start`, botón "Buscar parada o línea",
+      "Boulevard" → parada 340 (Pío Baroja 10), `/ubicacion`.
+- [ ] PWA Sprint 3: 30 errores TS y 233 de lint (kanban `dbus-app`).
 
 ## Decisiones tomadas (no reabrir)
 
-- Fuente del bot = API JSON de Dbus sobre HTTP; los feeds `.pb` redirigen a S3
-  y dan 403. Sin fallback a mocks en producción.
+- 2026-11-22 · `SIN_SERVICIO` es el estado operativo real que devuelve Dbus
+  (HTTP 200 + `avisos`), no un outage ni un efecto de nuestro escaneo.
+- 2026-11-22 · Reinicio de producción solo con autorización explícita; `git
+  push` no despliega.
+- Fuente del bot = API JSON de Dbus sobre HTTP; feeds `.pb` → 403. Sin mocks.
 - `codParada` = código visible en marquesina, no id interno.
 - Producción con `npm run start`, nunca `tsx watch`; un solo proceso/polling.
 - Línea = código público; id interno solo alias de entrada. En búsquedas gana
-  el código público porque `32` también es una línea pública.
-- El catálogo JSON es índice de descubrimiento regenerable; las llegadas
-  siempre se consultan en vivo.
+  el código público porque `32` también es línea pública.
+- Catálogo JSON = índice de descubrimiento regenerable; llegadas siempre en vivo.
 - Sin "paradas populares": `/buscar` y `/linea` son la UX de descubrimiento.
+- Sin coordenadas inventadas: si falla la fuente, se dice y se sugiere `/buscar`.
 - Docs: `AGENTS.md` manda; `README.md` es uso; ADRs son decisiones históricas.
+
+## Esperando a Iker
+
+- Rotación del token de Telegram (no bloquea A ni B).
+- Lanzar las dos sesiones paralelas con los prompts entregados en el chat.
 
 ## Git
 
-`8ce2694` → `f1ed9a0` → `65d2b08` → `e10eb3c` → `8445239` → `99621cf`
-(docs) → `482b53f` (split a workspaces pnpm) → `8afc1c0` → `5c4f759` →
-`20ceaf0` → `0cf03d0` → `5d4e9a4` → `e49a375` → `9d02d4b` → (este commit de
-docs y `COLA_VACIA`), todo pusheado. `main = origin/main`, working tree limpio,
-una sola rama y un solo worktree. Token solo por entorno (`.env` de la raíz, no
-trackeado).
+`main a7ff1a4 = origin/main` ✓ · ramas abiertas: ninguna · worktrees: 1 (raíz)
+· stash: vacío · working tree limpio (salvo este `ESTADO.md` del cierre).
 
 ## Siguiente sesión
 
-- Leer primero: `AGENTS.md`, `README.md`, `ESTADO.md`.
-- Empezar por: reiniciar el bot tras el cambio de `build-catalog.mjs` (regla 9),
-  luego validar el round-trip real en Telegram y rotar el token.
-- No reabrir: mocks, `.pb`, `tsx watch` en producción, listas de paradas
-  "populares", ni escribir el token en archivos.
+- Leer primero: `AGENTS.md`, `ESTADO.md`.
+- Empezar por: ejecutar los prompts A y B en paralelo (están completos en el
+  chat de la sesión anterior).
+- Reglas específicas: alcance solo `apps/bot/` y `packages/**` aditivo; no
+  tocar `apps/mobile`, CI ni state/kanban; secretos solo por entorno; todo
+  cambio termina con `pnpm --filter @dbus/bot verify` y `pnpm verify`, commit +
+  push y reinicio **autorizado**.
