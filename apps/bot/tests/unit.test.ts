@@ -9,9 +9,12 @@ import {
   normalizeLine,
 } from '../src/arrival.js';
 import {
+  getAllStopsForLine,
   getCatalogMeta,
   getLineByCode,
   getStopsForItinerary,
+  listAllLines,
+  paginate,
   searchLines,
   searchStops,
 } from '../src/catalog.js';
@@ -154,6 +157,44 @@ describe('catálogo de búsqueda (datos reales de Dbus)', () => {
     const meta = getCatalogMeta();
     expect(meta.lines).toBeGreaterThan(30);
     expect(meta.stops).toBeGreaterThan(500);
+  });
+});
+
+describe('browse de catálogo (todas las líneas y paradas)', () => {
+  it('lista todas las líneas ordenadas por código público', () => {
+    const lines = listAllLines();
+    expect(lines).toHaveLength(39);
+    expect(lines[0].cod).toBe('5');
+    expect(lines.map((l) => l.cod)).toContain('28');
+    expect(lines.map((l) => l.cod)).toContain('B9');
+    expect(lines.findIndex((l) => l.cod === '5')).toBeLessThan(
+      lines.findIndex((l) => l.cod === '28')
+    );
+  });
+
+  it('devuelve todas las paradas de una línea sin duplicados', () => {
+    const stops = getAllStopsForLine('28');
+    expect(stops.length).toBeGreaterThan(20);
+    expect(new Set(stops.map((s) => s.cod)).size).toBe(stops.length);
+    expect(stops.map((s) => s.cod)).toContain('1');
+    expect(getAllStopsForLine('no-existe')).toEqual([]);
+  });
+
+  it('página con límites y recorte correctos', () => {
+    const items = Array.from({ length: 39 }, (_, i) => i);
+    const first = paginate(items, 0, 10);
+    expect(first.items).toHaveLength(10);
+    expect(first.totalPages).toBe(4);
+    expect(first.hasNext).toBe(true);
+    expect(first.hasPrev).toBe(false);
+
+    const last = paginate(items, 99, 10);
+    expect(last.page).toBe(3);
+    expect(last.items).toHaveLength(9);
+    expect(last.hasNext).toBe(false);
+
+    expect(paginate(items, -3, 10).page).toBe(0);
+    expect(paginate([], 0, 10).totalPages).toBe(1);
   });
 });
 

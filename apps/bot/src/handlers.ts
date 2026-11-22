@@ -11,10 +11,13 @@ import {
   normalizeLine,
 } from './arrival.js';
 import {
+  getAllStopsForLine,
   getItinerariesForLine,
   getItineraryById,
   getLineByCode,
   getStopsForItinerary,
+  listAllLines,
+  paginate,
   searchLines,
   searchStops,
 } from './catalog.js';
@@ -184,6 +187,7 @@ function mainKeyboard() {
     [Markup.button.callback('⭐ Favoritos', 'menu_favorites')],
     [Markup.button.callback('📋 Mis avisos', 'menu_my_alerts')],
     [Markup.button.callback('🔎 Buscar parada o línea', 'menu_search')],
+    [Markup.button.callback('📃 Todas las líneas', 'lines_all')],
     [
       Markup.button.callback('🔄 Actualizar', 'menu_refresh'),
       Markup.button.callback('ℹ️ Ayuda', 'menu_help'),
@@ -202,8 +206,8 @@ const HELP_TEXT =
   '`/borrar <id>` — eliminar un aviso\n' +
   '`/buscar <texto>` — parada (código o nombre) o línea (número/destino)\n' +
   '`/linea <linea>` — destinos y paradas de una línea\n' +
+  '`/lineas` — todas las líneas · `/lineas <parada>` — líneas en esa parada\n' +
   '`/fav` — tus favoritos · `/fav add <parada> [linea]` · `/fav linea <linea>`\n' +
-  '`/lineas <parada>` — líneas que pasan por una parada\n' +
   '`/actualizar` — refrescar datos · `/estado` — diagnóstico\n\n' +
   'Busca por código (`1`), nombre (`Boulevard`), línea (`28`) o destino ' +
   '(`Ospitaleak`). Sin línea en `/fav add` guardas la parada completa.\n' +
@@ -352,6 +356,12 @@ async function showLineDestinations(
       ...buttons.map((button) => [button]),
       [
         Markup.button.callback(
+          `🚏 Todas las paradas (${getAllStopsForLine(line.cod).length})`,
+          `la_${normalizeLine(line.cod)}`
+        ),
+      ],
+      [
+        Markup.button.callback(
           '⭐ Guardar línea',
           `favline_${normalizeLine(line.cod)}`
         ),
@@ -385,6 +395,94 @@ async function showLineStops(ctx: Context, itineraryId: string): Promise<void> {
       parse_mode: 'Markdown',
       ...Markup.inlineKeyboard([...buttons.map((button) => [button]), ...back]),
     }
+  );
+}
+
+const LINES_PER_PAGE = 10;
+const STOPS_PER_PAGE = 15;
+
+type KeyboardRow = ReturnType<typeof Markup.button.callback>[];
+
+function pagerButtons(
+  hasPrev: boolean,
+  hasNext: boolean,
+  prevData: string,
+  nextData: string
+): KeyboardRow {
+  const buttons: KeyboardRow = [];
+  if (hasPrev) buttons.push(Markup.button.callback('⬅️ Anterior', prevData));
+  if (hasNext) buttons.push(Markup.button.callback('Siguiente ➡️', nextData));
+  return buttons;
+}
+
+/** Catálogo completo de líneas, paginado. El índice de búsqueda es real. */
+async function showAllLines(ctx: Context, page = 0): Promise<void> {
+  const paged = paginate(listAllLines(), page, LINES_PER_PAGE);
+  const rows: KeyboardRow[] = paged.items.map((line) => [
+    Markup.button.callback(
+      `🚌 L${line.cod} · ${(line.destinations[0] ?? '').slice(0, 22)}`,
+      `srch_l_${normalizeLine(line.cod)}`
+    ),
+  ]);
+  const pager = pagerButtons(
+    paged.hasPrev,
+    paged.hasNext,
+    `lpages_${paged.page - 1}`,
+    `lpages_${paged.page + 1}`
+  );
+  if (pager.length) rows.push(pager);
+  rows.push([Markup.button.callback('⬅️ Menú', 'menu_main')]);
+
+  await safeEdit(
+    ctx,
+    `📃 **Todas las líneas** (${paged.total})\n` +
+      `Página ${paged.page + 1}/${paged.totalPages}\n\nElige una línea para ver sus destinos y paradas:`,
+    { parse_mode: 'Markdown', ...Markup.inlineKeyboard(rows) }
+  );
+}
+
+/** Todas las paradas de una línea, de todos sus destinos, paginadas. */
+async function showAllStopsForLine(
+  ctx: Context,
+  lineId: string,
+  page = 0
+): Promise<void> {
+  const line = getLineByCode(lineId);
+  const code = normalizeLine(lineId);
+  const stops = line ? getAllStopsForLine(line.cod) : [];
+  const back: KeyboardRow = [
+    Markup.button.callback('⬅️ Destinos', `srch_l_${code}`),
+    Markup.button.callback('⬅️ Menú', 'menu_main'),
+  ];
+  if (!line || !stops.length) {
+    await safeEdit(ctx, `❌ Sin paradas para la línea **${escapeMd(code)}**.`, {
+      parse_mode: 'Markdown',
+      ...Markup.inlineKeyboard([back]),
+    });
+    return;
+  }
+
+  const paged = paginate(stops, page, STOPS_PER_PAGE);
+  const rows: KeyboardRow[] = paged.items.map((stop) => [
+    Markup.button.callback(
+      `🚏 ${stop.desc.slice(0, 26)} (${stop.cod})`,
+      `ls_${stop.cod}_${code}`
+    ),
+  ]);
+  const pager = pagerButtons(
+    paged.hasPrev,
+    paged.hasNext,
+    `lapages_${code}_${paged.page - 1}`,
+    `lapages_${code}_${paged.page + 1}`
+  );
+  if (pager.length) rows.push(pager);
+  rows.push(back);
+
+  await safeEdit(
+    ctx,
+    `🚏 **L${escapeMd(code)}** — todas las paradas (${paged.total})\n` +
+      `Página ${paged.page + 1}/${paged.totalPages}\n\nElige una parada para ver llegadas y guardarla en favoritos:`,
+    { parse_mode: 'Markdown', ...Markup.inlineKeyboard(rows) }
   );
 }
 
@@ -634,10 +732,15 @@ export async function handleParada(ctx: Context): Promise<void> {
 
 export async function handleLineas(ctx: Context): Promise<void> {
   const stopId = textOf(ctx).split(/\s+/)[1];
-  if (!stopId || !/^\d+$/.test(stopId)) {
-    await ctx.reply('Uso: `/lineas <codigo>`\nEjemplo: `/lineas 1`', {
-      parse_mode: 'Markdown',
-    });
+  if (!stopId) {
+    await showAllLines(ctx);
+    return;
+  }
+  if (!/^\d+$/.test(stopId)) {
+    await ctx.reply(
+      'Uso: `/lineas` (todas) o `/lineas <codigo>`\nEjemplo: `/lineas 1`',
+      { parse_mode: 'Markdown' }
+    );
     return;
   }
   const lines = await getStopLines(stopId);
@@ -1066,6 +1169,32 @@ async function handleLineStopCallback(ctx: Context): Promise<void> {
   await answer(ctx);
 }
 
+async function handleAllLinesCallback(ctx: Context): Promise<void> {
+  const data = callbackData(ctx);
+  if (data === 'lines_all') {
+    await showAllLines(ctx);
+  } else {
+    const match = data.match(/^lpages_(\d+)$/);
+    if (!match) return;
+    await showAllLines(ctx, Number.parseInt(match[1], 10));
+  }
+  await answer(ctx);
+}
+
+async function handleLineAllStopsCallback(ctx: Context): Promise<void> {
+  const data = callbackData(ctx);
+  const direct = data.match(/^la_([^_]+)$/);
+  const paged = data.match(/^lapages_([^_]+)_(\d+)$/);
+  if (direct) {
+    await showAllStopsForLine(ctx, direct[1]);
+  } else if (paged) {
+    await showAllStopsForLine(ctx, paged[1], Number.parseInt(paged[2], 10));
+  } else {
+    return;
+  }
+  await answer(ctx);
+}
+
 async function handleFavLineSaveCallback(ctx: Context): Promise<void> {
   const match = callbackData(ctx).match(/^favline_([^_]+)$/);
   if (!match) return;
@@ -1251,6 +1380,8 @@ export function setupBot(bot: Telegraf<Context>): void {
   bot.action(/^srch_s_\d+$/, handleSearchStopCallback);
   bot.action(/^srch_l_(.+)$/, handleSearchLineCallback);
   bot.action(/^ld_\d+$/, handleLineDestCallback);
+  bot.action(/^(lines_all|lpages_\d+)$/, handleAllLinesCallback);
+  bot.action(/^(la_[^_]+|lapages_[^_]+_\d+)$/, handleLineAllStopsCallback);
   bot.action(/^ls_\d+_.+$/, handleLineStopCallback);
   bot.action(/^favline_view_(.+)$/, handleFavLineViewCallback);
   bot.action(/^favlin_remove_\d+$/, handleFavLineRemoveCallback);

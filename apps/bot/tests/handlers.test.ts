@@ -293,6 +293,44 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
     }
   });
 
+  it('/lineas sin argumentos abre el listado paginado de líneas', async () => {
+    const target = { ...chat, id: 555555560 };
+    let start = sent.length;
+    await bot.handleUpdate(messageUpdate('/lineas', 60, target) as never);
+    let output = textsSince(start);
+    expect(output).toContain('Todas las líneas');
+    expect(output).toContain('srch_l_21');
+    expect(output).toContain('lpages_1');
+
+    start = sent.length;
+    await bot.handleUpdate(callbackUpdate('lpages_1', 61, target) as never);
+    output = textsSince(start);
+    expect(output).toContain('srch_l_28');
+    expect(output).toContain('lpages_0');
+  });
+
+  it('una línea muestra todas sus paradas paginadas y permite guardarlas', async () => {
+    const target = { ...chat, id: 555555561 };
+    let start = sent.length;
+    await bot.handleUpdate(messageUpdate('/linea 28', 62, target) as never);
+    expect(textsSince(start)).toContain('la_28');
+
+    start = sent.length;
+    await bot.handleUpdate(callbackUpdate('la_28', 63, target) as never);
+    const output = textsSince(start);
+    expect(output).toContain('todas las paradas');
+    expect(output).toContain('ls_1_28');
+    expect(output).toContain('lapages_28_1');
+
+    start = sent.length;
+    await bot.handleUpdate(callbackUpdate('lapages_28_1', 64, target) as never);
+    expect(textsSince(start)).toContain('Página 2/3');
+
+    start = sent.length;
+    await bot.handleUpdate(callbackUpdate('ls_1_28', 65, target) as never);
+    expect(textsSince(start)).toContain('favstop_1');
+  });
+
   it('/estado muestra diagnóstico sin secretos', async () => {
     const start = sent.length;
     await bot.handleUpdate(messageUpdate('/estado', 31) as never);

@@ -150,3 +150,47 @@ export function getCatalogMeta(): {
     stops: data.stops.length,
   };
 }
+
+/** Todas las líneas públicas, ordenadas por código (21, 25, 28, B4...). */
+export function listAllLines(): CatalogLine[] {
+  return [...data.lines].sort((a, b) =>
+    a.cod.localeCompare(b.cod, 'es', { numeric: true, sensitivity: 'base' })
+  );
+}
+
+/**
+ * Todas las paradas de una línea (unión de sus itinerarios, sin duplicados),
+ * en el orden del catálogo. Un mismo destino no muestra toda la línea.
+ */
+export function getAllStopsForLine(lineId: string): CatalogStop[] {
+  const codes = new Set(
+    getItinerariesForLine(lineId).flatMap((itinerario) => itinerario.stops)
+  );
+  return data.stops.filter((stop) => codes.has(stop.cod));
+}
+
+export interface Page<T> {
+  items: T[];
+  page: number;
+  totalPages: number;
+  total: number;
+  hasPrev: boolean;
+  hasNext: boolean;
+}
+
+/** Página 0-based, siempre con al menos una página ( aunque esté vacía ). */
+export function paginate<T>(items: T[], page: number, size: number): Page<T> {
+  const total = items.length;
+  const totalPages = Math.max(1, Math.ceil(total / size));
+  const current = Number.isFinite(page)
+    ? Math.min(Math.max(0, Math.trunc(page)), totalPages - 1)
+    : 0;
+  return {
+    items: items.slice(current * size, (current + 1) * size),
+    page: current,
+    totalPages,
+    total,
+    hasPrev: current > 0,
+    hasNext: current < totalPages - 1,
+  };
+}
