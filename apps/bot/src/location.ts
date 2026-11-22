@@ -1,9 +1,10 @@
 /**
  * Flujo de paradas cercanas: /ubicacion + mensajes de ubicación de Telegram.
  *
- * Las coordenadas se usan solo durante la petición a Overpass: no se escriben
- * en la BD, ni en la sesión, ni en el log. El resultado se muestra con bytes
- * de callback stateless (`srch_s_<cod>`) que llevan a las llegadas en vivo.
+ * Las coordenadas se usan solo durante la consulta al índice local: no se
+ * escriben en la BD, ni en la sesión, ni en el log. El resultado se muestra
+ * con bytes de callback stateless (`srch_s_<cod>`) que llevan a las llegadas
+ * en vivo.
  */
 import { type Context, Markup } from 'telegraf';
 import { config } from './config.js';
@@ -17,12 +18,9 @@ import {
 } from './nearby.js';
 import { safeEdit } from './render.js';
 
-export const UBICACION_TEXT =
-  '📍 **Paradas cercanas**\n\n' +
-  'Pulsa el botón para compartir tu ubicación con el bot. ' +
-  'Buscaré paradas Dbus cerca de ti usando OpenStreetMap y te mostraré ' +
-  'sus llegadas en tiempo real.\n\n' +
-  'No guardo tu ubicación: se usa solo para esta consulta.';
+const OSM_ATTRIBUTION = '© OpenStreetMap contributors (ODbL)';
+
+export const UBICACION_TEXT = `📍 **Paradas cercanas**\n\nPulsa el botón para compartir tu ubicación con el bot. Buscaré paradas Dbus cerca de ti usando el índice local de coordenadas y te mostraré sus llegadas en tiempo real.\n\nCoordenadas de paradas: ${OSM_ATTRIBUTION}.\n\nNo guardo tu ubicación: se usa solo para esta consulta.`;
 
 export async function handleUbicacion(ctx: Context): Promise<void> {
   if (isNearbyDisabled()) {
@@ -62,7 +60,7 @@ export async function handleLocation(ctx: Context): Promise<void> {
     const stops = await getNearbyStops(latitude, longitude);
     if (!stops.length) {
       await ctx.reply(
-        `📭 No encontré paradas Dbus con referencia en OpenStreetMap a ${config.nearbyRadiusM} m de tu ubicación. Usa /buscar.`
+        `📭 No encontré paradas Dbus a ${config.nearbyRadiusM} m de tu ubicación. Usa /buscar.`
       );
       return;
     }
@@ -73,14 +71,15 @@ export async function handleLocation(ctx: Context): Promise<void> {
       ),
     ]);
     await ctx.reply(
-      '📍 Paradas cercanas (Dbus + OpenStreetMap):\n' +
-        'Elige una para ver llegadas en vivo.',
+      `📍 Paradas cercanas (índice local de Dbus):\nElige una para ver llegadas en vivo.\n\nCoordenadas: ${OSM_ATTRIBUTION}.`,
       Markup.inlineKeyboard(rows)
     );
   } catch (error) {
-    // Nunca se rellena con paradas inventadas: si falla la fuente, se dice.
+    // Nunca se rellena con paradas inventadas: si falla el índice, se dice.
     if (!(error instanceof NearbyUnavailableError)) throw error;
-    logger.error('[nearby] Overpass no disponible');
+    logger.error(
+      `[nearby] índice de coordenadas no disponible: ${error.message}`
+    );
     await ctx.reply(NEARBY_UNAVAILABLE_TEXT);
   }
 }

@@ -18,15 +18,11 @@ export const configSchema = z.object({
   pollIntervalMs: z.number().int().positive().default(30_000),
   defaultAlertMinutes: z.number().int().positive().default(5),
   dbPath: z.string().default('./bot.db'),
-  // Paradas cercanas: OSM/Overpass, read-only y sin credenciales. Las
-  // coordenadas del usuario nunca se persisten.
+  // Paradas cercanas: índice local de coordenadas (sin red). Las coordenadas
+  // del usuario nunca se persisten. La ruta del índice se configura con
+  // DBUS_STOP_COORDINATES_PATH (ver stop-coordinates.ts).
   nearbyEnabled: z.boolean().default(true),
-  overpassUrl: z
-    .string()
-    .url()
-    .default('https://overpass-api.de/api/interpreter'),
   nearbyRadiusM: z.number().int().min(50).max(2000).default(500),
-  nearbyTimeoutMs: z.number().int().positive().default(30_000),
 });
 
 export const config = configSchema.parse({
@@ -46,12 +42,8 @@ export const config = configSchema.parse({
   nearbyEnabled: process.env.NEARBY_ENABLED
     ? !['0', 'false', 'no'].includes(process.env.NEARBY_ENABLED.toLowerCase())
     : undefined,
-  overpassUrl: process.env.OVERPASS_URL || undefined,
   nearbyRadiusM: process.env.NEARBY_RADIUS_M
     ? Number.parseInt(process.env.NEARBY_RADIUS_M, 10)
-    : undefined,
-  nearbyTimeoutMs: process.env.NEARBY_TIMEOUT_MS
-    ? Number.parseInt(process.env.NEARBY_TIMEOUT_MS, 10)
     : undefined,
 });
 
