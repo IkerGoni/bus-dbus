@@ -32,9 +32,16 @@ El bot sigue en producción sin cambios (PID `80402`).
   11 capturas en `docs/07-android-mvp/capturas/sprint-4/`.
 - Prompt del Sprint 5 en `docs/07-android-mvp/prompts/SPRINT-5.md`.
 
+- **Tras el Sprint 4** (rama `android/favoritas-sondeo`): ★ por llegada en A05
+  (favorita parada+línea junto a la 🔔; la hora pasa bajo el destino) y sondeo
+  adaptativo del motor (30 s / 1 min / 2 min según lo que le falta al bus).
+  94 tests por variante. Probado en el AVD: ★ de la L27 en 344 → aparece en
+  Favoritas de Inicio; aviso con el bus a 57 min → «Consulta Dbus cada 120 s».
+
 ## Pendiente (por prioridad)
 
-- [ ] Iker: probar en su móvil el APK debug de `main` (`~/Downloads/bus-donostia-debug.apk`).
+- [ ] Merge de `android/favoritas-sondeo` a `main` + push + borrar rama (falta la orden de Iker).
+- [ ] Iker: probar en su móvil el APK debug (`~/Downloads/bus-donostia-debug.apk`).
 - [ ] **Sprint 5** (prompt `docs/07-android-mvp/prompts/SPRINT-5.md`).
 - [ ] Licencia y repo público: los decide Iker más adelante (repo privado hasta entonces).
 - [ ] Probar en móvil real el motor con Doze y fabricantes agresivos con la batería.
@@ -60,6 +67,9 @@ El bot sigue en producción sin cambios (PID `80402`).
 - 2026-11-22 · Iker: **avisos de un solo uso**: saltan una vez a los X min y
   desaparecen. Sin recurrentes, sin Posponer/Descartar en la notificación y
   sin Posponer en Inicio (solo Pausar).
+- 2026-11-22 · Sondeo adaptativo solo en el motor en segundo plano (≤ 3 min de
+  margen → 30 s, 4–7 → 1 min, ≥ 8 → 2 min, sin datos → 1 min); la pantalla
+  visible sigue a 30 s (guardrails §3). ★ por llegada en A05 = `STOP_LINE`.
 - 2026-11-22 · Android Sprint 4: el motor arranca desde un observador de
   `alerts` en `AppContainer` (guardar, switch, Deshacer) y
   al abrir la app; tras reiniciar el móvil, un aviso activo se retoma al abrir

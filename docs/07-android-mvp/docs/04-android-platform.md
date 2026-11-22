@@ -19,8 +19,12 @@ Decisión de arquitectura: ADR 009 (`docs/03-architecture/adrs/009-android-nativ
 - **Foreground Service `dataSync`** (`FOREGROUND_SERVICE_DATA_SYNC`) con
   notificación silenciosa en canal `dbus_monitoring` (`IMPORTANCE_LOW`):
   «Vigilando L5 en Pío Baroja 10».
-- Sondea `tiemposParada` cada 30 s **agrupando avisos por parada** (una
+- Sondea `tiemposParada` **agrupando avisos por parada** (una
   petición por parada, como el bot) y evalúa `computeAlertStatus`.
+- **Sondeo adaptativo** (`pollDelayMs`): con `pollIntervalSec` = 30 s de base,
+  según lo que le falta al bus para entrar en la antelación del aviso: ≤ 3 min →
+  30 s · 4–7 min → 1 min · ≥ 8 min → 2 min · sin bus de la línea, sin servicio
+  o error → 1 min. Manda el aviso más urgente. La UI visible sigue a 30 s.
 - Se para cuando no queda ningún aviso en vigilancia, o tras 60 min seguidos
   sin servicio/errores (y entonces lo notifica). Android 15 limita `dataSync` a
   6 h/24 h: si se alcanza, se para y se avisa (`onTimeout`).
