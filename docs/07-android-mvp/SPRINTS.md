@@ -7,7 +7,7 @@ build debug). Estado de cada sprint: `ESTADO.md`.
 
 | Sprint | Objetivo | Cierra brechas | Estado |
 |---|---|---|---|
-| 0 | Esqueleto verde | B4, B8, B14 (base) | ver ESTADO.md |
+| 0 | Esqueleto verde | B4, B8, B14 (base) | hecho 2026-11-22 |
 | 1 | Datos y dominio | B1, B3, B12, B15, B16 | pendiente |
 | 2 | Consulta: Paradas, Detalle, Líneas | B1, B2, B9, B11 | pendiente |
 | 3 | Inicio, Avisos, Ajustes, Onboarding | B5, B10, B13 | pendiente |

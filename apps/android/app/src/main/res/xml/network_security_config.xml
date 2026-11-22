@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- La API de Dbus solo responde por HTTP. Cleartext solo para ese dominio (ADR 009). -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">app.dbus.eus</domain>
+    </domain-config>
+</network-security-config>
