@@ -1,47 +1,34 @@
 # Estado — bus-dbus
 
-Actualizado: 2026-11-22 18:50 · Última sesión: puesta al día de la documentación
+Actualizado: 2026-11-23 00:30 · Última sesión: auditoría y commit Sprint 5.0
 
 > **`AGENTS.md` es la fuente de verdad.** Este archivo es el estado de sesión;
 > si algo aquí contradice a `AGENTS.md`, manda `AGENTS.md`.
 
 ## Objetivo actual
 
-MVP Android nativo sin backend (ADR 009). Plan en
-`docs/07-android-mvp/SPRINTS.md`. **Sprints 0–4 hechos e integrados en `main`
-(último merge `b8e08f8`, `android/favoritas-sondeo`); siguiente: Sprint 5
-(publicación).** El bot sigue en producción (PID `4713`, ver Pendiente).
+MVP Android nativo sin backend (ADR 009), ahora `v1.0.0`. Plan vigente en
+`bus-donostia-engineering-plan/` (Sprints 5.0–8) y anexo de reglas en
+`AGENTS.md` / `apps/android/AGENTS.md`. Sprint 5.0 (config v2, rendimiento,
+KMP) integrado en `main`; falta el cierre de release Play y el Sprint 5.1.
 
 ## Hecho en la última sesión
 
-- **Docs al día con `main` `b8e08f8`** (rama `docs/puesta-al-dia`, integrada en
-  `0f19b4e`, pusheada y borrada): 44 `.md`
-  revisados contra el código, 37 editados y 1 nuevo; `README.md` reescrito (bot + Android);
-  `docs/README.md` nuevo como índice; 18 docs marcados «Histórico: ver …»;
-  specs Android con avisos de un solo uso, ★ en A05 y sondeo adaptativo;
-  `/ubicacion` y callbacks del bot en `docs/05-ui/02-bot-telegram.md`;
-  B1–B16 marcadas por sprint. 98 enlaces internos, 0 rotos.
-- **6 reglas nuevas en `AGENTS.md`** (Iker delegó la decisión): `tipo` solo
-  `1` = GPS, `/ubicacion` en la regla 8, `strings*.xml`, alcance de
-  `pnpm verify`, ruta de tests Android y sección Documentación.
-- Verificación: bot 85/86 (falla el test de integración: la API devolvió
-  `tipo=0`, que el test no acepta); `pnpm verify` igual (core 14 y contracts 7
-  verdes). Android: 94 tests JVM por variante y 0 errores de lint en el build
-  de `main` `b8e08f8` (18:28, worktree principal); el `gradlew` de esta sesión
-  se canceló tras 20 min en `compileKotlin`. La rama solo toca `.md`.
-
-### Sesiones anteriores (Android, 2026-11-22)
-
-- **Sprint 4:** motor de avisos con FGS `dataSync` (`engine/AlertMonitorService`),
-  decisión pura en `domain/AlertEngine.kt`, canales `dbus_monitoring` y
-  `dbus_arrivals_high`, deep link `dbus://stop/{stopId}?highlightLine={lineId}`.
-  Avisos de un solo uso: Room v2 con `MIGRATION_1_2` (borra recurrentes y ya
-  disparados). 11 capturas en `docs/07-android-mvp/capturas/sprint-4/`.
-- **Tras el Sprint 4** (`android/favoritas-sondeo`, integrada): ★ por llegada
-  en A05 y sondeo adaptativo del motor (30 s si faltan ≤ 7 min para avisar,
-  1 min hasta 14, 2 min más allá) con aviso 30 s antes (`NOTIFY_EARLY_MS`).
+- Auditoría del Sprint 5.0 contra AGENTS.md, plan y plantilla v2: 6 desviaciones
+  P1 corregidas (timeouts de la config ignorados, `System` en `domain/Ticker`,
+  rango de antelación fijo `1..30`, `uiLimits` sin validar, StrictMode tarde,
+  `key`/`contentType` en LazyColumn) y 2 P2 (KDoc borrados, baseline profile).
+- Tests nuevos: escalones mal ordenados/vacíos/rápidos, límites de UI, config
+  remota con rangos inválidos, `pollDelayMs` con `PollingConfig` propia.
+- Verificación: `./gradlew check assembleDebug assembleRelease
+  -Pdbus.release.unsigned=true` verde; 122 tests por variante, 0 fallos;
+  lint 0 errores (29 avisos); `lintVitalRelease` OK; APK release 2,3 MB con
+  `baseline.prof`. JDK: `JAVA_HOME=/opt/homebrew/opt/openjdk@17` (sin él,
+  `gradlew` falla con «Unable to locate a Java Runtime»).
+- Commits `036d500` (plan + anexo de reglas) y `3935d9e` (Sprint 5.0 + fixes).
 
 ## Pendiente (por prioridad)
+
 
 - [ ] Test `apps/bot/tests/integration.test.ts:51` falla: Dbus devuelve
       `tipo=0` (parada 2, L36 y L46, 18:40). Arreglo ya hecho en la rama
@@ -53,7 +40,9 @@ MVP Android nativo sin backend (ADR 009). Plan en
 - [ ] Idea de Iker (después del Sprint 5): opción «Sonido de alarma» para los
       avisos (canal aparte con audio de alarma, vibración fuerte y repetición
       hasta que se toque).
-- [ ] **Sprint 5** (prompt `docs/07-android-mvp/prompts/SPRINT-5.md`).
+- [ ] **Sprint 5.0 cierre de release** (fuera de esta auditoría): `REMOTE_CONFIG_URL` HTTPS, firma release, ficha Play (capturas ES/EU, privacidad) y prueba manual del APK release (R8) en móvil.
+- [ ] Sprint 5.0 P2 de la auditoría: `config.json` aún plano (campos de API fuera de `api`) y con `pollIntervalSec` heredado; sobrecargas `baseMs` redundantes en `pollDelayMs`/`nextPollDelayMs`; baseline profile escrito a mano (no Macrobenchmark); `app.filesDir` y tema en SharedPreferences leídos en Main Thread; AGENTS.md dice «94 tests» (son 122 por variante).
+- [ ] **Sprint 5.1** (`bus-donostia-engineering-plan/sprints/Sprint_5.1___…md`): quitar `StopCodePill` de AlertEdit, StopDetail, Lines y Stops.
 - [ ] Licencia y repo público: los decide Iker más adelante (repo privado hasta entonces).
 - [ ] Probar en móvil real el motor con Doze y fabricantes agresivos con la batería.
 - [ ] Revisar en móvil real Cercanas con ubicación aproximada (en Android 12+
@@ -72,6 +61,9 @@ MVP Android nativo sin backend (ADR 009). Plan en
       Comprobación: `python3 docs/07-android-mvp/wireframes/verificar.py`.
 
 ## Decisiones tomadas (no reabrir)
+
+- 2026-11-23 · Sprint 5.0: sondeo del motor en 4 escalones desde `config.json` (≤ 7 min → 30 s, 8–14 → 1 min, 15–30 → 4 min, ≥ 31 → 10 min; sin datos → base × 2). Sustituye a los 3 escalones del 2026-11-22. Ticker de UI a 30 s (`uiTickerSec`).
+- 2026-11-23 · Auditoría 5.0: se mantienen `freshness` 45/90 s y 4,8 km/h (comportamiento real) en vez de 30/300 y 5,0 de la plantilla v2.
 
 - 2026-11-22 · Iker: **licencia se decide más tarde; repo privado hasta que él
   decida.** Sin `LICENSE` ni `config.json` remoto publicado mientras tanto.
@@ -142,12 +134,19 @@ MVP Android nativo sin backend (ADR 009). Plan en
 - Rotación del token de Telegram (R6).
 - Validación conversacional del bot.
 - Visto bueno al nombre «Bus Donostia» y al applicationId antes de Play.
+- Firma release y hosting HTTPS del `config.json` remoto (Sprint 5.0 §4).
 
 ## Git
 
-`main` = `24b23ef` (Sprints 0–4 + docs al día + reglas). Rama abierta:
-`audit/arquitectura` (worktree `../bus-dbus-audit`, sesión paralela).
+`main` = ver `git log -1` (= `origin/main`). Ramas abiertas: ninguna de esta
+sesión. Worktree ajeno: `~/.local/share/kilo/worktree-pool/bus-dbus-494227611d30/ahead-child`
+(HEAD separado en `76aa4d5`, sin commits propios; no creado aquí).
 
 ## Siguiente sesión
 
-- Prompt: `docs/07-android-mvp/prompts/SPRINT-5.md`.
+- Leer primero: `AGENTS.md` (anexo), `apps/android/AGENTS.md`,
+  `bus-donostia-engineering-plan/sprints/Sprint_5.1___Quick_Wins_UX__Limpieza_de_Códigos_y_Animaciones_Pre-Release.md`.
+- Empezar por: Sprint 5.1 (retirar `StopCodePill`) o, si Iker lo prioriza, el
+  cierre de release Play del 5.0.
+- Reglas específicas: exportar `JAVA_HOME` y `ANDROID_HOME` como en
+  `apps/android/README.md` antes de `gradlew`.
