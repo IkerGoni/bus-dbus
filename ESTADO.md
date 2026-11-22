@@ -1,5 +1,5 @@
 # Estado — bus-dbus
-Actualizado: 2026-11-22 06:05 · Última sesión: mejoras y endurecimiento del bot Dbus
+Actualizado: 2026-11-22 06:13 · Última sesión: consolidación, docs y despliegue del bot
 
 ## Objetivo actual
 PWA de llegadas de Dbus (San Sebastián) + bot de Telegram con avisos.
@@ -30,7 +30,14 @@ en el Sprint 3 por errores preexistentes de TypeScript/lint.
   src/` y `build` del bot sin errores. README actualizado.
 - Migración previa: GTFS-RT/protobuf (`.pb` con 403 desde S3) → API JSON real
   de Dbus `SSIIMovilWSv2/ws/cons/tiemposParada` (HTTP, sin auth).
+- Consolidación: `validateLineAtStop` y `CATALOG_ERROR` unifican la validación
+  de línea y el error de catálogo en `handlers.ts`; `findRow<T>` agrupa los
+  finders de `db.ts`; `normalizeLine` se usa también en `/aviso` (acepta `L28`,
+  `028`). Sin cambios de comportamiento: 27/27 tests siguen en verde.
 - Eliminados `gtfs-client.ts`, `src/proto/` y la dependencia `protobufjs` del bot.
+- Bot reconstruido y arrancado con `BOT_TOKEN` del entorno: `node dist/index.js`
+  en PID 1054, sin conflictos 409, scheduler y refresco de 30 s activos.
+  `f1ed9a0` ya pusheado a `origin/main`.
 
 ## Pendiente (por prioridad)
 - [ ] PWA Shell (Sprint 3): 30 errores TS y 233 errores de lint en `src/`
@@ -56,9 +63,11 @@ en el Sprint 3 por errores preexistentes de TypeScript/lint.
 - Enviar `/start` a `@dbus_alarm_bot` para confirmar el round-trip real.
 
 ## Git
-Base: main 8ce2694 = origin/main · ramas abiertas: ninguna
-Los cambios de esta sesión están commiteados localmente, pendientes de push
-(y el bot hay que reiniciarlo con `BOT_TOKEN` del entorno).
+`8ce2694` → `f1ed9a0` (mejoras del bot, ya pusheado) → consolidación + docs
+de esta sesión (pusheado con este cambio). Ramas abiertas: ninguna.
+El token solo se pasa por entorno a `npm run start`; nunca en archivos ni en
+commits. Recomendación de seguridad: rotar el token porque se compartió en
+texto plano en el chat.
 
 ## Siguiente sesión
 - Leer primero: `ESTADO.md`, `README.md`, `bot/src/dbus-client.ts`,

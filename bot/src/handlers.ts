@@ -7,6 +7,7 @@ import {
   getNextArrival,
   getNextArrivals,
   getStopLines,
+  matchesLine,
   normalizeLine,
 } from './arrival.js';
 import { config } from './config.js';
@@ -143,6 +144,27 @@ async function safeEdit(
   }
 }
 
+const CATALOG_ERROR =
+  '⚠️ No se pudo cargar el catálogo de paradas de Dbus. Prueba `/parada <codigo>`.';
+
+/**
+ * Valida una línea contra los datos reales de la parada. Devuelve el mensaje
+ * de error ya formateado, o null si la línea pasa (o no hay datos para juzgar).
+ */
+async function validateLineAtStop(
+  stopId: string,
+  lineId: string
+): Promise<string | null> {
+  const lines = await getStopLines(stopId);
+  if (!lines.length || lines.some((line) => matchesLine(line, lineId))) {
+    return null;
+  }
+  return (
+    `❌ La línea **L${escapeMd(lineId)}** no pasa por la parada **${escapeMd(stopId)}** ahora mismo.\n` +
+    `Líneas con datos: ${lines.map((line) => `L${escapeMd(line.lineId)}`).join(', ')}`
+  );
+}
+
 function mainKeyboard() {
   return Markup.inlineKeyboard([
     [Markup.button.callback('🚌 Ver llegadas', 'menu_arrivals')],
@@ -243,16 +265,12 @@ async function showPopularStops(
 ): Promise<void> {
   const stops = await fetchPopularStops();
   if (!stops.length) {
-    await safeEdit(
-      ctx,
-      '⚠️ No se pudo cargar el catálogo de paradas de Dbus. Prueba `/parada <codigo>`.',
-      {
-        parse_mode: 'Markdown',
-        ...Markup.inlineKeyboard([
-          [Markup.button.callback('⬅️ Menú', 'menu_main')],
-        ]),
-      }
-    );
+    await safeEdit(ctx, CATALOG_ERROR, {
+      parse_mode: 'Markdown',
+      ...Markup.inlineKeyboard([
+        [Markup.button.callback('⬅️ Menú', 'menu_main')],
+      ]),
+    });
     return;
   }
   const suffix = mode === 'alert' ? 'alert' : 'arrivals';
@@ -467,18 +485,9 @@ export async function handleParada(ctx: Context): Promise<void> {
   const times = await fetchStopTimes(stopId);
   const requestedLine = args[2] ? normalizeLine(args[2]) : undefined;
   if (requestedLine) {
-    const lines = await getStopLines(stopId);
-    const known = lines.some(
-      (line) =>
-        normalizeLine(line.lineId) === requestedLine ||
-        normalizeLine(line.internalLineId) === requestedLine
-    );
-    if (lines.length && !known) {
-      await ctx.reply(
-        `❌ La línea **L${escapeMd(requestedLine)}** no pasa por la parada **${escapeMd(stopId)}** ahora mismo.\n` +
-          `Líneas con datos: ${lines.map((l) => `L${escapeMd(l.lineId)}`).join(', ')}`,
-        { parse_mode: 'Markdown' }
-      );
+    const error = await validateLineAtStop(stopId, requestedLine);
+    if (error) {
+      await ctx.reply(error, { parse_mode: 'Markdown' });
       return;
     }
   }
@@ -513,10 +522,7 @@ export async function handleLineas(ctx: Context): Promise<void> {
 export async function handlePopulares(ctx: Context): Promise<void> {
   const stops = await fetchPopularStops();
   if (!stops.length) {
-    await ctx.reply(
-      '⚠️ No se pudo cargar el catálogo de paradas de Dbus. Prueba `/parada <codigo>`.',
-      { parse_mode: 'Markdown' }
-    );
+    await ctx.reply(CATALOG_ERROR, { parse_mode: 'Markdown' });
     return;
   }
   const msg = `📍 **Paradas populares** (código entre paréntesis):\n\n${stops
@@ -529,7 +535,7 @@ export async function handlePopulares(ctx: Context): Promise<void> {
 export async function handleAviso(ctx: Context): Promise<void> {
   const args = textOf(ctx).split(/\s+/);
   const stopId = args[1];
-  const lineId = (args[2] || '').toUpperCase().replace(/^L/, '');
+  const lineId = normalizeLine(args[2] || '');
   const minutesAhead = Number.parseInt(args[3] ?? '', 10);
 
   if (!stopId || !/^\d+$/.test(stopId) || !/^\d+$/.test(lineId)) {
@@ -545,20 +551,9 @@ export async function handleAviso(ctx: Context): Promise<void> {
   }
   // Aceptar tanto el código público (28) como el id interno (32), pero no
   // crear avisos para líneas que no pasan por la parada.
-  const lines = await getStopLines(stopId);
-  if (
-    lines.length &&
-    !lines.some(
-      (line) =>
-        normalizeLine(line.lineId) === lineId ||
-        normalizeLine(line.internalLineId) === lineId
-    )
-  ) {
-    await ctx.reply(
-      `❌ La línea **L${escapeMd(lineId)}** no pasa por la parada **${escapeMd(stopId)}**.\n` +
-        `Líneas con datos: ${lines.map((l) => `L${escapeMd(l.lineId)}`).join(', ')}`,
-      { parse_mode: 'Markdown' }
-    );
+  const error = await validateLineAtStop(stopId, lineId);
+  if (error) {
+    await ctx.reply(error, { parse_mode: 'Markdown' });
     return;
   }
   await createAndConfirmAlert(ctx, stopId, lineId, minutesAhead, false);

@@ -73,6 +73,12 @@ interface FavoriteRow {
   created_at: number;
 }
 
+/** Consulta de una sola fila con parámetros, compartida por los finders. */
+function findRow<T>(sql: string, ...params: unknown[]): T | null {
+  const row = db.prepare(sql).get(...params);
+  return row ? (row as T) : null;
+}
+
 function rowToAlert(row: AlertRow): UserAlert {
   return {
     id: row.id,
@@ -124,11 +130,13 @@ export function findActiveAlert(
   stopId: string,
   lineId: string
 ): UserAlert | null {
-  const stmt = db.prepare(
-    'SELECT * FROM user_alerts WHERE chat_id = ? AND stop_id = ? AND line_id = ? AND active = 1 LIMIT 1'
+  const row = findRow<AlertRow>(
+    'SELECT * FROM user_alerts WHERE chat_id = ? AND stop_id = ? AND line_id = ? AND active = 1 LIMIT 1',
+    chatId,
+    stopId,
+    lineId
   );
-  const row = stmt.get(chatId, stopId, lineId);
-  return row ? rowToAlert(row as AlertRow) : null;
+  return row ? rowToAlert(row) : null;
 }
 
 export function getActiveAlerts(): UserAlert[] {
@@ -235,11 +243,13 @@ export function findFavorite(
   stopId: string,
   lineId: string
 ): UserFavorite | null {
-  const stmt = db.prepare(
-    'SELECT * FROM user_favorites WHERE chat_id = ? AND stop_id = ? AND line_id = ? LIMIT 1'
+  const row = findRow<FavoriteRow>(
+    'SELECT * FROM user_favorites WHERE chat_id = ? AND stop_id = ? AND line_id = ? LIMIT 1',
+    chatId,
+    stopId,
+    lineId
   );
-  const row = stmt.get(chatId, stopId, lineId);
-  return row ? rowToFavorite(row as FavoriteRow) : null;
+  return row ? rowToFavorite(row) : null;
 }
 
 export function removeFavorite(id: number): boolean {
