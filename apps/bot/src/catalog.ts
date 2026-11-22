@@ -154,9 +154,11 @@ export function toPublicLineId(lineId: string, stopId?: string): string {
   const key = normalizeLine(lineId);
   if (stopId) {
     const atStop = getCatalogLinesForStop(stopId);
+    // El código público manda (regla 5): en paradas con 26 (id 28) y 28,
+    // escribir "28" es la línea 28, no el alias interno de la 26.
+    if (atStop.some((line) => line.lineId === key)) return key;
     const byInternal = atStop.find((line) => line.internalLineId === key);
     if (byInternal) return byInternal.lineId;
-    if (atStop.some((line) => line.lineId === key)) return key;
   }
   return getLineByCode(key)?.cod ?? key;
 }

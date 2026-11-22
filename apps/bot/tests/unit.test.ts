@@ -324,6 +324,9 @@ describe('índice de descubrimiento sin service en vivo', () => {
   it('resuelve el id interno en el contexto de la parada, sin contexto gana la pública', () => {
     expect(toPublicLineId('32', '2')).toBe('28');
     expect(toPublicLineId('32')).toBe('32');
+    // La parada 5 tiene las públicas 26 (id 28) y 28: el código público gana.
+    expect(toPublicLineId('28', '5')).toBe('28');
+    expect(toPublicLineId('26', '5')).toBe('26');
     expect(toPublicLineId('L028', '2')).toBe('28');
   });
 

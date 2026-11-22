@@ -194,6 +194,14 @@ const catalog = {
   ),
 };
 
+// Una API degradada que devuelve "NO ITINERARIOS" para todo no debe
+// sobrescribir un índice bueno con un catálogo vacío.
+if (lines.length === 0 || stopsByCod.size === 0) {
+  throw new Error(
+    '[catalog] sin líneas o paradas en la respuesta; se conserva el índice anterior'
+  );
+}
+
 await fs.mkdir(path.dirname(outFile), { recursive: true });
 await fs.writeFile(outFile, `${JSON.stringify(catalog, null, 2)}\n`);
 console.log(

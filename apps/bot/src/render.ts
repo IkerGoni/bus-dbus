@@ -673,9 +673,12 @@ export async function saveFavorite(
   stopId: string,
   rawLineId = ''
 ): Promise<boolean> {
-  const lineId = toPublicLineId(rawLineId, stopId);
+  const requestedLine = toPublicLineId(rawLineId, stopId);
+  const arrival = requestedLine
+    ? await getNextArrival(stopId, requestedLine)
+    : null;
+  const lineId = arrival ? normalizeLine(arrival.lineId) : requestedLine;
   if (findFavorite(chatId, stopId, lineId)) return false;
-  const arrival = lineId ? await getNextArrival(stopId, lineId) : null;
   addFavorite({
     chatId,
     stopId,
@@ -712,10 +715,12 @@ export async function createAndConfirmAlert(
   if (!chatId) return 'no-chat';
 
   const arrival = await getNextArrival(stopId, lineId);
-  // El usuario puede escribir el id interno (32); guardamos siempre el
-  // código público (28) para que avisos y mensajes sean coherentes. Sin datos
-  // en vivo, el índice resuelve el alias en el contexto de esta parada.
-  const publicLineId = toPublicLineId(arrival?.lineId || lineId, stopId);
+  // Con llegada real, su `lineId` YA es el código público: no se re-resuelve
+  // contra el índice (en paradas con 26 y 28, un "28" se convertía en 26).
+  // Sin datos en vivo, el índice resuelve el alias en contexto de parada.
+  const publicLineId = arrival
+    ? normalizeLine(arrival.lineId)
+    : toPublicLineId(lineId, stopId);
   const stopName = displayStopName(stopId);
   const existing = findActiveAlert(chatId, stopId, publicLineId);
   if (existing) {

@@ -114,8 +114,9 @@ export function formatArrivalsList(
 ): string {
   const code = arrivals[0]?.stopId ?? stopId ?? '';
   const header = `🚏 **${escapeMd(stopName)}**${code ? ` (${code})` : ''}`;
-  const notice = avisos?.length
-    ? `\n\n📢 ${avisos
+  const realAvisos = Array.isArray(avisos) ? avisos : [];
+  const notice = realAvisos.length
+    ? `\n\n📢 ${realAvisos
         .map((aviso) => escapeMd(aviso.trim()))
         .filter(Boolean)
         .join('\n📢 ')}`

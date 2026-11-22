@@ -8,6 +8,12 @@
 # En macOS hay además una plantilla launchd (com.dbus.catalog-weekly.plist).
 set -eu
 
+# cron no hereda el PATH interactivo: pnpm/node suelen estar fuera de
+# /usr/bin:/bin. Añadir rutas habituales en macOS y Linux (RS).
+PATH="${PATH:-}:/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+export PATH
+command -v pnpm >/dev/null 2>&1 || { echo "pnpm no encontrado en PATH" >&2; exit 1; }
+
 ROOT=$(cd "$(dirname "$0")/../../.." && pwd)
 CATALOG=apps/bot/data/dbus-catalog.json
 LOG=${TMPDIR:-/tmp}/dbus-catalog-refresh.log
