@@ -67,9 +67,9 @@ MVP Android nativo sin backend (ADR 009). Plan en
       gitignored).
 - [ ] El `ci.yml` usa `npm ci` en un monorepo pnpm: revisar si pasa.
 - [ ] Catálogo duplicado: `packages/contracts/data/` vs `apps/bot/data/`.
-- [ ] Wireframes `.excalidraw` y `stitch-references/` de `docs/07-android-mvp/`
-      aún muestran recurrentes y «Posponer»: rehacerlos con el prompt
-      `docs/07-android-mvp/prompts/WIREFRAMES.md`.
+- [x] Wireframes `.excalidraw` y `stitch-references/inicio/` al día con los
+      avisos de un solo uso (2026-11-22, rama `docs/wireframes-android`).
+      Comprobación: `python3 docs/07-android-mvp/wireframes/verificar.py`.
 
 ## Decisiones tomadas (no reabrir)
 
