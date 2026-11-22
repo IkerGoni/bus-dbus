@@ -135,8 +135,8 @@ R6 (token en claro en `.env`, gitignored) sigue pendiente de rotación.
 
 ## Git
 
-`main = origin/main = 484f42b` ✓ · rama local: solo `main` · worktrees: 1 (raíz) ·
-stash: vacío · **árbol limpio**:
+`main = origin/main` ✓ sin drift (hash actual: `git log -1`) · rama local: solo
+`main` · worktrees: 1 (raíz) · stash: vacío · **árbol limpio**:
 remediación de auditoría commiteada y pusheada (24 ficheros modificados + 5
 nuevos, incluye 2 docs). El commit externo `fbcb70e` añadió
 `docs/06-api-externa/**` y no solapó estos cambios. El bot en
