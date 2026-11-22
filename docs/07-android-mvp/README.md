@@ -13,6 +13,7 @@
 > `stitch-references/` y `prompts/STITCH-REMAINING-SCREENS-PROMPTS.md` aún
 > muestran avisos recurrentes y los botones «Posponer 5'» / «Descartar». Son
 > diseño anterior: manda [`docs/03-android-screens.md`](docs/03-android-screens.md).
+> Para corregirlos: [`prompts/WIREFRAMES.md`](prompts/WIREFRAMES.md).
 
 Paquete definitivo y unificado para que los agentes de desarrollo implementen la
 aplicación Android **Dbus Donostia (MVP v1)**, cerrando todas las brechas
@@ -69,6 +70,7 @@ docs/07-android-mvp/
     ├── PROMPT-IMPLEMENTACION.md                # Histórico: prompt general previo a los sprints
     ├── SPRINT-1.md … SPRINT-4.md               # Histórico: prompts ejecutados
     ├── SPRINT-5.md                             # Pendiente: publicación
+    ├── WIREFRAMES.md                           # Pendiente: rehacer wireframes y stitch-references
     └── STITCH-REMAINING-SCREENS-PROMPTS.md     # Histórico: prompts de diseño para Stitch AI
 ```
 
