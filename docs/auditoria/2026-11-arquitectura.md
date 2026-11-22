@@ -1,6 +1,6 @@
 # Auditoría de arquitectura · bus-dbus · 2026-11-22
 
-Rama `audit/arquitectura` (worktree `../bus-dbus-audit`), base `main` @ `b8e08f8`.
+Rama `audit/arquitectura` (worktree `../bus-dbus-audit`), empezada sobre `main` @ `b8e08f8` y rebasada sobre `0988113` (docs de la otra sesión; sin cambios de código).
 Alcance: `apps/bot/**`, `apps/android/**`, `packages/**`. Fuera: `apps/mobile/**`
 (congelada, ADR 009). Mandan `AGENTS.md` y las decisiones «no reabrir» de `ESTADO.md`.
 
@@ -12,12 +12,12 @@ Alcance: `apps/bot/**`, `apps/android/**`, `packages/**`. Fuera: `apps/mobile/**
 - El sondeo adaptativo de Android sí conviene en el bot, aplicado al refresco y no al cron (P2): 0 peticiones sin avisos ni usuarios y avisos ~30 s antes en vez de hasta ~90 s tarde.
 - Android: el motor dependía de `ui/` (arreglado); `AppContainer` mezcla cableado y política; 0 logs y `catch` mudos en el motor (P3).
 - Secretos: `BOT_TOKEN` solo por entorno y Telegraf lo redacta (probado). Pendiente: rotarlo (R6), `chmod 600 .env`, firma de release con Play App Signing y lista de hosts para la config remota.
-- 3 commits sin cambio de comportamiento; las dos verificaciones en verde (bot 86/86, Android 95 por variante, lint 0 errores). No hace falta reiniciar el bot.
+- 4 commits sin cambio de comportamiento; las dos verificaciones en verde (bot 86/86, Android 95 por variante, lint 0 errores). No hace falta reiniciar el bot.
 - Sin medir: arranque en frío, recomposiciones y APK release (8 GB de RAM; comandos en la sección de rendimiento).
 
 ## Cifras de partida y finales
 
-| Verificación | Partida (`b8e08f8`) | Final (`7d3d556`) |
+| Verificación | Partida (`b8e08f8`) | Final (rama rebasada) |
 |---|---|---|
 | `pnpm --filter @dbus/bot verify` | **rojo**: 85/86 tests (falla `integration.test.ts:51`, `tipo=0`), `tsc` y biome limpios | **verde**: 86/86, `tsc` y biome limpios |
 | `@dbus/core` tests | 14/14 | 15/15 (+1 paridad `tipo=0`) |
@@ -25,7 +25,7 @@ Alcance: `apps/bot/**`, `apps/android/**`, `packages/**`. Fuera: `apps/mobile/**
 | Android `./gradlew check assembleDebug` | verde · 94 tests por variante · lint 0 errores, 29 avisos | verde · 95 tests por variante · lint 0 errores, 29 avisos (mismos ids) |
 | Avisos de lint por id | `GradleDependency` 11 · `NewerVersionAvailable` 9 · `UnusedAttribute` 2 · `Typos` 2 · `AndroidGradlePluginVersion` 2 · `ObsoleteSdkInt` 1 · `InlinedApi` 1 · `DataExtractionRules` 1 | idénticos |
 | APK debug | 21 074 357 B | 21 145 119 B (+70 762 B; los `.dex` sin comprimir solo +48 B; el resto viene del empaquetado, no investigado) |
-| Tiempo de `check assembleDebug` | 38 min 38 s (en frío, con la otra sesión compilando y ~8 GB de swap) | 1 min 13 s (incremental; el daemon de Kotlin se quedó sin heap y Gradle recompiló fuera de él) |
+| Tiempo de `check assembleDebug` | 38 min 38 s (en frío, con la otra sesión compilando y ~8 GB de swap) | 1 min 13 s (incremental; el daemon de Kotlin se quedó sin heap y Gradle recompiló fuera de él). Tras rebasar sobre `0988113`: 4 s, todo `up-to-date` (main solo cambió docs) |
 
 ## Inventario (fase 1)
 
@@ -58,7 +58,7 @@ Riesgo = riesgo de aplicar el arreglo. Estado: **arreglado** en esta rama, o
 | H4 | media | capas · android | El motor (`engine/`) importa de `ui.alerts` (`feedView`, `fetchStops`): la capa de servicio depende de la de UI. | `engine/AlertMonitorService.kt:21-22` | S | bajo | **arreglado** (C3) |
 | H5 | media | robustez · android | Ninguna llamada a `Log` en toda la app (grep: 0). Los `catch` son mudos; el del motor captura `Exception`, devuelve `CONTINUE` y **no cuenta como problema**: un fallo persistente de Room nunca llega a `NO_SERVICE_STOP_MS` y el servicio queda vivo sondeando cada 30 s sin hacer nada útil. | `engine/AlertMonitorService.kt:128-131`; `data/api/DbusClient.kt:40`; `data/config/ConfigRepository.kt:51`, `:69` | S | bajo | propuesta P3 |
 | H6 | media | duplicación TS/Kotlin | ADR 009 §4 promete paridad por fixtures de `computeAlertStatus`, `computeFreshness`, `remainingMinutes` y `haversineMeters`, pero **no existen en `@dbus/core`** (el bot hace la caducidad y el matching a su manera). Los tests de core leían 1 fixture; los de Android, 6. La paridad real cubre solo el parseo de `tiemposParada`. | `grep computeFreshness\|computeAlertStatus packages/core/src` vacío; `packages/core/tests/core.test.ts:2`; `apps/android/.../StopFeedParserTest.kt` | M | bajo | parcial (C2) + propuesta P4 |
-| H7 | media | robustez · android | Timeouts HTTP: `connect` 10 s y `call` 15 s; la spec dice 8 s. Con el motor en segundo plano, una parada colgada retrasa toda la vuelta hasta 15 s. | `BusDonostiaApp.kt:45-46`; `docs/07-android-mvp/docs/04-android-platform.md` §0 | S | bajo | propuesta P5 |
+| H7 | media | robustez · android | Timeouts HTTP: `connect` 10 s y `call` 15 s (la spec decía 8 s; la sesión de docs ya la alineó con el código). Con el motor en segundo plano, una parada colgada retrasa toda la vuelta hasta 15 s. | `BusDonostiaApp.kt:45-46`; `docs/07-android-mvp/docs/04-android-platform.md` §0 | S | bajo | propuesta P5 |
 | H8 | media | publicación · android | `release` sin `signingConfig` ni `isShrinkResources`. No bloquea el MVP, sí el Sprint 5. | `apps/android/app/build.gradle.kts:81-84` | S | bajo | propuesta P6 |
 | H9 | media | responsabilidad única · android | `AppContainer` es composition root **y** política: `fetchStop` registra feeds, hora de última consulta y colores; su `init` observa `alerts` y arranca el servicio. | `BusDonostiaApp.kt:96-118` | M | medio | propuesta P7 |
 | H10 | baja | rendimiento · android | El `Ticker` de 1 s hace que el estado de A01, A04 y A05 se emita cada segundo y se recompongan las filas; `items(rows)` sin `key`. No medido en dispositivo (ver «Cifras»). | `domain/Ticker.kt:22-24`; `ui/stopdetail/StopDetailScreen.kt:301` | S | bajo | propuesta P8 |
@@ -165,9 +165,9 @@ verificación antes y después.
 
 | Commit | Qué | Hallazgo | Antes | Después |
 |---|---|---|---|---|
-| C1 `014471b` | `test(bot)`: el test de integración acepta `tipo` 0, 1 y 2. Solo cambia el test: el código ya trataba `tipo≠1` como horario. | H2 | `integration.test.ts`: 14/15 · bot 85/86 (rojo) | 15/15 · bot 86/86 (verde) |
-| C2 `266c2f3` | `test(contracts)`: fixture real `tiemposParada-2-datos-tipo0.json` (capturado con `curl`, sin editar) y dos tests de paridad que fijan el comportamiento: `packages/core/tests/tipo0.test.ts` y `StopFeedParserTest.tipo0EsHorario`. Aditivo en `packages/**`. | H2, H6 | core 14 · Android 94 por variante | core 15 · Android 95 por variante (en verde a la primera: documentan lo que ya pasaba) |
-| C3 `7d3d556` | `refactor(android)`: `feedView` pasa a `data/live/LiveFeeds.kt` y `fetchStops` a miembro de `AppContainer`. El motor ya no importa nada de `ui/` (`grep "import eus.busdonostia.app.ui" engine/` vacío). Solo se mueven funciones. | H4 | 2 imports `engine → ui` · 95 tests · lint 0/29 | 0 imports · 95 tests · lint 0/29 |
+| C1 `1f66920` + `197fb97` | `test(bot)`: el test de integración deja de exigir `tipo ∈ {1, 2}`; tras la regla nueva de `AGENTS.md` (ningún test asume un conjunto cerrado de `tipo`) solo exige un entero. Solo cambia el test: el código ya trataba `tipo≠1` como horario. | H2 | `integration.test.ts`: 14/15 · bot 85/86 (rojo) | 15/15 · bot 86/86 (verde) |
+| C2 `6d6d6a4` | `test(contracts)`: fixture real `tiemposParada-2-datos-tipo0.json` (capturado con `curl`, sin editar) y dos tests de paridad que fijan el comportamiento: `packages/core/tests/tipo0.test.ts` y `StopFeedParserTest.tipo0EsHorario`. Aditivo en `packages/**`. | H2, H6 | core 14 · Android 94 por variante | core 15 · Android 95 por variante (en verde a la primera: documentan lo que ya pasaba) |
+| C3 `58eb48d` | `refactor(android)`: `feedView` pasa a `data/live/LiveFeeds.kt` y `fetchStops` a miembro de `AppContainer`. El motor ya no importa nada de `ui/` (`grep "import eus.busdonostia.app.ui" engine/` vacío). Solo se mueven funciones. | H4 | 2 imports `engine → ui` · 95 tests · lint 0/29 | 0 imports · 95 tests · lint 0/29 |
 
 Ninguno toca `apps/bot/src`: **el bot de producción no necesita reinicio por
 esta rama.** Si más adelante se aplica P1/P2, entonces sí (regla 9): commit +
@@ -184,7 +184,7 @@ tiene el PID nuevo.
 | P2 | Sondeo adaptativo del bot (ver sección anterior): `pollDelayMs`/`nextPollDelayMs` nuevos en `@dbus/core`, evaluar avisos tras refrescar su parada y `NOTIFY_EARLY_MS = 30 s`. | H3, H6 | M | medio | Iker |
 | P3 | Android: `Log.w` con tag en los `catch` del motor, `DbusClient` y `ConfigRepository`; en el motor, contar un fallo inesperado como «problema» para que actúe `NO_SERVICE_STOP_MS`. Notificar **antes** de borrar el aviso, o no borrarlo si `areNotificationsEnabled()` es `false`. | H5, H20 | S | bajo | lane android |
 | P4 | Paridad real: que `packages/core/tests` lean los 7 fixtures, y un fixture JSON de casos de dominio (`remainingMinutes`, frescura, matching con destino y preferencia GPS, haversine) que ejecuten vitest y JUnit. Si el bot no usa `computeFreshness`, documentar que esa paridad no aplica. | H6 | M | bajo | lanes bot + android |
-| P5 | Alinear timeouts: `callTimeout(8 s)` en `AppContainer.http` o cambiar la spec a 15 s. Recomendado 8 s: con el motor en segundo plano, un timeout largo retrasa todas las paradas de la vuelta. | H7 | S | bajo | Iker / lane android |
+| P5 | Bajar `callTimeout` a 8 s en `AppContainer.http` (y la spec con él): con el motor en segundo plano, un timeout largo retrasa todas las paradas de la vuelta. Dbus responde en 258 ms como máximo en la muestra. | H7 | S | bajo | Iker / lane android |
 | P6 | Firma de release (Sprint 5), sin keystore en el repo: `signingConfigs.release` que lea `storeFile`, `storePassword`, `keyAlias` y `keyPassword` de `~/.gradle/gradle.properties` o de variables de entorno, con fallo explícito si faltan al ensamblar `release`. Keystore fuera del repo (ya ignorado: `*.jks`, `*.keystore`) y con copia cifrada; activar **Play App Signing** (Google guarda la clave de firma, nosotros solo la de subida). Añadir `isShrinkResources = true` y medir el APK release antes/después. | H8 | S | bajo | Iker (crea y custodia la clave) |
 | P7 | Sacar de `AppContainer` un `LiveRepository` (`fetchStop`, `fetchStops`, `liveFeeds`, registro de hora y colores) y un `MonitoringStarter` (el observador de `alerts`). `AppContainer` queda como cableado. | H9 | M | medio | lane android |
 | P8 | Recomposición y lógica en UI: `items(rows, key = …)` con clave única (línea + destino + `minutesAtFetch` + índice), derivar el estado de A05 con `nowMs` redondeado al minuto que cambia, y mover a funciones puras de `domain/` (con test) `nextAlertSourceText`, `feedHint`, la dedup de destinos y el filtrado. Deduplicar en `fetchStop` las peticiones en vuelo por parada (como `client.ts:147`). Medir antes con Layout Inspector o un Macrobenchmark en un equipo con memoria suficiente. | H10, H11, H16 | M | bajo | lane android |
@@ -195,16 +195,18 @@ tiene el PID nuevo.
 
 ## Cambios de documentación propuestos
 
-No se tocan aquí (reparto con la sesión de documentación). Para quien lleve los docs:
+No se tocan aquí (reparto con la sesión de documentación). Revisado contra
+`main` @ `0988113`: la otra sesión ya corrigió el PID del bot en `ESTADO.md`,
+la regla de `tipo` en `AGENTS.md` y los timeouts en `04-android-platform.md` §0.
+Queda:
 
 | Documento | Cambio |
 |---|---|
-| `ESTADO.md` | El bot de producción ya no es el PID `80402`: hoy corre el `4713` (arrancado el 2026-11-22 13:35, cwd `apps/bot`, log en `$TMPDIR/dbus-bot.log`). |
-| `ESTADO.md` | Añadir a pendientes: reinicio del bot tras integrar esta rama (solo si se aplica P1/P2; los commits de esta rama no cambian `apps/bot/src`). Añadir P1, P2 y P10 como decisiones para Iker. |
-| `AGENTS.md` § Reglas del bot | Regla 7: «preferencia GPS (`tipo=1`)»; añadir que `tipo` 0 y 2 son sin GPS (Dbus da `0` desde el 2026-11-22). |
-| `docs/07-android-mvp/docs/02-domain-contracts.md` §1 | `ArrivalSource`: `tipo=1 GPS · cualquier otro (0, 2) horario`. |
+| `AGENTS.md` § Verificación | «94 tests JVM por variante» → 95 (C2 añade `tipo0EsHorario`). |
+| `docs/README.md` | Añadir al índice `docs/auditoria/2026-11-arquitectura.md` (regla nueva de `AGENTS.md` § Documentación). |
 | `packages/contracts/fixtures/README.md` | Nueva fila: `tiemposParada-2-datos-tipo0.json` · 2 Urbieta 12 · `DATOS` · 5 tiempos mezclando `tipo=0` y `tipo=1` · 2026-11-22 18:37. |
-| `docs/07-android-mvp/docs/04-android-platform.md` §0 | Timeout: dice 8 s y el código usa 10 s de conexión y 15 s de llamada (H7). Corregir el que pierda en P5. |
-| `docs/03-architecture/adrs/009-android-nativo-mvp.md` §4 | La lista de lógica «duplicada a propósito» incluye `computeAlertStatus` y `computeFreshness`, que no existen en `@dbus/core`. Precisar que la paridad probada hoy es la del parseo de `tiemposParada` (H6). |
-| `docs/07-android-mvp/docs/02-domain-contracts.md` §4 | «el fixture de paridad la cubre» (haversine): no hay fixture compartido; cada lado tiene su test. |
-| `docs/07-android-mvp/SPRINTS.md` / prompt Sprint 5 | Incluir P6 (firma con Play App Signing, credenciales fuera del repo) y P10 (lista de hosts de la config remota). La auditoría de secretos del historial ya está hecha (H13): 0 hallazgos. |
+| `docs/07-android-mvp/docs/02-domain-contracts.md` §1 (línea 37) | `ArrivalSource`: `tipo=1 GPS · cualquier otro (0, 2) horario`, como ya dice `AGENTS.md`. |
+| `docs/03-architecture/adrs/009-android-nativo-mvp.md` §4 (líneas 33-34) | La lista de lógica «duplicada a propósito» incluye `computeAlertStatus` y `computeFreshness`, que no existen en `@dbus/core`. Precisar que la paridad probada hoy es la del parseo de `tiemposParada` (H6). Si el ADR se considera inmutable, anotarlo en `ESTADO.md`. |
+| `docs/07-android-mvp/docs/02-domain-contracts.md` §4 (línea 164) | «el fixture de paridad la cubre» (haversine): no hay fixture compartido; cada lado tiene su test. |
+| `ESTADO.md` | Pendientes nuevos para Iker: P1 (refresco del bot), P2 (sondeo adaptativo en el bot) y P10 (`chmod 600 .env`, `chat_id` en logs). Esta rama no cambia `apps/bot/src`: no exige reinicio. |
+| `docs/07-android-mvp/prompts/SPRINT-5.md` | No se reescribe si ya se ejecutó; si sigue pendiente, añadir P6 (firma con Play App Signing, credenciales fuera del repo) y P10 (lista de hosts de la config remota). La auditoría de secretos del historial ya está hecha (H13): 0 hallazgos. |
