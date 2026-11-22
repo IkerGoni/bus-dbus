@@ -2,6 +2,10 @@
 # Regeneración semanal del índice de descubrimiento.
 # No toca BOT_TOKEN ni reinicia el bot: los cambios del catálogo los lee el
 # proceso en su próximo arranque (regla 9 de AGENTS.md).
+#
+# Instalación en RS (Linux, cron del usuario; NO instalado en este Mac):
+#   0 3 * * 0 /bin/sh /ruta/a/bus-dbus/apps/bot/scripts/refresh-catalog-weekly.sh
+# En macOS hay además una plantilla launchd (com.dbus.catalog-weekly.plist).
 set -eu
 
 ROOT=$(cd "$(dirname "$0")/../../.." && pwd)
