@@ -1,6 +1,6 @@
 # Brechas entre diseño y código — bus-dbus
 
-Diferencias detectadas entre los wireframes de `docs/02-wireframes/`, el
+Diferencias detectadas entre los wireframes de `docs/05-ui/wireframes/`, el
 comportamiento descrito en `AGENTS.md` / `ESTADO.md` y el código actual de
 `apps/bot/` y `apps/mobile/`.
 

@@ -8,7 +8,8 @@ Aplicación PWA móvil para notificaciones push de llegada de autobús Dbus (San
 
 | Área | Estado | Evidencia |
 |------|--------|-----------|
-| **Planning (Sprints 0-2)** | ✅ Completo | 3 docs en `docs/04-planning/`, 12 wireframes en `docs/02-wireframes/`, 8 ADRs en `docs/03-architecture/adrs/` |
+| **Planning (Sprints 0-2)** | ✅ Completo | 3 docs en `docs/04-planning/`, 12 wireframes en `docs/05-ui/wireframes/`, 8 ADRs en `docs/03-architecture/adrs/` |
+| **UI / diseño** | ✅ Documentado | 4 docs + 12 wireframes en `docs/05-ui/` (exportable para diseño por encargo) |
 | **PWA Shell (Sprint 3)** | 🔧 Bloqueado | Errores TS/lint preexistentes en `apps/mobile/src/` |
 | **Bot: datos reales** | ✅ Activo | API JSON de Dbus (`tiemposParada`), sin mocks en producción |
 | **Tests del bot** | ✅ 62/62 pasan | `pnpm --filter @dbus/bot test` (26 unit + 15 integración + 21 E2E) |
@@ -53,9 +54,10 @@ Aplicación PWA móvil para notificaciones push de llegada de autobús Dbus (San
 │   ├── core/               # @dbus/core — dominio isomórfico compartido
 │   └── contracts/          # @dbus/contracts — spec, fixtures y catálogo
 ├── docs/
-│   ├── 02-wireframes/      # Wireframes Excalidraw
 │   ├── 03-architecture/    # 8 ADRs
 │   ├── 04-planning/        # alcance, hitos, métricas, stack
+│   ├── 05-ui/              # UI exportable: inventario, bot, PWA, brechas
+│   │   └── wireframes/     # 12 wireframes Excalidraw (flujos, móvil, componentes)
 │   └── plan/               # repo-split.md, ui-audit.md
 ├── state/kanban/           # Kanban histórico
 ├── .github/                # CI/CD workflows (pendiente)

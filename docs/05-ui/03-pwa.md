@@ -40,7 +40,7 @@ tácticos son de 48×48 px.
 | `/offline` | `pages/Offline.tsx` | S07 · Sin conexión (ruta) |
 | *(overlay global)* | `pages/Offline.tsx` | S07 · Sin conexión (bloqueo) |
 
-Wireframe asociado: `docs/02-wireframes/02-mobile-web/01-home.excalidraw` …
+Wireframe asociado: `docs/05-ui/wireframes/02-mobile-web/01-home.excalidraw` …
 `09-offline-empty.excalidraw`.
 
 ## 3. Detalle por pantalla
@@ -214,7 +214,7 @@ memoria. Wireframes: `09-offline-empty.excalidraw`, `01-home.excalidraw`.
 <a id="5-pantallas-solo-diseñadas"></a>
 ## 5. Pantallas solo diseñadas
 
-Existen en `docs/02-wireframes/` pero **no** en el código de `apps/mobile/`:
+Existen en `docs/05-ui/wireframes/` pero **no** en el código de `apps/mobile/`:
 
 ### 5.1 Onboarding y permisos
 

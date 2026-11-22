@@ -1,6 +1,6 @@
 # UI / wireframe audit + improvement spec (mobile)
 
-Scope: `src/` (3,378 LOC) + `02-wireframes/` (12 frames, 12.9k doc lines).
+Scope: `src/` (3,378 LOC) + `05-ui/wireframes/` (12 frames, 12.9k doc lines).
 Verdict: **not commercial level.** High-fidelity prototype quality — plausible in a
 screenshot, fails on build, data honesty, interaction truth, contrast, i18n and states.
 

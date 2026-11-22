@@ -2,8 +2,9 @@
 
 Fuente de verdad del proyecto. Si este archivo contradice a un doc antiguo,
 manda aquí. `README.md` = visión y uso; `ESTADO.md` = estado de sesión;
-`docs/` = wireframes, ADRs y planning; `docs/plan/repo-split.md` = plan de
-separación en workspaces (trabajo en curso).
+`docs/05-ui/` = inventario de UI + wireframes (exportable para diseño);
+`docs/03-architecture/` = ADRs; `docs/04-planning/` y `docs/plan/` = planning;
+`docs/plan/repo-split.md` = plan de separación en workspaces (trabajo en curso).
 
 ## Qué hay hoy
 

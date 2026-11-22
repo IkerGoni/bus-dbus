@@ -24,7 +24,7 @@ Fuentes primarias:
 - `apps/bot/src/handlers.ts`, `apps/bot/src/alerts.ts`, `apps/bot/src/arrival.ts`
 - `apps/mobile/src/App.tsx`, `apps/mobile/src/pages/`, `apps/mobile/src/components/`
 - `apps/mobile/src/i18n/locales/es.json`, `eu.json`
-- `docs/02-wireframes/` (9 wireframes de móvil, 2 flujos, 1 librería de componentes)
+- `docs/05-ui/wireframes/` (9 wireframes de móvil, 2 flujos, 1 librería de componentes)
 
 ## 2. Documentos del inventario
 
@@ -126,7 +126,7 @@ No existe `BottomNav`, aunque `App.tsx` reserva `pb-20` para una barra inferior.
 ## 6. Design tokens y accesibilidad
 
 Tokens declarados en el wireframe
-[`components/component-library.excalidraw`](../02-wireframes/components/component-library.excalidraw):
+[`wireframes/components/component-library.excalidraw`](wireframes/components/component-library.excalidraw):
 
 | Grupo | Tokens |
 |---|---|
