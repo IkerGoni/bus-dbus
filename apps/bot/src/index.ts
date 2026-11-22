@@ -1,4 +1,4 @@
-import { Telegraf, session } from 'telegraf';
+import { Telegraf } from 'telegraf';
 import { stopAlertScheduler } from './alerts.js';
 import { config } from './config.js';
 import { getActiveAlerts } from './db.js';
@@ -7,7 +7,7 @@ import {
   getCachedStopCodes,
   getDataSource,
 } from './dbus-client.js';
-import { setBotReference, setupBot } from './handlers.js';
+import { setupBot } from './handlers.js';
 import { acquireInstanceLock, releaseInstanceLock } from './single-instance.js';
 
 if (!acquireInstanceLock()) {
@@ -21,10 +21,8 @@ process.once('exit', () => releaseInstanceLock());
 
 const bot = new Telegraf(config.botToken);
 
-// Middleware de sesión (los flujos usan además un mapa propio por chat).
-bot.use(session());
-
-setBotReference(bot);
+// Los flujos usan su propio mapa por chat (session.ts); no hace falta el
+// middleware de sesión de Telegraf, que nadie lee. setupBot ya fija la_ref.
 setupBot(bot);
 
 // Telegraf no convierte un throw en un error manejado: sin esto, un fallo de

@@ -331,6 +331,24 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
     expect(textsSince(start)).toContain('favstop_2');
   });
 
+  it('/parada ofrece las mismas acciones que la vista por callback', async () => {
+    const target = { ...chat, id: 555555562 };
+    const start = sent.length;
+    await bot.handleUpdate(messageUpdate('/parada 2', 66, target) as never);
+    const output = textsSince(start);
+    expect(output).toContain('stop_refresh_2');
+    expect(output).toContain('stop_alert_2');
+    expect(output).toContain('favstop_2');
+  });
+
+  it('/actualizar tiene cooldown por chat', async () => {
+    const target = { ...chat, id: 555555563 };
+    await bot.handleUpdate(messageUpdate('/actualizar', 67, target) as never);
+    const start = sent.length;
+    await bot.handleUpdate(messageUpdate('/actualizar', 68, target) as never);
+    expect(textsSince(start)).toContain('Espera');
+  });
+
   it('/estado muestra diagnóstico sin secretos', async () => {
     const start = sent.length;
     await bot.handleUpdate(messageUpdate('/estado', 31) as never);

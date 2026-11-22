@@ -1,5 +1,9 @@
 import { type Context, Markup, type Telegraf } from 'telegraf';
-import { setBotInstance, startAlertScheduler } from './alerts.js';
+import {
+  getAlertStats,
+  setBotInstance,
+  startAlertScheduler,
+} from './alerts.js';
 import {
   UNKNOWN_DESTINATION,
   escapeMd,
@@ -12,6 +16,7 @@ import {
 } from './arrival.js';
 import {
   getAllStopsForLine,
+  getCatalogMeta,
   getItinerariesForLine,
   getItineraryById,
   getLineByCode,
@@ -401,6 +406,8 @@ async function showLineStops(ctx: Context, itineraryId: string): Promise<void> {
 
 const LINES_PER_PAGE = 10;
 const STOPS_PER_PAGE = 15;
+const REFRESH_COOLDOWN_MS = 30_000;
+const lastRefreshByChat = new Map<number, number>();
 
 type KeyboardRow = ReturnType<typeof Markup.button.callback>[];
 
@@ -739,8 +746,6 @@ export async function handleParada(ctx: Context): Promise<void> {
     );
     return;
   }
-  await ctx.reply('🔍 Consultando datos en tiempo real...');
-  const times = await fetchStopTimes(stopId);
   const requestedLine = args[2] ? normalizeLine(args[2]) : undefined;
   if (requestedLine) {
     const error = await validateLineAtStop(stopId, requestedLine);
@@ -749,12 +754,8 @@ export async function handleParada(ctx: Context): Promise<void> {
       return;
     }
   }
-  const arrivals = await getNextArrivals(stopId, requestedLine);
-  const stopName = times?.parada?.desc || getStopName(stopId);
-  await ctx.reply(
-    formatArrivalsList(stopName, arrivals, times?.estado, stopId),
-    { parse_mode: 'Markdown' }
-  );
+  // Misma vista que por callback: botones de refrescar, aviso y favorito.
+  await showArrivalsForStop(ctx, stopId, requestedLine);
 }
 
 export async function handleLineas(ctx: Context): Promise<void> {
@@ -910,11 +911,34 @@ export async function handleBorrar(ctx: Context): Promise<void> {
 }
 
 export async function handleActualizar(ctx: Context): Promise<void> {
+  const chatId = ctx.chat?.id;
+  const now = Date.now();
+  if (
+    chatId &&
+    now - (lastRefreshByChat.get(chatId) ?? 0) < REFRESH_COOLDOWN_MS
+  ) {
+    const wait = Math.ceil(
+      (REFRESH_COOLDOWN_MS - (now - (lastRefreshByChat.get(chatId) ?? 0))) /
+        1000
+    );
+    const msg = `Espera ${wait} s antes de volver a actualizar.`;
+    if (ctx.callbackQuery) {
+      await answer(ctx, msg);
+    } else {
+      await ctx.reply(msg);
+    }
+    return;
+  }
+  if (chatId) {
+    if (lastRefreshByChat.size > 500) lastRefreshByChat.clear();
+    lastRefreshByChat.set(chatId, now);
+  }
+
   // Refresca tanto la caché de paradas como el catálogo completo, no solo
   // la parada de prueba. Así `/actualizar` cumple lo que promete.
   clearCache();
   const [times, stops] = await Promise.all([
-    fetchStopTimes('1', true),
+    fetchStopTimes('2', true),
     fetchPopularStops(),
   ]);
   const cachedCodes = getCachedStopCodes().length;
@@ -937,10 +961,21 @@ export async function handleActualizar(ctx: Context): Promise<void> {
 /** Diagnóstico rápido del estado en memoria y de la fuente de datos. */
 export async function handleEstado(ctx: Context): Promise<void> {
   const stats = getCacheStats();
+  const catalog = getCatalogMeta();
+  const ageDays = Math.max(
+    0,
+    Math.floor(
+      (Date.now() - Date.parse(catalog.generatedAt)) / (24 * 60 * 60 * 1000)
+    )
+  );
+  const alertsStats = getAlertStats();
   const msg = `🟢 **Estado del bot**
 📡 Fuente: ${escapeMd(getDataSource())}
 🚏 Paradas en caché: ${stats.stops} · catálogo: ${stats.popularStops}
-🔔 Avisos activos: ${getActiveAlerts().length}
+📚 Índice: ${catalog.lines} líneas · ${catalog.stops} paradas · ${ageDays} d${
+    ageDays > 7 ? ' ⚠️ regenerar con `npm run build:catalog`' : ''
+  }
+🔔 Avisos activos: ${getActiveAlerts().length} · enviados: ${alertsStats.sent} · fallidos: ${alertsStats.failed}
 ⏱ Proceso activo: ${Math.floor(process.uptime())} s`;
   await ctx.reply(msg, { parse_mode: 'Markdown' });
 }

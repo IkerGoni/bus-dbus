@@ -10,7 +10,7 @@ Actualizado: 2026-11-22 07:05 · Última sesión: verificación de buscador/favo
 | Área | Estado |
 |------|--------|
 | Bot de Telegram | ✅ Activo con datos reales desde `apps/bot`, build de `8445239`, PID `73125`, `node dist/index.js`, lock y log verificados |
-| Calidad del bot | ✅ 40/40 tests · `pnpm --filter @dbus/bot verify` (tsc + biome + tests) · `build` OK |
+| Calidad del bot | ✅ 51/51 tests · `pnpm --filter @dbus/bot verify` (tsc + biome + tests) · `build` OK |
 | Descubrimiento | ✅ `/buscar` + `/linea` sobre catálogo real (39 líneas, 127 itinerarios, 548 paradas) |
 | Favoritos | ✅ parada completa, parada+línea y línea favorita |
 | PWA (Sprint 3) | 🔧 Bloqueada: errores TS/lint preexistentes en `apps/mobile/src/` |
@@ -55,7 +55,7 @@ petición explícita.
   quedaron solo en TMPDIR, nunca en el repo.
 
 ### Verificación de buscador y favoritos
-- Suite completa 40/40 en `apps/bot/` con `BOT_TOKEN` inyectado por entorno.
+- Suite completa 51/51 en `apps/bot/` con `BOT_TOKEN` inyectado por entorno y BD en memoria.
 - 4 flujos comprobados contra la API real con un test temporal (borrado):
   búsqueda por nombre → llegadas; búsqueda por línea → destinos → paradas →
   llegadas; guardar/ver/borrar parada completa (con dedup); guardar/ver/borrar
