@@ -7,6 +7,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc -b",
     "build:catalog": "node scripts/build-catalog.mjs",
+    "build:coordinates": "node scripts/build-stop-coordinates.mjs",
     "start": "node dist/index.js",
     "typecheck": "tsc -b",
     "test": "BOT_TOKEN=vitest_test_token DB_PATH=:memory: vitest run",
