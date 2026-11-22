@@ -548,10 +548,14 @@ async function showArrivalsForStop(
     [Markup.button.callback('⬅️ Menú', 'menu_main')],
   ]);
 
-  await safeEdit(ctx, formatArrivalsList(stopName, arrivals, times?.estado), {
-    parse_mode: 'Markdown',
-    ...keyboard,
-  });
+  await safeEdit(
+    ctx,
+    formatArrivalsList(stopName, arrivals, times?.estado, stopId),
+    {
+      parse_mode: 'Markdown',
+      ...keyboard,
+    }
+  );
 }
 
 async function showStopLines(ctx: Context, stopId: string): Promise<void> {
@@ -725,9 +729,10 @@ export async function handleParada(ctx: Context): Promise<void> {
   }
   const arrivals = await getNextArrivals(stopId, requestedLine);
   const stopName = times?.parada?.desc || getStopName(stopId);
-  await ctx.reply(formatArrivalsList(stopName, arrivals, times?.estado), {
-    parse_mode: 'Markdown',
-  });
+  await ctx.reply(
+    formatArrivalsList(stopName, arrivals, times?.estado, stopId),
+    { parse_mode: 'Markdown' }
+  );
 }
 
 export async function handleLineas(ctx: Context): Promise<void> {
