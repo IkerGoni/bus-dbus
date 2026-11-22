@@ -72,9 +72,8 @@ data class AlertRule(
     val minutesAhead: Int,
     val active: Boolean = true,
     val createdAtMs: Long,
-    val snoozedUntilMs: Long? = null,
 )
 
-enum class ComputedAlertStatus { INACTIVE, SNOOZED, TRIGGERED, ACTIVE }
+enum class ComputedAlertStatus { INACTIVE, TRIGGERED, ACTIVE }
 
 enum class FreshnessLevel { FRESH, STALE, EXPIRED }

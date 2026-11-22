@@ -25,7 +25,6 @@ import eus.busdonostia.app.ui.alerts.feedView
 import eus.busdonostia.app.ui.alerts.fetchStops
 import eus.busdonostia.app.ui.alerts.pollStops
 import eus.busdonostia.app.ui.alerts.setAlertActive
-import eus.busdonostia.app.ui.alerts.snoozeAlert
 import eus.busdonostia.app.ui.alerts.stopsToWatch
 import eus.busdonostia.app.ui.alerts.updateAlert
 import eus.busdonostia.app.ui.stops.StopRow
@@ -135,9 +134,6 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
     fun onQueryChange(value: String) {
         query.value = value
     }
-
-    /** Posponer 5' real: `snoozedUntilMs = now + 300_000`. */
-    fun snooze(rule: AlertRule) = container.snoozeAlert(rule)
 
     /** Pausar real: `active = false`. El Snackbar ofrece [undoPause]. */
     fun pause(rule: AlertRule) = container.setAlertActive(rule, false)

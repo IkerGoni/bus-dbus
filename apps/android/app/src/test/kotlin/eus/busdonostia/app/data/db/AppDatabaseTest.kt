@@ -97,7 +97,7 @@ class AppDatabaseTest {
 
     @Test
     fun `avisos - regla hace ida y vuelta`() = runTest {
-        val r = rule("a1").copy(destination = "Intxaurrondo", snoozedUntilMs = 123)
+        val r = rule("a1").copy(destination = "Intxaurrondo")
         db.alerts().insert(r.toEntity())
         assertEquals(r, db.alerts().findById("a1")!!.toDomain())
     }
@@ -149,7 +149,7 @@ class AppDatabaseTest {
         val rules = migrated.alerts().getAll().map { it.toDomain() }
         assertEquals(listOf("once", "paused"), rules.map { it.id }.sorted())
         assertEquals(
-            AlertRule("once", "340", "Easo", "28", "Amara", 5, active = true, createdAtMs = 10, snoozedUntilMs = 20),
+            AlertRule("once", "340", "Easo", "28", "Amara", 5, active = true, createdAtMs = 10),
             rules.first { it.id == "once" },
         )
         migrated.close()

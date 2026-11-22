@@ -22,7 +22,6 @@ data class AlertEntity(
     val minutesAhead: Int,
     val active: Boolean,
     val createdAtMs: Long,
-    val snoozedUntilMs: Long?,
 )
 
 fun AlertRule.toEntity() = AlertEntity(
@@ -34,7 +33,6 @@ fun AlertRule.toEntity() = AlertEntity(
     minutesAhead = minutesAhead,
     active = active,
     createdAtMs = createdAtMs,
-    snoozedUntilMs = snoozedUntilMs,
 )
 
 fun AlertEntity.toDomain() = AlertRule(
@@ -46,7 +44,6 @@ fun AlertEntity.toDomain() = AlertRule(
     minutesAhead = minutesAhead,
     active = active,
     createdAtMs = createdAtMs,
-    snoozedUntilMs = snoozedUntilMs,
 )
 
 @Dao

@@ -8,7 +8,6 @@ import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.FiberManualRecord
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.outlined.EventBusy
-import androidx.compose.material.icons.outlined.Snooze
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -44,11 +43,6 @@ fun AlertStatusLabel(item: AlertItem, modifier: Modifier = Modifier) {
     val (icon: ImageVector, tint: Color, text: String) = when (item.status) {
         ComputedAlertStatus.TRIGGERED -> Triple(Icons.Filled.Bolt, colors.live, stringResource(R.string.alert_status_triggered))
         ComputedAlertStatus.ACTIVE -> Triple(Icons.Filled.FiberManualRecord, colors.live, stringResource(R.string.alert_status_active))
-        ComputedAlertStatus.SNOOZED -> Triple(
-            Icons.Outlined.Snooze,
-            colors.warning,
-            stringResource(R.string.alert_status_snoozed, clockOf(item.rule.snoozedUntilMs ?: 0L)),
-        )
         ComputedAlertStatus.INACTIVE ->
             if (item.detail == AlertDetail.EXPIRED) {
                 Triple(Icons.Outlined.EventBusy, colors.scheduled, stringResource(R.string.alert_status_expired))

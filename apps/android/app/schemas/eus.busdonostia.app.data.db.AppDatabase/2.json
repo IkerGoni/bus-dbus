@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "e480032430352ec195f4bae3481006fb",
+    "identityHash": "a66180168fe3352fbdb848adced6bd97",
     "entities": [
       {
         "tableName": "favorites",
@@ -46,7 +46,7 @@
       },
       {
         "tableName": "alerts",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `stopId` TEXT NOT NULL, `stopName` TEXT NOT NULL, `lineId` TEXT NOT NULL, `destination` TEXT, `minutesAhead` INTEGER NOT NULL, `active` INTEGER NOT NULL, `createdAtMs` INTEGER NOT NULL, `snoozedUntilMs` INTEGER, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `stopId` TEXT NOT NULL, `stopName` TEXT NOT NULL, `lineId` TEXT NOT NULL, `destination` TEXT, `minutesAhead` INTEGER NOT NULL, `active` INTEGER NOT NULL, `createdAtMs` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -94,11 +94,6 @@
             "columnName": "createdAtMs",
             "affinity": "INTEGER",
             "notNull": true
-          },
-          {
-            "fieldPath": "snoozedUntilMs",
-            "columnName": "snoozedUntilMs",
-            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -177,7 +172,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e480032430352ec195f4bae3481006fb')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a66180168fe3352fbdb848adced6bd97')"
     ]
   }
 }

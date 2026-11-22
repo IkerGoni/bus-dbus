@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 data class AlertsUiState(
     /** Room aún no ha respondido. */
     val loading: Boolean = true,
-    /** ACTIVOS: `TRIGGERED`, `ACTIVE`, `SNOOZED`, en el orden de §3. */
+    /** ACTIVOS: `TRIGGERED`, `ACTIVE`, en el orden de §3. */
     val active: List<AlertItem> = emptyList(),
     /** PAUSADOS: `INACTIVE` (pausados o caducados). */
     val silenced: List<AlertItem> = emptyList(),

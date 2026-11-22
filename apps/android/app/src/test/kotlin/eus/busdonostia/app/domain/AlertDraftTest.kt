@@ -5,7 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** A06: validación, dedup `(stopId, lineId)` y switch/posponer. */
+/** A06: validación, dedup `(stopId, lineId)` y switch. */
 class AlertDraftTest {
     private val base = AlertDraft(stopId = "340", stopName = "Pío Baroja 10", lineId = "5", minutesAhead = 5)
 
@@ -22,7 +22,7 @@ class AlertDraftTest {
         val rule = base.copy(lineId = " b4 ").toRule("id", 1_000)
         assertEquals("B4", rule.lineId)
         assertEquals(1_000L, rule.createdAtMs)
-        assertTrue(rule.active && rule.snoozedUntilMs == null)
+        assertTrue(rule.active)
         assertEquals(base, base.toRule("x", 0).toDraft())
     }
 
@@ -45,13 +45,11 @@ class AlertDraftTest {
     }
 
     @Test
-    fun switchYPosponer() {
-        val paused = base.toRule("a", 0).copy(active = false, snoozedUntilMs = 20)
+    fun switchPausaYReactiva() {
+        val paused = base.toRule("a", 0).copy(active = false)
         // Reactivar (pausado o caducado) lo vuelve a armar desde ahora.
-        assertEquals(paused.copy(active = true, createdAtMs = 99, snoozedUntilMs = null), paused.withActive(true, 99))
+        assertEquals(paused.copy(active = true, createdAtMs = 99), paused.withActive(true, 99))
         assertEquals(paused.copy(active = false), paused.withActive(false, 99))
-        assertEquals(1_000L + SNOOZE_MS, paused.snoozed(1_000).snoozedUntilMs)
-        assertTrue(paused.snoozed(1_000).active)
     }
 
     @Test

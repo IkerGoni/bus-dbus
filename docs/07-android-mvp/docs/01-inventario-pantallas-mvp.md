@@ -28,7 +28,7 @@ bus-dbus (Android MVP v1)
 │   ├── A07 · Ajustes (dbus://settings) — Tema · ES/EU · Notificaciones · Caché real
 │   └── A08 · Onboarding ligero (primera apertura) — 1 pantalla + POST_NOTIFICATIONS
 ├── Superficie de sistema
-│   └── Push Android local (dbus_arrivals_high) — Acciones [Posponer 5'] y [Descartar]
+│   └── Push Android local (dbus_arrivals_high) — sin botones; tap → A05
 └── Diferido explícitamente (fuera de v1)
     ├── v1.1: Widget Jetpack Glance (2×1 / 4×1) + Lectura por voz (TTS)
     └── v2.0: Mapa vectorial interactivo (MapLibre) dentro de A02
@@ -43,4 +43,4 @@ bus-dbus (Android MVP v1)
 3. **Explorar línea y guardar parada:** `A03 Líneas` → elegir línea con color Dbus
    → `A03b Itinerario` → elegir sentido → tocar parada → `A05` (★ favorita o 🔔 aviso).
 4. **Aviso disparado (Push):** el Foreground Service local dispara cuando `remainingMinutes <= minutesAhead` →
-   notificación Android con `[Posponer 5']` y `[Descartar]` sin abrir la app.
+   notificación Android sin botones y el aviso se borra (un solo uso); tocarla abre `A05`.

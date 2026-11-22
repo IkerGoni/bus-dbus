@@ -45,18 +45,17 @@ class AlertListTest {
         val items = listOf(
             alertItem(rule("inactive", "5").copy(active = false), arrivals, now),
             alertItem(rule("expired", "5").copy(createdAtMs = now - ONCE_TTL_MS - 1), arrivals, now),
-            alertItem(rule("snoozed", "5").copy(snoozedUntilMs = now + SNOOZE_MS), arrivals, now),
             alertItem(rule("noArrival", "13"), arrivals, now),
             alertItem(rule("active12", "28"), arrivals, now),
             alertItem(rule("active7", "27"), arrivals, now),
             alertItem(rule("triggered", "5", stop = "1"), arrivals, now),
         )
         assertEquals(
-            listOf("triggered", "active7", "active12", "noArrival", "snoozed", "expired", "inactive"),
+            listOf("triggered", "active7", "active12", "noArrival", "expired", "inactive"),
             sortAlerts(items).map { it.rule.id },
         )
         val (activeGroup, pausedGroup) = groupAlerts(items)
-        assertEquals(listOf("triggered", "active7", "active12", "noArrival", "snoozed"), activeGroup.map { it.rule.id })
+        assertEquals(listOf("triggered", "active7", "active12", "noArrival"), activeGroup.map { it.rule.id })
         assertEquals(listOf("expired", "inactive"), pausedGroup.map { it.rule.id })
         assertEquals("triggered", nextAlert(items)?.rule?.id)
         assertEquals(4, alertBadgeCount(items)) // ACTIVE | TRIGGERED

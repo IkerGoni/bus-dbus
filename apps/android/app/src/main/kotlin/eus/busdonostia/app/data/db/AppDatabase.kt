@@ -29,7 +29,7 @@ abstract class AppDatabase : RoomDatabase() {
 
 /**
  * v2: los avisos pasan a ser de un solo uso. Se borran los recurrentes y los que ya
- * avisaron (`lastTriggeredAtMs`), y desaparecen las columnas de frecuencia, días y franja.
+ * avisaron (`lastTriggeredAtMs`), y desaparecen las columnas de frecuencia, días, franja y posponer.
  */
 val MIGRATION_1_2 = object : Migration(1, 2) {
     override fun migrate(db: SupportSQLiteDatabase) {
@@ -37,11 +37,11 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
         db.execSQL(
             "CREATE TABLE `alerts_v2` (`id` TEXT NOT NULL, `stopId` TEXT NOT NULL, `stopName` TEXT NOT NULL, " +
                 "`lineId` TEXT NOT NULL, `destination` TEXT, `minutesAhead` INTEGER NOT NULL, `active` INTEGER NOT NULL, " +
-                "`createdAtMs` INTEGER NOT NULL, `snoozedUntilMs` INTEGER, PRIMARY KEY(`id`))",
+                "`createdAtMs` INTEGER NOT NULL, PRIMARY KEY(`id`))",
         )
         db.execSQL(
             "INSERT INTO `alerts_v2` SELECT `id`, `stopId`, `stopName`, `lineId`, `destination`, `minutesAhead`, " +
-                "`active`, `createdAtMs`, `snoozedUntilMs` FROM `alerts`",
+                "`active`, `createdAtMs` FROM `alerts`",
         )
         db.execSQL("DROP TABLE `alerts`")
         db.execSQL("ALTER TABLE `alerts_v2` RENAME TO `alerts`")

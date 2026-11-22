@@ -29,7 +29,7 @@ fun validateDraft(draft: AlertDraft): List<DraftError> = buildList {
 
 /**
  * Regla a guardar. Guardar vuelve a armar el aviso: activo, vigila desde [nowMs]
- * (caduca a los 7 días desde aquí) y sin posponer.
+ * (caduca a los 7 días desde aquí).
  */
 fun AlertDraft.toRule(id: String, nowMs: Long): AlertRule = AlertRule(
     id = id,
@@ -85,10 +85,7 @@ fun planSave(
 
 /** Activar o pausar con el switch. Reactivar lo vuelve a armar desde [nowMs] (pausado o caducado). */
 fun AlertRule.withActive(value: Boolean, nowMs: Long): AlertRule =
-    if (value) copy(active = true, createdAtMs = nowMs, snoozedUntilMs = null) else copy(active = false)
-
-/** Posponer 5' (A01): `snoozedUntilMs = now + 300_000` y sigue activo. */
-fun AlertRule.snoozed(nowMs: Long): AlertRule = copy(active = true, snoozedUntilMs = nowMs + SNOOZE_MS)
+    if (value) copy(active = true, createdAtMs = nowMs) else copy(active = false)
 
 /**
  * Destinos reales de [lineId] en [stopId]: los de los itinerarios del catálogo que pasan

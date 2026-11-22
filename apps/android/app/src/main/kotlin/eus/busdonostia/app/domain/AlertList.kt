@@ -64,11 +64,10 @@ fun alertItem(rule: AlertRule, arrivals: List<Arrival>, nowMs: Long): AlertItem 
 private fun ComputedAlertStatus.priority(): Int = when (this) {
     ComputedAlertStatus.TRIGGERED -> 0
     ComputedAlertStatus.ACTIVE -> 1
-    ComputedAlertStatus.SNOOZED -> 2
-    ComputedAlertStatus.INACTIVE -> 3
+    ComputedAlertStatus.INACTIVE -> 2
 }
 
-/** Orden de §3: TRIGGERED, ACTIVE (menos minutos primero, sin llegada al final), SNOOZED, INACTIVE. */
+/** Orden de §3: TRIGGERED, ACTIVE (menos minutos primero, sin llegada al final), INACTIVE. */
 fun sortAlerts(items: List<AlertItem>): List<AlertItem> =
     items.sortedWith(
         compareBy<AlertItem> { it.status.priority() }
@@ -77,9 +76,9 @@ fun sortAlerts(items: List<AlertItem>): List<AlertItem> =
     )
 
 fun isActiveGroup(status: ComputedAlertStatus): Boolean =
-    status == ComputedAlertStatus.TRIGGERED || status == ComputedAlertStatus.ACTIVE || status == ComputedAlertStatus.SNOOZED
+    status == ComputedAlertStatus.TRIGGERED || status == ComputedAlertStatus.ACTIVE
 
-/** A04: ACTIVOS (`TRIGGERED`, `ACTIVE`, `SNOOZED`) y PAUSADOS (`INACTIVE`), ya ordenados. */
+/** A04: ACTIVOS (`TRIGGERED`, `ACTIVE`) y PAUSADOS (`INACTIVE`), ya ordenados. */
 fun groupAlerts(items: List<AlertItem>): Pair<List<AlertItem>, List<AlertItem>> =
     sortAlerts(items).partition { isActiveGroup(it.status) }
 

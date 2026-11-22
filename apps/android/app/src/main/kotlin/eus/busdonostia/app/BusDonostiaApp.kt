@@ -111,7 +111,7 @@ class AppContainer(private val app: Application) {
     init {
         // Sin bloquear el arranque: si no hay remota o falla, sigue la empaquetada.
         appScope.launch { configRepository.refreshIfDue() }
-        // Cada cambio de avisos (guardar, switch, Posponer, Deshacer): si algo queda en vigilancia, arranca el servicio.
+        // Cada cambio de avisos (guardar, switch, Deshacer): si algo queda en vigilancia, arranca el servicio.
         appScope.launch {
             alerts.filterNotNull().collect { rules -> ensureMonitoring(app, rules, System.currentTimeMillis()) }
         }

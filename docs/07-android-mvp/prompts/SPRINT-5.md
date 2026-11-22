@@ -17,7 +17,7 @@ Implementa el **Sprint 5** del MVP Android de bus-dbus.
 export JAVA_HOME=/opt/homebrew/opt/openjdk@17
 export ANDROID_HOME=/opt/homebrew/share/android-commandlinetools
 export PATH="$JAVA_HOME/bin:$PATH"
-cd apps/android && ./gradlew check assembleDebug   # verde antes de empezar (95 tests por variante)
+cd apps/android && ./gradlew check assembleDebug   # verde antes de empezar (93 tests por variante)
 ```
 Emulador: AVD `dbus36`. Memoria (Iker): apaga el emulador (`adb emu kill`) y
 `./gradlew --stop` al terminar.

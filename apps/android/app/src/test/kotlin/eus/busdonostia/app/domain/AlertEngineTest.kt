@@ -54,27 +54,14 @@ class AlertEngineTest {
     }
 
     @Test
-    fun pospuestoSigueVigilandoSinConsultar() {
-        val snoozed = once("a").snoozed(now)
-        val during = evaluateTick(listOf(snoozed), emptyMap(), now + 60_000, null)
-        assertEquals(EngineAction.CONTINUE, during.action)
-        assertTrue(stopsToPoll(listOf(snoozed), now + 60_000).isEmpty())
-        // Pasados 5 min, vuelve a consultar y avisa.
-        val after = now + SNOOZE_MS
-        assertEquals(setOf("340"), stopsToPoll(listOf(snoozed), after))
-        assertEquals(1, evaluateTick(listOf(snoozed), mapOf("340" to live(arrival("5", 9))), after, null).firings.size)
-    }
-
-    @Test
     fun soloVigilaLoQueTocaYAgrupaPorParada() {
         val rules = listOf(
             once("a", stop = "340"),
             once("b", line = "28", stop = "340"),
             once("c", stop = "1").copy(active = false),
-            once("e", stop = "7").copy(snoozedUntilMs = now + SNOOZE_MS),
         )
         assertEquals(setOf("340"), stopsToPoll(rules, now))
-        assertEquals(listOf("a", "b", "e"), rules.filter { isWatching(it, now) }.map { it.id })
+        assertEquals(listOf("a", "b"), rules.filter { isWatching(it, now) }.map { it.id })
         assertFalse(isWatching(once("x").copy(createdAtMs = now - ONCE_TTL_MS - 1), now)) // caducado
     }
 

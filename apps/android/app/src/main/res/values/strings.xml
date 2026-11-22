@@ -138,7 +138,6 @@
     <string name="alert_any_destination">Cualquier destino</string>
     <string name="alert_status_triggered">Llegando</string>
     <string name="alert_status_active">Activa</string>
-    <string name="alert_status_snoozed">Pospuesta hasta las %1$s</string>
     <string name="alert_status_expired">Caducada</string>
     <string name="alert_status_paused">Pausada</string>
 
@@ -165,11 +164,10 @@
     <string name="alert_error_no_line">Elige una línea.</string>
     <string name="alert_error_minutes">La antelación debe estar entre 1 y 30 minutos.</string>
 
-    <!-- Notificación de llegada y su vista previa en A06; `notif_action_snooze` es el Posponer de A01 -->
+    <!-- Notificación de llegada y su vista previa en A06 -->
     <string name="notif_title">L%1$s → %2$s en %3$d min</string>
     <string name="notif_title_no_destination">L%1$s en %2$d min</string>
     <string name="notif_body_stop">%1$s (%2$s)</string>
-    <string name="notif_action_snooze">Posponer 5\'</string>
 
     <!-- A05 · avisos -->
     <string name="stop_create_alert">Crear aviso en esta parada</string>

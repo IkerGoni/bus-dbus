@@ -11,15 +11,12 @@ const val NO_SERVICE_STOP_MS = 60 * 60_000L
 /** Margen para no repetir una consulta que la UI acaba de hacer (sondeo de 30 s con algo de retraso). */
 const val FETCH_SLACK_MS = 5_000L
 
-/** En vigilancia: el servicio tiene que seguir vivo por este aviso (activo y sin caducar, o pospuesto). */
-fun isWatching(rule: AlertRule, nowMs: Long): Boolean = when (computeAlertStatus(rule, nowMs)) {
-    ComputedAlertStatus.ACTIVE, ComputedAlertStatus.SNOOZED -> true
-    else -> false
-}
+/** En vigilancia: el servicio tiene que seguir vivo por este aviso (activo y sin caducar). */
+fun isWatching(rule: AlertRule, nowMs: Long): Boolean = computeAlertStatus(rule, nowMs) == ComputedAlertStatus.ACTIVE
 
-/** Paradas que hay que consultar: las de avisos en vigilancia que no están pospuestos. */
+/** Paradas que hay que consultar: las de avisos en vigilancia. */
 fun stopsToPoll(rules: List<AlertRule>, nowMs: Long): Set<String> =
-    rules.filter { computeAlertStatus(it, nowMs) == ComputedAlertStatus.ACTIVE }.mapTo(sortedSetOf()) { it.stopId }
+    rules.filter { isWatching(it, nowMs) }.mapTo(sortedSetOf()) { it.stopId }
 
 /** Hay que consultar si nunca se ha hecho o la última respuesta tiene casi un intervalo (la UI también sondea). */
 fun isFetchDue(lastFetchedAtMs: Long?, nowMs: Long, intervalMs: Long): Boolean =
@@ -63,7 +60,7 @@ fun evaluateTick(rules: List<AlertRule>, views: Map<String, ArrivalsView>, nowMs
 
     val polled = stopsToPoll(rules, nowMs).mapNotNull { views[it] }.filter { it != ArrivalsView.Loading }
     val trouble = when {
-        polled.isEmpty() -> troubleSinceMs // nada consultado (todo pospuesto): no cuenta ni a favor ni en contra
+        polled.isEmpty() -> troubleSinceMs // nada consultado todavía: no cuenta ni a favor ni en contra
         polled.all(::isTrouble) -> troubleSinceMs ?: nowMs
         else -> null
     }

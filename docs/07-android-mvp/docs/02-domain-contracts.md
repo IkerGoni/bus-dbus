@@ -81,7 +81,6 @@ export interface AlertRule {
   minutesAhead: number;    // Entero 1..30
   active: boolean;         // false = pausado por el usuario
   createdAtMs: number;     // Caduca a los 7 días si no avisa (paridad regla 7 del bot)
-  snoozedUntilMs?: number; // now + 300_000 al pulsar «Posponer 5'» en Inicio
 }
 ```
 
@@ -91,8 +90,8 @@ Reglas:
 - **Un solo uso:** vigila desde que se guarda; al disparar, el motor notifica y
   **borra** el aviso. Si a los 7 días no ha disparado queda `INACTIVE`
   («Caducada») hasta que el usuario lo reactive o lo borre.
-- **Sin avisos recurrentes** (días, franja, alarmas): se quitaron el
-  2026-11-22. Room v2 borra los que hubiera (`MIGRATION_1_2`).
+- **Sin avisos recurrentes** (días, franja, alarmas) **ni Posponer**: se
+  quitaron el 2026-11-22. Room v2 borra los que hubiera (`MIGRATION_1_2`).
 
 ## 2. Matching de llegada (paridad con `findMatchingArrival` del bot)
 
@@ -110,7 +109,6 @@ para que un aviso de la línea pública `32` nunca case con la `28`.
 ```ts
 export type ComputedAlertStatus =
   | 'INACTIVE'   // Pausada o caducada (la disparada ya no existe: se borra)
-  | 'SNOOZED'    // now < snoozedUntilMs
   | 'TRIGGERED'  // Hay nextArrival dentro de minutesAhead y no se ha avisado aún
   | 'ACTIVE';    // Vigilando
 
@@ -121,7 +119,6 @@ export function computeAlertStatus(
 ): ComputedAlertStatus {
   if (!alert.active) return 'INACTIVE';
   if (nowMs - alert.createdAtMs > 7 * 86_400_000) return 'INACTIVE';
-  if (alert.snoozedUntilMs !== undefined && nowMs < alert.snoozedUntilMs) return 'SNOOZED';
   if (nextArrival !== undefined && remainingMinutes(nextArrival, nowMs) <= alert.minutesAhead) {
     return 'TRIGGERED';
   }
@@ -135,8 +132,7 @@ borra el aviso.
 ### Prioridad de ordenación en `Inicio` y `Mis avisos`
 1. `TRIGGERED`
 2. `ACTIVE` (menor `remainingMinutes` primero; sin llegada al final)
-3. `SNOOZED`
-4. `INACTIVE`
+3. `INACTIVE`
 
 ## 4. Frescura de datos y cercanía offline (cierra B1, B2 y B11)
 

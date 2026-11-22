@@ -9,10 +9,10 @@
 - [ ] **B7 (Widget):** Diferido explícitamente a v1.1 (Jetpack Glance); cero placeholders muertos en v1.
 - [ ] **B8 (Build verde):** en Android no se arregla la PWA: `apps/android` nace con `./gradlew check` (build + lint + tests JVM) en verde y CI. La PWA queda congelada (ADR 009).
 - [ ] **B9 (Crear alerta desde parada):** Botón `Crear aviso` y campana 🔔 por fila en `A05` pasan `stopId` y `lineId` a `A06`.
-- [ ] **B10 (Estados de alerta):** Renderizar los 5 estados de `ComputedAlertStatus` (`TRIGGERED`, `ACTIVE`, `SNOOZED`, `INACTIVE`; `SILENCED` desapareció con los recurrentes).
+- [ ] **B10 (Estados de alerta):** Renderizar los 5 estados de `ComputedAlertStatus` (`TRIGGERED`, `ACTIVE`, `INACTIVE`; `SILENCED` y `SNOOZED` desaparecieron el 2026-11-22).
 - [ ] **B11 (Offline real):** Banner superior no bloqueante cuando hay caché; distinguir `NO_SERVICE`, `EMPTY` y `API_ERROR`.
 - [ ] **B12 (Favoritos persistentes):** Persistir `STOP`, `STOP_LINE` y `LINE` en DB local con dedup determinista y estrellas rellenas `#F59E0B`.
-- [ ] **B13 (Posponer/Pausar reales):** `Posponer 5'` escribe `snoozedUntilMs`; `Pausar` muta `active = false` con `Deshacer`.
+- [ ] **B13 (Posponer/Pausar reales):** `Posponer` eliminado (2026-11-22); `Pausar` muta `active = false` con `Deshacer`.
 - [ ] **B14 (i18n estricto):** Test en CI que falla si faltan claves entre `es` y `eu` o si existen literales en UI.
 - [ ] **B15 (Countdown reactivo):** Recalcular minutos restantes contra reloj reactivo de 1 s (`remainingMinutes`), sin mostrar segundos.
 - [ ] **B16 (Silencio unificado):** Usar únicamente `computeAlertStatus` en toda la app y worker.

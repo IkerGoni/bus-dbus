@@ -101,12 +101,12 @@ build debug). Estado de cada sprint: `ESTADO.md`.
 - **Cambio de Iker en la misma sesión:** los avisos son **de un solo uso**:
   saltan una vez y se borran. Fuera los recurrentes (días, franja, alarmas
   exactas, receptores de boot/hora) y los botones `Posponer 5'` / `Descartar` de
-  la notificación; Inicio conserva `Posponer 5'`. Room v2 (`MIGRATION_1_2`)
-  borra recurrentes y avisos ya disparados. 95 tests JVM por variante (con
+  la notificación, y `Posponer 5'` de Inicio (solo queda `Pausar`). Room v2 (`MIGRATION_1_2`)
+  borra recurrentes y avisos ya disparados. 93 tests JVM por variante (con
   test de migración). Probado en el AVD `dbus36` contra la API real con la app
   en segundo plano: 344 → 🔔 L16 → «Vigilando L16 en Pio Baroja 15» →
   notificación `L16 → Igeldo en 5 min` sin botones → el aviso desaparece de A04
-  y el servicio se para. 10 capturas en `capturas/sprint-4/`.
+  y el servicio se para; Inicio solo con `Pausar`. 11 capturas en `capturas/sprint-4/`.
 
 ## Sprint 5 · Publicación
 - Auditar el historial de git en busca de secretos **antes** de hacer público

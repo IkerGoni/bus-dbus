@@ -139,7 +139,6 @@
     <string name="alert_any_destination">Edozein helmuga</string>
     <string name="alert_status_triggered">Iristen</string>
     <string name="alert_status_active">Aktiboa</string>
-    <string name="alert_status_snoozed">%1$s arte atzeratuta</string>
     <string name="alert_status_expired">Iraungita</string>
     <string name="alert_status_paused">Pausatuta</string>
 
@@ -166,11 +165,10 @@
     <string name="alert_error_no_line">Aukeratu linea bat.</string>
     <string name="alert_error_minutes">Aurrerapena 1 eta 30 minutu artekoa izan behar da.</string>
 
-    <!-- Iritsiera-jakinarazpena eta A06ko aurrebista; `notif_action_snooze` A01eko Atzeratu da -->
+    <!-- Iritsiera-jakinarazpena eta A06ko aurrebista -->
     <string name="notif_title">L%1$s → %2$s, %3$d min barru</string>
     <string name="notif_title_no_destination">L%1$s, %2$d min barru</string>
     <string name="notif_body_stop">%1$s (%2$s)</string>
-    <string name="notif_action_snooze">Atzeratu 5\'</string>
 
     <!-- A05 · abisuak -->
     <string name="stop_create_alert">Sortu abisua geltoki honetan</string>

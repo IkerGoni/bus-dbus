@@ -18,12 +18,10 @@
 - **Referencia visual:** `stitch-references/inicio/code.html`.
 - **Cabecera (56 dp):** título `Dbus` a la izquierda y botón Ajustes (`48×48dp`) a la derecha → `A07`.
 - **Buscador rápido:** pill único limpio sin borde interior → abre búsqueda universal (`código`, `calle`, `línea`, `destino`).
-- **Sección `TU PRÓXIMO AVISO` (solo si existe alerta `TRIGGERED`, `ACTIVE` o `SNOOZED`):**
+- **Sección `TU PRÓXIMO AVISO` (solo si existe alerta `TRIGGERED` o `ACTIVE`):**
   - Fila 1: badge oficial Dbus + destino (`maxLines = 1`, elipsis) | cuenta atrás grande `JetBrains Mono` (`tabular-nums`, `nowrap`).
   - Fila 2: `{stopName} ({stopId})` | `● En vivo · Aviso {min}'` (o reloj `Horario`).
-  - Fila 3: 2 botones reales (`min-h 48dp`):
-    - `Posponer 5'` → persiste `snoozedUntilMs = now + 300_000`.
-    - `Pausar` → persiste `active = false` + Snackbar con botón `Deshacer`.
+  - Fila 3: botón real `Pausar` (`min-h 48dp`) → persiste `active = false` + Snackbar con botón `Deshacer`. Sin `Posponer` (2026-11-22).
   - Tap en tarjeta → `A05` con `stopId`.
 - **Sección `PARADAS FAVORITAS`:** tarjetas compactas con estrella rellena `#F59E0B` (`48×48dp`) y próximas 2–3 llegadas reales (`● 2 min` verde / reloj `9 min` gris). Auto-refresco 30 s + *pull-to-refresh*.
 - **Estado vacío (sin alertas ni favoritos):** dos CTAs útiles: `Ver paradas cercanas` (`A02`) y `Explorar líneas` (`A03`).
@@ -44,8 +42,8 @@
 
 ### A04 · Mis Avisos (`dbus://alerts`)
 - **Cabecera:** `Mis avisos` + Ajustes. FAB inferior derecho: `+ Nuevo aviso` → `A06`.
-- **Agrupación:** `ACTIVOS` (`TRIGGERED`, `ACTIVE`, `SNOOZED`) y `PAUSADOS` (`INACTIVE`: pausados o caducados). Los que ya avisaron no aparecen: se borran al avisar.
-- **Tarjeta:** badge Dbus + línea/destino + minutos actuales, subtítulo `{stopName} ({stopId}) · Aviso {min}' · {frecuencia}`, estado (`⚡ Llegando`, `● Activa`, `⏱ Pospuesta`, `🌙 Fuera de franja` / `✓ Avisado hoy`, `Pausada`); la frecuencia muestra la franja (`L–V 07:45–08:30`), switch `active`, Editar (`A06`) y Eliminar (con `Deshacer`).
+- **Agrupación:** `ACTIVOS` (`TRIGGERED`, `ACTIVE`) y `PAUSADOS` (`INACTIVE`: pausados o caducados). Los que ya avisaron no aparecen: se borran al avisar.
+- **Tarjeta:** badge Dbus + línea/destino + minutos actuales, subtítulo `{stopName} ({stopId}) · Aviso {min}'`, estado (`⚡ Llegando`, `● Activa`, `Caducada`, `Pausada`), switch `active`, Editar (`A06`) y Eliminar (con `Deshacer`).
 - **Estado vacío:** explicación breve + CTA `Elegir parada y crear aviso` → `A02`.
 
 ### A05 · Detalle de parada (`dbus://stop/{stopId}`)

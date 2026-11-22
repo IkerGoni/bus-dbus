@@ -2,7 +2,6 @@ package eus.busdonostia.app.domain
 
 import eus.busdonostia.app.domain.ComputedAlertStatus.ACTIVE
 import eus.busdonostia.app.domain.ComputedAlertStatus.INACTIVE
-import eus.busdonostia.app.domain.ComputedAlertStatus.SNOOZED
 import eus.busdonostia.app.domain.ComputedAlertStatus.TRIGGERED
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -55,15 +54,6 @@ class AlertStatusTest {
         val alert = once(created, minutesAhead = 5)
         assertEquals(ACTIVE, computeAlertStatus(alert, fetched + 119_999, a)) // aún 6 min
         assertEquals(TRIGGERED, computeAlertStatus(alert, fetched + 120_000, a)) // 5 min
-    }
-
-    @Test
-    fun pospuestoHastaSnoozedUntil() {
-        val created = madrid("2026-11-02T08:00")
-        val now = created + 60_000
-        val alert = once(created).copy(snoozedUntilMs = now + SNOOZE_MS)
-        assertEquals(SNOOZED, computeAlertStatus(alert, now, arrival(1, now)))
-        assertEquals(TRIGGERED, computeAlertStatus(alert, now + SNOOZE_MS, arrival(1, now + SNOOZE_MS)))
     }
 
     @Test
