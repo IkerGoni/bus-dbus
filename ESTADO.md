@@ -14,7 +14,8 @@ MVP Android nativo sin backend (ADR 009). Plan en
 
 ## Hecho en la última sesión
 
-- **Docs al día con `main` `b8e08f8`** (rama `docs/puesta-al-dia`): 44 `.md`
+- **Docs al día con `main` `b8e08f8`** (rama `docs/puesta-al-dia`, integrada en
+  `0f19b4e`, pusheada y borrada): 44 `.md`
   revisados contra el código, 37 editados y 1 nuevo; `README.md` reescrito (bot + Android);
   `docs/README.md` nuevo como índice; 18 docs marcados «Histórico: ver …»;
   specs Android con avisos de un solo uso, ★ en A05 y sondeo adaptativo;
@@ -39,8 +40,6 @@ MVP Android nativo sin backend (ADR 009). Plan en
 
 ## Pendiente (por prioridad)
 
-- [ ] Merge de `docs/puesta-al-dia` a `main` + push + borrar rama y worktree
-      `../bus-dbus-docs` (falta la orden de Iker).
 - [ ] Test `apps/bot/tests/integration.test.ts:51` falla: Dbus devuelve
       `tipo=0` (parada 2, L36 y L46, 18:40). Arreglo ya hecho en la rama
       `audit/arquitectura` (`014471b`), sin integrar.
@@ -137,7 +136,6 @@ MVP Android nativo sin backend (ADR 009). Plan en
 
 ## Esperando a Iker
 
-- Orden de merge de `docs/puesta-al-dia`.
 - Revisar las reglas de `AGENTS.md` propuestas en el informe de la sesión de
   docs (no se cambiaron).
 - Rotación del token de Telegram (R6).
@@ -146,8 +144,7 @@ MVP Android nativo sin backend (ADR 009). Plan en
 
 ## Git
 
-`main` = `b8e08f8` (Sprints 0–4 integrados). Ramas abiertas:
-`docs/puesta-al-dia` (worktree `../bus-dbus-docs`, esta sesión) y
+`main` = `0f19b4e` (Sprints 0–4 + docs al día). Rama abierta:
 `audit/arquitectura` (worktree `../bus-dbus-audit`, sesión paralela).
 
 ## Siguiente sesión
