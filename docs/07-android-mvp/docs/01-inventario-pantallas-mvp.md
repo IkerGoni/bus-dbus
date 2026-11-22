@@ -9,7 +9,7 @@ en vivo, 39 líneas y avisos «X min antes»).
 | Superficie | Paquete | Estado | Tipo de UI |
 |---|---|---|---|
 | Bot de Telegram | `@dbus/bot` (`apps/bot/`) | Activo, datos reales | Mensajes Markdown + inline keyboards (sin cambios) |
-| App Android (MVP v1) | `apps/android/` (Gradle, Kotlin + Compose, ADR 009) | Especificación ejecutiva | Material 3 · 4 pestañas fijas + Push nativo |
+| App Android (MVP v1) | `apps/android/` (Gradle, Kotlin + Compose, ADR 009) | Sprints 0–4 hechos; Sprint 5 (publicación) pendiente | Material 3 · 4 pestañas fijas + notificaciones locales |
 | PWA | `@dbus/mobile` (`apps/mobile/`) | Congelada (ADR 009) | — |
 
 ## 2. Mapa de pantallas Android MVP v1
@@ -21,11 +21,11 @@ bus-dbus (Android MVP v1)
 │   ├── Tab 2: A02 · Paradas (dbus://stops) — Cercanas (GPS offline) · Favoritas · Recientes · Buscador
 │   ├── Tab 3: A03 · Líneas (dbus://lines) — 39 líneas oficiales Dbus
 │   │   └── Subpantalla: A03b · Itinerario (dbus://line/{lineId}) — Sentidos + timeline paradas
-│   └── Tab 4: A04 · Mis Avisos (dbus://alerts) — 5 estados + FAB nuevo aviso
+│   └── Tab 4: A04 · Mis Avisos (dbus://alerts) — Llegando · Activa · Pausada/Caducada + FAB nuevo aviso
 ├── Pantallas de detalle / flujo (sin NavigationBar inferior)
-│   ├── A05 · Detalle de parada (dbus://stop/{stopId}) — Llegadas RT + 🔔 por fila + Cómo llegar (geo:)
+│   ├── A05 · Detalle de parada (dbus://stop/{stopId}) — Llegadas RT + ★ y 🔔 por fila + Cómo llegar (geo:)
 │   ├── A06 · Configurar aviso (dbus://alert/new | /edit) — X min antes · un solo uso
-│   ├── A07 · Ajustes (dbus://settings) — Tema · ES/EU · Notificaciones · Caché real
+│   ├── A07 · Ajustes (dbus://settings) — Tema · ES/EU · Notificaciones · Batería · Datos reales
 │   └── A08 · Onboarding ligero (primera apertura) — 1 pantalla + POST_NOTIFICATIONS
 ├── Superficie de sistema
 │   └── Push Android local (dbus_arrivals_high) — sin botones; tap → A05
@@ -42,5 +42,5 @@ bus-dbus (Android MVP v1)
    avisa una vez y se borra) → `Guardar aviso`.
 3. **Explorar línea y guardar parada:** `A03 Líneas` → elegir línea con color Dbus
    → `A03b Itinerario` → elegir sentido → tocar parada → `A05` (★ favorita o 🔔 aviso).
-4. **Aviso disparado (Push):** el Foreground Service local dispara cuando `remainingMinutes <= minutesAhead` →
+4. **Aviso disparado (Push):** el Foreground Service local dispara cuando `remainingMinutes <= minutesAhead`, 30 s antes (`NOTIFY_EARLY_MS`) →
    notificación Android sin botones y el aviso se borra (un solo uso); tocarla abre `A05`.

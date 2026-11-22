@@ -1,5 +1,7 @@
 # ADR 003: Push Architecture: Web Push API + VAPID
 
+> **Histórico:** ver [ADR 009](009-android-nativo-mvp.md) (avisos locales en el móvil, sin servidor ni Web Push).
+
 ## Status
 Accepted — Superseded por ADR 009 para el cliente móvil (2026-11-22)
 

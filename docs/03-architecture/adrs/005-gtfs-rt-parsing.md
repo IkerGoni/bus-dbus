@@ -1,5 +1,7 @@
 # ADR 005: GTFS-RT Parsing: Web Worker + protobufjs
 
+> **Histórico:** ver [`docs/06-api-externa/`](../../06-api-externa/README.md) (fuente vigente: API JSON de Dbus; los `.pb` dan 403).
+
 > **Nota 2026-11-22:** los feeds `.pb` de `opendata.euskadi.eus` redirigen a S3
 > y devuelven `403 AccessDenied`. El diseño de esta ADR queda como referencia
 > histórica de la PWA (Sprint 3, bloqueado); **no aplica al bot**, que usa la

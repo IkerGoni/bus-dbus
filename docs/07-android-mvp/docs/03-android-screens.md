@@ -16,7 +16,7 @@
 
 ### A01 · Inicio (`dbus://home`)
 - **Referencia visual:** `stitch-references/inicio/code.html`.
-- **Cabecera (56 dp):** título `Dbus` a la izquierda y botón Ajustes (`48×48dp`) a la derecha → `A07`.
+- **Cabecera (56 dp):** título `Bus Donostia` (`app_name`, no «Dbus»: la app no es oficial) a la izquierda y botón Ajustes (`48×48dp`) a la derecha → `A07`.
 - **Buscador rápido:** pill único limpio sin borde interior → abre búsqueda universal (`código`, `calle`, `línea`, `destino`).
 - **Sección `TU PRÓXIMO AVISO` (solo si existe alerta `TRIGGERED` o `ACTIVE`):**
   - Fila 1: badge oficial Dbus + destino (`maxLines = 1`, elipsis) | cuenta atrás grande `JetBrains Mono` (`tabular-nums`, `nowrap`).
@@ -66,8 +66,8 @@
 - Apariencia (`Sistema / Claro / Oscuro`), Idioma (`Español / Euskara` al 100%).
 - Notificaciones: estado real leído de Android + `Ajustes del sistema` (`ACTION_APP_NOTIFICATION_SETTINGS`).
 - Datos: conteo real del catálogo offline (leído del asset, hoy `548 paradas · 39 líneas`), fecha `generatedAt` del catálogo y hora real de la última consulta en vivo. Sin «tamaño de caché» en v1 (no hay caché que medir).
-- Avisos: estado real de `SCHEDULE_EXACT_ALARM` y de optimización de batería, con enlace a ajustes.
-- Acerca de: versión de build (`BuildConfig.VERSION_NAME`), licencia MIT, fuentes: «Tiempos: servicio de la app de Dbus (no oficial, sin afiliación)» y «Coordenadas de paradas © OpenStreetMap (ODbL)».
+- Avisos en segundo plano: estado real de la optimización de batería, con enlace a ajustes (sin pedir `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`).
+- Acerca de: versión de build (`BuildConfig.VERSION_NAME`) y fuentes: «Tiempos: servicio de la app de Dbus (no oficial, sin afiliación)», «Coordenadas de paradas © OpenStreetMap (ODbL)» y tipografías (SIL OFL 1.1). Sin licencia de la app: está sin decidir (ver `ESTADO.md`).
 
 ### A08 · Onboarding ligero (primera apertura)
 - Pantalla única (sin carrusel): icono + 3 bullets (llegadas reales y paradas cercanas · avisos `X min antes` · sin anuncios ES/EU).

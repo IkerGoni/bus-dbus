@@ -1,5 +1,7 @@
 # ADR 004: Data Model: IndexedDB Schema (idb + zod)
 
+> **Histórico:** ver [ADR 009](009-android-nativo-mvp.md) y [`02-domain-contracts.md`](../../07-android-mvp/docs/02-domain-contracts.md) (Room en Android).
+
 ## Status
 Accepted
 

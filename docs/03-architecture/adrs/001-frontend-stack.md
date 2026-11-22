@@ -1,5 +1,7 @@
 # ADR 001: Frontend Stack: Vite 6 + React 19 + TypeScript 5.7 + Tailwind 4
 
+> **Histórico:** ver [ADR 009](009-android-nativo-mvp.md) (cliente Android nativo; PWA congelada).
+
 ## Status
 Accepted — Superseded por ADR 009 para el cliente móvil (2026-11-22)
 

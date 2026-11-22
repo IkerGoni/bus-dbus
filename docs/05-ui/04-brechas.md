@@ -1,5 +1,7 @@
 # Brechas entre diseño y código — bus-dbus
 
+> **Histórico:** ver [`05-migration-from-brechas.md`](../07-android-mvp/docs/05-migration-from-brechas.md) (B1–B16 cerradas en Android).
+
 Diferencias detectadas entre los wireframes de `docs/05-ui/wireframes/`, el
 comportamiento descrito en `AGENTS.md` / `ESTADO.md` y el código actual de
 `apps/bot/` y `apps/mobile/`.

@@ -125,7 +125,7 @@ ocupación, accesibilidad por vehículo y andenes).
   (`#E2E8F0` / `#334155`) y radio fijo `16dp` (`1rem`).
 - **Color estrictamente semántico:** verde esmeralda (`#059669`) solo para datos
   en tiempo real (`EN VIVO`); azul (`#005BB5`) para acciones primarias y pestaña
-  activa; ámbar (`#F59E0B`) para favoritos y alertas silenciadas; colores
+  activa; ámbar (`#F59E0B`) para favoritos; colores
   oficiales Dbus exclusivamente en badges de línea.
 - **Bilingüe ES / EU al 100%:** cero literales hardcodeados en UI.
 
@@ -171,6 +171,6 @@ Cuadrado redondeado (`28×28dp` en listas, `36×36dp` en Hero Card, radio `8dp` 
     inferior en `Plus Jakarta Sans` (`11px`, `nowrap`).
 - **Componentes de Alerta («Avísame X min antes»):**
   - Chips rápidos `2'`, `3'`, `5'`, `8'`, `10'`, `15'` sincronizados con slider `1–30`.
-  - 5 estados visuales (`computeAlertStatus`): `TRIGGERED` (`⚡ Llegando`),
-    `ACTIVE` (`● Activa`), `SNOOZED` (`⏱ Pospuesta`), `SILENCED` (`🌙 Silenciada`),
-    `INACTIVE` (`Pausada`).
+  - 3 estados visuales (`computeAlertStatus`): `TRIGGERED` (`⚡ Llegando`),
+    `ACTIVE` (`● Activa`) e `INACTIVE` (`Pausada` o `Caducada`). Avisos de un
+    solo uso: sin `SNOOZED` ni `SILENCED` (quitados el 2026-11-22).

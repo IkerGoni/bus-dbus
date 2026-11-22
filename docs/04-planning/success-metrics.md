@@ -1,5 +1,7 @@
 # Success Metrics & Measurement Plan — Dbus Mobile Web App
 
+> **Histórico:** ver [`docs/07-android-mvp/SPRINTS.md`](../07-android-mvp/SPRINTS.md) (métricas de la PWA, no aplican al Android).
+
 ## Versión
 v0.1 — Sprint 0 output | 2026-11-22
 

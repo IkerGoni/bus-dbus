@@ -32,7 +32,9 @@ como completada sin cumplir estas reglas.
   real con dedup determinista.
 - Los minutos restantes se recalculan contra un reloj reactivo de 1 s (`now`) a
   partir de `minutos` + `fetchedAtMs`, **sin mostrar segundos** (la API no da esa
-  precisión), y se resincronizan con red cada 30 s en primer plano.
+  precisión), y se resincronizan con red cada 30 s en primer plano. El motor en
+  segundo plano sondea de forma adaptativa (30 s, 1 min o 2 min; ver
+  `04-android-platform.md` §1).
 - `Inicio`, `Mis avisos`, badge de navegación y worker de notificaciones DEBEN
   consumir la misma función pura `computeAlertStatus(alert, now, nextArrival)` de
   `02-domain-contracts.md`.

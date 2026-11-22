@@ -17,14 +17,13 @@ Implementa el **Sprint 5** del MVP Android de bus-dbus.
 export JAVA_HOME=/opt/homebrew/opt/openjdk@17
 export ANDROID_HOME=/opt/homebrew/share/android-commandlinetools
 export PATH="$JAVA_HOME/bin:$PATH"
-cd apps/android && ./gradlew check assembleDebug   # verde antes de empezar (93 tests por variante)
+cd apps/android && ./gradlew check assembleDebug   # verde antes de empezar (94 tests por variante)
 ```
 Emulador: AVD `dbus36`. Memoria (Iker): apaga el emulador (`adb emu kill`) y
 `./gradlew --stop` al terminar.
 
-**Rama:** `android/sprint-5` desde `main` (si `android/sprint-4` aún no está
-integrada, pregúntale a Iker antes de ramificar). Alcance: `apps/android/**`
-y docs.
+**Rama:** `android/sprint-5` desde `main` (Sprints 0–4 ya integrados; último
+merge `b8e08f8`). Alcance: `apps/android/**` y docs.
 
 **Decisiones de Iker que condicionan el sprint (2026-11-22, no reabrir):**
 - **El repo sigue privado** hasta que Iker decida. No lo hagas público ni
@@ -37,8 +36,9 @@ y docs.
 
 **Ya existe (Sprints 1–4), no lo dupliques:** motor de avisos de **un solo
 uso** (saltan una vez y se borran; sin recurrentes ni botones en la
-notificación) en `engine/` (FGS `dataSync`, canales) con la decisión pura en
-`domain/AlertEngine.kt`; deep link `dbus://stop/{stopId}?highlightLine=`;
+notificación) en `engine/` (FGS `dataSync`, canales, sondeo adaptativo 30 s /
+1 min / 2 min, aviso 30 s antes) con la decisión pura en
+`domain/AlertEngine.kt`; ★ y 🔔 por llegada en A05; deep link `dbus://stop/{stopId}?highlightLine=`;
 `ConfigRepository` con remota opcional; A07 con aviso de app no oficial.
 
 **Entregables:**
@@ -66,7 +66,8 @@ notificación) en `engine/` (FGS `dataSync`, canales) con la decisión pura en
    (en el Sprint 4 solo se probó en castellano).
 
 **Fuera de alcance sin orden explícita de Iker:** subir nada a Play Console
-(cuenta, pago, pista interna), hacer público el repo, elegir licencia.
+(cuenta, pago, pista interna), hacer público el repo, elegir licencia, y la
+idea apuntada de la opción «Sonido de alarma» para los avisos (ver `ESTADO.md`).
 
 **DoD:** `./gradlew check assembleDebug assembleRelease` verde; APK release
 instalado en el emulador con el flujo de avisos funcionando; si Iker conecta un

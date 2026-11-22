@@ -7,8 +7,8 @@ Decisión de arquitectura: ADR 009 (`docs/03-architecture/adrs/009-android-nativ
   `app.dbus.eus` con `res/xml/network_security_config.xml`
   (`<domain-config cleartextTrafficPermitted="true">`). Nada de
   `usesCleartextTraffic="true"` global.
-- Timeout 8 s, sin reintentos automáticos en primer plano (el usuario tiene
-  `Reintentar`).
+- Timeout de conexión 10 s y de llamada 15 s (`BusDonostiaApp`), sin
+  reintentos automáticos en primer plano (el usuario tiene `Reintentar`).
 - Base URL, paths, parámetros y cabeceras salen de `ApiConfig`: copia
   empaquetada en `assets/config.json` + config remota estática opcional (ADR 009
   § Configuración remota). La app funciona igual sin ella.
@@ -31,7 +31,7 @@ Decisión de arquitectura: ADR 009 (`docs/03-architecture/adrs/009-android-nativ
   6 h/24 h: si se alcanza, se para y se avisa (`onTimeout`).
 - **Avisos de un solo uso** (2026-11-22): al disparar se notifica y el aviso
   se borra. Sin recurrentes, sin `AlarmManager` ni `SCHEDULE_EXACT_ALARM`.
-- **Arranque:** al guardar en A06 y al reactivar o posponer en la app (gestos
+- **Arranque:** al guardar en A06 y al reactivar un aviso en la app (gestos
   del usuario, arranque en primer plano permitido) y al abrir la app. Tras
   reiniciar el móvil, un aviso activo se retoma al abrir la app (Android 15 no
   deja arrancar `dataSync` desde `BOOT_COMPLETED`).
@@ -48,8 +48,8 @@ Decisión de arquitectura: ADR 009 (`docs/03-architecture/adrs/009-android-nativ
 ## 3. Permisos y navegación nativa
 - `POST_NOTIFICATIONS` (API 33+): solo por gesto del usuario (A08 o al guardar
   el primer aviso). Si se deniega: `Settings.ACTION_APP_NOTIFICATION_SETTINGS`.
-- `ACCESS_COARSE_LOCATION` (fine opcional): solo para ordenar «Cercanas»; la
-  ubicación no se persiste (igual que el bot). La app funciona sin GPS.
+- `ACCESS_COARSE_LOCATION` + `ACCESS_FINE_LOCATION` pedidos juntos (el usuario
+  elige aproximada o precisa): solo para ordenar «Cercanas»; la ubicación no se persiste (igual que el bot). La app funciona sin GPS.
 - **Cómo llegar:** `Intent(ACTION_VIEW, Uri.parse("geo:$lat,$lon?q=$lat,$lon(${Uri.encode(name)})"))`;
   oculto si la parada no tiene coordenadas o no hay app que lo resuelva.
 - **Edge-to-edge + Predictive Back** (`enableOnBackInvokedCallback`).

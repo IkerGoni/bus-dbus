@@ -1,192 +1,139 @@
-# Dbus Donostia — Mobile Web App + Telegram Bot
+# Bus Donostia — bot de Telegram + app Android
 
-Aplicación PWA móvil para notificaciones push de llegada de autobús Dbus (San Sebastián) + bot de Telegram con avisos de llegada.
+Llegadas en vivo y avisos «X min antes» de los autobuses Dbus (San Sebastián).
+Dos productos sobre la API JSON de Dbus: un bot de Telegram en producción y una
+app Android nativa en desarrollo. Proyecto no oficial, sin afiliación con Dbus.
 
-**Reglas y estado detallado:** [`AGENTS.md`](AGENTS.md) · [`ESTADO.md`](ESTADO.md).
+**Reglas:** [`AGENTS.md`](AGENTS.md) (mandan) · **estado de sesión:**
+[`ESTADO.md`](ESTADO.md) · **índice de docs:** [`docs/README.md`](docs/README.md).
 
-## Estado actual (2026-11-22)
+## Estado (2026-11-22)
 
 | Área | Estado | Evidencia |
-|------|--------|-----------|
-| **Planning (Sprints 0-2)** | ✅ Completo | 3 docs en `docs/04-planning/`, 12 wireframes en `docs/05-ui/wireframes/`, 8 ADRs en `docs/03-architecture/adrs/` |
-| **UI / diseño** | ✅ Documentado | 4 docs + 12 wireframes en `docs/05-ui/` (exportable para diseño por encargo) |
-| **PWA Shell (Sprint 3)** | 🔧 Bloqueado | Errores TS/lint preexistentes en `apps/mobile/src/` |
-| **Bot: datos reales** | ✅ Activo | API JSON de Dbus (`tiemposParada`), sin mocks en producción |
-| **Tests del bot** | ✅ 62/62 pasan | `pnpm --filter @dbus/bot test` (26 unit + 15 integración + 21 E2E) |
-| **TypeScript del bot** | ✅ 0 errores | `pnpm --filter @dbus/bot typecheck` |
-| **Lint del bot** | ✅ 0 errores | `pnpm --filter @dbus/bot verify` |
-| **Workspace** | 🔧 En curso | Split a pnpm workspaces (`apps/`, `packages/`, `docs/`); ver `docs/plan/repo-split.md` |
+|---|---|---|
+| Bot de Telegram (`apps/bot`) | ✅ En producción, datos reales | `pnpm --filter @dbus/bot verify`: 86 tests (15 contra la API real) |
+| App Android (`apps/android`) | 🔧 Sprints 0–4 hechos; Sprint 5 (publicación) pendiente | `./gradlew check assembleDebug`: 94 tests JVM por variante, 0 errores de lint |
+| Paquetes compartidos (`packages/`) | ✅ `@dbus/core` (14 tests), `@dbus/contracts` (7 tests) | `pnpm verify` |
+| PWA (`apps/mobile`) | 🧊 Congelada (ADR 009), build roto | [`apps/mobile/KNOWN_ISSUES.md`](apps/mobile/KNOWN_ISSUES.md) |
 
-## Stack tecnológico
+## Stack
 
-| Capa | Tecnología |
-|------|------------|
-| Frontend | Vite 6 + React 19 + TypeScript 5.7 |
-| Styling | Tailwind CSS 4 (Oxide) |
-| PWA / SW | Workbox GenerateSW (vite-plugin-pwa) |
-| Push | Web Push API + VAPID |
-| BD local | IndexedDB vía `idb` |
-| Parsing GTFS-RT | protobufjs + Web Worker (PWA, bloqueado; `.pb` dan 403) |
-| State | preact/signals |
-| Routing | wouter |
-| i18n | i18next (ES + EU) |
-| Lint/Format | Biome |
-| Tests | Vitest + Playwright |
-| Hosting | Cloudflare Pages + Functions |
-| Bot Telegram | Telegraf + better-sqlite3 + API JSON Dbus (live) |
+| Producto | Tecnología |
+|---|---|
+| Bot | Node ≥ 22, TypeScript, Telegraf, better-sqlite3, node-cron, Zod, Vitest, Biome |
+| Android | Kotlin + Jetpack Compose + Material 3, Room, OkHttp + kotlinx.serialization; minSdk 26, targetSdk 36 (versiones en [`apps/android/README.md`](apps/android/README.md)) |
+| Compartido | `@dbus/core` (dominio TS), `@dbus/contracts` (fixtures reales de la API) |
+| Datos | API JSON de Dbus, HTTP sin auth; catálogo offline regenerable desde la misma API |
+| CI | GitHub Actions: `.github/workflows/ci.yml` (Node) y `android.yml` (Gradle) |
 
-## Estructura del repositorio
+## Estructura
 
 ```
 .
 ├── apps/
-│   ├── bot/                # PRODUCTO 1 — @dbus/bot (Telegram, SQLite, API JSON)
-│   │   ├── src/            # handlers, alerts, db, config, catalog, ...
-│   │   ├── data/dbus-catalog.json  # Índice real (39 líneas, 548 paradas)
-│   │   ├── scripts/build-catalog.mjs
-│   │   ├── tests/          # Unit + integración + E2E de handlers
-│   │   └── bot.db          # SQLite (gitignored)
-│   └── mobile/             # PRODUCTO 2 — @dbus/mobile (PWA -> Capacitor)
-│       ├── src/            # páginas, componentes, store, i18n, lib
-│       ├── public/  index.html  vite.config.ts  wrangler.toml
-│       └── functions/      # Cloudflare Functions (pendiente)
+│   ├── bot/            # @dbus/bot — Telegram, SQLite, API JSON (producción)
+│   │   ├── src/        # handlers, commands, callbacks, render, alerts, db…
+│   │   ├── data/       # dbus-catalog.json (548 paradas, 39 líneas, 127 itinerarios)
+│   │   │               # + dbus-stop-coordinates.json (514 con coordenadas OSM)
+│   │   ├── scripts/    # build-catalog.mjs, build-stop-coordinates.mjs, refresco semanal
+│   │   └── tests/      # 8 archivos, 86 tests
+│   ├── android/        # App Android (Gradle, fuera de pnpm)
+│   └── mobile/         # @dbus/mobile — PWA congelada (ADR 009)
 ├── packages/
-│   ├── core/               # @dbus/core — dominio isomórfico compartido
-│   └── contracts/          # @dbus/contracts — spec, fixtures y catálogo
-├── docs/
-│   ├── 03-architecture/    # 8 ADRs
-│   ├── 04-planning/        # alcance, hitos, métricas, stack
-│   ├── 05-ui/              # UI exportable: inventario, bot, PWA, brechas
-│   │   └── wireframes/     # 12 wireframes Excalidraw (flujos, móvil, componentes)
-│   └── plan/               # repo-split.md, ui-audit.md
-├── state/kanban/           # Kanban histórico
-├── .github/                # CI/CD workflows (pendiente)
-├── AGENTS.md               # Reglas del repo (mandan)
-├── README.md · ESTADO.md
-├── pnpm-workspace.yaml · pnpm-lock.yaml · package.json · tsconfig.json
-└── biome.json              # Config Biome (lint/format)
+│   ├── core/           # @dbus/core — dominio compartido
+│   └── contracts/      # @dbus/contracts — fixtures reales y catálogo
+├── docs/               # ver docs/README.md
+├── state/kanban/       # kanban histórico
+├── .github/workflows/  # ci.yml, android.yml
+├── AGENTS.md · ESTADO.md · README.md
+└── package.json · pnpm-workspace.yaml · tsconfig.json · biome.json
 ```
 
-## Comandos disponibles
+## Comandos
 
 ```bash
 # Raíz (pnpm workspaces)
-pnpm verify             # lint + typecheck + tests de todos los paquetes
-pnpm dev                # PWA (apps/mobile)
+pnpm verify                      # lint + typecheck + tests de todos los paquetes
 
-# Bot de Telegram (apps/bot)
-pnpm --filter @dbus/bot verify   # tsc -b + biome + 62 tests
+# Bot (apps/bot)
+pnpm --filter @dbus/bot verify   # tsc -b + biome + 86 tests
 pnpm --filter @dbus/bot build    # -> apps/bot/dist
-pnpm --filter @dbus/bot start    # node dist/index.js (cwd apps/bot)
-cd apps/bot && pnpm run build:catalog  # regenerar el catálogo desde Dbus
+cd apps/bot && npm run build:catalog   # regenerar el catálogo desde Dbus
+
+# Android (toolchain en apps/android/README.md)
+cd apps/android && ./gradlew check assembleDebug
 ```
 
-## Configuración del bot de Telegram
+Despliegue del bot: [`AGENTS.md`](AGENTS.md) § Despliegue (`git push` no despliega).
 
-El token del bot se lee de la variable de entorno `BOT_TOKEN`. No está hardcodeado.
+## Bot de Telegram
+
+El token se lee solo de la variable de entorno `BOT_TOKEN`:
 
 ```bash
 cd apps/bot
 export BOT_TOKEN='...'           # solo en el entorno; nunca en .env ni en el repo
-pnpm run build && pnpm run start # producción (sin watch, evita conflictos de polling)
+pnpm run build && npm run start  # producción (sin watch, evita conflictos 409)
 ```
 
-`apps/bot/.env.example` es plantilla para el resto de variables, pero el token
-real **nunca** se escribe en `apps/bot/.env` (está en `.gitignore`). Para
-desarrollo se puede usar `pnpm run dev`, pero `tsx watch` reinicia el polling
-y provoca conflictos `409`: usarlo solo en scripting.
+`apps/bot/.env.example` es plantilla para el resto de variables. `pnpm run dev`
+usa `tsx watch`, que reinicia el polling y provoca conflictos `409`: no usarlo
+con el bot de producción en marcha.
 
-Variables de entorno:
-- `BOT_TOKEN` — Token del bot de Telegram (requerido)
-- `DBUS_BASE_URL` — API JSON de Dbus (default: `http://app.dbus.eus/SSIIMovilWSv2/ws/cons`, HTTP, sin auth)
-- `BOT_LANGUAGE` — Idioma de nombres/destinos: `eu|es|en|fr` (default: `es`)
-- `CACHE_TTL_MS` — TTL de caché de llegadas (default: `30000`)
-- `POLL_INTERVAL_MS` — Refresco en segundo plano (default: `30000`)
-- `DEFAULT_ALERT_MINUTES` — Minutos antelación por defecto (default: `5`)
-- `DB_PATH` — Ruta de la base de datos SQLite (default: `./bot.db`)
+Variables de entorno (default entre paréntesis):
+- `BOT_TOKEN` — token de Telegram (requerido)
+- `DBUS_BASE_URL` — API JSON (`http://app.dbus.eus/SSIIMovilWSv2/ws/cons`)
+- `BOT_LANGUAGE` — `eu|es|en|fr` (`es`)
+- `CACHE_TTL_MS` (`30000`) · `POLL_INTERVAL_MS` (`30000`)
+- `DEFAULT_ALERT_MINUTES` (`5`) · `DB_PATH` (`./bot.db`)
+- `NEARBY_ENABLED` (`1`) · `NEARBY_RADIUS_M` (`500`, 50–2000) para `/ubicacion`
+- `DBUS_CATALOG_PATH`, `DBUS_STOP_COORDINATES_PATH` — rutas de los índices (`apps/bot/data/`)
+- `LOG_LEVEL` — `debug|info|warn|error|silent` (`info`)
 
-Comandos del bot: `/start`, `/buscar <texto>`, `/linea <linea>`,
-`/parada <codigo> [linea]`, `/lineas <codigo>`,
-`/aviso <parada> <linea> <minutos>`, `/lista`, `/borrar <id>`, `/fav`,
-`/actualizar`, `/estado`, `/help`. El código de parada es el
-número visible en la marquesina (p. ej. `1` = Boulevard 9). `/estado` muestra
-la fuente de datos, el tamaño de las cachés y los avisos activos (sin secretos).
+Comandos: `/start`, `/buscar <texto>`, `/linea <linea>`, `/lineas [parada]`,
+`/parada <codigo> [linea]`, `/aviso <parada> <linea> <minutos>`, `/lista`,
+`/borrar <id>`, `/fav`, `/ubicacion`, `/actualizar`, `/estado`, `/help`. El
+código de parada es el número de la marquesina (p. ej. `1` = Boulevard 9).
+Detalle de pantallas, textos y callbacks:
+[`docs/05-ui/02-bot-telegram.md`](docs/05-ui/02-bot-telegram.md).
 
-**Cómo encontrar tu parada o línea.** No hay lista de "populares": es arbitraria
-e incompleta. El buscador (`/buscar` o el botón 🔎) acepta código (`1`), nombre
-de calle (`Boulevard`), línea (`28`, `L28`) o destino (`Ospitaleak`) y devuelve
-botones con las coincidencias reales del catálogo. `/linea 28` muestra los
-destinos de la línea y, al elegir uno, todas sus paradas. Desde cualquier vista
-de llegadas se puede guardar la **parada completa** (todas las líneas) o solo
-**una línea**; `/fav add <parada> [linea]` (línea opcional) y `/fav linea <linea>`
-permiten lo mismo por comando. Los favoritos son la pantalla de inicio: un toque
-muestra las llegadas en vivo.
+**Cómo encontrar tu parada o línea.** Sin lista de «populares». `/buscar` (o
+🔎) acepta código (`1`), calle (`Boulevard`), línea (`28`, `L28`) o destino
+(`Ospitaleak`). `/linea 28` muestra los destinos y, al elegir uno, sus paradas.
+`/ubicacion` lista paradas cercanas con el índice local de OpenStreetMap; la
+ubicación no se guarda. Desde las llegadas se guarda la parada completa o una
+sola línea; los favoritos son la pantalla de inicio.
 
-`apps/bot/data/dbus-catalog.json` es un **índice de descubrimiento** generado
-con `pnpm --filter @dbus/bot exec node scripts/build-catalog.mjs` (o
-`cd apps/bot && npm run build:catalog`) desde la API real de Dbus (39 líneas,
-127 itinerarios, 548 paradas). No contiene horarios ni llegadas: esos siempre
-se consultan en vivo; regenerar el catálogo actualiza nombres/códigos cuando
-Dbus cambia su red.
+El catálogo `apps/bot/data/dbus-catalog.json` es solo un índice de
+descubrimiento: las llegadas siempre se consultan en vivo. Identidad de línea,
+favoritos y avisos (dedup, caducidad a 7 días, preferencia GPS): reglas 5–7 de
+[`AGENTS.md`](AGENTS.md).
 
-El bot acepta el código público (`28`, `L28`, `B4`) y, como alias de entrada,
-el id interno de Dbus (`32` era el id de la pública `28`). En búsquedas gana
-el código público: `32` también existe como línea pública. Siempre se guarda
-y muestra el código público.
+Calidad de vida: caché en memoria de 200 paradas con evicción; `stop_refresh`
+invalida solo la parada consultada; lock de instancia única y reintento de los
+`409` de Telegram con backoff (12 intentos, hasta 30 s).
 
-Avisos: dedup por `(chat, parada, línea)`, caducidad a 7 días, preferencia por
-estimaciones GPS y aislamiento de fallos de envío por chat. Favoritos: parada
-completa, parada+línea y línea favorita; dedup por `(chat, parada, línea)`.
-`/lista` permite borrar cada aviso. `/actualizar` recarga la caché de la API;
-el botón Refrescar (`stop_refresh`) invalida solo la parada consultada. El
-arranque tiene lock de instancia única y reintenta los conflictos `409` de
-Telegram con backoff (12 intentos, hasta 30 s).
+## App Android
 
-Optimizaciones y calidad de vida: el catálogo se genera en paralelo desde la
-API; la caché en memoria está limitada a 200 paradas con evicción de las más
-antiguas (el refresco de 30 s no crece sin control); la confirmación de un
-aviso incluye la próxima llegada estimada; y el flujo interactivo distingue un
-aviso creado de uno duplicado en el mensaje emergente. `/estado` muestra la
-fuente, el tamaño de las cachés, los avisos activos y el uptime.
+Kotlin + Compose, sin backend ni Firebase (ADR 009). Cuatro pestañas: Inicio,
+Paradas (cercanas offline), Líneas y Avisos. Cada llegada de A05 tiene ★
+(favorita parada+línea) y 🔔 (aviso). Los avisos son de **un solo uso**: un
+servicio en primer plano sondea (30 s si faltan ≤ 7 min para avisar, 1 min
+hasta 14, 2 min más allá), avisa 30 s antes y borra el aviso. Inicio solo
+ofrece «Pausar».
 
-## Roadmap (Milestones)
-
-| Hito | Sprint | Objetivo | Fecha estimada |
-|------|--------|----------|----------------|
-| M1: Planning Complete | 0-2 | Scope, stack, wireframes, ADRs firmados | ✅ DONE |
-| M2: PWA Shell Ready | 3 | Vite+React+TS+Tailwind, SW, routing, i18n, CI | ~2026-12-06 |
-| M3: Real-time Engine | 4 | ⚠️ Revisar fuente: los feeds `.pb` dan 403 (ADR 005); IndexedDB + Web Worker | ~2026-12-20 |
-| M4: Push Notifications | 5 | Web Push VAPID, config granular, iOS fallback | ~2026-01-03 |
-| M5: Beta Launch | 6 | 20 testers, 2 semanas, métricas Go/No-Go | ~2026-01-17 |
-| M6: Production Release | 6+ | Deploy prod, docs handoff, monitoring activo | ~2026-01-24 |
-
-## Bloqueos conocidos
-
-**Sprint 3 (PWA Shell):** errores TypeScript/lint preexistentes en
-`apps/mobile/src/` (bloqueo no relacionado con el bot). Las tareas de corrección
-están creadas en el kanban histórico (`state/kanban/`, board `dbus-app`):
-- `t_408a2dd2` — Imports faltantes en páginas
-- `t_06703f31` — Componentes UI (props inexistentes, duplicados)
-- `t_5e745f77` — Schema IndexedDB (índice `alerts` incompatible)
-- `t_9c098959` — Worker `postMessage` transfer list inválido
+Spec: [`docs/07-android-mvp/`](docs/07-android-mvp/README.md) · plan:
+[`SPRINTS.md`](docs/07-android-mvp/SPRINTS.md) · toolchain:
+[`apps/android/README.md`](apps/android/README.md).
 
 ## Datos en tiempo real
 
-- **Fuente activa del bot:** API JSON que usa la app oficial de Dbus:
-  `GET http://app.dbus.eus/SSIIMovilWSv2/ws/cons/tiemposParada?codParada={codigo}&idioma=es`
-  (HTTP, sin auth, datos reales con indicador de GPS vs. horario).
-- **Obsoleto:** los feeds `.pb` de `opendata.euskadi.eus` redirigen a S3 y
-  devuelven `403 AccessDenied`; el fetcher Playwright ya no es necesario para el bot.
-- GTFS Estático (PWA): `ftp.geo.euskadi.net/.../google_transit.zip`
-
-## Documentación
-
-- [`AGENTS.md`](AGENTS.md) — reglas del repo, verificación y despliegue. Mandan sobre docs antiguos.
-- [`ESTADO.md`](ESTADO.md) — estado de sesión, decisiones y pendientes.
-- `docs/03-architecture/adrs/` — decisiones (001-008). ADR 005 describe el diseño GTFS-RT de la PWA; **los feeds `.pb` ya no responden**, no aplicar al bot.
-- `docs/04-planning/` — alcance, hitos, métricas y stack planeado; M3 necesita revisión de fuente.
-- `docs/plan/repo-split.md` — plan de separación en workspaces (bot / mobile / core / contracts).
+- **Fuente única:** `GET http://app.dbus.eus/SSIIMovilWSv2/ws/cons/tiemposParada?codParada={codigo}&idioma=es`
+  (HTTP, sin auth; GPS `tipo=1` u horario). Endpoints y riesgos:
+  [`docs/06-api-externa/`](docs/06-api-externa/README.md).
+- **Descartado:** los feeds GTFS-RT `.pb` de `opendata.euskadi.eus` dan
+  `403 AccessDenied`.
 
 ## Licencia
 
-Privado — Proyecto personal de Iker Goñi.
+Sin decidir. Repositorio privado hasta que el autor decida.

@@ -2,8 +2,12 @@
 
 Fuente: ADR 009, `docs/` de este paquete y `prompts/PROMPT-IMPLEMENTACION.md`.
 Un sprint = una rama `android/sprint-N` integrada en `main` al cerrar.
-Verificación común: `cd apps/android && ./gradlew check` (lint + tests JVM +
-build debug). Estado de cada sprint: `ESTADO.md`.
+Verificación común: `cd apps/android && ./gradlew check assembleDebug` (lint +
+tests JVM + APK debug). Estado de sesión: [`ESTADO.md`](../../ESTADO.md).
+
+> Los §Sprint 3 y §Sprint 4 conservan el alcance original (recurrentes,
+> «Posponer») como registro. Desde el 2026-11-22 los avisos son de un solo uso:
+> ver «Cambio de Iker» en §Sprint 4.
 
 | Sprint | Objetivo | Cierra brechas | Estado |
 |---|---|---|---|
@@ -11,8 +15,8 @@ build debug). Estado de cada sprint: `ESTADO.md`.
 | 1 | Datos y dominio | B1, B3, B12, B15, B16 | hecho 2026-11-22 |
 | 2 | Consulta: Paradas, Detalle, Líneas | B1, B2, B9, B11 | hecho 2026-11-22 |
 | 3 | Inicio, Avisos, Ajustes, Onboarding | B5, B10, B13 | hecho 2026-11-22 |
-| 4 | Motor de avisos y notificaciones | B6 | pendiente |
-| 5 | Publicación: repo público + config | — | pendiente |
+| 4 | Motor de avisos y notificaciones | B6 | hecho 2026-11-22 |
+| 5 | Publicación: release firmado, ficha de Play, auditoría de secretos | — | pendiente |
 
 ## Sprint 0 · Esqueleto verde
 - Toolchain: JDK 17 + Android SDK (platform 36, build-tools, platform-tools).
@@ -85,7 +89,8 @@ build debug). Estado de cada sprint: `ESTADO.md`.
   avión. 31 capturas en `capturas/sprint-3/`. Sin motor (Sprint 4).
 
 ## Sprint 4 · Motor de avisos
-- Foreground Service `dataSync` (sondeo 30 s agrupado por parada).
+- Foreground Service `dataSync` (sondeo agrupado por parada; adaptativo desde
+  `android/favoritas-sondeo`, ver abajo).
 - Canales y notificación; deep link `dbus://stop/{stopId}`.
 - `POST_NOTIFICATIONS` con fallback a ajustes.
 - **DoD:** flujo completo en emulador: cercana → A05 → 🔔 → guardar →
@@ -107,14 +112,20 @@ build debug). Estado de cada sprint: `ESTADO.md`.
   en segundo plano: 344 → 🔔 L16 → «Vigilando L16 en Pio Baroja 15» →
   notificación `L16 → Igeldo en 5 min` sin botones → el aviso desaparece de A04
   y el servicio se para; Inicio solo con `Pausar`. 11 capturas en `capturas/sprint-4/`.
+- **Tras el Sprint 4** (rama `android/favoritas-sondeo`, merge `b8e08f8`): ★
+  por llegada en A05 (favorita parada+línea, `STOP_LINE`, junto a la 🔔) y
+  sondeo adaptativo del motor: cada 30 s si faltan ≤ 7 min para avisar, 1 min
+  hasta 14, 2 min más allá (y 1 min sin datos de la línea); avisa 30 s antes
+  (`NOTIFY_EARLY_MS`). La UI visible sigue a 30 s. 94 tests JVM por variante.
 
 ## Sprint 5 · Publicación
-- Auditar el historial de git en busca de secretos **antes** de hacer público
-  el repo (token del bot: nunca commiteado según `ESTADO.md`; verificarlo).
+- Auditar el historial de git en busca de secretos (token del bot: nunca
+  commiteado según `ESTADO.md`; verificarlo), aunque el repo siga privado.
 - **Repo privado hasta que Iker decida** (2026-11-22); licencia también
   pendiente. El `config.json` remoto no puede salir de un repo privado: su URL se
   queda vacía (solo la copia empaquetada) hasta que Iker elija hosting.
 - Nombre/icono no oficiales, firma de release, ficha de Play (FGS `dataSync`,
   ubicación), pista de pruebas internas.
-- **DoD:** APK release firmado instalado en un móvil real; config remota
-  descargada y validada.
+- **DoD:** el de [`prompts/SPRINT-5.md`](prompts/SPRINT-5.md): `./gradlew check
+  assembleDebug assembleRelease` verde y APK release con el flujo de avisos
+  funcionando. La config remota se valida solo si Iker elige hosting.
