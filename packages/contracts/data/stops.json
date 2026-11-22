@@ -1,0 +1,8402 @@
+[
+  {
+    "id": "1",
+    "code": "1",
+    "name": "Boulevard 9",
+    "lines": [
+      "21",
+      "28",
+      "B4",
+      "B9"
+    ],
+    "destinations": [
+      "Amara-Mutualitateak",
+      "Boulevard",
+      "Amara - Ospitaleak - Miramon",
+      "Amara - Ospitaleak",
+      "Anoeta (Fútbol)",
+      "Amara - Riberas - Martutene",
+      "Amara - Errondo - Puio"
+    ]
+  },
+  {
+    "id": "2",
+    "code": "2",
+    "name": "Urbieta 12",
+    "lines": [
+      "21",
+      "28",
+      "36",
+      "B4",
+      "B9",
+      "46"
+    ],
+    "destinations": [
+      "Amara-Mutualitateak",
+      "Amara - Ospitaleak - Miramon",
+      "Amara - Ospitaleak",
+      "Anoeta (Fútbol)",
+      "Avda. Libertad-San Roque",
+      "Amara - Riberas - Martutene",
+      "Amara - Errondo - Puio",
+      "Morlans"
+    ]
+  },
+  {
+    "id": "3",
+    "code": "3",
+    "name": "Urbieta 58",
+    "lines": [
+      "21",
+      "28",
+      "B4",
+      "B9"
+    ],
+    "destinations": [
+      "Amara-Mutualitateak",
+      "Amara - Ospitaleak - Miramon",
+      "Amara - Ospitaleak",
+      "Anoeta (Fútbol)",
+      "Amara - Riberas - Martutene",
+      "Amara - Errondo - Puio"
+    ]
+  },
+  {
+    "id": "4",
+    "code": "4",
+    "name": "Antso Jakituna / Sancho Sabio 12",
+    "lines": [
+      "14",
+      "28",
+      "B4",
+      "B9"
+    ],
+    "destinations": [
+      "Anoeta (Fútbol)",
+      "Amara - Ospitaleak - Miramon",
+      "Amara - Ospitaleak",
+      "Amara - Riberas - Martutene",
+      "Amara - Errondo - Puio"
+    ]
+  },
+  {
+    "id": "5",
+    "code": "5",
+    "name": "Antso Jakituna / Sancho Sabio 28",
+    "lines": [
+      "17",
+      "26",
+      "28",
+      "B4",
+      "B9"
+    ],
+    "destinations": [
+      "Amara-Ospitaleak-Miramon",
+      "Anoeta (Fútbol)",
+      "Amara - Riberas - Martutene",
+      "Amara - Riberas - Poligono 27",
+      "Amara - Ospitaleak - Miramon",
+      "Amara - Ospitaleak",
+      "Amara - Errondo - Puio"
+    ]
+  },
+  {
+    "id": "6",
+    "code": "6",
+    "name": "Madrid 14",
+    "lines": [
+      "17",
+      "28",
+      "B4",
+      "B9"
+    ],
+    "destinations": [
+      "Amara-Ospitaleak-Miramon",
+      "Anoeta (Fútbol)",
+      "Amara - Ospitaleak - Miramon",
+      "Amara - Ospitaleak",
+      "Amara - Riberas - Martutene",
+      "Amara - Errondo - Puio"
+    ]
+  },
+  {
+    "id": "7",
+    "code": "7",
+    "name": "Madrid 28",
+    "lines": [
+      "14"
+    ],
+    "destinations": [
+      "Anoeta (Fútbol)"
+    ]
+  },
+  {
+    "id": "8",
+    "code": "8",
+    "name": "Toribio Alzaga",
+    "lines": [
+      "24",
+      "26",
+      "31",
+      "B4"
+    ],
+    "destinations": [
+      "Amara-Intxaurrondo-Altza",
+      "Amara - Riberas - Martutene",
+      "Amara - Riberas - Poligono 27",
+      "Riberas - Poligono 27 - Altza"
+    ]
+  },
+  {
+    "id": "9",
+    "code": "9",
+    "name": "La Salle",
+    "lines": [
+      "26",
+      "31",
+      "41",
+      "B4"
+    ],
+    "destinations": [
+      "Amara - Riberas - Martutene",
+      "Amara - Riberas - Poligono 27",
+      "Riberas - Poligono 27 - Altza",
+      "Egia-Loiola-Martutene"
+    ]
+  },
+  {
+    "id": "10",
+    "code": "10",
+    "name": "Loiola 12",
+    "lines": [
+      "26",
+      "31",
+      "41",
+      "B4"
+    ],
+    "destinations": [
+      "Amara - Riberas - Martutene",
+      "Amara - Riberas - Poligono 27",
+      "Riberas - Poligono 27 - Altza",
+      "Egia-Loiola-Martutene"
+    ]
+  },
+  {
+    "id": "11",
+    "code": "11",
+    "name": "Hipika 12",
+    "lines": [
+      "26",
+      "31",
+      "41",
+      "B4"
+    ],
+    "destinations": [
+      "Amara - Riberas - Martutene",
+      "Amara - Riberas - Poligono 27",
+      "Riberas - Poligono 27 - Altza",
+      "Egia-Loiola-Martutene"
+    ]
+  },
+  {
+    "id": "12",
+    "code": "12",
+    "name": "Renfe Loiola",
+    "lines": [
+      "41"
+    ],
+    "destinations": [
+      "Egia-Loiola-Martutene"
+    ]
+  },
+  {
+    "id": "13",
+    "code": "13",
+    "name": "Felisa Martín Bravo",
+    "lines": [
+      "26",
+      "31",
+      "B4"
+    ],
+    "destinations": [
+      "Amara - Riberas - Martutene",
+      "Amara - Riberas - Poligono 27",
+      "Riberas - Poligono 27 - Altza"
+    ]
+  },
+  {
+    "id": "14",
+    "code": "14",
+    "name": "Rot. 27. poligonoa biribilgunea",
+    "lines": [
+      "26",
+      "31"
+    ],
+    "destinations": [
+      "Amara - Riberas - Poligono 27",
+      "Poligono 27 - Ospitaleak - Miramon",
+      "Riberas - Poligono 27 - Altza"
+    ]
+  },
+  {
+    "id": "15",
+    "code": "15",
+    "name": "Renfe Martutene",
+    "lines": [
+      "26",
+      "41",
+      "B4"
+    ],
+    "destinations": [
+      "Amara - Riberas - Martutene",
+      "Egia-Loiola-Martutene"
+    ]
+  },
+  {
+    "id": "16",
+    "code": "16",
+    "name": "Ibaialde",
+    "lines": [
+      "26",
+      "41",
+      "B4"
+    ],
+    "destinations": [
+      "Amara - Riberas - Martutene",
+      "Egia-Loiola-Martutene"
+    ]
+  },
+  {
+    "id": "17",
+    "code": "17",
+    "name": "Easo 19",
+    "lines": [
+      "21",
+      "28"
+    ],
+    "destinations": [
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "18",
+    "code": "18",
+    "name": "Larrunmendi",
+    "lines": [
+      "26",
+      "41",
+      "B4"
+    ],
+    "destinations": [
+      "Amara - Riberas - Martutene",
+      "Boulevard",
+      "Egia-Loiola-Martutene",
+      "Gros"
+    ]
+  },
+  {
+    "id": "19",
+    "code": "19",
+    "name": "Martutene 53",
+    "lines": [
+      "26",
+      "41"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Gros"
+    ]
+  },
+  {
+    "id": "20",
+    "code": "20",
+    "name": "Kartzela",
+    "lines": [
+      "26",
+      "41"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Gros"
+    ]
+  },
+  {
+    "id": "21",
+    "code": "21",
+    "name": "Antzieta 31",
+    "lines": [
+      "26",
+      "31",
+      "41"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Poligono 27 - Ospitaleak - Miramon",
+      "Gros"
+    ]
+  },
+  {
+    "id": "22",
+    "code": "22",
+    "name": "Txomin Enea",
+    "lines": [
+      "26",
+      "31",
+      "41"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Poligono 27 - Ospitaleak - Miramon",
+      "Gros"
+    ]
+  },
+  {
+    "id": "23",
+    "code": "23",
+    "name": "Patxillardegi",
+    "lines": [
+      "26",
+      "31",
+      "41"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Poligono 27 - Ospitaleak - Miramon",
+      "Gros"
+    ]
+  },
+  {
+    "id": "24",
+    "code": "24",
+    "name": "Loiola-Topo",
+    "lines": [
+      "26",
+      "31",
+      "41"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Poligono 27 - Ospitaleak - Miramon",
+      "Gros"
+    ]
+  },
+  {
+    "id": "25",
+    "code": "25",
+    "name": "Zurriola",
+    "lines": [
+      "8",
+      "17",
+      "40",
+      "41"
+    ],
+    "destinations": [
+      "Gros - Intxaurrondo",
+      "Gros",
+      "Gros-Cocheras"
+    ]
+  },
+  {
+    "id": "26",
+    "code": "26",
+    "name": "Madrid 19",
+    "lines": [
+      "28"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Anoeta (Fútbol)"
+    ]
+  },
+  {
+    "id": "27",
+    "code": "27",
+    "name": "Madrid 5",
+    "lines": [
+      "26",
+      "28"
+    ],
+    "destinations": [
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "28",
+    "code": "28",
+    "name": "Antso Jakituna / Sancho Sabio 35",
+    "lines": [
+      "21",
+      "23",
+      "26",
+      "28",
+      "32",
+      "46"
+    ],
+    "destinations": [
+      "Boulevard",
+      "San Bartolome",
+      "Avenida Libertad - San Antonio",
+      "Santa Catalina San Antonio"
+    ]
+  },
+  {
+    "id": "29",
+    "code": "29",
+    "name": "Antso Jakituna / Sancho Sabio 11",
+    "lines": [
+      "21",
+      "23",
+      "28",
+      "32"
+    ],
+    "destinations": [
+      "Boulevard",
+      "San Bartolome"
+    ]
+  },
+  {
+    "id": "30",
+    "code": "30",
+    "name": "Easo plaza",
+    "lines": [
+      "21",
+      "23",
+      "28",
+      "32"
+    ],
+    "destinations": [
+      "Boulevard",
+      "San Bartolome"
+    ]
+  },
+  {
+    "id": "32",
+    "code": "32",
+    "name": "Okendo 11",
+    "lines": [
+      "19",
+      "21",
+      "23",
+      "26",
+      "28",
+      "B9"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza",
+      "Pza. Gipzukoa",
+      "Boulevard",
+      "Pza. Gipuzkoa"
+    ]
+  },
+  {
+    "id": "34",
+    "code": "34",
+    "name": "Boulevard 17",
+    "lines": [
+      "5",
+      "25",
+      "B1",
+      "B8"
+    ],
+    "destinations": [
+      "Benta Berri",
+      "Boulevard",
+      "Benta Berri-Zuatzu",
+      "Express Unibertsitatea - Zuatzu",
+      "Benta Berri - Añorga - Belartza",
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Añorga",
+      "Benta Berri - Añorga",
+      "Miraconcha - Benta Berri - Seminario"
+    ]
+  },
+  {
+    "id": "35",
+    "code": "35",
+    "name": "Urbieta 20",
+    "lines": [
+      "5",
+      "25",
+      "33",
+      "40",
+      "B1",
+      "B8",
+      "45"
+    ],
+    "destinations": [
+      "Benta Berri",
+      "Benta Berri-Zuatzu",
+      "Express Unibertsitatea - Zuatzu",
+      "Benta Berri - Añorga - Belartza",
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Añorga",
+      "Antiguo-Berio-Igara",
+      "Antiguo-Igara",
+      "Benta Berri - Añorga",
+      "Miraconcha - Benta Berri - Seminario",
+      "Antiguo - Uniber - Etxadi"
+    ]
+  },
+  {
+    "id": "36",
+    "code": "36",
+    "name": "Zubieta-San Martin",
+    "lines": [
+      "5",
+      "16",
+      "18",
+      "25",
+      "33",
+      "40",
+      "B1",
+      "B7",
+      "B8",
+      "45"
+    ],
+    "destinations": [
+      "Benta Berri",
+      "Benta Berri-Zuatzu",
+      "Express Unibertsitatea - Zuatzu",
+      "Igeldo",
+      "Seminario",
+      "Miraconcha - Seminario",
+      "Benta Berri - Añorga - Belartza",
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Añorga",
+      "Antiguo-Berio-Igara",
+      "Antiguo-Igara",
+      "Benta Berri - Añorga",
+      "Miraconcha - Benta Berri - Seminario",
+      "Antiguo - Uniber - Etxadi"
+    ]
+  },
+  {
+    "id": "37",
+    "code": "37",
+    "name": "Okendo 5",
+    "lines": [
+      "5",
+      "16",
+      "18",
+      "25",
+      "B2"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Pío Baroja - Boulevard",
+      "Gipuzkoa Plaza"
+    ]
+  },
+  {
+    "id": "38",
+    "code": "38",
+    "name": "Loiola Parking II",
+    "lines": [
+      "26",
+      "41",
+      "B4"
+    ],
+    "destinations": [
+      "Amara - Riberas - Martutene",
+      "Amara - Riberas - Poligono 27",
+      "Egia-Loiola-Martutene"
+    ]
+  },
+  {
+    "id": "39",
+    "code": "39",
+    "name": "Zubieta plaza",
+    "lines": [
+      "5",
+      "16",
+      "18",
+      "25",
+      "33",
+      "40",
+      "45"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Pío Baroja - Boulevard",
+      "Gipuzkoa Plaza",
+      "Gros-Intxaurrondo-Larratxo",
+      "Gros",
+      "Gros-Cocheras",
+      "Antiguo-Estaciones RENFE-Bus Geltokiak"
+    ]
+  },
+  {
+    "id": "40",
+    "code": "40",
+    "name": "Ondarreta",
+    "lines": [
+      "5",
+      "25",
+      "45"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Antiguo-Estaciones RENFE-Bus Geltokiak"
+    ]
+  },
+  {
+    "id": "41",
+    "code": "41",
+    "name": "Esklabak",
+    "lines": [
+      "5",
+      "25",
+      "35",
+      "45"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Antiguo-Aiete-Ospitaleak",
+      "Antiguo-Estaciones RENFE-Bus Geltokiak"
+    ]
+  },
+  {
+    "id": "42",
+    "code": "42",
+    "name": "Zumalakarregi 21",
+    "lines": [
+      "5",
+      "25",
+      "33",
+      "35",
+      "40",
+      "45"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Anoeta (Fútbol)",
+      "Gros-Intxaurrondo-Larratxo",
+      "Antiguo-Aiete-Ospitaleak",
+      "Gros",
+      "Gros-Cocheras",
+      "Antiguo-Estaciones RENFE-Bus Geltokiak"
+    ]
+  },
+  {
+    "id": "43",
+    "code": "43",
+    "name": "Majisteritza",
+    "lines": [
+      "5",
+      "25",
+      "33",
+      "35",
+      "40",
+      "45"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Anoeta (Fútbol)",
+      "Gros-Intxaurrondo-Larratxo",
+      "Antiguo-Aiete-Ospitaleak",
+      "Gros",
+      "Gros-Cocheras",
+      "Antiguo-Estaciones RENFE-Bus Geltokiak"
+    ]
+  },
+  {
+    "id": "44",
+    "code": "44",
+    "name": "Unibertsitatea Tol.77",
+    "lines": [
+      "5",
+      "25",
+      "45"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Antiguo-Estaciones RENFE-Bus Geltokiak"
+    ]
+  },
+  {
+    "id": "45",
+    "code": "45",
+    "name": "Tolosa 111",
+    "lines": [
+      "5",
+      "24",
+      "25",
+      "27",
+      "35",
+      "45"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Anoeta (Fútbol)",
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo",
+      "Intxaurrondo - Amara - Antiguo",
+      "Antiguo-Aiete-Ospitaleak",
+      "Antiguo-Estaciones RENFE-Bus Geltokiak"
+    ]
+  },
+  {
+    "id": "46",
+    "code": "46",
+    "name": "Amerika Plaza",
+    "lines": [
+      "5",
+      "24",
+      "25",
+      "27",
+      "35",
+      "45"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Anoeta (Fútbol)",
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo",
+      "Intxaurrondo - Amara - Antiguo",
+      "Antiguo-Aiete-Ospitaleak",
+      "Antiguo-Estaciones RENFE-Bus Geltokiak"
+    ]
+  },
+  {
+    "id": "47",
+    "code": "47",
+    "name": "Errotaburu 5",
+    "lines": [
+      "5"
+    ],
+    "destinations": [
+      "Benta Berri",
+      "Boulevard",
+      "Benta Berri-Zuatzu",
+      "Express Unibertsitatea - Zuatzu"
+    ]
+  },
+  {
+    "id": "48",
+    "code": "48",
+    "name": "Zuatzu",
+    "lines": [
+      "5"
+    ],
+    "destinations": [
+      "Benta Berri-Zuatzu",
+      "Express Unibertsitatea - Zuatzu"
+    ]
+  },
+  {
+    "id": "49",
+    "code": "49",
+    "name": "Errotaburu 6",
+    "lines": [
+      "5"
+    ],
+    "destinations": [
+      "Benta Berri",
+      "Benta Berri-Zuatzu",
+      "Express Unibertsitatea - Zuatzu"
+    ]
+  },
+  {
+    "id": "50",
+    "code": "50",
+    "name": "Tolosa 138",
+    "lines": [
+      "5",
+      "25",
+      "27",
+      "35",
+      "B1",
+      "43",
+      "45"
+    ],
+    "destinations": [
+      "Benta Berri",
+      "Benta Berri-Zuatzu",
+      "Express Unibertsitatea - Zuatzu",
+      "Benta Berri - Añorga - Belartza",
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Añorga",
+      "Amara - Gros - Altza",
+      "Antiguo-Aiete-Ospitaleak",
+      "Aiete-Antiguo",
+      "Benta Berri - Añorga",
+      "Amara-Anoeta",
+      "Antiguo - Uniber - Etxadi"
+    ]
+  },
+  {
+    "id": "51",
+    "code": "51",
+    "name": "Zarautz 90",
+    "lines": [
+      "5",
+      "B8"
+    ],
+    "destinations": [
+      "Benta Berri",
+      "Benta Berri-Zuatzu",
+      "Miraconcha - Benta Berri - Seminario"
+    ]
+  },
+  {
+    "id": "52",
+    "code": "52",
+    "name": "Resurrección Mª de Azkue 32",
+    "lines": [
+      "5",
+      "B8"
+    ],
+    "destinations": [
+      "Benta Berri",
+      "Benta Berri-Zuatzu",
+      "Miraconcha - Benta Berri - Seminario"
+    ]
+  },
+  {
+    "id": "53",
+    "code": "53",
+    "name": "Resurrección Mª de Azkue",
+    "lines": [
+      "B8"
+    ],
+    "destinations": [
+      "Miraconcha - Benta Berri - Seminario"
+    ]
+  },
+  {
+    "id": "54",
+    "code": "54",
+    "name": "Bentaberri",
+    "lines": [
+      "B8"
+    ],
+    "destinations": [
+      "Miraconcha - Benta Berri - Seminario"
+    ]
+  },
+  {
+    "id": "55",
+    "code": "55",
+    "name": "Matia",
+    "lines": [
+      "B8"
+    ],
+    "destinations": [
+      "Miraconcha - Benta Berri - Seminario"
+    ]
+  },
+  {
+    "id": "56",
+    "code": "56",
+    "name": "Boulevard 15",
+    "lines": [
+      "8",
+      "29",
+      "31",
+      "B3"
+    ],
+    "destinations": [
+      "Gros - Intxaurrondo",
+      "Boulevard",
+      "Intxaurrondo Sur",
+      "Boulevard - Aiete - Ospitaleak",
+      "Egia - Intxaurrondo - Zubiaurre",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "57",
+    "code": "57",
+    "name": "Iparragirre 8",
+    "lines": [
+      "8",
+      "17",
+      "40",
+      "41"
+    ],
+    "destinations": [
+      "Gros - Intxaurrondo",
+      "Paseo Colón - Iparagirre",
+      "Gros",
+      "Gros-Cocheras"
+    ]
+  },
+  {
+    "id": "58",
+    "code": "58",
+    "name": "Zubiaurre 64",
+    "lines": [
+      "14",
+      "31",
+      "B10"
+    ],
+    "destinations": [
+      "Zubiaurre - Bidebieta",
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "59",
+    "code": "59",
+    "name": "Txomiñeneko Anbulatorioa",
+    "lines": [
+      "26",
+      "31",
+      "B4"
+    ],
+    "destinations": [
+      "Amara - Riberas - Martutene",
+      "Amara - Riberas - Poligono 27",
+      "Riberas - Poligono 27 - Altza"
+    ]
+  },
+  {
+    "id": "60",
+    "code": "60",
+    "name": "Nafarroa 34",
+    "lines": [
+      "8",
+      "17",
+      "40",
+      "41"
+    ],
+    "destinations": [
+      "Gros - Intxaurrondo",
+      "Gros",
+      "Egia-Loiola-Martutene"
+    ]
+  },
+  {
+    "id": "61",
+    "code": "61",
+    "name": "Arbos Musikaria / M. Arbos Z.10",
+    "lines": [
+      "8",
+      "14",
+      "31",
+      "B10"
+    ],
+    "destinations": [
+      "Gros - Intxaurrondo",
+      "Zubiaurre - Bidebieta",
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "62",
+    "code": "62",
+    "name": "Arbos Musikaria / Maestro Arbos",
+    "lines": [
+      "8",
+      "29"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Paseo Colón - Iparagirre",
+      "Paseo Colón - Miracruz"
+    ]
+  },
+  {
+    "id": "63",
+    "code": "63",
+    "name": "Renfe - Zubiaurre 27",
+    "lines": [
+      "8",
+      "14",
+      "31",
+      "B10"
+    ],
+    "destinations": [
+      "Gros - Intxaurrondo",
+      "Zubiaurre - Bidebieta",
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "64",
+    "code": "64",
+    "name": "Renfe Ategorrieta",
+    "lines": [
+      "8",
+      "29"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Paseo Colón - Iparagirre",
+      "Paseo Colón - Miracruz"
+    ]
+  },
+  {
+    "id": "65",
+    "code": "65",
+    "name": "Zarategi 8",
+    "lines": [
+      "8",
+      "9",
+      "B3"
+    ],
+    "destinations": [
+      "Gros - Intxaurrondo",
+      "Egia - Okendo",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "66",
+    "code": "66",
+    "name": "Gaztelu",
+    "lines": [
+      "8",
+      "9",
+      "B3"
+    ],
+    "destinations": [
+      "Gros - Intxaurrondo",
+      "Egia - Okendo",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "67",
+    "code": "67",
+    "name": "Lafont",
+    "lines": [
+      "8",
+      "9",
+      "B3"
+    ],
+    "destinations": [
+      "Gros - Intxaurrondo",
+      "Egia - Okendo",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "68",
+    "code": "68",
+    "name": "Basotxiki",
+    "lines": [
+      "8",
+      "9",
+      "29",
+      "B3"
+    ],
+    "destinations": [
+      "Gros - Intxaurrondo",
+      "Boulevard",
+      "Paseo Colón - Iparagirre",
+      "Egia - Okendo",
+      "Paseo Colón - Miracruz",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "69",
+    "code": "69",
+    "name": "Julimasene",
+    "lines": [
+      "8",
+      "9",
+      "29",
+      "B3"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Paseo Colón - Iparagirre",
+      "Egia - Okendo",
+      "Paseo Colón - Miracruz",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "70",
+    "code": "70",
+    "name": "Zubiaurre 117",
+    "lines": [
+      "8",
+      "9",
+      "29",
+      "B3"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Paseo Colón - Iparagirre",
+      "Egia - Okendo",
+      "Paseo Colón - Miracruz",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "71",
+    "code": "71",
+    "name": "Zubiaurre 70",
+    "lines": [
+      "8",
+      "9",
+      "29",
+      "B3"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Paseo Colón - Iparagirre",
+      "Egia - Okendo",
+      "Paseo Colón - Miracruz",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "72",
+    "code": "72",
+    "name": "Zabaltoki",
+    "lines": [
+      "8",
+      "9",
+      "29",
+      "B3"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Paseo Colón - Iparagirre",
+      "Egia - Okendo",
+      "Paseo Colón - Miracruz",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "73",
+    "code": "73",
+    "name": "Zubiaurre 39",
+    "lines": [
+      "8",
+      "9",
+      "29",
+      "B3"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Paseo Colón - Iparagirre",
+      "Egia - Okendo",
+      "Paseo Colón - Miracruz",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "74",
+    "code": "74",
+    "name": "Ategorrieta 31",
+    "lines": [
+      "8",
+      "29",
+      "42"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Paseo Colón - Iparagirre",
+      "Paseo Colón - Miracruz",
+      "Okendo",
+      "Gros-Sta Catalina"
+    ]
+  },
+  {
+    "id": "75",
+    "code": "75",
+    "name": "Galtzada Nagusia / Gran Vía 21",
+    "lines": [
+      "8",
+      "29",
+      "42"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Paseo Colón - Iparagirre",
+      "Paseo Colón - Miracruz",
+      "Okendo",
+      "Gros-Sta Catalina"
+    ]
+  },
+  {
+    "id": "76",
+    "code": "76",
+    "name": "Colon 17",
+    "lines": [
+      "8",
+      "13",
+      "14",
+      "17",
+      "24",
+      "29",
+      "31",
+      "33",
+      "37",
+      "40",
+      "42",
+      "46"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Paseo Colón - Iparagirre",
+      "Buenavista - Paseo Colón",
+      "Anoeta (Fútbol)",
+      "Amara-Ospitaleak-Miramon",
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo",
+      "Paseo Colón - Miracruz",
+      "Aiete-Ospitaleak",
+      "Antiguo-Berio-Igara",
+      "Estación del Norte-Zorroaga",
+      "Antiguo-Igara",
+      "Okendo",
+      "Gros-Sta Catalina",
+      "Morlans"
+    ]
+  },
+  {
+    "id": "77",
+    "code": "77",
+    "name": "Askatasuna / Libertad 6",
+    "lines": [
+      "8",
+      "9",
+      "B3"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Okendo",
+      "Egia - Okendo",
+      "Egia-Okendo",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "78",
+    "code": "78",
+    "name": "Elosegi 22",
+    "lines": [
+      "14",
+      "B6"
+    ],
+    "destinations": [
+      "Bidebieta",
+      "Altza"
+    ]
+  },
+  {
+    "id": "79",
+    "code": "79",
+    "name": "Boulevard 13",
+    "lines": [
+      "26",
+      "B2"
+    ],
+    "destinations": [
+      "Amara - Riberas - Martutene",
+      "Boulevard",
+      "Amara - Riberas - Poligono 27",
+      "Aiete - Bera Bera"
+    ]
+  },
+  {
+    "id": "80",
+    "code": "80",
+    "name": "Askatasuna / Libertad 15",
+    "lines": [
+      "29",
+      "31",
+      "B3"
+    ],
+    "destinations": [
+      "Intxaurrondo Sur",
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Egia - Intxaurrondo - Zubiaurre"
+    ]
+  },
+  {
+    "id": "81",
+    "code": "81",
+    "name": "Epaitegiak / Juzgados",
+    "lines": [
+      "9",
+      "B3",
+      "42"
+    ],
+    "destinations": [
+      "Egia - Intxaurrondo",
+      "Egia - Intxaurrondo - Zubiaurre",
+      "Aldapa-Egia"
+    ]
+  },
+  {
+    "id": "82",
+    "code": "82",
+    "name": "Tabakalera",
+    "lines": [
+      "9",
+      "B3",
+      "42"
+    ],
+    "destinations": [
+      "Egia - Intxaurrondo",
+      "Egia - Intxaurrondo - Zubiaurre",
+      "Aldapa-Egia"
+    ]
+  },
+  {
+    "id": "83",
+    "code": "83",
+    "name": "Egia 24",
+    "lines": [
+      "9",
+      "B3",
+      "42"
+    ],
+    "destinations": [
+      "Egia - Intxaurrondo",
+      "Egia - Intxaurrondo - Zubiaurre",
+      "Aldapa-Egia"
+    ]
+  },
+  {
+    "id": "84",
+    "code": "84",
+    "name": "Ametzagaña 14",
+    "lines": [
+      "9",
+      "24",
+      "B3",
+      "42"
+    ],
+    "destinations": [
+      "Egia - Intxaurrondo",
+      "Amara-Intxaurrondo-Altza",
+      "Egia - Intxaurrondo - Zubiaurre",
+      "Aldapa-Egia"
+    ]
+  },
+  {
+    "id": "85",
+    "code": "85",
+    "name": "María Reina",
+    "lines": [
+      "9",
+      "24",
+      "B3"
+    ],
+    "destinations": [
+      "Egia - Intxaurrondo",
+      "Amara-Intxaurrondo-Altza",
+      "Egia - Intxaurrondo - Zubiaurre"
+    ]
+  },
+  {
+    "id": "86",
+    "code": "86",
+    "name": "Polloe - Ametzagaña 58",
+    "lines": [
+      "9",
+      "B3"
+    ],
+    "destinations": [
+      "Egia - Intxaurrondo",
+      "Egia - Intxaurrondo - Zubiaurre"
+    ]
+  },
+  {
+    "id": "87",
+    "code": "87",
+    "name": "Tolaregoia",
+    "lines": [
+      "9",
+      "B3"
+    ],
+    "destinations": [
+      "Egia - Intxaurrondo",
+      "Egia - Intxaurrondo - Zubiaurre"
+    ]
+  },
+  {
+    "id": "88",
+    "code": "88",
+    "name": "Beharko",
+    "lines": [
+      "9",
+      "B3"
+    ],
+    "destinations": [
+      "Egia - Intxaurrondo",
+      "Egia - Intxaurrondo - Zubiaurre"
+    ]
+  },
+  {
+    "id": "89",
+    "code": "89",
+    "name": "Galizia 18",
+    "lines": [
+      "9",
+      "29",
+      "B3"
+    ],
+    "destinations": [
+      "Egia - Intxaurrondo",
+      "Intxaurrondo Sur",
+      "Egia - Intxaurrondo - Zubiaurre"
+    ]
+  },
+  {
+    "id": "90",
+    "code": "90",
+    "name": "Galizia 28",
+    "lines": [
+      "9",
+      "29",
+      "B3"
+    ],
+    "destinations": [
+      "Egia - Intxaurrondo",
+      "Intxaurrondo Sur",
+      "Egia - Intxaurrondo - Zubiaurre"
+    ]
+  },
+  {
+    "id": "91",
+    "code": "91",
+    "name": "Buztintxulo",
+    "lines": [
+      "9",
+      "29",
+      "B3"
+    ],
+    "destinations": [
+      "Egia - Intxaurrondo",
+      "Intxaurrondo Sur",
+      "Egia - Intxaurrondo - Zubiaurre"
+    ]
+  },
+  {
+    "id": "92",
+    "code": "92",
+    "name": "Baratzategi 21",
+    "lines": [
+      "9",
+      "29",
+      "B3"
+    ],
+    "destinations": [
+      "Egia - Intxaurrondo",
+      "Okendo",
+      "Egia - Okendo",
+      "Egia - Puente Santa Catalina",
+      "Intxaurrondo Sur",
+      "Boulevard",
+      "Paseo Colón - Miracruz",
+      "Egia - Intxaurrondo - Zubiaurre",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "93",
+    "code": "93",
+    "name": "Txara II",
+    "lines": [
+      "9",
+      "27",
+      "29",
+      "33",
+      "B3"
+    ],
+    "destinations": [
+      "Okendo",
+      "Egia - Okendo",
+      "Egia - Puente Santa Catalina",
+      "Intxaurrondo - Amara - Antiguo",
+      "Anoeta (Fútbol)",
+      "Boulevard",
+      "Paseo Colón - Miracruz",
+      "Antiguo-Berio-Igara",
+      "Intx-Gros-Boulevard",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "94",
+    "code": "94",
+    "name": "Elosegi 43",
+    "lines": [
+      "14",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza",
+      "Buenavista - Bidebieta - Boulevard",
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "95",
+    "code": "95",
+    "name": "Mons 77",
+    "lines": [
+      "9",
+      "27",
+      "33",
+      "B3"
+    ],
+    "destinations": [
+      "Okendo",
+      "Egia - Okendo",
+      "Egia - Puente Santa Catalina",
+      "Intxaurrondo - Amara - Antiguo",
+      "Anoeta (Fútbol)",
+      "Antiguo-Berio-Igara",
+      "Intx-Gros-Boulevard",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "96",
+    "code": "96",
+    "name": "Dbus Kotxerak",
+    "lines": [
+      "9",
+      "27",
+      "29",
+      "33",
+      "41",
+      "B3"
+    ],
+    "destinations": [
+      "Okendo",
+      "Egia - Okendo",
+      "Egia-Okendo",
+      "Egia - Puente Santa Catalina",
+      "Intxaurrondo - Amara - Antiguo",
+      "Anoeta (Fútbol)",
+      "Intxaurrondo Sur",
+      "Gros-Intxaurrondo-Larratxo",
+      "Egia-Loiola-Martutene",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "97",
+    "code": "97",
+    "name": "Karmengo Andre Maria 65",
+    "lines": [
+      "9",
+      "27",
+      "41",
+      "B3",
+      "42"
+    ],
+    "destinations": [
+      "Okendo",
+      "Egia - Okendo",
+      "Egia-Okendo",
+      "Egia - Puente Santa Catalina",
+      "Intxaurrondo - Amara - Antiguo",
+      "Amara - Antiguo",
+      "Anoeta (Fútbol)",
+      "Egia-Loiola-Martutene",
+      "Egia - Boulevard",
+      "Gros-Sta Catalina"
+    ]
+  },
+  {
+    "id": "98",
+    "code": "98",
+    "name": "Karmengo Andre Maria 43",
+    "lines": [
+      "9",
+      "27",
+      "41",
+      "B3"
+    ],
+    "destinations": [
+      "Okendo",
+      "Egia - Okendo",
+      "Egia-Okendo",
+      "Egia - Puente Santa Catalina",
+      "Intxaurrondo - Amara - Antiguo",
+      "Amara - Antiguo",
+      "Anoeta (Fútbol)",
+      "Egia-Loiola-Martutene",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "99",
+    "code": "99",
+    "name": "Egia 17",
+    "lines": [
+      "41"
+    ],
+    "destinations": [
+      "Gros"
+    ]
+  },
+  {
+    "id": "100",
+    "code": "100",
+    "name": "Frantziskotarrak",
+    "lines": [
+      "9",
+      "41",
+      "B3"
+    ],
+    "destinations": [
+      "Okendo",
+      "Egia - Okendo",
+      "Egia-Okendo",
+      "Egia - Puente Santa Catalina",
+      "Gros",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "101",
+    "code": "101",
+    "name": "Mandasko Dukea 3",
+    "lines": [
+      "9",
+      "41",
+      "B3"
+    ],
+    "destinations": [
+      "Okendo",
+      "Egia - Okendo",
+      "Egia-Okendo",
+      "Egia - Puente Santa Catalina",
+      "Gros",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "102",
+    "code": "102",
+    "name": "Boulevard 3",
+    "lines": [
+      "13",
+      "14",
+      "33",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Altza",
+      "Boulevard",
+      "Buenavista - Altza",
+      "Buenavista - Boulevard",
+      "Bidebieta - Altza",
+      "Bidebieta - Boulevard",
+      "Bidebieta - Buenavista - Altza",
+      "Zubiaurre - Bidebieta",
+      "Intx-Gros-Boulevard",
+      "Buenavista - Bidebieta - Boulevard",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "103",
+    "code": "103",
+    "name": "Askatasuna  21",
+    "lines": [
+      "13",
+      "33",
+      "36",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Gros-Intxaurrondo-Larratxo",
+      "Avda.Libertad - Gros - Aldakonea",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "104",
+    "code": "104",
+    "name": "Pinudi / Pinares M.16",
+    "lines": [
+      "13",
+      "27",
+      "37",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Buenavista - Paseo Colón",
+      "Paseo Colón - Miracruz",
+      "Amara - Gros - Altza",
+      "Avd Libertad - Rodil",
+      "Santa Catalina - Rodil",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "105",
+    "code": "105",
+    "name": "Euskal Herria / Vasconia",
+    "lines": [
+      "13",
+      "14",
+      "27",
+      "29",
+      "31",
+      "33",
+      "36",
+      "37",
+      "B6",
+      "B10",
+      "46"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Bidebieta",
+      "Zubiaurre - Bidebieta",
+      "BIdebieta",
+      "Amara - Gros - Altza",
+      "Intxaurrondo Sur",
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Gros-Intxaurrondo-Larratxo",
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea",
+      "Avd Libertad - Rodil",
+      "Santa Catalina - Rodil",
+      "Zubiaurre - Bidebieta - Buenavista - Altza",
+      "Avenida Libertad - San Antonio",
+      "Santa Catalina San Antonio"
+    ]
+  },
+  {
+    "id": "106",
+    "code": "106",
+    "name": "Jai Alai",
+    "lines": [
+      "13",
+      "14",
+      "27",
+      "29",
+      "33",
+      "37",
+      "B6",
+      "46"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Bidebieta",
+      "BIdebieta",
+      "Amara - Gros - Altza",
+      "Intxaurrondo Sur",
+      "Gros-Intxaurrondo-Larratxo",
+      "Avd Libertad - Rodil",
+      "Avenida Libertad - San Antonio",
+      "Santa Catalina San Antonio"
+    ]
+  },
+  {
+    "id": "107",
+    "code": "107",
+    "name": "Erlojua / Reloj",
+    "lines": [
+      "13",
+      "14",
+      "27",
+      "B6",
+      "46"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Bidebieta",
+      "BIdebieta",
+      "Amara - Gros - Altza",
+      "Avenida Libertad - San Antonio",
+      "Santa Catalina San Antonio"
+    ]
+  },
+  {
+    "id": "108",
+    "code": "108",
+    "name": "Intxaurrondo Zaharra",
+    "lines": [
+      "13",
+      "14",
+      "B6",
+      "46"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Bidebieta",
+      "BIdebieta",
+      "Avenida Libertad - San Antonio",
+      "Santa Catalina San Antonio"
+    ]
+  },
+  {
+    "id": "109",
+    "code": "109",
+    "name": "Mirakruzgaña / Alto Miracruz",
+    "lines": [
+      "13",
+      "14",
+      "27",
+      "B6",
+      "46"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Bidebieta",
+      "BIdebieta",
+      "Amara - Gros - Altza",
+      "Avenida Libertad - San Antonio",
+      "Santa Catalina San Antonio"
+    ]
+  },
+  {
+    "id": "110",
+    "code": "110",
+    "name": "J. Elosegi 111",
+    "lines": [
+      "13",
+      "27",
+      "38",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Amara - Gros - Altza",
+      "Larratxo-Altza-Eskalantegi-Molinao",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "111",
+    "code": "111",
+    "name": "Herrera Euskotren",
+    "lines": [
+      "13",
+      "27",
+      "38",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Amara - Gros - Altza",
+      "Larratxo-Altza-Eskalantegi-Molinao",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "112",
+    "code": "112",
+    "name": "Herrera 20",
+    "lines": [
+      "13",
+      "27",
+      "31",
+      "B6"
+    ],
+    "destinations": [
+      "Altza",
+      "Bidebieta - Altza",
+      "Amara - Gros - Altza",
+      "Riberas - Poligono 27 - Altza"
+    ]
+  },
+  {
+    "id": "113",
+    "code": "113",
+    "name": "Herrera 42",
+    "lines": [
+      "13",
+      "27",
+      "31",
+      "B6"
+    ],
+    "destinations": [
+      "Altza",
+      "Bidebieta - Altza",
+      "Amara - Gros - Altza",
+      "Riberas - Poligono 27 - Altza"
+    ]
+  },
+  {
+    "id": "114",
+    "code": "114",
+    "name": "Erroteta Behekoa",
+    "lines": [
+      "13",
+      "31",
+      "B6"
+    ],
+    "destinations": [
+      "Altza",
+      "Bidebieta - Altza",
+      "Riberas - Poligono 27 - Altza"
+    ]
+  },
+  {
+    "id": "115",
+    "code": "115",
+    "name": "Santa Barbara",
+    "lines": [
+      "13",
+      "27",
+      "31",
+      "38",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Amara - Gros - Altza",
+      "Anoeta (Fútbol)",
+      "Poligono 27 - Ospitaleak - Miramon",
+      "Riberas - Poligono 27 - Altza",
+      "Trintxerpe-Azkuene",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "116",
+    "code": "116",
+    "name": "Nerecan",
+    "lines": [
+      "13",
+      "27",
+      "31",
+      "38",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Amara - Gros - Altza",
+      "Anoeta (Fútbol)",
+      "Poligono 27 - Ospitaleak - Miramon",
+      "Trintxerpe-Azkuene",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "117",
+    "code": "117",
+    "name": "San Martzial",
+    "lines": [
+      "13",
+      "27",
+      "31",
+      "38",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Amara - Gros - Altza",
+      "Anoeta (Fútbol)",
+      "Poligono 27 - Ospitaleak - Miramon",
+      "Trintxerpe-Azkuene",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "118",
+    "code": "118",
+    "name": "Martillun",
+    "lines": [
+      "13",
+      "27",
+      "31",
+      "38",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Amara - Gros - Altza",
+      "Anoeta (Fútbol)",
+      "Poligono 27 - Ospitaleak - Miramon",
+      "Trintxerpe-Azkuene",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "119",
+    "code": "119",
+    "name": "Larratxo 46",
+    "lines": [
+      "13",
+      "24",
+      "27",
+      "31",
+      "33",
+      "38",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Amara-Intxaurrondo-Altza",
+      "Amara - Gros - Altza",
+      "Anoeta (Fútbol)",
+      "Poligono 27 - Ospitaleak - Miramon",
+      "Gros-Intxaurrondo-Larratxo",
+      "Trintxerpe-Azkuene",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "120",
+    "code": "120",
+    "name": "Larratxo I",
+    "lines": [
+      "13",
+      "33",
+      "38",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Altza",
+      "Boulevard",
+      "Buenavista - Altza",
+      "Buenavista - Boulevard",
+      "Bidebieta - Altza",
+      "Bidebieta - Boulevard",
+      "Bidebieta - Buenavista - Altza",
+      "Buenavista - Paseo Colón",
+      "Paseo Colón - Miracruz",
+      "Antiguo-Berio-Igara",
+      "Gros-Intxaurrondo-Larratxo",
+      "Larratxo-Altza-Eskalantegi-Molinao",
+      "Buenavista - Bidebieta - Boulevard",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "121",
+    "code": "121",
+    "name": "Bianka",
+    "lines": [
+      "13",
+      "24",
+      "38",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Buenavista - Boulevard",
+      "Bidebieta - Boulevard",
+      "Buenavista - Paseo Colón",
+      "Paseo Colón - Miracruz",
+      "Gros-Amara-Antiguo",
+      "Larratxo-Altza-Eskalantegi-Molinao",
+      "Buenavista - Bidebieta - Boulevard"
+    ]
+  },
+  {
+    "id": "122",
+    "code": "122",
+    "name": "Lauaizeta 33",
+    "lines": [
+      "13",
+      "24",
+      "38",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Buenavista - Boulevard",
+      "Bidebieta - Boulevard",
+      "Buenavista - Paseo Colón",
+      "Paseo Colón - Miracruz",
+      "Gros-Amara-Antiguo",
+      "Larratxo-Altza-Eskalantegi-Molinao",
+      "Buenavista - Bidebieta - Boulevard"
+    ]
+  },
+  {
+    "id": "123",
+    "code": "123",
+    "name": "Altza 55",
+    "lines": [
+      "13",
+      "24",
+      "38",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Buenavista - Boulevard",
+      "Bidebieta - Boulevard",
+      "Buenavista - Paseo Colón",
+      "Paseo Colón - Miracruz",
+      "Gros-Amara-Antiguo",
+      "Larratxo-Altza-Eskalantegi-Molinao",
+      "Buenavista - Bidebieta - Boulevard"
+    ]
+  },
+  {
+    "id": "124",
+    "code": "124",
+    "name": "Larratxo 94",
+    "lines": [
+      "13",
+      "24",
+      "38",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Buenavista - Boulevard",
+      "Bidebieta - Boulevard",
+      "Buenavista - Paseo Colón",
+      "Paseo Colón - Miracruz",
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo",
+      "Larratxo-Altza-Eskalantegi-Molinao",
+      "Buenavista - Bidebieta - Boulevard"
+    ]
+  },
+  {
+    "id": "125",
+    "code": "125",
+    "name": "Arriberri",
+    "lines": [
+      "13",
+      "38",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Buenavista - Boulevard",
+      "Bidebieta - Boulevard",
+      "Buenavista - Paseo Colón",
+      "Paseo Colón - Miracruz",
+      "Larratxo-Altza-Eskalantegi-Molinao",
+      "Buenavista - Bidebieta - Boulevard"
+    ]
+  },
+  {
+    "id": "126",
+    "code": "126",
+    "name": "Arria Parkea",
+    "lines": [
+      "13",
+      "24",
+      "B10"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Bidebieta - Boulevard",
+      "Paseo Colón - Miracruz",
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo"
+    ]
+  },
+  {
+    "id": "127",
+    "code": "127",
+    "name": "Pikabea",
+    "lines": [
+      "13",
+      "24",
+      "B10"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Bidebieta - Boulevard",
+      "Paseo Colón - Miracruz",
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo"
+    ]
+  },
+  {
+    "id": "128",
+    "code": "128",
+    "name": "Renfe Herrera",
+    "lines": [
+      "13",
+      "24",
+      "B10"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Bidebieta - Boulevard",
+      "Paseo Colón - Miracruz",
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo"
+    ]
+  },
+  {
+    "id": "129",
+    "code": "129",
+    "name": "Herrera",
+    "lines": [
+      "13",
+      "24",
+      "38",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Buenavista - Boulevard",
+      "Bidebieta - Boulevard",
+      "Buenavista - Paseo Colón",
+      "Paseo Colón - Miracruz",
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo",
+      "Trintxerpe-Azkuene",
+      "Buenavista - Bidebieta - Boulevard"
+    ]
+  },
+  {
+    "id": "130",
+    "code": "130",
+    "name": "Gaiztarro",
+    "lines": [
+      "13",
+      "24",
+      "38",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Buenavista - Boulevard",
+      "Bidebieta - Boulevard",
+      "Buenavista - Paseo Colón",
+      "Paseo Colón - Miracruz",
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo",
+      "Trintxerpe-Azkuene",
+      "Buenavista - Bidebieta - Boulevard"
+    ]
+  },
+  {
+    "id": "131",
+    "code": "131",
+    "name": "Mirakruzgaña / Alto Miracruz II",
+    "lines": [
+      "13",
+      "14",
+      "24",
+      "31",
+      "B6",
+      "B10",
+      "46"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Buenavista - Boulevard",
+      "Bidebieta - Boulevard",
+      "Buenavista - Paseo Colón",
+      "Paseo Colón - Miracruz",
+      "Gipuzkoa Plaza",
+      "Anoeta (Fútbol)",
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo",
+      "Boulevard - Aiete - Ospitaleak",
+      "Aiete-Ospitaleak",
+      "Buenavista - Bidebieta - Boulevard",
+      "Morlans"
+    ]
+  },
+  {
+    "id": "132",
+    "code": "132",
+    "name": "Ulia",
+    "lines": [
+      "13",
+      "14",
+      "31",
+      "B6",
+      "B10",
+      "46"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Buenavista - Boulevard",
+      "Bidebieta - Boulevard",
+      "Buenavista - Paseo Colón",
+      "Paseo Colón - Miracruz",
+      "Gipuzkoa Plaza",
+      "Anoeta (Fútbol)",
+      "Boulevard - Aiete - Ospitaleak",
+      "Aiete-Ospitaleak",
+      "Buenavista - Bidebieta - Boulevard",
+      "Morlans"
+    ]
+  },
+  {
+    "id": "133",
+    "code": "133",
+    "name": "Toki Eder",
+    "lines": [
+      "13",
+      "14",
+      "24",
+      "31",
+      "B6",
+      "B10",
+      "46"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Buenavista - Boulevard",
+      "Bidebieta - Boulevard",
+      "Buenavista - Paseo Colón",
+      "Paseo Colón - Miracruz",
+      "Anoeta (Fútbol)",
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo",
+      "Boulevard - Aiete - Ospitaleak",
+      "Aiete-Ospitaleak",
+      "Buenavista - Bidebieta - Boulevard",
+      "Morlans"
+    ]
+  },
+  {
+    "id": "134",
+    "code": "134",
+    "name": "Jesuitak",
+    "lines": [
+      "13",
+      "14",
+      "24",
+      "31",
+      "33",
+      "B6",
+      "B10",
+      "46"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Buenavista - Boulevard",
+      "Bidebieta - Boulevard",
+      "Buenavista - Paseo Colón",
+      "Paseo Colón - Miracruz",
+      "Gipuzkoa Plaza",
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo",
+      "Boulevard - Aiete - Ospitaleak",
+      "Aiete-Ospitaleak",
+      "Intx-Gros-Boulevard",
+      "Buenavista - Bidebieta - Boulevard",
+      "Morlans"
+    ]
+  },
+  {
+    "id": "135",
+    "code": "135",
+    "name": "Mariaren Bihotza",
+    "lines": [
+      "13",
+      "14",
+      "24",
+      "31",
+      "33",
+      "37",
+      "B6",
+      "B10",
+      "46"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Buenavista - Boulevard",
+      "Bidebieta - Boulevard",
+      "Buenavista - Paseo Colón",
+      "Paseo Colón - Miracruz",
+      "Gipuzkoa Plaza",
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo",
+      "Boulevard - Aiete - Ospitaleak",
+      "Aiete-Ospitaleak",
+      "Intx-Gros-Boulevard",
+      "Gipuzkoa Plaza - Estación del Norte - Zorroaga",
+      "Estación del Norte-Zorroaga",
+      "Buenavista - Bidebieta - Boulevard",
+      "Morlans"
+    ]
+  },
+  {
+    "id": "136",
+    "code": "136",
+    "name": "Kursaal",
+    "lines": [
+      "13",
+      "14",
+      "29",
+      "31",
+      "33",
+      "37",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Buenavista - Boulevard",
+      "Bidebieta - Boulevard",
+      "Gipuzkoa Plaza",
+      "Boulevard - Aiete - Ospitaleak",
+      "Intx-Gros-Boulevard",
+      "Gipuzkoa Plaza - Estación del Norte - Zorroaga",
+      "Buenavista - Bidebieta - Boulevard"
+    ]
+  },
+  {
+    "id": "137",
+    "code": "137",
+    "name": "Escalerillas",
+    "lines": [
+      "13",
+      "B10"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "138",
+    "code": "138",
+    "name": "Pasaiako Portua - Escalerillas",
+    "lines": [
+      "13",
+      "B6"
+    ],
+    "destinations": [
+      "Buenavista - Boulevard",
+      "Buenavista - Paseo Colón",
+      "Buenavista - Bidebieta - Boulevard"
+    ]
+  },
+  {
+    "id": "139",
+    "code": "139",
+    "name": "Casares 57",
+    "lines": [
+      "13",
+      "B10"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "140",
+    "code": "140",
+    "name": "Buenavista Casares",
+    "lines": [
+      "13",
+      "38",
+      "B6"
+    ],
+    "destinations": [
+      "Buenavista - Boulevard",
+      "Buenavista - Paseo Colón",
+      "Larratxo-Altza-Eskalantegi-Molinao",
+      "Buenavista - Bidebieta - Boulevard"
+    ]
+  },
+  {
+    "id": "141",
+    "code": "141",
+    "name": "Casares 69",
+    "lines": [
+      "13",
+      "B10"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "142",
+    "code": "142",
+    "name": "Darieta",
+    "lines": [
+      "13",
+      "38",
+      "B6"
+    ],
+    "destinations": [
+      "Buenavista - Boulevard",
+      "Buenavista - Paseo Colón",
+      "Larratxo-Altza-Eskalantegi-Molinao",
+      "Buenavista - Bidebieta - Boulevard"
+    ]
+  },
+  {
+    "id": "143",
+    "code": "143",
+    "name": "Casares 42",
+    "lines": [
+      "13",
+      "B10"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "144",
+    "code": "144",
+    "name": "Oleta",
+    "lines": [
+      "13",
+      "38",
+      "B6"
+    ],
+    "destinations": [
+      "Buenavista - Boulevard",
+      "Buenavista - Paseo Colón",
+      "Larratxo-Altza-Eskalantegi-Molinao",
+      "Buenavista - Bidebieta - Boulevard"
+    ]
+  },
+  {
+    "id": "145",
+    "code": "145",
+    "name": "Arrizar",
+    "lines": [
+      "13",
+      "B10"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "146",
+    "code": "146",
+    "name": "Aitzgain",
+    "lines": [
+      "13"
+    ],
+    "destinations": [
+      "Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "147",
+    "code": "147",
+    "name": "Txirrita Bertsolaria 54",
+    "lines": [
+      "13"
+    ],
+    "destinations": [
+      "Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "148",
+    "code": "148",
+    "name": "Txirrita Bertsolaria 21",
+    "lines": [
+      "13"
+    ],
+    "destinations": [
+      "Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "149",
+    "code": "149",
+    "name": "Txirrita Bertsolaria 13",
+    "lines": [
+      "13"
+    ],
+    "destinations": [
+      "Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "150",
+    "code": "150",
+    "name": "Pinudi/ Pinares - Mirakruz 14",
+    "lines": [
+      "14",
+      "29",
+      "31",
+      "33",
+      "36",
+      "46"
+    ],
+    "destinations": [
+      "Bidebieta",
+      "Zubiaurre - Bidebieta",
+      "BIdebieta",
+      "Intxaurrondo Sur",
+      "Paseo Colón - Miracruz",
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Gros-Intxaurrondo-Larratxo",
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea",
+      "Avenida Libertad - San Antonio",
+      "Santa Catalina San Antonio"
+    ]
+  },
+  {
+    "id": "151",
+    "code": "151",
+    "name": "Zuatzu-Urola",
+    "lines": [
+      "5"
+    ],
+    "destinations": [
+      "Benta Berri-Zuatzu"
+    ]
+  },
+  {
+    "id": "152",
+    "code": "152",
+    "name": "Fernando Sasiain",
+    "lines": [
+      "29",
+      "33",
+      "37",
+      "41"
+    ],
+    "destinations": [
+      "Intxaurrondo Sur",
+      "Gros-Intxaurrondo-Larratxo",
+      "Avd Libertad - Rodil",
+      "Santa Catalina - Rodil",
+      "Egia-Loiola-Martutene"
+    ]
+  },
+  {
+    "id": "153",
+    "code": "153",
+    "name": "Mons 36",
+    "lines": [
+      "24",
+      "29",
+      "33"
+    ],
+    "destinations": [
+      "Amara-Intxaurrondo-Altza",
+      "Intxaurrondo Sur",
+      "Gros-Intxaurrondo-Larratxo"
+    ]
+  },
+  {
+    "id": "154",
+    "code": "154",
+    "name": "Zarategi 80",
+    "lines": [
+      "24",
+      "29",
+      "33"
+    ],
+    "destinations": [
+      "Amara-Intxaurrondo-Altza",
+      "Intxaurrondo Sur",
+      "Gros-Intxaurrondo-Larratxo"
+    ]
+  },
+  {
+    "id": "155",
+    "code": "155",
+    "name": "Txara I",
+    "lines": [
+      "24",
+      "29",
+      "33"
+    ],
+    "destinations": [
+      "Amara-Intxaurrondo-Altza",
+      "Intxaurrondo Sur",
+      "Gros-Intxaurrondo-Larratxo"
+    ]
+  },
+  {
+    "id": "156",
+    "code": "156",
+    "name": "Gipuzkoa Plaza",
+    "lines": [
+      "14",
+      "37"
+    ],
+    "destinations": [
+      "Bidebieta",
+      "Gipuzkoa Plaza",
+      "Zubiaurre - Bidebieta",
+      "Gipuzkoa Plaza - Estación del Norte - Zorroaga"
+    ]
+  },
+  {
+    "id": "157",
+    "code": "157",
+    "name": "Askatasuna / Libertad 7",
+    "lines": [
+      "9",
+      "14",
+      "37",
+      "42"
+    ],
+    "destinations": [
+      "Egia - Intxaurrondo",
+      "Bidebieta",
+      "Zubiaurre - Bidebieta",
+      "Gipuzkoa Plaza - Estación del Norte - Zorroaga",
+      "Aldapa-Egia"
+    ]
+  },
+  {
+    "id": "158",
+    "code": "158",
+    "name": "Elosegi 102",
+    "lines": [
+      "13",
+      "14",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Bidebieta - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Bidebieta",
+      "Zubiaurre - Bidebieta",
+      "BIdebieta",
+      "Altza",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "159",
+    "code": "159",
+    "name": "Elosegi 283",
+    "lines": [
+      "14",
+      "B6"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza",
+      "Anoeta (Fútbol)",
+      "Buenavista - Bidebieta - Boulevard"
+    ]
+  },
+  {
+    "id": "160",
+    "code": "160",
+    "name": "Juan XXIII 2",
+    "lines": [
+      "13",
+      "14",
+      "B10"
+    ],
+    "destinations": [
+      "Bidebieta - Altza",
+      "Bidebieta",
+      "Zubiaurre - Bidebieta",
+      "BIdebieta",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "161",
+    "code": "161",
+    "name": "Juan XXIII 1",
+    "lines": [
+      "13",
+      "14",
+      "38",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Bidebieta - Boulevard",
+      "Bidebieta - Buenavista - Altza",
+      "Gipuzkoa Plaza",
+      "Anoeta (Fútbol)",
+      "Larratxo-Altza-Eskalantegi-Molinao",
+      "Buenavista - Bidebieta - Boulevard",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "162",
+    "code": "162",
+    "name": "Bidebietako Anbulatorioa",
+    "lines": [
+      "14",
+      "B10"
+    ],
+    "destinations": [
+      "Bidebieta",
+      "Zubiaurre - Bidebieta",
+      "BIdebieta",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "163",
+    "code": "163",
+    "name": "Julio Urkixo 38",
+    "lines": [
+      "14",
+      "B10"
+    ],
+    "destinations": [
+      "Bidebieta",
+      "Zubiaurre - Bidebieta",
+      "BIdebieta",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "164",
+    "code": "164",
+    "name": "Serapio Mujika 29",
+    "lines": [
+      "14",
+      "B10"
+    ],
+    "destinations": [
+      "Bidebieta",
+      "Gipuzkoa Plaza",
+      "Zubiaurre - Bidebieta",
+      "BIdebieta",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "165",
+    "code": "165",
+    "name": "Ategorrieta 65",
+    "lines": [
+      "14",
+      "24",
+      "33"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza",
+      "Anoeta (Fútbol)",
+      "Gros - Amara - Antiguo",
+      "Antiguo-Berio-Igara",
+      "Intx-Gros-Boulevard"
+    ]
+  },
+  {
+    "id": "166",
+    "code": "166",
+    "name": "Ategorrieta 41",
+    "lines": [
+      "14",
+      "17",
+      "33",
+      "40"
+    ],
+    "destinations": [
+      "Anoeta (Fútbol)",
+      "Amara-Ospitaleak-Miramon",
+      "Gros",
+      "Antiguo-Berio-Igara",
+      "Antiguo-Igara"
+    ]
+  },
+  {
+    "id": "167",
+    "code": "167",
+    "name": "Satrustegi I",
+    "lines": [
+      "16",
+      "B7"
+    ],
+    "destinations": [
+      "Igeldo"
+    ]
+  },
+  {
+    "id": "168",
+    "code": "168",
+    "name": "Satrustegi II",
+    "lines": [
+      "16",
+      "B7"
+    ],
+    "destinations": [
+      "Igeldo",
+      "Pío Baroja - Boulevard"
+    ]
+  },
+  {
+    "id": "169",
+    "code": "169",
+    "name": "Funikularra",
+    "lines": [
+      "16",
+      "B7"
+    ],
+    "destinations": [
+      "Igeldo",
+      "Pío Baroja - Boulevard"
+    ]
+  },
+  {
+    "id": "170",
+    "code": "170",
+    "name": "La Sirena",
+    "lines": [
+      "16",
+      "B7"
+    ],
+    "destinations": [
+      "Igeldo"
+    ]
+  },
+  {
+    "id": "171",
+    "code": "171",
+    "name": "Igeldo 81",
+    "lines": [
+      "16",
+      "B7"
+    ],
+    "destinations": [
+      "Igeldo"
+    ]
+  },
+  {
+    "id": "172",
+    "code": "172",
+    "name": "Cristóbal Balenciaga 2",
+    "lines": [
+      "16",
+      "B7"
+    ],
+    "destinations": [
+      "Igeldo"
+    ]
+  },
+  {
+    "id": "173",
+    "code": "173",
+    "name": "Tximistarri",
+    "lines": [
+      "16",
+      "B7"
+    ],
+    "destinations": [
+      "Igeldo"
+    ]
+  },
+  {
+    "id": "174",
+    "code": "174",
+    "name": "Cristóbal Balenciaga 42",
+    "lines": [
+      "16",
+      "B7"
+    ],
+    "destinations": [
+      "Igeldo"
+    ]
+  },
+  {
+    "id": "175",
+    "code": "175",
+    "name": "Amezti 2",
+    "lines": [
+      "16",
+      "B7"
+    ],
+    "destinations": [
+      "Igeldo"
+    ]
+  },
+  {
+    "id": "176",
+    "code": "176",
+    "name": "Kamio C.B.74",
+    "lines": [
+      "16",
+      "B7"
+    ],
+    "destinations": [
+      "Igeldo"
+    ]
+  },
+  {
+    "id": "177",
+    "code": "177",
+    "name": "Cristóbal Balenciaga 96",
+    "lines": [
+      "16",
+      "B7"
+    ],
+    "destinations": [
+      "Igeldo"
+    ]
+  },
+  {
+    "id": "178",
+    "code": "178",
+    "name": "Igeldo Herria",
+    "lines": [
+      "16",
+      "B7"
+    ],
+    "destinations": [
+      "Igeldo"
+    ]
+  },
+  {
+    "id": "179",
+    "code": "179",
+    "name": "Meteorologikoa A.O. 44",
+    "lines": [
+      "16",
+      "B7"
+    ],
+    "destinations": [
+      "Igeldo"
+    ]
+  },
+  {
+    "id": "180",
+    "code": "180",
+    "name": "Camping",
+    "lines": [
+      "16",
+      "B7"
+    ],
+    "destinations": [
+      "Igeldo",
+      "Pío Baroja - Boulevard"
+    ]
+  },
+  {
+    "id": "181",
+    "code": "181",
+    "name": "Meteorologikoa A.O.47",
+    "lines": [
+      "16"
+    ],
+    "destinations": [
+      "Pío Baroja - Boulevard"
+    ]
+  },
+  {
+    "id": "182",
+    "code": "182",
+    "name": "Igeldo Herria - C. Balenciaga 105",
+    "lines": [
+      "16"
+    ],
+    "destinations": [
+      "Pío Baroja - Boulevard"
+    ]
+  },
+  {
+    "id": "183",
+    "code": "183",
+    "name": "Cristóbal Balenciaga 93",
+    "lines": [
+      "16"
+    ],
+    "destinations": [
+      "Pío Baroja - Boulevard"
+    ]
+  },
+  {
+    "id": "184",
+    "code": "184",
+    "name": "Kamio",
+    "lines": [
+      "16"
+    ],
+    "destinations": [
+      "Pío Baroja - Boulevard"
+    ]
+  },
+  {
+    "id": "185",
+    "code": "185",
+    "name": "Amezti",
+    "lines": [
+      "16"
+    ],
+    "destinations": [
+      "Pío Baroja - Boulevard"
+    ]
+  },
+  {
+    "id": "186",
+    "code": "186",
+    "name": "Cristóbal Balenciaga 42 II",
+    "lines": [
+      "16"
+    ],
+    "destinations": [
+      "Pío Baroja - Boulevard"
+    ]
+  },
+  {
+    "id": "187",
+    "code": "187",
+    "name": "Tximistarri II",
+    "lines": [
+      "16"
+    ],
+    "destinations": [
+      "Pío Baroja - Boulevard"
+    ]
+  },
+  {
+    "id": "188",
+    "code": "188",
+    "name": "Cristóbal Balenciaga 1",
+    "lines": [
+      "16"
+    ],
+    "destinations": [
+      "Pío Baroja - Boulevard"
+    ]
+  },
+  {
+    "id": "189",
+    "code": "189",
+    "name": "Igeldo 57",
+    "lines": [
+      "16"
+    ],
+    "destinations": [
+      "Pío Baroja - Boulevard"
+    ]
+  },
+  {
+    "id": "190",
+    "code": "190",
+    "name": "Iruñea",
+    "lines": [
+      "16"
+    ],
+    "destinations": [
+      "Pío Baroja - Boulevard"
+    ]
+  },
+  {
+    "id": "191",
+    "code": "191",
+    "name": "Zuatzu-Ulia",
+    "lines": [
+      "5"
+    ],
+    "destinations": [
+      "Benta Berri-Zuatzu"
+    ]
+  },
+  {
+    "id": "192",
+    "code": "192",
+    "name": "Galtzada Nagusia / Gran Vía 27",
+    "lines": [
+      "14",
+      "17",
+      "33",
+      "40"
+    ],
+    "destinations": [
+      "Anoeta (Fútbol)",
+      "Amara-Ospitaleak-Miramon",
+      "Antiguo-Berio-Igara",
+      "Antiguo-Igara"
+    ]
+  },
+  {
+    "id": "193",
+    "code": "193",
+    "name": "Estaciones- Renfe- Bus- Geltokiak",
+    "lines": [
+      "9",
+      "14",
+      "17",
+      "24",
+      "37",
+      "40",
+      "45",
+      "46"
+    ],
+    "destinations": [
+      "Egia - Puente Santa Catalina",
+      "Anoeta (Fútbol)",
+      "Amara-Ospitaleak-Miramon",
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo",
+      "Gipuzkoa Plaza - Estación del Norte - Zorroaga",
+      "Estación del Norte-Zorroaga",
+      "Antiguo-Igara",
+      "Antiguo - Uniber - Etxadi",
+      "Antiguo-Estaciones RENFE-Bus Geltokiak",
+      "Morlans"
+    ]
+  },
+  {
+    "id": "194",
+    "code": "194",
+    "name": "Bilbo plaza",
+    "lines": [
+      "14",
+      "17",
+      "24",
+      "46"
+    ],
+    "destinations": [
+      "Anoeta (Fútbol)",
+      "Amara-Ospitaleak-Miramon",
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo",
+      "Morlans"
+    ]
+  },
+  {
+    "id": "195",
+    "code": "195",
+    "name": "Ehunurteurrena / Centenario",
+    "lines": [
+      "14",
+      "17",
+      "23",
+      "24",
+      "26",
+      "32",
+      "46"
+    ],
+    "destinations": [
+      "Anoeta (Fútbol)",
+      "Amara-Ospitaleak-Miramon",
+      "Errondo-Puio",
+      "Errondo - Puio",
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo",
+      "Amara - Riberas - Martutene",
+      "Amara - Riberas - Poligono 27",
+      "Puio-Errondo",
+      "Morlans"
+    ]
+  },
+  {
+    "id": "197",
+    "code": "197",
+    "name": "Antso Jakituna / S. el Sabio 28 I",
+    "lines": [
+      "14"
+    ],
+    "destinations": [
+      "Anoeta (Fútbol)"
+    ]
+  },
+  {
+    "id": "198",
+    "code": "198",
+    "name": "Madrid 10",
+    "lines": [
+      "14"
+    ],
+    "destinations": [
+      "Anoeta (Fútbol)"
+    ]
+  },
+  {
+    "id": "199",
+    "code": "199",
+    "name": "Anoeta",
+    "lines": [
+      "17",
+      "28",
+      "31",
+      "37",
+      "B4",
+      "B9"
+    ],
+    "destinations": [
+      "Amara-Ospitaleak-Miramon",
+      "Anoeta (Fútbol)",
+      "Amara - Ospitaleak - Miramon",
+      "Amara - Ospitaleak",
+      "Poligono 27 - Ospitaleak - Miramon",
+      "Gipuzkoa Plaza - Estación del Norte - Zorroaga",
+      "Estación del Norte-Zorroaga",
+      "Amara - Riberas - Martutene",
+      "Amara - Errondo - Puio"
+    ]
+  },
+  {
+    "id": "200",
+    "code": "200",
+    "name": "Madrid 17",
+    "lines": [
+      "17",
+      "37"
+    ],
+    "destinations": [
+      "Gros",
+      "Gros-Cocheras",
+      "Avd Libertad - Rodil",
+      "Santa Catalina - Rodil"
+    ]
+  },
+  {
+    "id": "201",
+    "code": "201",
+    "name": "Madrid 3",
+    "lines": [
+      "17",
+      "27"
+    ],
+    "destinations": [
+      "Gros",
+      "Gros-Cocheras",
+      "Intxaurrondo - Amara - Antiguo",
+      "Amara - Antiguo"
+    ]
+  },
+  {
+    "id": "202",
+    "code": "202",
+    "name": "Antso Jakituna / Sancho Sabio 33",
+    "lines": [
+      "17",
+      "27",
+      "37"
+    ],
+    "destinations": [
+      "Gros",
+      "Gros-Cocheras",
+      "Amara - Gros - Altza",
+      "Avd Libertad - Rodil",
+      "Santa Catalina - Rodil"
+    ]
+  },
+  {
+    "id": "203",
+    "code": "203",
+    "name": "Bizkaia pas. - Mundaiz zubia",
+    "lines": [
+      "17",
+      "27",
+      "46"
+    ],
+    "destinations": [
+      "Gros",
+      "Gros-Cocheras",
+      "Amara - Gros - Altza",
+      "Avenida Libertad - San Antonio",
+      "Santa Catalina San Antonio"
+    ]
+  },
+  {
+    "id": "204",
+    "code": "204",
+    "name": "Gernikako Arbola",
+    "lines": [
+      "17",
+      "26",
+      "27",
+      "37",
+      "46"
+    ],
+    "destinations": [
+      "Gros",
+      "Gros-Cocheras",
+      "Boulevard",
+      "Amara - Gros - Altza",
+      "Avd Libertad - Rodil",
+      "Santa Catalina - Rodil",
+      "Avenida Libertad - San Antonio",
+      "Santa Catalina San Antonio"
+    ]
+  },
+  {
+    "id": "205",
+    "code": "205",
+    "name": "Puente Maria Kristina zubia",
+    "lines": [
+      "17",
+      "26",
+      "27",
+      "36",
+      "46"
+    ],
+    "destinations": [
+      "Gros",
+      "Gros-Cocheras",
+      "Boulevard",
+      "Amara - Gros - Altza",
+      "Fueros - Gros - Aldakonea",
+      "Avenida Libertad - San Antonio",
+      "Santa Catalina San Antonio"
+    ]
+  },
+  {
+    "id": "206",
+    "code": "206",
+    "name": "Groseko Anbulatorioa",
+    "lines": [
+      "8",
+      "17",
+      "40",
+      "41"
+    ],
+    "destinations": [
+      "Gros - Intxaurrondo",
+      "Gros",
+      "Anoeta (Fútbol)",
+      "Egia-Loiola-Martutene"
+    ]
+  },
+  {
+    "id": "207",
+    "code": "207",
+    "name": "Askatasuna/Libertad 18",
+    "lines": [
+      "33",
+      "40",
+      "45"
+    ],
+    "destinations": [
+      "Antiguo-Berio-Igara",
+      "Antiguo-Igara",
+      "Antiguo - Uniber - Etxadi"
+    ]
+  },
+  {
+    "id": "208",
+    "code": "208",
+    "name": "Urbieta 6",
+    "lines": [
+      "16",
+      "18",
+      "19",
+      "23",
+      "26",
+      "31",
+      "B2",
+      "B7"
+    ],
+    "destinations": [
+      "Igeldo",
+      "Seminario",
+      "Miraconcha - Seminario",
+      "Aiete - Bera Bera",
+      "Errondo - Puio",
+      "Amara - Riberas - Martutene",
+      "Amara - Riberas - Poligono 27",
+      "Boulevard - Aiete - Ospitaleak"
+    ]
+  },
+  {
+    "id": "209",
+    "code": "209",
+    "name": "P.M.Collado",
+    "lines": [
+      "5",
+      "21",
+      "23",
+      "24",
+      "27",
+      "32",
+      "B9",
+      "43",
+      "46"
+    ],
+    "destinations": [
+      "Anoeta (Fútbol)",
+      "Amara-Mutualitateak",
+      "Boulevard",
+      "San Bartolome",
+      "Pza. Gipuzkoa",
+      "Amara-Intxaurrondo-Altza",
+      "Amara - Gros - Altza",
+      "Amara-Anoeta",
+      "Avenida Libertad - San Antonio",
+      "Santa Catalina San Antonio"
+    ]
+  },
+  {
+    "id": "210",
+    "code": "210",
+    "name": "J.M.Salaberria 27",
+    "lines": [
+      "21"
+    ],
+    "destinations": [
+      "Amara-Mutualitateak"
+    ]
+  },
+  {
+    "id": "211",
+    "code": "211",
+    "name": "Mutualitateak",
+    "lines": [
+      "21"
+    ],
+    "destinations": [
+      "Amara-Mutualitateak",
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "212",
+    "code": "212",
+    "name": "Errondo-Barkaiztegi",
+    "lines": [
+      "21",
+      "32",
+      "B9",
+      "43"
+    ],
+    "destinations": [
+      "Boulevard",
+      "San Bartolome",
+      "Amara - Errondo - Puio",
+      "Antiguo-Unibertsitatea"
+    ]
+  },
+  {
+    "id": "213",
+    "code": "213",
+    "name": "Lizarra",
+    "lines": [
+      "19",
+      "31",
+      "B2"
+    ],
+    "destinations": [
+      "Aiete - Bera Bera",
+      "Boulevard - Aiete - Ospitaleak",
+      "Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "214",
+    "code": "214",
+    "name": "Errondo",
+    "lines": [
+      "23",
+      "B9"
+    ],
+    "destinations": [
+      "Errondo-Puio",
+      "Errondo - Puio",
+      "Amara - Errondo - Puio"
+    ]
+  },
+  {
+    "id": "215",
+    "code": "215",
+    "name": "Errondogaña / Alto Errondo 32",
+    "lines": [
+      "23",
+      "B9"
+    ],
+    "destinations": [
+      "Errondo-Puio",
+      "Errondo - Puio",
+      "Amara - Errondo - Puio"
+    ]
+  },
+  {
+    "id": "216",
+    "code": "216",
+    "name": "Azkaratene",
+    "lines": [
+      "23",
+      "B9"
+    ],
+    "destinations": [
+      "Errondo-Puio",
+      "Errondo - Puio",
+      "Amara - Errondo - Puio"
+    ]
+  },
+  {
+    "id": "217",
+    "code": "217",
+    "name": "Mirakruzgaña / Alto Miracruz II",
+    "lines": [
+      "14",
+      "B10"
+    ],
+    "destinations": [
+      "Zubiaurre - Bidebieta",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "218",
+    "code": "218",
+    "name": "Bera Bera 133",
+    "lines": [
+      "19",
+      "B2",
+      "45"
+    ],
+    "destinations": [
+      "Aiete - Bera Bera",
+      "Antiguo - Uniber - Etxadi",
+      "Antiguo-Estaciones RENFE-Bus Geltokiak"
+    ]
+  },
+  {
+    "id": "219",
+    "code": "219",
+    "name": "Bera Bera 89",
+    "lines": [
+      "19",
+      "B2",
+      "45"
+    ],
+    "destinations": [
+      "Aiete - Bera Bera",
+      "Antiguo-Estaciones RENFE-Bus Geltokiak"
+    ]
+  },
+  {
+    "id": "220",
+    "code": "220",
+    "name": "Bera Bera 85",
+    "lines": [
+      "19",
+      "B2",
+      "45"
+    ],
+    "destinations": [
+      "Aiete - Bera Bera",
+      "Antiguo-Estaciones RENFE-Bus Geltokiak"
+    ]
+  },
+  {
+    "id": "221",
+    "code": "221",
+    "name": "Bera Bera 57",
+    "lines": [
+      "19",
+      "B2",
+      "45"
+    ],
+    "destinations": [
+      "Aiete - Bera Bera",
+      "Gipuzkoa Plaza",
+      "Pza. Gipzukoa",
+      "Boulevard",
+      "Antiguo - Uniber - Etxadi"
+    ]
+  },
+  {
+    "id": "222",
+    "code": "222",
+    "name": "Bera Bera 47",
+    "lines": [
+      "19",
+      "B2",
+      "45"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza",
+      "Pza. Gipzukoa",
+      "Boulevard",
+      "Antiguo - Uniber - Etxadi"
+    ]
+  },
+  {
+    "id": "223",
+    "code": "223",
+    "name": "Bera Bera 31",
+    "lines": [
+      "19",
+      "B2",
+      "45"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza",
+      "Pza. Gipzukoa",
+      "Boulevard",
+      "Antiguo - Uniber - Etxadi"
+    ]
+  },
+  {
+    "id": "224",
+    "code": "224",
+    "name": "Bera Bera 2",
+    "lines": [
+      "19",
+      "B2",
+      "45"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza",
+      "Pza. Gipzukoa",
+      "Boulevard",
+      "Antiguo - Uniber - Etxadi"
+    ]
+  },
+  {
+    "id": "225",
+    "code": "225",
+    "name": "Askatasuna / Libertad 31",
+    "lines": [
+      "5",
+      "16",
+      "18",
+      "25",
+      "45"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Pío Baroja - Boulevard",
+      "Gipuzkoa Plaza",
+      "Antiguo-Estaciones RENFE-Bus Geltokiak"
+    ]
+  },
+  {
+    "id": "226",
+    "code": "226",
+    "name": "Aiete 53",
+    "lines": [
+      "19",
+      "31",
+      "35",
+      "B2"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza",
+      "Pza. Gipzukoa",
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Aiete-Antiguo-Arriola",
+      "Aiete-Antiguo",
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "227",
+    "code": "227",
+    "name": "Iza",
+    "lines": [
+      "19",
+      "35",
+      "B2"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza",
+      "Pza. Gipzukoa",
+      "Aiete-Antiguo-Arriola",
+      "Aiete-Antiguo",
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "228",
+    "code": "228",
+    "name": "Aiete 1",
+    "lines": [
+      "19",
+      "31",
+      "35",
+      "B2"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza",
+      "Pza. Gipzukoa",
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Aiete-Antiguo-Arriola",
+      "Aiete-Antiguo",
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "229",
+    "code": "229",
+    "name": "Marianistak",
+    "lines": [
+      "19",
+      "31",
+      "B2"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza",
+      "Pza. Gipzukoa",
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "230",
+    "code": "230",
+    "name": "Katalina Eleizegi 2",
+    "lines": [
+      "32",
+      "46"
+    ],
+    "destinations": [
+      "Puio-Errondo",
+      "Morlans"
+    ]
+  },
+  {
+    "id": "231",
+    "code": "231",
+    "name": "Katalina Eleizegi 34",
+    "lines": [
+      "32"
+    ],
+    "destinations": [
+      "Puio-Errondo"
+    ]
+  },
+  {
+    "id": "232",
+    "code": "232",
+    "name": "Katalina Eleizegi 48",
+    "lines": [
+      "32"
+    ],
+    "destinations": [
+      "Puio-Errondo"
+    ]
+  },
+  {
+    "id": "234",
+    "code": "234",
+    "name": "Errondogaña / Alto Errondo 107",
+    "lines": [
+      "32"
+    ],
+    "destinations": [
+      "Puio-Errondo"
+    ]
+  },
+  {
+    "id": "235",
+    "code": "235",
+    "name": "Errondogaña / Alto Errondo 91",
+    "lines": [
+      "32"
+    ],
+    "destinations": [
+      "Puio-Errondo"
+    ]
+  },
+  {
+    "id": "236",
+    "code": "236",
+    "name": "Errondogaña / Alto Errondo 55",
+    "lines": [
+      "32"
+    ],
+    "destinations": [
+      "Puio-Errondo"
+    ]
+  },
+  {
+    "id": "237",
+    "code": "237",
+    "name": "Errondogaña / Alto Errondo 27",
+    "lines": [
+      "32"
+    ],
+    "destinations": [
+      "Puio-Errondo",
+      "San Bartolome"
+    ]
+  },
+  {
+    "id": "238",
+    "code": "238",
+    "name": "Boulevard 19",
+    "lines": [
+      "16",
+      "B7"
+    ],
+    "destinations": [
+      "Igeldo",
+      "Pío Baroja - Boulevard"
+    ]
+  },
+  {
+    "id": "239",
+    "code": "239",
+    "name": "Zumalakarregi 10",
+    "lines": [
+      "5",
+      "25",
+      "33",
+      "35",
+      "40",
+      "B1",
+      "43",
+      "45"
+    ],
+    "destinations": [
+      "Benta Berri",
+      "Benta Berri-Zuatzu",
+      "Express Unibertsitatea - Zuatzu",
+      "Benta Berri - Añorga - Belartza",
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Añorga",
+      "Antiguo-Berio-Igara",
+      "Aiete-Antiguo-Arriola",
+      "Aiete-Antiguo",
+      "Antiguo-Igara",
+      "Benta Berri - Añorga",
+      "Antiguo-Unibertsitatea",
+      "Antiguo - Uniber - Etxadi"
+    ]
+  },
+  {
+    "id": "240",
+    "code": "240",
+    "name": "Antiguoko Anbulatorioa",
+    "lines": [
+      "5",
+      "25",
+      "33",
+      "35",
+      "40",
+      "B1",
+      "43",
+      "45"
+    ],
+    "destinations": [
+      "Benta Berri",
+      "Benta Berri-Zuatzu",
+      "Express Unibertsitatea - Zuatzu",
+      "Benta Berri - Añorga - Belartza",
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Añorga",
+      "Antiguo-Berio-Igara",
+      "Aiete-Antiguo-Arriola",
+      "Aiete-Antiguo",
+      "Antiguo-Igara",
+      "Benta Berri - Añorga",
+      "Antiguo-Unibertsitatea",
+      "Antiguo - Uniber - Etxadi"
+    ]
+  },
+  {
+    "id": "241",
+    "code": "241",
+    "name": "Magisteritza Tol14",
+    "lines": [
+      "5",
+      "25",
+      "27",
+      "33",
+      "35",
+      "40",
+      "B1",
+      "43",
+      "45"
+    ],
+    "destinations": [
+      "Benta Berri",
+      "Benta Berri-Zuatzu",
+      "Express Unibertsitatea - Zuatzu",
+      "Benta Berri - Añorga - Belartza",
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Añorga",
+      "Intxaurrondo - Amara - Antiguo",
+      "Amara - Gros - Altza",
+      "Amara - Antiguo",
+      "Antiguo-Berio-Igara",
+      "Aiete-Antiguo-Arriola",
+      "Aiete-Antiguo",
+      "Antiguo-Igara",
+      "Benta Berri - Añorga",
+      "Antiguo-Unibertsitatea",
+      "Antiguo - Uniber - Etxadi"
+    ]
+  },
+  {
+    "id": "242",
+    "code": "242",
+    "name": "Unibertsitatea Elhuyar",
+    "lines": [
+      "25",
+      "33",
+      "40",
+      "B1"
+    ],
+    "destinations": [
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Antiguo-Berio-Igara",
+      "Antiguo-Igara",
+      "Benta Berri - Añorga"
+    ]
+  },
+  {
+    "id": "243",
+    "code": "243",
+    "name": "Elhuyar Plaza",
+    "lines": [
+      "33",
+      "35",
+      "40"
+    ],
+    "destinations": [
+      "Gros-Intxaurrondo-Larratxo",
+      "Antiguo-Aiete-Ospitaleak",
+      "Gros",
+      "Gros-Cocheras"
+    ]
+  },
+  {
+    "id": "244",
+    "code": "244",
+    "name": "Berio 22",
+    "lines": [
+      "25",
+      "33",
+      "40",
+      "B1"
+    ],
+    "destinations": [
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Antiguo-Berio-Igara",
+      "Antiguo-Igara",
+      "Benta Berri - Añorga"
+    ]
+  },
+  {
+    "id": "245",
+    "code": "245",
+    "name": "Berio 19",
+    "lines": [
+      "33",
+      "40"
+    ],
+    "destinations": [
+      "Gros-Intxaurrondo-Larratxo",
+      "Gros",
+      "Gros-Cocheras"
+    ]
+  },
+  {
+    "id": "246",
+    "code": "246",
+    "name": "Aspace",
+    "lines": [
+      "25",
+      "33",
+      "40",
+      "B1"
+    ],
+    "destinations": [
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Antiguo-Berio-Igara",
+      "Antiguo-Igara",
+      "Benta Berri - Añorga"
+    ]
+  },
+  {
+    "id": "247",
+    "code": "247",
+    "name": "Berio 45",
+    "lines": [
+      "33",
+      "40"
+    ],
+    "destinations": [
+      "Gros-Intxaurrondo-Larratxo",
+      "Gros",
+      "Gros-Cocheras"
+    ]
+  },
+  {
+    "id": "248",
+    "code": "248",
+    "name": "Berio 78",
+    "lines": [
+      "25",
+      "33",
+      "40",
+      "B1"
+    ],
+    "destinations": [
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Antiguo-Berio-Igara",
+      "Antiguo-Igara",
+      "Benta Berri - Añorga"
+    ]
+  },
+  {
+    "id": "249",
+    "code": "249",
+    "name": "Portuetxe 2",
+    "lines": [
+      "33",
+      "40",
+      "43"
+    ],
+    "destinations": [
+      "Antiguo-Berio-Igara",
+      "Antiguo-Igara",
+      "Antiguo-Unibertsitatea"
+    ]
+  },
+  {
+    "id": "250",
+    "code": "250",
+    "name": "Portuetxe 9",
+    "lines": [
+      "33",
+      "43"
+    ],
+    "destinations": [
+      "Gros-Intxaurrondo-Larratxo",
+      "Amara-Anoeta"
+    ]
+  },
+  {
+    "id": "251",
+    "code": "251",
+    "name": "Portuetxe 10",
+    "lines": [
+      "33",
+      "40",
+      "43"
+    ],
+    "destinations": [
+      "Antiguo-Berio-Igara",
+      "Antiguo-Igara",
+      "Antiguo-Unibertsitatea"
+    ]
+  },
+  {
+    "id": "252",
+    "code": "252",
+    "name": "Portuetxe 21",
+    "lines": [
+      "33",
+      "43"
+    ],
+    "destinations": [
+      "Gros-Intxaurrondo-Larratxo",
+      "Amara-Anoeta"
+    ]
+  },
+  {
+    "id": "253",
+    "code": "253",
+    "name": "Portuetxe 18",
+    "lines": [
+      "33",
+      "40",
+      "43"
+    ],
+    "destinations": [
+      "Antiguo-Berio-Igara",
+      "Antiguo-Igara",
+      "Antiguo-Unibertsitatea"
+    ]
+  },
+  {
+    "id": "254",
+    "code": "254",
+    "name": "Portuetxe 35",
+    "lines": [
+      "33",
+      "43"
+    ],
+    "destinations": [
+      "Gros-Intxaurrondo-Larratxo",
+      "Amara-Anoeta"
+    ]
+  },
+  {
+    "id": "255",
+    "code": "255",
+    "name": "Errotazar",
+    "lines": [
+      "33",
+      "40",
+      "43"
+    ],
+    "destinations": [
+      "Antiguo-Berio-Igara",
+      "Antiguo-Igara",
+      "Antiguo-Unibertsitatea"
+    ]
+  },
+  {
+    "id": "256",
+    "code": "256",
+    "name": "Portuetxe 51",
+    "lines": [
+      "33",
+      "43"
+    ],
+    "destinations": [
+      "Gros-Intxaurrondo-Larratxo",
+      "Amara-Anoeta"
+    ]
+  },
+  {
+    "id": "257",
+    "code": "257",
+    "name": "Igara",
+    "lines": [
+      "33",
+      "40",
+      "43"
+    ],
+    "destinations": [
+      "Antiguo-Berio-Igara",
+      "Gros-Intxaurrondo-Larratxo",
+      "Antiguo-Igara",
+      "Gros",
+      "Gros-Cocheras",
+      "Antiguo-Unibertsitatea",
+      "Amara-Anoeta"
+    ]
+  },
+  {
+    "id": "258",
+    "code": "258",
+    "name": "Berio 73",
+    "lines": [
+      "33"
+    ],
+    "destinations": [
+      "Gros-Intxaurrondo-Larratxo"
+    ]
+  },
+  {
+    "id": "259",
+    "code": "259",
+    "name": "Berio 63",
+    "lines": [
+      "33"
+    ],
+    "destinations": [
+      "Gros-Intxaurrondo-Larratxo"
+    ]
+  },
+  {
+    "id": "260",
+    "code": "260",
+    "name": "Begiristain I",
+    "lines": [
+      "17",
+      "28",
+      "31"
+    ],
+    "destinations": [
+      "Amara-Ospitaleak-Miramon",
+      "Amara - Ospitaleak - Miramon",
+      "Amara - Ospitaleak",
+      "Poligono 27 - Ospitaleak - Miramon"
+    ]
+  },
+  {
+    "id": "261",
+    "code": "261",
+    "name": "Begiristain II",
+    "lines": [
+      "17",
+      "28",
+      "31"
+    ],
+    "destinations": [
+      "Gros",
+      "Gros-Cocheras",
+      "Boulevard",
+      "Riberas - Poligono 27 - Altza"
+    ]
+  },
+  {
+    "id": "262",
+    "code": "262",
+    "name": "Lorearte",
+    "lines": [
+      "17",
+      "28",
+      "31"
+    ],
+    "destinations": [
+      "Amara-Ospitaleak-Miramon",
+      "Amara - Ospitaleak - Miramon",
+      "Amara - Ospitaleak",
+      "Poligono 27 - Ospitaleak - Miramon"
+    ]
+  },
+  {
+    "id": "263",
+    "code": "263",
+    "name": "Txiskuenea",
+    "lines": [
+      "17",
+      "28",
+      "31"
+    ],
+    "destinations": [
+      "Gros",
+      "Gros-Cocheras",
+      "Boulevard",
+      "Riberas - Poligono 27 - Altza"
+    ]
+  },
+  {
+    "id": "264",
+    "code": "264",
+    "name": "Donostia Ospitalea I",
+    "lines": [
+      "17",
+      "28",
+      "31"
+    ],
+    "destinations": [
+      "Amara-Ospitaleak-Miramon",
+      "Amara - Ospitaleak - Miramon",
+      "Amara - Ospitaleak",
+      "Poligono 27 - Ospitaleak - Miramon",
+      "Avda.Libertad - Gros - Intxaurrondo"
+    ]
+  },
+  {
+    "id": "265",
+    "code": "265",
+    "name": "Donostia Ospitalea II",
+    "lines": [
+      "17",
+      "28",
+      "31"
+    ],
+    "destinations": [
+      "Gros",
+      "Gros-Cocheras",
+      "Boulevard",
+      "Amara - Ospitaleak",
+      "Riberas - Poligono 27 - Altza"
+    ]
+  },
+  {
+    "id": "266",
+    "code": "266",
+    "name": "Ospitalea / Hospital I",
+    "lines": [
+      "17",
+      "28",
+      "31"
+    ],
+    "destinations": [
+      "Amara-Ospitaleak-Miramon",
+      "Amara - Ospitaleak - Miramon",
+      "Amara - Ospitaleak",
+      "Avda.Libertad - Gros - Intxaurrondo"
+    ]
+  },
+  {
+    "id": "267",
+    "code": "267",
+    "name": "Ospitalea / Hospital II",
+    "lines": [
+      "17",
+      "28",
+      "31"
+    ],
+    "destinations": [
+      "Gros",
+      "Gros-Cocheras",
+      "Boulevard",
+      "Amara - Ospitaleak",
+      "Boulevard - Aiete - Ospitaleak",
+      "Riberas - Poligono 27 - Altza",
+      "Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "268",
+    "code": "268",
+    "name": "Onkologikoa I",
+    "lines": [
+      "17",
+      "28",
+      "31",
+      "35"
+    ],
+    "destinations": [
+      "Amara-Ospitaleak-Miramon",
+      "Amara - Ospitaleak - Miramon",
+      "Amara - Ospitaleak",
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Aiete-Antiguo-Arriola",
+      "Aiete-Antiguo"
+    ]
+  },
+  {
+    "id": "269",
+    "code": "269",
+    "name": "Zarautz 122",
+    "lines": [
+      "5",
+      "B8"
+    ],
+    "destinations": [
+      "Benta Berri",
+      "Benta Berri-Zuatzu",
+      "Miraconcha - Benta Berri - Seminario"
+    ]
+  },
+  {
+    "id": "270",
+    "code": "270",
+    "name": "Onkologikoa II",
+    "lines": [
+      "17",
+      "28",
+      "31",
+      "35"
+    ],
+    "destinations": [
+      "Gros",
+      "Gros-Cocheras",
+      "Boulevard",
+      "Amara - Ospitaleak",
+      "Boulevard - Aiete - Ospitaleak",
+      "Aiete-Ospitaleak",
+      "Antiguo-Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "271",
+    "code": "271",
+    "name": "Miramon",
+    "lines": [
+      "17",
+      "28"
+    ],
+    "destinations": [
+      "Amara-Ospitaleak-Miramon",
+      "Gros",
+      "Gros-Cocheras",
+      "Amara - Ospitaleak - Miramon",
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "273",
+    "code": "273",
+    "name": "Mikeleteak 4",
+    "lines": [
+      "18"
+    ],
+    "destinations": [
+      "Seminario",
+      "Miraconcha - Seminario"
+    ]
+  },
+  {
+    "id": "274",
+    "code": "274",
+    "name": "Mikeleteak 1",
+    "lines": [
+      "18"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza"
+    ]
+  },
+  {
+    "id": "275",
+    "code": "275",
+    "name": "Portuenea 2",
+    "lines": [
+      "18"
+    ],
+    "destinations": [
+      "Seminario",
+      "Miraconcha - Seminario"
+    ]
+  },
+  {
+    "id": "276",
+    "code": "276",
+    "name": "Jauregi / Palacio",
+    "lines": [
+      "18"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza"
+    ]
+  },
+  {
+    "id": "277",
+    "code": "277",
+    "name": "Unibertsitatea Tol.70 I",
+    "lines": [
+      "5",
+      "25",
+      "45"
+    ],
+    "destinations": [
+      "Benta Berri",
+      "Benta Berri-Zuatzu",
+      "Express Unibertsitatea - Zuatzu",
+      "Benta Berri - Añorga - Belartza",
+      "Benta Berri - Añorga",
+      "Añorga",
+      "Antiguo - Uniber - Etxadi"
+    ]
+  },
+  {
+    "id": "278",
+    "code": "278",
+    "name": "Tolosa 112",
+    "lines": [
+      "5",
+      "25",
+      "27",
+      "35",
+      "40",
+      "43",
+      "45"
+    ],
+    "destinations": [
+      "Benta Berri",
+      "Benta Berri-Zuatzu",
+      "Express Unibertsitatea - Zuatzu",
+      "Benta Berri - Añorga - Belartza",
+      "Benta Berri - Añorga",
+      "Añorga",
+      "Amara - Gros - Altza",
+      "Aiete-Antiguo",
+      "Antiguo-Igara",
+      "Antiguo-Unibertsitatea",
+      "Antiguo - Uniber - Etxadi"
+    ]
+  },
+  {
+    "id": "279",
+    "code": "279",
+    "name": "Infernua",
+    "lines": [
+      "25",
+      "B1"
+    ],
+    "destinations": [
+      "Benta Berri - Añorga - Belartza",
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Añorga",
+      "Benta Berri - Añorga"
+    ]
+  },
+  {
+    "id": "281",
+    "code": "281",
+    "name": "Ibaeta - Tolosa",
+    "lines": [
+      "25",
+      "B1"
+    ],
+    "destinations": [
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Benta Berri - Añorga"
+    ]
+  },
+  {
+    "id": "283",
+    "code": "283",
+    "name": "N.A.",
+    "lines": [
+      "9",
+      "13",
+      "24"
+    ],
+    "destinations": [
+      "Egia-Okendo",
+      "Altza",
+      "Boulevard",
+      "Gros - Amara - Antiguo"
+    ]
+  },
+  {
+    "id": "284",
+    "code": "284",
+    "name": "Barcelona 15",
+    "lines": [
+      "26",
+      "27",
+      "31"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Intxaurrondo - Amara - Antiguo",
+      "Amara - Antiguo",
+      "Anoeta (Fútbol)",
+      "Poligono 27 - Ospitaleak - Miramon"
+    ]
+  },
+  {
+    "id": "286",
+    "code": "286",
+    "name": "Matigotxotegi",
+    "lines": [
+      "9",
+      "27",
+      "41",
+      "B3"
+    ],
+    "destinations": [
+      "Okendo",
+      "Egia - Okendo",
+      "Egia - Puente Santa Catalina",
+      "Intxaurrondo - Amara - Antiguo",
+      "Anoeta (Fútbol)",
+      "Egia-Loiola-Martutene",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "287",
+    "code": "287",
+    "name": "Errekalde II",
+    "lines": [
+      "25",
+      "B1"
+    ],
+    "destinations": [
+      "Benta Berri - Añorga - Belartza",
+      "Boulevard",
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Añorga",
+      "Benta Berri - Añorga"
+    ]
+  },
+  {
+    "id": "288",
+    "code": "288",
+    "name": "Karmengo Andre Maria 3",
+    "lines": [
+      "9",
+      "27",
+      "41",
+      "B3"
+    ],
+    "destinations": [
+      "Okendo",
+      "Egia - Okendo",
+      "Egia - Puente Santa Catalina",
+      "Intxaurrondo - Amara - Antiguo",
+      "Amara - Antiguo",
+      "Anoeta (Fútbol)",
+      "Egia-Loiola-Martutene",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "289",
+    "code": "289",
+    "name": "Igeldo 25",
+    "lines": [
+      "16"
+    ],
+    "destinations": [
+      "Pío Baroja - Boulevard"
+    ]
+  },
+  {
+    "id": "290",
+    "code": "290",
+    "name": "Molinao 64",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "291",
+    "code": "291",
+    "name": "Londaitz",
+    "lines": [
+      "19",
+      "31",
+      "B2"
+    ],
+    "destinations": [
+      "Aiete - Bera Bera",
+      "Boulevard - Aiete - Ospitaleak",
+      "Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "292",
+    "code": "292",
+    "name": "La Cumbre",
+    "lines": [
+      "19",
+      "31",
+      "35",
+      "B2"
+    ],
+    "destinations": [
+      "Aiete - Bera Bera",
+      "Boulevard - Aiete - Ospitaleak",
+      "Aiete-Ospitaleak",
+      "Antiguo-Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "293",
+    "code": "293",
+    "name": "Muntoalde",
+    "lines": [
+      "19",
+      "B2"
+    ],
+    "destinations": [
+      "Aiete - Bera Bera"
+    ]
+  },
+  {
+    "id": "294",
+    "code": "294",
+    "name": "Munto",
+    "lines": [
+      "19",
+      "31",
+      "35",
+      "B2"
+    ],
+    "destinations": [
+      "Aiete - Bera Bera",
+      "Boulevard - Aiete - Ospitaleak",
+      "Aiete-Ospitaleak",
+      "Antiguo-Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "295",
+    "code": "295",
+    "name": "Aiete jauregia I / Palacio Aiete I",
+    "lines": [
+      "19",
+      "31",
+      "35",
+      "B2"
+    ],
+    "destinations": [
+      "Aiete - Bera Bera",
+      "Boulevard - Aiete - Ospitaleak",
+      "Aiete-Ospitaleak",
+      "Antiguo-Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "296",
+    "code": "296",
+    "name": "Berabera-Etxadi",
+    "lines": [
+      "19",
+      "B2"
+    ],
+    "destinations": [
+      "Aiete - Bera Bera"
+    ]
+  },
+  {
+    "id": "297",
+    "code": "297",
+    "name": "Easo 27",
+    "lines": [
+      "19",
+      "31",
+      "36",
+      "B2"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza",
+      "Pza. Gipzukoa",
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Avda.Libertad - Gros - Aldakonea",
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "298",
+    "code": "298",
+    "name": "Mirakontxa",
+    "lines": [
+      "16",
+      "18",
+      "B8"
+    ],
+    "destinations": [
+      "Igeldo",
+      "Miraconcha - Seminario",
+      "Miraconcha - Benta Berri - Seminario"
+    ]
+  },
+  {
+    "id": "299",
+    "code": "299",
+    "name": "Miramar jauregia/ Palacio Miramar",
+    "lines": [
+      "16",
+      "18",
+      "B8"
+    ],
+    "destinations": [
+      "Igeldo",
+      "Miraconcha - Seminario",
+      "Miraconcha - Benta Berri - Seminario"
+    ]
+  },
+  {
+    "id": "300",
+    "code": "300",
+    "name": "Baenako Dukea",
+    "lines": [
+      "16",
+      "18",
+      "B8"
+    ],
+    "destinations": [
+      "Igeldo",
+      "Miraconcha - Seminario",
+      "Miraconcha - Benta Berri - Seminario"
+    ]
+  },
+  {
+    "id": "301",
+    "code": "301",
+    "name": "Sanserreka",
+    "lines": [
+      "16",
+      "18",
+      "B8"
+    ],
+    "destinations": [
+      "Igeldo",
+      "Miraconcha - Seminario",
+      "Miraconcha - Benta Berri - Seminario"
+    ]
+  },
+  {
+    "id": "302",
+    "code": "302",
+    "name": "Sanserreka-Polikiroldegia",
+    "lines": [
+      "16",
+      "18",
+      "B8"
+    ],
+    "destinations": [
+      "Igeldo",
+      "Miraconcha - Seminario",
+      "Miraconcha - Benta Berri - Seminario"
+    ]
+  },
+  {
+    "id": "303",
+    "code": "303",
+    "name": "Rio Deba Ibaia 2",
+    "lines": [
+      "42"
+    ],
+    "destinations": [
+      "Aldapa-Egia"
+    ]
+  },
+  {
+    "id": "304",
+    "code": "304",
+    "name": "Melodi-Pío Baroja",
+    "lines": [
+      "5",
+      "24",
+      "35",
+      "36"
+    ],
+    "destinations": [
+      "Anoeta (Fútbol)",
+      "Amara-Intxaurrondo-Altza",
+      "Antiguo-Aiete-Ospitaleak",
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea"
+    ]
+  },
+  {
+    "id": "305",
+    "code": "305",
+    "name": "Gipuzkoa plaza II",
+    "lines": [
+      "18",
+      "19",
+      "23"
+    ],
+    "destinations": [
+      "Seminario",
+      "Gipuzkoa Plaza",
+      "Miraconcha - Seminario",
+      "Aiete - Bera Bera",
+      "Pza. Gipzukoa",
+      "Errondo - Puio",
+      "Pza. Gipuzkoa"
+    ]
+  },
+  {
+    "id": "306",
+    "code": "306",
+    "name": "Lazkano 3",
+    "lines": [
+      "35",
+      "36"
+    ],
+    "destinations": [
+      "Antiguo-Aiete-Ospitaleak",
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea"
+    ]
+  },
+  {
+    "id": "307",
+    "code": "307",
+    "name": "Izaburu",
+    "lines": [
+      "19",
+      "35",
+      "B2"
+    ],
+    "destinations": [
+      "Aiete - Bera Bera",
+      "Antiguo-Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "308",
+    "code": "308",
+    "name": "Matia Zentroa",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda. Libertad-San Roque",
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea",
+      "Estación del Norte-San Roque"
+    ]
+  },
+  {
+    "id": "309",
+    "code": "309",
+    "name": "Lugaritz 27",
+    "lines": [
+      "5",
+      "24",
+      "27",
+      "45"
+    ],
+    "destinations": [
+      "Anoeta (Fútbol)",
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo",
+      "Intxaurrondo - Amara - Antiguo",
+      "Antiguo-Estaciones RENFE-Bus Geltokiak"
+    ]
+  },
+  {
+    "id": "310",
+    "code": "310",
+    "name": "Lugaritz-Euskotren II",
+    "lines": [
+      "5",
+      "24",
+      "45"
+    ],
+    "destinations": [
+      "Anoeta (Fútbol)",
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo",
+      "Antiguo-Estaciones RENFE-Bus Geltokiak"
+    ]
+  },
+  {
+    "id": "311",
+    "code": "311",
+    "name": "Unibertsitatea-Tol. 70 II",
+    "lines": [
+      "27",
+      "35",
+      "40",
+      "43"
+    ],
+    "destinations": [
+      "Intxaurrondo - Amara - Antiguo",
+      "Amara - Gros - Altza",
+      "Amara - Antiguo",
+      "Aiete-Antiguo",
+      "Antiguo-Igara",
+      "Antiguo-Unibertsitatea"
+    ]
+  },
+  {
+    "id": "313",
+    "code": "313",
+    "name": "Lugaritz-Geriatrikoa",
+    "lines": [
+      "27",
+      "B8",
+      "43",
+      "45"
+    ],
+    "destinations": [
+      "Amara - Gros - Altza",
+      "Miraconcha - Benta Berri - Seminario",
+      "Amara-Anoeta",
+      "Antiguo - Uniber - Etxadi"
+    ]
+  },
+  {
+    "id": "314",
+    "code": "314",
+    "name": "Lazkano",
+    "lines": [
+      "35",
+      "36"
+    ],
+    "destinations": [
+      "Aiete-Antiguo-Arriola",
+      "Aiete-Antiguo",
+      "Avda. Libertad-San Roque",
+      "Estación del Norte-San Roque"
+    ]
+  },
+  {
+    "id": "315",
+    "code": "315",
+    "name": "Melodi-Pío Baroja 55",
+    "lines": [
+      "27",
+      "35",
+      "43"
+    ],
+    "destinations": [
+      "Intxaurrondo - Amara - Antiguo",
+      "Amara - Antiguo",
+      "Aiete-Antiguo-Arriola",
+      "Aiete-Antiguo",
+      "Antiguo-Unibertsitatea"
+    ]
+  },
+  {
+    "id": "316",
+    "code": "316",
+    "name": "Sanserreka 33",
+    "lines": [
+      "16"
+    ],
+    "destinations": [
+      "Pío Baroja - Boulevard"
+    ]
+  },
+  {
+    "id": "317",
+    "code": "317",
+    "name": "Sanserreka 25",
+    "lines": [
+      "16"
+    ],
+    "destinations": [
+      "Pío Baroja - Boulevard"
+    ]
+  },
+  {
+    "id": "318",
+    "code": "318",
+    "name": "Baenako Dukea 1",
+    "lines": [
+      "16"
+    ],
+    "destinations": [
+      "Pío Baroja - Boulevard"
+    ]
+  },
+  {
+    "id": "319",
+    "code": "319",
+    "name": "Miraconcha 42",
+    "lines": [
+      "16"
+    ],
+    "destinations": [
+      "Pío Baroja - Boulevard"
+    ]
+  },
+  {
+    "id": "320",
+    "code": "320",
+    "name": "Miraconcha 28",
+    "lines": [
+      "16"
+    ],
+    "destinations": [
+      "Pío Baroja - Boulevard"
+    ]
+  },
+  {
+    "id": "321",
+    "code": "321",
+    "name": "Askatasuna / Libertad 20",
+    "lines": [
+      "36",
+      "46"
+    ],
+    "destinations": [
+      "Avda. Libertad-San Roque",
+      "Morlans"
+    ]
+  },
+  {
+    "id": "322",
+    "code": "322",
+    "name": "Gantxegi",
+    "lines": [
+      "18"
+    ],
+    "destinations": [
+      "Seminario",
+      "Miraconcha - Seminario"
+    ]
+  },
+  {
+    "id": "323",
+    "code": "323",
+    "name": "Portuenea 20 I",
+    "lines": [
+      "18"
+    ],
+    "destinations": [
+      "Seminario",
+      "Miraconcha - Seminario"
+    ]
+  },
+  {
+    "id": "324",
+    "code": "324",
+    "name": "Portuenea 49",
+    "lines": [
+      "18"
+    ],
+    "destinations": [
+      "Seminario",
+      "Miraconcha - Seminario"
+    ]
+  },
+  {
+    "id": "325",
+    "code": "325",
+    "name": "Dr. Marañón",
+    "lines": [
+      "18"
+    ],
+    "destinations": [
+      "Seminario",
+      "Miraconcha - Seminario"
+    ]
+  },
+  {
+    "id": "326",
+    "code": "326",
+    "name": "Muntomar",
+    "lines": [
+      "18"
+    ],
+    "destinations": [
+      "Seminario",
+      "Miraconcha - Seminario"
+    ]
+  },
+  {
+    "id": "327",
+    "code": "327",
+    "name": "Pinu bidea / C. de los Pinos",
+    "lines": [
+      "18"
+    ],
+    "destinations": [
+      "Seminario",
+      "Miraconcha - Seminario"
+    ]
+  },
+  {
+    "id": "328",
+    "code": "328",
+    "name": "Gurutzealde- Heriz 153",
+    "lines": [
+      "18",
+      "B8"
+    ],
+    "destinations": [
+      "Seminario",
+      "Miraconcha - Seminario",
+      "Miraconcha - Benta Berri - Seminario"
+    ]
+  },
+  {
+    "id": "329",
+    "code": "329",
+    "name": "Itsasaurre",
+    "lines": [
+      "18",
+      "B8"
+    ],
+    "destinations": [
+      "Seminario",
+      "Miraconcha - Seminario",
+      "Miraconcha - Benta Berri - Seminario"
+    ]
+  },
+  {
+    "id": "330",
+    "code": "330",
+    "name": "Seminarioa-Heriz 82",
+    "lines": [
+      "18",
+      "B8"
+    ],
+    "destinations": [
+      "Seminario",
+      "Miraconcha - Seminario",
+      "Miraconcha - Benta Berri - Seminario"
+    ]
+  },
+  {
+    "id": "331",
+    "code": "331",
+    "name": "Avanco",
+    "lines": [
+      "18",
+      "B8"
+    ],
+    "destinations": [
+      "Seminario",
+      "Gipuzkoa Plaza",
+      "Miraconcha - Seminario",
+      "Miraconcha - Benta Berri - Seminario"
+    ]
+  },
+  {
+    "id": "332",
+    "code": "332",
+    "name": "Seminarioa",
+    "lines": [
+      "18"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza"
+    ]
+  },
+  {
+    "id": "333",
+    "code": "333",
+    "name": "Itsasaurre-Heriz 112",
+    "lines": [
+      "18"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza"
+    ]
+  },
+  {
+    "id": "334",
+    "code": "334",
+    "name": "Gurutzealde-Heriz 128",
+    "lines": [
+      "18",
+      "36"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza",
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea"
+    ]
+  },
+  {
+    "id": "335",
+    "code": "335",
+    "name": "Begi Urdinak",
+    "lines": [
+      "18",
+      "36"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza",
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea"
+    ]
+  },
+  {
+    "id": "336",
+    "code": "336",
+    "name": "Donostizarra",
+    "lines": [
+      "18",
+      "36"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza",
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea"
+    ]
+  },
+  {
+    "id": "337",
+    "code": "337",
+    "name": "Portuenea 20 II",
+    "lines": [
+      "18"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza"
+    ]
+  },
+  {
+    "id": "338",
+    "code": "338",
+    "name": "Portuenea 21",
+    "lines": [
+      "18"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza"
+    ]
+  },
+  {
+    "id": "339",
+    "code": "339",
+    "name": "Pío Baroja 4",
+    "lines": [
+      "5",
+      "16",
+      "24",
+      "35"
+    ],
+    "destinations": [
+      "Anoeta (Fútbol)",
+      "Pío Baroja - Boulevard",
+      "Amara-Intxaurrondo-Altza",
+      "Antiguo-Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "340",
+    "code": "340",
+    "name": "Pío Baroja 10",
+    "lines": [
+      "5",
+      "16",
+      "24",
+      "35"
+    ],
+    "destinations": [
+      "Anoeta (Fútbol)",
+      "Pío Baroja - Boulevard",
+      "Amara-Intxaurrondo-Altza",
+      "Antiguo-Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "341",
+    "code": "341",
+    "name": "Larramendi",
+    "lines": [
+      "19",
+      "31",
+      "B2"
+    ],
+    "destinations": [
+      "Aiete - Bera Bera",
+      "Boulevard - Aiete - Ospitaleak"
+    ]
+  },
+  {
+    "id": "344",
+    "code": "344",
+    "name": "Pio Baroja 15",
+    "lines": [
+      "16",
+      "18",
+      "27",
+      "35",
+      "B8",
+      "43"
+    ],
+    "destinations": [
+      "Igeldo",
+      "Miraconcha - Seminario",
+      "Intxaurrondo - Amara - Antiguo",
+      "Amara - Antiguo",
+      "Aiete-Antiguo-Arriola",
+      "Aiete-Antiguo",
+      "Miraconcha - Benta Berri - Seminario",
+      "Antiguo-Unibertsitatea"
+    ]
+  },
+  {
+    "id": "345",
+    "code": "345",
+    "name": "Pío Baroja 5",
+    "lines": [
+      "16",
+      "18",
+      "27",
+      "35",
+      "B8",
+      "43"
+    ],
+    "destinations": [
+      "Igeldo",
+      "Miraconcha - Seminario",
+      "Intxaurrondo - Amara - Antiguo",
+      "Amara - Antiguo",
+      "Aiete-Antiguo-Arriola",
+      "Aiete-Antiguo",
+      "Miraconcha - Benta Berri - Seminario",
+      "Antiguo-Unibertsitatea"
+    ]
+  },
+  {
+    "id": "347",
+    "code": "347",
+    "name": "Pio XII.a",
+    "lines": [
+      "23",
+      "24",
+      "27",
+      "32",
+      "46"
+    ],
+    "destinations": [
+      "Errondo-Puio",
+      "Errondo - Puio",
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo",
+      "Intxaurrondo - Amara - Antiguo",
+      "Puio-Errondo",
+      "Morlans"
+    ]
+  },
+  {
+    "id": "348",
+    "code": "348",
+    "name": "Melodi- Lugaritz",
+    "lines": [
+      "24",
+      "27"
+    ],
+    "destinations": [
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo",
+      "Intxaurrondo - Amara - Antiguo"
+    ]
+  },
+  {
+    "id": "349",
+    "code": "349",
+    "name": "Unibertsitatea-Tol.95",
+    "lines": [
+      "5",
+      "24",
+      "27",
+      "35"
+    ],
+    "destinations": [
+      "Anoeta (Fútbol)",
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo",
+      "Intxaurrondo - Amara - Antiguo",
+      "Antiguo-Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "350",
+    "code": "350",
+    "name": "Zumalakarregi 9",
+    "lines": [
+      "5",
+      "16",
+      "24",
+      "27",
+      "33",
+      "40"
+    ],
+    "destinations": [
+      "Anoeta (Fútbol)",
+      "Pío Baroja - Boulevard",
+      "Gros-Amara-Antiguo",
+      "Amara-Intxaurrondo-Altza",
+      "Gros - Amara - Antiguo",
+      "Intxaurrondo - Amara - Antiguo",
+      "Gros-Intxaurrondo-Larratxo",
+      "Gros",
+      "Gros-Cocheras"
+    ]
+  },
+  {
+    "id": "351",
+    "code": "351",
+    "name": "Zumalakarregi 8",
+    "lines": [
+      "27"
+    ],
+    "destinations": [
+      "Intxaurrondo - Amara - Antiguo",
+      "Amara - Gros - Altza",
+      "Amara - Antiguo"
+    ]
+  },
+  {
+    "id": "352",
+    "code": "352",
+    "name": "Melodi parkea",
+    "lines": [
+      "27",
+      "43"
+    ],
+    "destinations": [
+      "Amara - Gros - Altza",
+      "Amara-Anoeta"
+    ]
+  },
+  {
+    "id": "353",
+    "code": "353",
+    "name": "Añorgatxiki I",
+    "lines": [
+      "25",
+      "B1"
+    ],
+    "destinations": [
+      "Benta Berri - Añorga - Belartza",
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Añorga",
+      "Benta Berri - Añorga"
+    ]
+  },
+  {
+    "id": "354",
+    "code": "354",
+    "name": "Anorga I",
+    "lines": [
+      "25",
+      "B1"
+    ],
+    "destinations": [
+      "Benta Berri - Añorga - Belartza",
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Añorga",
+      "Benta Berri - Añorga"
+    ]
+  },
+  {
+    "id": "355",
+    "code": "355",
+    "name": "Karmengo A. M. / V. del Carmen",
+    "lines": [
+      "25",
+      "B1"
+    ],
+    "destinations": [
+      "Benta Berri - Añorga - Belartza",
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Benta Berri - Añorga"
+    ]
+  },
+  {
+    "id": "356",
+    "code": "356",
+    "name": "Errotazar-Amasorrain",
+    "lines": [
+      "25",
+      "B1"
+    ],
+    "destinations": [
+      "Benta Berri - Añorga - Belartza",
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Benta Berri - Añorga"
+    ]
+  },
+  {
+    "id": "357",
+    "code": "357",
+    "name": "Caserío Parada",
+    "lines": [
+      "46"
+    ],
+    "destinations": [
+      "Avenida Libertad - San Antonio",
+      "Santa Catalina San Antonio"
+    ]
+  },
+  {
+    "id": "358",
+    "code": "358",
+    "name": "Irubide",
+    "lines": [
+      "25",
+      "B1"
+    ],
+    "destinations": [
+      "Benta Berri - Añorga - Belartza",
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Benta Berri - Añorga"
+    ]
+  },
+  {
+    "id": "359",
+    "code": "359",
+    "name": "Caserio Parada 28",
+    "lines": [
+      "46"
+    ],
+    "destinations": [
+      "Avenida Libertad - San Antonio",
+      "Santa Catalina San Antonio"
+    ]
+  },
+  {
+    "id": "360",
+    "code": "360",
+    "name": "Rotonda Belartza biribilgunea",
+    "lines": [
+      "25",
+      "B1"
+    ],
+    "destinations": [
+      "Benta Berri - Añorga - Belartza",
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Benta Berri - Añorga"
+    ]
+  },
+  {
+    "id": "361",
+    "code": "361",
+    "name": "Belartza",
+    "lines": [
+      "25",
+      "B1"
+    ],
+    "destinations": [
+      "Benta Berri - Añorga - Belartza",
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Benta Berri - Añorga"
+    ]
+  },
+  {
+    "id": "362",
+    "code": "362",
+    "name": "Errekalde",
+    "lines": [
+      "25"
+    ],
+    "destinations": [
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "363",
+    "code": "363",
+    "name": "Río Deba Ibaia 25",
+    "lines": [
+      "42"
+    ],
+    "destinations": [
+      "Aldapa-Egia"
+    ]
+  },
+  {
+    "id": "364",
+    "code": "364",
+    "name": "Anorga II",
+    "lines": [
+      "25"
+    ],
+    "destinations": [
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "365",
+    "code": "365",
+    "name": "Anorgatxiki II",
+    "lines": [
+      "25"
+    ],
+    "destinations": [
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "366",
+    "code": "366",
+    "name": "Garbera",
+    "lines": [
+      "24",
+      "27",
+      "33"
+    ],
+    "destinations": [
+      "Amara-Intxaurrondo-Altza",
+      "Intxaurrondo - Amara - Antiguo",
+      "Gros-Intxaurrondo-Larratxo",
+      "Intx-Gros-Boulevard"
+    ]
+  },
+  {
+    "id": "367",
+    "code": "367",
+    "name": "Otxoki",
+    "lines": [
+      "27",
+      "33"
+    ],
+    "destinations": [
+      "Intxaurrondo - Amara - Antiguo",
+      "Anoeta (Fútbol)",
+      "Antiguo-Berio-Igara",
+      "Intx-Gros-Boulevard"
+    ]
+  },
+  {
+    "id": "368",
+    "code": "368",
+    "name": "Baratzategi 2",
+    "lines": [
+      "27",
+      "33"
+    ],
+    "destinations": [
+      "Intxaurrondo - Amara - Antiguo",
+      "Anoeta (Fútbol)",
+      "Antiguo-Berio-Igara",
+      "Intx-Gros-Boulevard"
+    ]
+  },
+  {
+    "id": "369",
+    "code": "369",
+    "name": "Zarategi 71",
+    "lines": [
+      "9",
+      "27",
+      "29",
+      "33",
+      "B3"
+    ],
+    "destinations": [
+      "Okendo",
+      "Egia - Okendo",
+      "Egia - Puente Santa Catalina",
+      "Intxaurrondo - Amara - Antiguo",
+      "Anoeta (Fútbol)",
+      "Boulevard",
+      "Paseo Colón - Miracruz",
+      "Antiguo-Berio-Igara",
+      "Intx-Gros-Boulevard",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "370",
+    "code": "370",
+    "name": "Caserio Parada 70",
+    "lines": [
+      "46"
+    ],
+    "destinations": [
+      "Morlans",
+      "Avenida Libertad - San Antonio",
+      "Santa Catalina San Antonio"
+    ]
+  },
+  {
+    "id": "371",
+    "code": "371",
+    "name": "Berio 91",
+    "lines": [
+      "33"
+    ],
+    "destinations": [
+      "Gros-Intxaurrondo-Larratxo"
+    ]
+  },
+  {
+    "id": "373",
+    "code": "373",
+    "name": "Berio 118",
+    "lines": [
+      "25",
+      "33",
+      "40",
+      "B1"
+    ],
+    "destinations": [
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Antiguo-Berio-Igara",
+      "Antiguo-Igara",
+      "Benta Berri - Añorga"
+    ]
+  },
+  {
+    "id": "374",
+    "code": "374",
+    "name": "Polloe",
+    "lines": [
+      "24",
+      "42"
+    ],
+    "destinations": [
+      "Amara-Intxaurrondo-Altza",
+      "Aldapa-Egia",
+      "Okendo",
+      "Gros-Sta Catalina"
+    ]
+  },
+  {
+    "id": "375",
+    "code": "375",
+    "name": "Aizkorri",
+    "lines": [
+      "18",
+      "B8"
+    ],
+    "destinations": [
+      "Seminario",
+      "Miraconcha - Seminario",
+      "Miraconcha - Benta Berri - Seminario"
+    ]
+  },
+  {
+    "id": "376",
+    "code": "376",
+    "name": "Baratzategi 3",
+    "lines": [
+      "24",
+      "33"
+    ],
+    "destinations": [
+      "Amara-Intxaurrondo-Altza",
+      "Gros-Intxaurrondo-Larratxo"
+    ]
+  },
+  {
+    "id": "377",
+    "code": "377",
+    "name": "Otxoki parkea",
+    "lines": [
+      "24",
+      "33"
+    ],
+    "destinations": [
+      "Amara-Intxaurrondo-Altza",
+      "Gros-Intxaurrondo-Larratxo"
+    ]
+  },
+  {
+    "id": "378",
+    "code": "378",
+    "name": "Aldapabide 5",
+    "lines": [
+      "42"
+    ],
+    "destinations": [
+      "Okendo",
+      "Gros-Sta Catalina"
+    ]
+  },
+  {
+    "id": "380",
+    "code": "380",
+    "name": "Katalina Eleizegi 13",
+    "lines": [
+      "23",
+      "B9"
+    ],
+    "destinations": [
+      "San Bartolome",
+      "Pza. Gipuzkoa",
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "382",
+    "code": "382",
+    "name": "Pte Sta Catalina zubia",
+    "lines": [
+      "9",
+      "36",
+      "37",
+      "42",
+      "46"
+    ],
+    "destinations": [
+      "Egia - Intxaurrondo",
+      "Egia - Puente Santa Catalina",
+      "Fueros - Gros - Aldakonea",
+      "Santa Catalina - Rodil",
+      "Aldapa-Egia",
+      "Gros-Sta Catalina",
+      "Santa Catalina San Antonio"
+    ]
+  },
+  {
+    "id": "383",
+    "code": "383",
+    "name": "Molinao plaza I",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Larratxo-Altza-Eskalantegi-Molinao"
+    ]
+  },
+  {
+    "id": "394",
+    "code": "394",
+    "name": "Etxadi parkea",
+    "lines": [
+      "23",
+      "B9"
+    ],
+    "destinations": [
+      "Errondo-Puio",
+      "Errondo - Puio",
+      "Amara - Errondo - Puio"
+    ]
+  },
+  {
+    "id": "395",
+    "code": "395",
+    "name": "Larratxo",
+    "lines": [
+      "24",
+      "27",
+      "31",
+      "38"
+    ],
+    "destinations": [
+      "Gros-Amara-Antiguo",
+      "Amara-Intxaurrondo-Altza",
+      "Intxaurrondo - Amara - Antiguo",
+      "Amara - Gros - Altza",
+      "Anoeta (Fútbol)",
+      "Poligono 27 - Ospitaleak - Miramon",
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "399",
+    "code": "399",
+    "name": "Barcelona 35",
+    "lines": [
+      "26",
+      "27",
+      "31"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Intxaurrondo - Amara - Antiguo",
+      "Amara - Antiguo",
+      "Anoeta (Fútbol)",
+      "Poligono 27 - Ospitaleak - Miramon"
+    ]
+  },
+  {
+    "id": "401",
+    "code": "401",
+    "name": "Matigotxotegi-Parking",
+    "lines": [
+      "24"
+    ],
+    "destinations": [
+      "Amara-Intxaurrondo-Altza"
+    ]
+  },
+  {
+    "id": "402",
+    "code": "402",
+    "name": "Barcelona 26",
+    "lines": [
+      "24",
+      "26",
+      "31",
+      "41",
+      "B4"
+    ],
+    "destinations": [
+      "Amara-Intxaurrondo-Altza",
+      "Amara - Riberas - Martutene",
+      "Amara - Riberas - Poligono 27",
+      "Riberas - Poligono 27 - Altza",
+      "Egia-Loiola-Martutene"
+    ]
+  },
+  {
+    "id": "404",
+    "code": "404",
+    "name": "San Roke 12",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda. Libertad-San Roque",
+      "Estación del Norte-San Roque"
+    ]
+  },
+  {
+    "id": "405",
+    "code": "405",
+    "name": "Barcelona 10",
+    "lines": [
+      "24",
+      "26",
+      "31",
+      "41",
+      "B4"
+    ],
+    "destinations": [
+      "Amara-Intxaurrondo-Altza",
+      "Amara - Riberas - Martutene",
+      "Amara - Riberas - Poligono 27",
+      "Riberas - Poligono 27 - Altza",
+      "Egia-Loiola-Martutene"
+    ]
+  },
+  {
+    "id": "410",
+    "code": "410",
+    "name": "Leosineta",
+    "lines": [
+      "13",
+      "24",
+      "27",
+      "33",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Amara-Intxaurrondo-Altza",
+      "Anoeta (Fútbol)",
+      "Gros-Intxaurrondo-Larratxo",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "411",
+    "code": "411",
+    "name": "Altzako Anbulatorioa",
+    "lines": [
+      "13",
+      "31",
+      "38",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Poligono 27 - Ospitaleak - Miramon",
+      "Trintxerpe-Azkuene",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "413",
+    "code": "413",
+    "name": "Larratxo 98",
+    "lines": [
+      "13",
+      "38",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Buenavista - Boulevard",
+      "Bidebieta - Boulevard",
+      "Larratxo-Altza-Eskalantegi-Molinao",
+      "Buenavista - Bidebieta - Boulevard"
+    ]
+  },
+  {
+    "id": "417",
+    "code": "417",
+    "name": "Errondo-Anoeta",
+    "lines": [
+      "27"
+    ],
+    "destinations": [
+      "Anoeta (Fútbol)"
+    ]
+  },
+  {
+    "id": "418",
+    "code": "418",
+    "name": "Zorroaga-Anoeta",
+    "lines": [
+      "31"
+    ],
+    "destinations": [
+      "Riberas - Poligono 27 - Altza"
+    ]
+  },
+  {
+    "id": "420",
+    "code": "420",
+    "name": "Errondo -J.M. Salaberria",
+    "lines": [
+      "B9",
+      "43"
+    ],
+    "destinations": [
+      "Amara - Errondo - Puio",
+      "Antiguo-Unibertsitatea"
+    ]
+  },
+  {
+    "id": "421",
+    "code": "421",
+    "name": "Puente Zubiaurre zubia",
+    "lines": [
+      "14",
+      "31",
+      "B10"
+    ],
+    "destinations": [
+      "Zubiaurre - Bidebieta",
+      "Boulevard - Aiete - Ospitaleak",
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Aiete-Ospitaleak",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "423",
+    "code": "423",
+    "name": "Katalina Eleizegi 1",
+    "lines": [
+      "23",
+      "B9"
+    ],
+    "destinations": [
+      "San Bartolome",
+      "Pza. Gipuzkoa",
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "424",
+    "code": "424",
+    "name": "Oriamendi 112",
+    "lines": [
+      "31",
+      "35"
+    ],
+    "destinations": [
+      "Boulevard - Aiete - Ospitaleak",
+      "Aiete-Ospitaleak",
+      "Antiguo-Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "425",
+    "code": "425",
+    "name": "Mikeletegi 12",
+    "lines": [
+      "17",
+      "28",
+      "31",
+      "35"
+    ],
+    "destinations": [
+      "Gros",
+      "Gros-Cocheras",
+      "Boulevard",
+      "Boulevard - Aiete - Ospitaleak",
+      "Aiete-Ospitaleak",
+      "Antiguo-Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "426",
+    "code": "426",
+    "name": "Poliklinika II",
+    "lines": [
+      "17",
+      "28",
+      "31",
+      "35"
+    ],
+    "destinations": [
+      "Gros",
+      "Gros-Cocheras",
+      "Boulevard",
+      "Amara - Ospitaleak",
+      "Boulevard - Aiete - Ospitaleak",
+      "Aiete-Ospitaleak",
+      "Antiguo-Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "427",
+    "code": "427",
+    "name": "Poliklinika I",
+    "lines": [
+      "17",
+      "28",
+      "31",
+      "35"
+    ],
+    "destinations": [
+      "Amara-Ospitaleak-Miramon",
+      "Amara - Ospitaleak - Miramon",
+      "Amara - Ospitaleak",
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Aiete-Antiguo-Arriola",
+      "Aiete-Antiguo"
+    ]
+  },
+  {
+    "id": "428",
+    "code": "428",
+    "name": "Intxaurdegi",
+    "lines": [
+      "31",
+      "35"
+    ],
+    "destinations": [
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Aiete-Antiguo-Arriola",
+      "Aiete-Antiguo"
+    ]
+  },
+  {
+    "id": "429",
+    "code": "429",
+    "name": "Katxola",
+    "lines": [
+      "31",
+      "35"
+    ],
+    "destinations": [
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Aiete-Antiguo-Arriola",
+      "Aiete-Antiguo"
+    ]
+  },
+  {
+    "id": "430",
+    "code": "430",
+    "name": "Oriamendi",
+    "lines": [
+      "19",
+      "31",
+      "35",
+      "B2",
+      "45"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza",
+      "Pza. Gipzukoa",
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Aiete-Antiguo-Arriola",
+      "Aiete-Antiguo",
+      "Boulevard",
+      "Antiguo - Uniber - Etxadi"
+    ]
+  },
+  {
+    "id": "431",
+    "code": "431",
+    "name": "Gurutzealde II",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea"
+    ]
+  },
+  {
+    "id": "432",
+    "code": "432",
+    "name": "Aiete 93",
+    "lines": [
+      "19",
+      "31",
+      "35",
+      "B2",
+      "45"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza",
+      "Pza. Gipzukoa",
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Aiete-Antiguo-Arriola",
+      "Aiete-Antiguo",
+      "Boulevard",
+      "Antiguo - Uniber - Etxadi"
+    ]
+  },
+  {
+    "id": "433",
+    "code": "433",
+    "name": "Lugaritz -  Euskotren",
+    "lines": [
+      "27",
+      "B8",
+      "43",
+      "45"
+    ],
+    "destinations": [
+      "Amara - Gros - Altza",
+      "Miraconcha - Benta Berri - Seminario",
+      "Amara-Anoeta",
+      "Antiguo - Uniber - Etxadi"
+    ]
+  },
+  {
+    "id": "434",
+    "code": "434",
+    "name": "Oriamendi-Etxadi",
+    "lines": [
+      "31",
+      "35"
+    ],
+    "destinations": [
+      "Boulevard - Aiete - Ospitaleak",
+      "Aiete-Ospitaleak",
+      "Antiguo-Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "435",
+    "code": "435",
+    "name": "Oriamendi 20",
+    "lines": [
+      "31",
+      "35"
+    ],
+    "destinations": [
+      "Boulevard - Aiete - Ospitaleak",
+      "Aiete-Ospitaleak",
+      "Antiguo-Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "436",
+    "code": "436",
+    "name": "Oriamendi 60",
+    "lines": [
+      "31",
+      "35"
+    ],
+    "destinations": [
+      "Boulevard - Aiete - Ospitaleak",
+      "Aiete-Ospitaleak",
+      "Antiguo-Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "437",
+    "code": "437",
+    "name": "Katalina Eleizegi 25",
+    "lines": [
+      "23",
+      "B9"
+    ],
+    "destinations": [
+      "San Bartolome",
+      "Pza. Gipuzkoa",
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "439",
+    "code": "439",
+    "name": "Oriamendi 86",
+    "lines": [
+      "31",
+      "35"
+    ],
+    "destinations": [
+      "Boulevard - Aiete - Ospitaleak",
+      "Aiete-Ospitaleak",
+      "Antiguo-Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "440",
+    "code": "440",
+    "name": "Oriamendi-Pakea",
+    "lines": [
+      "31",
+      "35"
+    ],
+    "destinations": [
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Aiete-Antiguo-Arriola",
+      "Aiete-Antiguo"
+    ]
+  },
+  {
+    "id": "441",
+    "code": "441",
+    "name": "Molinaogaña / Alto Molinao",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Larratxo-Altza-Eskalantegi-Molinao",
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "443",
+    "code": "443",
+    "name": "Ubarburu 32",
+    "lines": [
+      "26"
+    ],
+    "destinations": [
+      "Amara - Riberas - Poligono 27"
+    ]
+  },
+  {
+    "id": "444",
+    "code": "444",
+    "name": "Ubarburu 44",
+    "lines": [
+      "26"
+    ],
+    "destinations": [
+      "Amara - Riberas - Poligono 27"
+    ]
+  },
+  {
+    "id": "445",
+    "code": "445",
+    "name": "Ubarburu 54",
+    "lines": [
+      "26"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Amara - Riberas - Poligono 27"
+    ]
+  },
+  {
+    "id": "446",
+    "code": "446",
+    "name": "Ubarburu 55",
+    "lines": [
+      "26"
+    ],
+    "destinations": [
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "447",
+    "code": "447",
+    "name": "Ubarburu 37",
+    "lines": [
+      "26"
+    ],
+    "destinations": [
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "448",
+    "code": "448",
+    "name": "Ubarburu 13",
+    "lines": [
+      "26"
+    ],
+    "destinations": [
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "452",
+    "code": "452",
+    "name": "Okendo 18",
+    "lines": [
+      "9",
+      "42"
+    ],
+    "destinations": [
+      "Egia - Intxaurrondo",
+      "Okendo",
+      "Egia - Intxaurrondo - Zubiaurre",
+      "Egia - Okendo",
+      "Egia-Okendo",
+      "Aldapa-Egia"
+    ]
+  },
+  {
+    "id": "458",
+    "code": "458",
+    "name": "Arroka plaza",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda. Libertad-San Roque",
+      "Estación del Norte-San Roque"
+    ]
+  },
+  {
+    "id": "459",
+    "code": "459",
+    "name": "San Roke 2",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda. Libertad-San Roque",
+      "Estación del Norte-San Roque"
+    ]
+  },
+  {
+    "id": "460",
+    "code": "460",
+    "name": "Aldapa 24",
+    "lines": [
+      "42"
+    ],
+    "destinations": [
+      "Aldapa-Egia"
+    ]
+  },
+  {
+    "id": "461",
+    "code": "461",
+    "name": "San Roke 18",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda. Libertad-San Roque",
+      "Estación del Norte-San Roque"
+    ]
+  },
+  {
+    "id": "462",
+    "code": "462",
+    "name": "Beloka 1",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda. Libertad-San Roque",
+      "Estación del Norte-San Roque"
+    ]
+  },
+  {
+    "id": "463",
+    "code": "463",
+    "name": "Beloka 15",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda. Libertad-San Roque",
+      "Estación del Norte-San Roque"
+    ]
+  },
+  {
+    "id": "464",
+    "code": "464",
+    "name": "Beloka 23",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda. Libertad-San Roque",
+      "Estación del Norte-San Roque"
+    ]
+  },
+  {
+    "id": "465",
+    "code": "465",
+    "name": "Lazkano 2",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda. Libertad-San Roque",
+      "Estación del Norte-San Roque"
+    ]
+  },
+  {
+    "id": "466",
+    "code": "466",
+    "name": "Txingurri",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Larratxo-Altza-Eskalantegi-Molinao"
+    ]
+  },
+  {
+    "id": "467",
+    "code": "467",
+    "name": "Lazkano 57",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda. Libertad-San Roque",
+      "Estación del Norte-San Roque"
+    ]
+  },
+  {
+    "id": "468",
+    "code": "468",
+    "name": "Lazkano 41",
+    "lines": [
+      "35",
+      "36"
+    ],
+    "destinations": [
+      "Antiguo-Aiete-Ospitaleak",
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea"
+    ]
+  },
+  {
+    "id": "469",
+    "code": "469",
+    "name": "San Roke 65",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda.Libertad - Gros - Aldakonea"
+    ]
+  },
+  {
+    "id": "470",
+    "code": "470",
+    "name": "San Roke 58",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea"
+    ]
+  },
+  {
+    "id": "471",
+    "code": "471",
+    "name": "San Roke 13",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea"
+    ]
+  },
+  {
+    "id": "472",
+    "code": "472",
+    "name": "San Roke 7",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea"
+    ]
+  },
+  {
+    "id": "473",
+    "code": "473",
+    "name": "Easo plaza",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea"
+    ]
+  },
+  {
+    "id": "475",
+    "code": "475",
+    "name": "Nazaret",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda. Libertad-San Roque",
+      "Estación del Norte-San Roque"
+    ]
+  },
+  {
+    "id": "476",
+    "code": "476",
+    "name": "Euskadi etorbidea-Azoka",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "477",
+    "code": "477",
+    "name": "Ricardo Arrilllaga 6",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "478",
+    "code": "478",
+    "name": "Gran Sol 3",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "479",
+    "code": "479",
+    "name": "Bordaenea 2",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "480",
+    "code": "480",
+    "name": "Oiartzun 8",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "481",
+    "code": "481",
+    "name": "Ulia 22",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "487",
+    "code": "487",
+    "name": "Jaialai  8",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea"
+    ]
+  },
+  {
+    "id": "488",
+    "code": "488",
+    "name": "Aldapabide 14",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea"
+    ]
+  },
+  {
+    "id": "489",
+    "code": "489",
+    "name": "Aldakoenea 69",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea"
+    ]
+  },
+  {
+    "id": "490",
+    "code": "490",
+    "name": "Aldakoenea-Alaiondo",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea"
+    ]
+  },
+  {
+    "id": "491",
+    "code": "491",
+    "name": "Konkorrenea-Parrokia",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea"
+    ]
+  },
+  {
+    "id": "492",
+    "code": "492",
+    "name": "Konkorrenea 23",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda. Libertad-San Roque",
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea",
+      "Estación del Norte-San Roque"
+    ]
+  },
+  {
+    "id": "493",
+    "code": "493",
+    "name": "Aldakoenea-Zuhaizti",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda. Libertad-San Roque",
+      "Estación del Norte-San Roque"
+    ]
+  },
+  {
+    "id": "494",
+    "code": "494",
+    "name": "Euskadi plaza",
+    "lines": [
+      "9",
+      "36",
+      "41",
+      "B3"
+    ],
+    "destinations": [
+      "Okendo",
+      "Egia - Okendo",
+      "Avda. Libertad-San Roque",
+      "Gros",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "495",
+    "code": "495",
+    "name": "Askatasuna/Libertad 19",
+    "lines": [
+      "8",
+      "40"
+    ],
+    "destinations": [
+      "Gros - Intxaurrondo",
+      "Gros",
+      "Gros-Cocheras"
+    ]
+  },
+  {
+    "id": "496",
+    "code": "496",
+    "name": "Errondo-Morlans",
+    "lines": [
+      "21",
+      "46"
+    ],
+    "destinations": [
+      "Amara-Mutualitateak",
+      "Avenida Libertad - San Antonio",
+      "Santa Catalina San Antonio"
+    ]
+  },
+  {
+    "id": "497",
+    "code": "497",
+    "name": "Errondogaña / Alto Errondo 49",
+    "lines": [
+      "23",
+      "B9"
+    ],
+    "destinations": [
+      "Errondo-Puio",
+      "Errondo - Puio",
+      "Amara - Errondo - Puio"
+    ]
+  },
+  {
+    "id": "498",
+    "code": "498",
+    "name": "Loiola - Parking",
+    "lines": [
+      "26",
+      "41"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Gros"
+    ]
+  },
+  {
+    "id": "499",
+    "code": "499",
+    "name": "Ubarburu 14",
+    "lines": [
+      "26"
+    ],
+    "destinations": [
+      "Amara - Riberas - Poligono 27"
+    ]
+  },
+  {
+    "id": "500",
+    "code": "500",
+    "name": "Ubarburu 31",
+    "lines": [
+      "26"
+    ],
+    "destinations": [
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "501",
+    "code": "501",
+    "name": "Ubarburu 5",
+    "lines": [
+      "26"
+    ],
+    "destinations": [
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "505",
+    "code": "505",
+    "name": "Isturin",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda.Libertad - Gros - Aldakonea"
+    ]
+  },
+  {
+    "id": "507",
+    "code": "507",
+    "name": "Ategorrieta",
+    "lines": [
+      "14",
+      "31",
+      "36",
+      "B10"
+    ],
+    "destinations": [
+      "Zubiaurre - Bidebieta",
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "508",
+    "code": "508",
+    "name": "San Luis plaza",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Larratxo-Altza-Eskalantegi-Molinao"
+    ]
+  },
+  {
+    "id": "509",
+    "code": "509",
+    "name": "Mikeletegi 6",
+    "lines": [
+      "31",
+      "35"
+    ],
+    "destinations": [
+      "Boulevard - Aiete - Ospitaleak",
+      "Aiete-Ospitaleak",
+      "Antiguo-Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "510",
+    "code": "510",
+    "name": "Mikeletegi 5",
+    "lines": [
+      "31",
+      "35"
+    ],
+    "destinations": [
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Aiete-Antiguo-Arriola",
+      "Aiete-Antiguo"
+    ]
+  },
+  {
+    "id": "511",
+    "code": "511",
+    "name": "Merkezabal 13",
+    "lines": [
+      "32"
+    ],
+    "destinations": [
+      "Puio-Errondo"
+    ]
+  },
+  {
+    "id": "512",
+    "code": "512",
+    "name": "Borroto 20",
+    "lines": [
+      "23",
+      "B9"
+    ],
+    "destinations": [
+      "Errondo-Puio",
+      "San Bartolome",
+      "Errondo - Puio",
+      "Pza. Gipuzkoa",
+      "Amara - Errondo - Puio",
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "513",
+    "code": "513",
+    "name": "Ategorrietako Frontoia",
+    "lines": [
+      "37"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza - Estación del Norte - Zorroaga",
+      "Avd Libertad - Rodil",
+      "Santa Catalina - Rodil",
+      "Estación del Norte-Zorroaga"
+    ]
+  },
+  {
+    "id": "514",
+    "code": "514",
+    "name": "Bordatxipi-Lore Toki",
+    "lines": [
+      "37"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza - Estación del Norte - Zorroaga",
+      "Estación del Norte-Zorroaga"
+    ]
+  },
+  {
+    "id": "515",
+    "code": "515",
+    "name": "Larraga Arbola",
+    "lines": [
+      "37"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza - Estación del Norte - Zorroaga",
+      "Estación del Norte-Zorroaga"
+    ]
+  },
+  {
+    "id": "516",
+    "code": "516",
+    "name": "Rodil 91",
+    "lines": [
+      "37"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza - Estación del Norte - Zorroaga",
+      "Estación del Norte-Zorroaga"
+    ]
+  },
+  {
+    "id": "517",
+    "code": "517",
+    "name": "Rodil 69",
+    "lines": [
+      "37"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza - Estación del Norte - Zorroaga",
+      "Estación del Norte-Zorroaga"
+    ]
+  },
+  {
+    "id": "518",
+    "code": "518",
+    "name": "Rodil 55",
+    "lines": [
+      "37"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza - Estación del Norte - Zorroaga",
+      "Estación del Norte-Zorroaga"
+    ]
+  },
+  {
+    "id": "519",
+    "code": "519",
+    "name": "Manteo",
+    "lines": [
+      "37"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza - Estación del Norte - Zorroaga",
+      "Estación del Norte-Zorroaga"
+    ]
+  },
+  {
+    "id": "522",
+    "code": "522",
+    "name": "F. G. Lorca 6",
+    "lines": [
+      "37"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza - Estación del Norte - Zorroaga",
+      "Estación del Norte-Zorroaga"
+    ]
+  },
+  {
+    "id": "523",
+    "code": "523",
+    "name": "Tolaregoia 2",
+    "lines": [
+      "42"
+    ],
+    "destinations": [
+      "Aldapa-Egia"
+    ]
+  },
+  {
+    "id": "524",
+    "code": "524",
+    "name": "Garroko zubia",
+    "lines": [
+      "8",
+      "9",
+      "29",
+      "B3"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Paseo Colón - Iparagirre",
+      "Egia - Okendo",
+      "Paseo Colón - Miracruz",
+      "Egia - Boulevard"
+    ]
+  },
+  {
+    "id": "525",
+    "code": "525",
+    "name": "Gregorio Ordoñez",
+    "lines": [
+      "26",
+      "27",
+      "31"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Intxaurrondo - Amara - Antiguo",
+      "Amara - Antiguo",
+      "Anoeta (Fútbol)",
+      "Poligono 27 - Ospitaleak - Miramon"
+    ]
+  },
+  {
+    "id": "526",
+    "code": "526",
+    "name": "Zorroagagaña / Alto Zorroaga 1",
+    "lines": [
+      "37"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza - Estación del Norte - Zorroaga",
+      "Estación del Norte-Zorroaga"
+    ]
+  },
+  {
+    "id": "527",
+    "code": "527",
+    "name": "Mendigain",
+    "lines": [
+      "37"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza - Estación del Norte - Zorroaga",
+      "Avd Libertad - Rodil",
+      "Santa Catalina - Rodil",
+      "Estación del Norte-Zorroaga"
+    ]
+  },
+  {
+    "id": "528",
+    "code": "528",
+    "name": "Zorroagagaña / Alto Zorroaga 2",
+    "lines": [
+      "37"
+    ],
+    "destinations": [
+      "Avd Libertad - Rodil",
+      "Santa Catalina - Rodil"
+    ]
+  },
+  {
+    "id": "529",
+    "code": "529",
+    "name": "Ospitaleak-Larranategi",
+    "lines": [
+      "37"
+    ],
+    "destinations": [
+      "Avd Libertad - Rodil",
+      "Santa Catalina - Rodil"
+    ]
+  },
+  {
+    "id": "531",
+    "code": "531",
+    "name": "Jaialai 17",
+    "lines": [
+      "42"
+    ],
+    "destinations": [
+      "Okendo",
+      "Gros-Sta Catalina"
+    ]
+  },
+  {
+    "id": "532",
+    "code": "532",
+    "name": "Tolaregoia 42",
+    "lines": [
+      "42"
+    ],
+    "destinations": [
+      "Aldapa-Egia"
+    ]
+  },
+  {
+    "id": "533",
+    "code": "533",
+    "name": "Zubiaurre 40",
+    "lines": [
+      "14",
+      "31",
+      "B10"
+    ],
+    "destinations": [
+      "Zubiaurre - Bidebieta",
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "534",
+    "code": "534",
+    "name": "Txurkoene 3",
+    "lines": [
+      "42"
+    ],
+    "destinations": [
+      "Aldapa-Egia"
+    ]
+  },
+  {
+    "id": "535",
+    "code": "535",
+    "name": "Karmengo Andre Maria 46",
+    "lines": [
+      "42"
+    ],
+    "destinations": [
+      "Okendo",
+      "Gros-Sta Catalina"
+    ]
+  },
+  {
+    "id": "536",
+    "code": "536",
+    "name": "Errondo 3",
+    "lines": [
+      "21"
+    ],
+    "destinations": [
+      "Amara-Mutualitateak"
+    ]
+  },
+  {
+    "id": "537",
+    "code": "537",
+    "name": "Leosineta II",
+    "lines": [
+      "13"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Buenavista - Boulevard",
+      "Bidebieta - Boulevard",
+      "Buenavista - Bidebieta - Boulevard",
+      "Buenavista - Paseo Colón",
+      "Paseo Colón - Miracruz"
+    ]
+  },
+  {
+    "id": "538",
+    "code": "538",
+    "name": "Pasai San Pedro 49",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Larratxo-Altza-Eskalantegi-Molinao",
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "539",
+    "code": "539",
+    "name": "Pasai San Pedro 25",
+    "lines": [
+      "13",
+      "14",
+      "38",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Bidebieta - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Bidebieta",
+      "Anoeta (Fútbol)",
+      "Zubiaurre - Bidebieta",
+      "BIdebieta",
+      "Larratxo-Altza-Eskalantegi-Molinao",
+      "Buenavista - Bidebieta - Boulevard",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "540",
+    "code": "540",
+    "name": "Larratxo 11",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Larratxo-Altza-Eskalantegi-Molinao"
+    ]
+  },
+  {
+    "id": "541",
+    "code": "541",
+    "name": "Larratxo 20",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Larratxo-Altza-Eskalantegi-Molinao"
+    ]
+  },
+  {
+    "id": "542",
+    "code": "542",
+    "name": "Eskalantegi 15",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Larratxo-Altza-Eskalantegi-Molinao"
+    ]
+  },
+  {
+    "id": "543",
+    "code": "543",
+    "name": "Eskalantegi 58",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Larratxo-Altza-Eskalantegi-Molinao",
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "544",
+    "code": "544",
+    "name": "Molinao plaza II",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "545",
+    "code": "545",
+    "name": "Darieta 141",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "546",
+    "code": "546",
+    "name": "Darieta 13",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "547",
+    "code": "547",
+    "name": "Darieta - Kiroldegia",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "548",
+    "code": "548",
+    "name": "Txingurri  29",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "549",
+    "code": "549",
+    "name": "Txingurri 7",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "550",
+    "code": "550",
+    "name": "Pasai San Pedro-Bidebieta",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "551",
+    "code": "551",
+    "name": "Euskadi etorbidea 5",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "552",
+    "code": "552",
+    "name": "Azkuene 35",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "553",
+    "code": "553",
+    "name": "Azkuene plaza",
+    "lines": [
+      "38"
+    ],
+    "destinations": [
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "554",
+    "code": "554",
+    "name": "Marrus",
+    "lines": [
+      "24",
+      "33"
+    ],
+    "destinations": [
+      "Amara-Intxaurrondo-Altza",
+      "Gros-Intxaurrondo-Larratxo"
+    ]
+  },
+  {
+    "id": "555",
+    "code": "555",
+    "name": "Zorroagagaña / Alto Zorroaga 76",
+    "lines": [
+      "37"
+    ],
+    "destinations": [
+      "Avd Libertad - Rodil",
+      "Santa Catalina - Rodil"
+    ]
+  },
+  {
+    "id": "556",
+    "code": "556",
+    "name": "Zorroagagaña / Alto Zorroaga 134",
+    "lines": [
+      "37"
+    ],
+    "destinations": [
+      "Avd Libertad - Rodil",
+      "Santa Catalina - Rodil"
+    ]
+  },
+  {
+    "id": "557",
+    "code": "557",
+    "name": "Illarra",
+    "lines": [
+      "40"
+    ],
+    "destinations": [
+      "Gros",
+      "Gros-Cocheras"
+    ]
+  },
+  {
+    "id": "558",
+    "code": "558",
+    "name": "Askatasuna/Libertad 3",
+    "lines": [
+      "33",
+      "37",
+      "46"
+    ],
+    "destinations": [
+      "Gros-Intxaurrondo-Larratxo",
+      "Avd Libertad - Rodil",
+      "Avenida Libertad - San Antonio"
+    ]
+  },
+  {
+    "id": "566",
+    "code": "566",
+    "name": "Pinu bidea / C. de los Pinos 7",
+    "lines": [
+      "B8"
+    ],
+    "destinations": [
+      "Miraconcha - Benta Berri - Seminario"
+    ]
+  },
+  {
+    "id": "567",
+    "code": "567",
+    "name": "Gurutzealde I",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea"
+    ]
+  },
+  {
+    "id": "568",
+    "code": "568",
+    "name": "Lazkano 57 II",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda.Libertad - Gros - Aldakonea",
+      "Fueros - Gros - Aldakonea"
+    ]
+  },
+  {
+    "id": "569",
+    "code": "569",
+    "name": "Aiete jauregia / Palacio Aiete II",
+    "lines": [
+      "19",
+      "31",
+      "35",
+      "B2"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza",
+      "Pza. Gipzukoa",
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Aiete-Antiguo-Arriola",
+      "Aiete-Antiguo",
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "570",
+    "code": "570",
+    "name": "Puente Mundaitz zubia",
+    "lines": [
+      "37"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza - Estación del Norte - Zorroaga",
+      "Estación del Norte-Zorroaga"
+    ]
+  },
+  {
+    "id": "571",
+    "code": "571",
+    "name": "Arriola 87",
+    "lines": [
+      "35"
+    ],
+    "destinations": [
+      "Aiete-Antiguo-Arriola",
+      "Antiguo-Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "572",
+    "code": "572",
+    "name": "Arriola 32 - Igerilekuak / Piscinas",
+    "lines": [
+      "35"
+    ],
+    "destinations": [
+      "Antiguo-Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "573",
+    "code": "573",
+    "name": "Pakea",
+    "lines": [
+      "35"
+    ],
+    "destinations": [
+      "Antiguo-Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "574",
+    "code": "574",
+    "name": "Arriola 15",
+    "lines": [
+      "35"
+    ],
+    "destinations": [
+      "Antiguo-Aiete-Ospitaleak"
+    ]
+  },
+  {
+    "id": "576",
+    "code": "576",
+    "name": "Julianategi-Unibertsitatea",
+    "lines": [
+      "35"
+    ],
+    "destinations": [
+      "Aiete-Antiguo-Arriola"
+    ]
+  },
+  {
+    "id": "577",
+    "code": "577",
+    "name": "Tontorgoxo",
+    "lines": [
+      "35"
+    ],
+    "destinations": [
+      "Aiete-Antiguo-Arriola"
+    ]
+  },
+  {
+    "id": "578",
+    "code": "578",
+    "name": "Arriola 26",
+    "lines": [
+      "35"
+    ],
+    "destinations": [
+      "Aiete-Antiguo-Arriola"
+    ]
+  },
+  {
+    "id": "579",
+    "code": "579",
+    "name": "Arriola 32",
+    "lines": [
+      "35"
+    ],
+    "destinations": [
+      "Aiete-Antiguo-Arriola"
+    ]
+  },
+  {
+    "id": "580",
+    "code": "580",
+    "name": "Arriola 89",
+    "lines": [
+      "35"
+    ],
+    "destinations": [
+      "Aiete-Antiguo-Arriola"
+    ]
+  },
+  {
+    "id": "581",
+    "code": "581",
+    "name": "Eguzkimendi / Montesol",
+    "lines": [
+      "46"
+    ],
+    "destinations": [
+      "Morlans"
+    ]
+  },
+  {
+    "id": "582",
+    "code": "582",
+    "name": "Ibaeta",
+    "lines": [
+      "33"
+    ],
+    "destinations": [
+      "Gros-Intxaurrondo-Larratxo"
+    ]
+  },
+  {
+    "id": "584",
+    "code": "584",
+    "name": "Morlans 51",
+    "lines": [
+      "46"
+    ],
+    "destinations": [
+      "Morlans"
+    ]
+  },
+  {
+    "id": "585",
+    "code": "585",
+    "name": "Tranbia 1",
+    "lines": [
+      "26",
+      "41",
+      "B4"
+    ],
+    "destinations": [
+      "Amara - Riberas - Martutene",
+      "Egia-Loiola-Martutene"
+    ]
+  },
+  {
+    "id": "586",
+    "code": "586",
+    "name": "Campo futbol zelaia",
+    "lines": [
+      "26",
+      "41"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Gros"
+    ]
+  },
+  {
+    "id": "587",
+    "code": "587",
+    "name": "Txingurri 40",
+    "lines": [
+      "27",
+      "31",
+      "33",
+      "38"
+    ],
+    "destinations": [
+      "Intxaurrondo - Amara - Antiguo",
+      "Anoeta (Fútbol)",
+      "Poligono 27 - Ospitaleak - Miramon",
+      "Antiguo-Berio-Igara",
+      "Trintxerpe-Azkuene"
+    ]
+  },
+  {
+    "id": "588",
+    "code": "588",
+    "name": "Arzakenea",
+    "lines": [
+      "25"
+    ],
+    "destinations": [
+      "Boulevard"
+    ]
+  },
+  {
+    "id": "589",
+    "code": "589",
+    "name": "Aldunaenea",
+    "lines": [
+      "37"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza - Estación del Norte - Zorroaga",
+      "Estación del Norte-Zorroaga"
+    ]
+  },
+  {
+    "id": "590",
+    "code": "590",
+    "name": "Mikeletegi Miramon",
+    "lines": [
+      "17",
+      "28",
+      "31",
+      "35"
+    ],
+    "destinations": [
+      "Amara-Ospitaleak-Miramon",
+      "Amara - Ospitaleak - Miramon",
+      "Avda.Libertad - Gros - Intxaurrondo",
+      "Aiete-Antiguo-Arriola",
+      "Aiete-Antiguo"
+    ]
+  },
+  {
+    "id": "591",
+    "code": "591",
+    "name": "Kotxerak - Mons",
+    "lines": [
+      "24",
+      "33"
+    ],
+    "destinations": [
+      "Gros - Amara - Antiguo",
+      "Antiguo-Berio-Igara",
+      "Intx-Gros-Boulevard"
+    ]
+  },
+  {
+    "id": "593",
+    "code": "593",
+    "name": "Baleazaleak / Balleneros 8",
+    "lines": [
+      "37"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza - Estación del Norte - Zorroaga",
+      "Estación del Norte-Zorroaga"
+    ]
+  },
+  {
+    "id": "594",
+    "code": "594",
+    "name": "Aldakoeneko Gaina",
+    "lines": [
+      "36"
+    ],
+    "destinations": [
+      "Avda. Libertad-San Roque",
+      "Estación del Norte-San Roque"
+    ]
+  },
+  {
+    "id": "595",
+    "code": "595",
+    "name": "Igeldo pasealekua 72",
+    "lines": [
+      "16",
+      "B7"
+    ],
+    "destinations": [
+      "Igeldo"
+    ]
+  },
+  {
+    "id": "596",
+    "code": "596",
+    "name": "Andoain 17",
+    "lines": [
+      "19",
+      "B2",
+      "45"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza",
+      "Pza. Gipzukoa",
+      "Boulevard",
+      "Antiguo - Uniber - Etxadi"
+    ]
+  },
+  {
+    "id": "597",
+    "code": "597",
+    "name": "Pagola",
+    "lines": [
+      "19",
+      "B2",
+      "45"
+    ],
+    "destinations": [
+      "Gipuzkoa Plaza",
+      "Pza. Gipzukoa",
+      "Boulevard",
+      "Antiguo - Uniber - Etxadi"
+    ]
+  },
+  {
+    "id": "598",
+    "code": "598",
+    "name": "Illunbe",
+    "lines": [
+      "28"
+    ],
+    "destinations": [
+      "Errondo Illunbe",
+      "Illunbe Centenario"
+    ]
+  },
+  {
+    "id": "599",
+    "code": "599",
+    "name": "Arzakenea II",
+    "lines": [
+      "25",
+      "B1"
+    ],
+    "destinations": [
+      "Benta Berri - Añorga - Belartza",
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Añorga",
+      "Benta Berri - Añorga"
+    ]
+  },
+  {
+    "id": "600",
+    "code": "600",
+    "name": "Urbieta 38",
+    "lines": [
+      "23",
+      "36",
+      "46"
+    ],
+    "destinations": [
+      "Errondo - Puio",
+      "Avda. Libertad-San Roque",
+      "Morlans"
+    ]
+  },
+  {
+    "id": "601",
+    "code": "601",
+    "name": "Hipika - Kuartelak",
+    "lines": [
+      "26",
+      "31",
+      "41"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Poligono 27 - Ospitaleak - Miramon",
+      "Gros"
+    ]
+  },
+  {
+    "id": "602",
+    "code": "602",
+    "name": "Etxadi Parkea II",
+    "lines": [
+      "32"
+    ],
+    "destinations": [
+      "Puio-Errondo"
+    ]
+  },
+  {
+    "id": "603",
+    "code": "603",
+    "name": "Elizasu",
+    "lines": [
+      "13",
+      "38",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Boulevard",
+      "Buenavista - Boulevard",
+      "Bidebieta - Boulevard",
+      "Buenavista - Paseo Colón",
+      "Paseo Colón - Miracruz",
+      "Larratxo-Altza-Eskalantegi-Molinao",
+      "Buenavista - Bidebieta - Boulevard"
+    ]
+  },
+  {
+    "id": "604",
+    "code": "604",
+    "name": "Txapiñenea",
+    "lines": [
+      "13",
+      "31",
+      "38",
+      "B6",
+      "B10"
+    ],
+    "destinations": [
+      "Altza",
+      "Buenavista - Altza",
+      "Bidebieta - Altza",
+      "Bidebieta - Buenavista - Altza",
+      "Poligono 27 - Ospitaleak - Miramon",
+      "Trintxerpe-Azkuene",
+      "Zubiaurre - Bidebieta - Buenavista - Altza"
+    ]
+  },
+  {
+    "id": "606",
+    "code": "606",
+    "name": "San Antonio",
+    "lines": [
+      "46"
+    ],
+    "destinations": [
+      "Morlans"
+    ]
+  },
+  {
+    "id": "607",
+    "code": "607",
+    "name": "Luis Pradera 9",
+    "lines": [
+      "46"
+    ],
+    "destinations": [
+      "Morlans"
+    ]
+  },
+  {
+    "id": "608",
+    "code": "608",
+    "name": "Morlans 73",
+    "lines": [
+      "46"
+    ],
+    "destinations": [
+      "Morlans"
+    ]
+  },
+  {
+    "id": "609",
+    "code": "609",
+    "name": "Luis Pradera 1",
+    "lines": [
+      "46"
+    ],
+    "destinations": [
+      "Morlans"
+    ]
+  },
+  {
+    "id": "610",
+    "code": "610",
+    "name": "Morlans Igogailua / Ascensor",
+    "lines": [
+      "46"
+    ],
+    "destinations": [
+      "Morlans",
+      "Avenida Libertad - San Antonio",
+      "Santa Catalina San Antonio"
+    ]
+  },
+  {
+    "id": "611",
+    "code": "611",
+    "name": "Morlans 19",
+    "lines": [
+      "46"
+    ],
+    "destinations": [
+      "Avenida Libertad - San Antonio",
+      "Santa Catalina San Antonio"
+    ]
+  },
+  {
+    "id": "612",
+    "code": "612",
+    "name": "Errondo-Mendeurrena/Centenario",
+    "lines": [
+      "28"
+    ],
+    "destinations": [
+      "Errondo Illunbe",
+      "Illunbe Centenario"
+    ]
+  },
+  {
+    "id": "613",
+    "code": "613",
+    "name": "Garbera II",
+    "lines": [
+      "31",
+      "33"
+    ],
+    "destinations": [
+      "Poligono 27 - Ospitaleak - Miramon",
+      "Riberas - Poligono 27 - Altza",
+      "Intx-Gros-Boulevard"
+    ]
+  },
+  {
+    "id": "616",
+    "code": "616",
+    "name": "Errotzar-Illarra",
+    "lines": [
+      "40"
+    ],
+    "destinations": [
+      "Gros",
+      "Gros-Cocheras"
+    ]
+  },
+  {
+    "id": "629",
+    "code": "629",
+    "name": "Loiola",
+    "lines": [
+      "27"
+    ],
+    "destinations": [
+      "Intxaurrondo - Amara - Antiguo",
+      "Amara - Antiguo",
+      "Anoeta (Fútbol)"
+    ]
+  },
+  {
+    "id": "630",
+    "code": "630",
+    "name": "Ospitalea/Hospital",
+    "lines": [
+      "35"
+    ],
+    "destinations": [
+      "Aiete-Antiguo-Arriola",
+      "Antiguo-Aiete-Ospitaleak",
+      "Aiete-Antiguo"
+    ]
+  },
+  {
+    "id": "631",
+    "code": "631",
+    "name": "Loiola II",
+    "lines": [
+      "24"
+    ],
+    "destinations": [
+      "Amara-Intxaurrondo-Altza"
+    ]
+  },
+  {
+    "id": "635",
+    "code": "635",
+    "name": "Berio Arturo Campion",
+    "lines": [
+      "25",
+      "33",
+      "B1"
+    ],
+    "destinations": [
+      "BentaBerri-Berio-Añorga-Belartza",
+      "Antiguo-Berio-Igara",
+      "Benta Berri - Añorga"
+    ]
+  },
+  {
+    "id": "636",
+    "code": "636",
+    "name": "San Bartolome 3",
+    "lines": [
+      "23",
+      "32"
+    ],
+    "destinations": [
+      "Errondo-Puio",
+      "San Bartolome",
+      "Puio-Errondo"
+    ]
+  },
+  {
+    "id": "642",
+    "code": "642",
+    "name": "Tolosa 13",
+    "lines": [
+      "24",
+      "27"
+    ],
+    "destinations": [
+      "Gros-Amara-Antiguo",
+      "Gros - Amara - Antiguo",
+      "Intxaurrondo - Amara - Antiguo"
+    ]
+  },
+  {
+    "id": "643",
+    "code": "643",
+    "name": "Madrid 20",
+    "lines": [
+      "24",
+      "26",
+      "43"
+    ],
+    "destinations": [
+      "Amara-Intxaurrondo-Altza",
+      "Amara - Riberas - Martutene",
+      "Amara - Riberas - Poligono 27",
+      "Antiguo-Unibertsitatea",
+      "Amara-Anoeta"
+    ]
+  },
+  {
+    "id": "646",
+    "code": "646",
+    "name": "Barcelona 37",
+    "lines": [
+      "41"
+    ],
+    "destinations": [
+      "Gros"
+    ]
+  }
+]

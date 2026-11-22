@@ -4,16 +4,22 @@
 .env.*.local
 
 # Bot
-bot/.env
+apps/bot/.env
 bot.db
+*.db
+*.db-journal
 
 # Dependencies
 node_modules/
 
 # Build outputs
 dist/
+dist-types/
 dist-ssr/
 *.local
+
+# TypeScript build info
+*.tsbuildinfo
 
 # IDE
 .idea/
@@ -29,5 +35,5 @@ Thumbs.db
 *.log
 npm-debug.log*
 
-# PWA
-public/proto/
+# Legacy artifacts
+bot-code.zip

@@ -1,6 +1,6 @@
 # Estado — bus-dbus
 
-Actualizado: 2026-11-22 07:00 · Última sesión: auditoría y refinado de documentación
+Actualizado: 2026-11-22 07:05 · Última sesión: verificación de buscador/favoritos, ajuste de rutas tras el split y reinicio del bot
 
 > **`AGENTS.md` es la fuente de verdad.** Este archivo es el estado de sesión;
 > si algo aquí contradice a `AGENTS.md`, manda `AGENTS.md`.
@@ -9,12 +9,13 @@ Actualizado: 2026-11-22 07:00 · Última sesión: auditoría y refinado de docum
 
 | Área | Estado |
 |------|--------|
-| Bot de Telegram | ✅ Activo con datos reales, commit `8445239`, PID `51205`, `node dist/index.js`, lock y log verificados |
-| Calidad del bot | ✅ 40/40 tests · `tsc` 0 errores · `biome check src/ tests/` limpio · `build` OK |
+| Bot de Telegram | ✅ Activo con datos reales desde `apps/bot`, build de `8445239`, PID `73125`, `node dist/index.js`, lock y log verificados |
+| Calidad del bot | ✅ 40/40 tests · `pnpm --filter @dbus/bot verify` (tsc + biome + tests) · `build` OK |
 | Descubrimiento | ✅ `/buscar` + `/linea` sobre catálogo real (39 líneas, 127 itinerarios, 548 paradas) |
 | Favoritos | ✅ parada completa, parada+línea y línea favorita |
-| PWA (Sprint 3) | 🔧 Bloqueada: 30 errores TS y 233 de lint en `src/` (preexistente) |
-| Docs | ✅ `README.md` y `AGENTS.md` refinados; ADR 005 y planning avisan de que los `.pb` dan 403 |
+| PWA (Sprint 3) | 🔧 Bloqueada: errores TS/lint preexistentes en `apps/mobile/src/` |
+| Workspace | 🔧 Split a pnpm en curso en el working tree (`apps/`, `packages/`, `docs/`); ver `docs/plan/repo-split.md` |
+| Docs | ✅ `README.md`, `AGENTS.md` y `ESTADO.md` con las rutas nuevas; ADR 005 avisa de que los `.pb` dan 403 |
 | Seguridad | ⚠️ Token compartido en texto plano: pendiente de rotación por Iker |
 
 ## Objetivo
@@ -44,7 +45,7 @@ petición explícita.
 
 ### Búsqueda y favoritos libres (`8445239`)
 - Eliminadas "paradas populares": lista arbitraria de 3 itinerarios semilla.
-- `bot/data/dbus-catalog.json` generado por `npm run build:catalog`: índice de
+- `apps/bot/data/dbus-catalog.json` generado con `cd apps/bot && npm run build:catalog`: índice de
   descubrimiento, **no** fuente de llegadas (estas siguen en vivo).
 - `/buscar` (código, nombre, línea o destino) y `/linea 28` → destinos →
   paradas → llegadas. Callbacks stateless.
@@ -53,13 +54,23 @@ petición explícita.
 - GPS descartado: la API de Dbus no devuelve coordenadas; datos de prueba
   quedaron solo en TMPDIR, nunca en el repo.
 
-### Documentación (sesión actual)
-- `AGENTS.md` nuevo con reglas, verificación y despliegue.
+### Verificación de buscador y favoritos
+- Suite completa 40/40 en `apps/bot/` con `BOT_TOKEN` inyectado por entorno.
+- 4 flujos comprobados contra la API real con un test temporal (borrado):
+  búsqueda por nombre → llegadas; búsqueda por línea → destinos → paradas →
+  llegadas; guardar/ver/borrar parada completa (con dedup); guardar/ver/borrar
+  línea favorita.
+- El split había dejado `apps/bot/package.json` sin `BOT_TOKEN` en los scripts
+  `test`/`verify`: corregido.
+
+### Documentación
+- `AGENTS.md`, `README.md` y `ESTADO.md` actualizados a las rutas del workspace
+  (`apps/bot`, `apps/mobile`, `packages/*`, `docs/*`).
 - `README.md`: recuento de tests 40/40, rutas de lint correctas, secretos por
   entorno (sin `.env`), identidad de línea, semántica real de favoritos y
   estado de GTFS-RT.
 - `ESTADO.md`: reescrito como estado actual + historial comprimido.
-- ADR 005 y `04-planning/mvp-scope.md`: aviso de que el diseño `.pb` no aplica
+- ADR 005 y `docs/04-planning/mvp-scope.md`: aviso de que el diseño `.pb` no aplica
   al bot porque los feeds devuelven 403.
 
 ## Pendiente (por prioridad)
@@ -85,10 +96,11 @@ petición explícita.
 
 ## Git
 
-`8ce2694` → `f1ed9a0` → `65d2b08` → `e10eb3c` → `8445239`, todos pusheados.
-Esta sesión añade cambios de documentación pendientes de commit/push.
-Ramas abiertas: ninguna. El token solo se pasa por entorno; nunca en archivos
-ni commits.
+`8ce2694` → `f1ed9a0` → `65d2b08` → `e10eb3c` → `8445239` → `99621cf`
+(docs), todos pusheados. Hay un **split a workspaces sin commitear** en el
+working tree (`apps/`, `packages/`, `docs/`, pnpm): trabajo ajeno a esta
+sesión, no modificado salvo `apps/bot/package.json` (test/verify con token)
+y los docs. Ramas abiertas: ninguna. Token solo por entorno.
 
 ## Siguiente sesión
 

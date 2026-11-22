@@ -1,0 +1,12 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+nodeLinker: hoisted
+
+# pnpm 11: las dependencias con scripts de instalación deben aprobarse aquí
+# (sustituye a onlyBuiltDependencies de pnpm 9/10).
+allowBuilds:
+  better-sqlite3: true
+  esbuild: true
+  "@biomejs/biome": true

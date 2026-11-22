@@ -1,0 +1,32 @@
+{
+  "name": "@dbus/bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -b",
+    "build:catalog": "node scripts/build-catalog.mjs",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -b",
+    "test": "BOT_TOKEN=vitest_test_token vitest run",
+    "verify": "tsc -b && biome check src tests && BOT_TOKEN=vitest_test_token vitest run"
+  },
+  "dependencies": {
+    "@dbus/contracts": "workspace:*",
+    "@dbus/core": "workspace:*",
+    "better-sqlite3": "^13.2.0",
+    "node-cron": "^3.0.3",
+    "telegraf": "^4.16.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/node": "^22.0.0",
+    "@types/node-cron": "^3.0.11",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.9"
+  }
+}
