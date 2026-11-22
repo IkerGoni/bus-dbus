@@ -9,7 +9,7 @@ build debug). Estado de cada sprint: `ESTADO.md`.
 |---|---|---|---|
 | 0 | Esqueleto verde | B4, B8, B14 (base) | hecho 2026-11-22 |
 | 1 | Datos y dominio | B1, B3, B12, B15, B16 | hecho 2026-11-22 |
-| 2 | Consulta: Paradas, Detalle, Líneas | B1, B2, B9, B11 | pendiente |
+| 2 | Consulta: Paradas, Detalle, Líneas | B1, B2, B9, B11 | hecho 2026-11-22 (rama sin integrar) |
 | 3 | Inicio, Avisos, Ajustes, Onboarding | B5, B10, B13 | pendiente |
 | 4 | Motor de avisos y notificaciones | B6 | pendiente |
 | 5 | Publicación: repo público + config | — | pendiente |
@@ -57,6 +57,13 @@ build debug). Estado de cada sprint: `ESTADO.md`.
   junto con A06 (nada de botones sin acción mientras tanto).
 - A03 Líneas y A03b Itinerario desde el catálogo.
 - **DoD:** probado en emulador contra la API real; capturas en `docs/07-android-mvp/capturas/`.
+- **Resultado (2026-11-22):** `AppContainer` en `BusDonostiaApp` (sin DI); A02, A05,
+  A03 y A03b con ViewModels y lógica pura (`domain/Search.kt`, `domain/StopView.kt`).
+  16 tests JVM nuevos por variante (búsqueda con paridad contra `packages/core/dist`,
+  cercanas, 5 vistas de A05 con fixtures reales, filtros de A03, favoritas).
+  Probado en el AVD `dbus36` contra `app.dbus.eus`: 340 en vivo, parada 1
+  `SIN_SERVICIO` con su motivo real, datos viejos (`STALE`) y error en modo avión.
+  19 capturas en `capturas/sprint-2/`.
 
 ## Sprint 3 · Inicio, Avisos, Ajustes, Onboarding
 - A06 Configurar aviso (ONCE / RECURRING con franja), dedup y guardado; 🔔 por

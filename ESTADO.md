@@ -1,6 +1,6 @@
 # Estado — bus-dbus
 
-Actualizado: 2026-11-22 13:50 · Última sesión: Android Sprint 1 (datos y dominio)
+Actualizado: 2026-11-22 15:00 · Última sesión: Android Sprint 2 (consulta)
 
 > **`AGENTS.md` es la fuente de verdad.** Este archivo es el estado de sesión;
 > si algo aquí contradice a `AGENTS.md`, manda `AGENTS.md`.
@@ -8,33 +8,38 @@ Actualizado: 2026-11-22 13:50 · Última sesión: Android Sprint 1 (datos y domi
 ## Objetivo actual
 
 MVP Android nativo sin backend (ADR 009). Plan en
-`docs/07-android-mvp/SPRINTS.md`. **Sprints 0 y 1 hechos; siguiente: Sprint 2
-(consulta: Paradas, Detalle, Líneas).** El bot sigue en producción sin cambios
+`docs/07-android-mvp/SPRINTS.md`. **Sprints 0, 1 y 2 hechos (el 2 en la rama
+`android/sprint-2`, sin integrar); siguiente: Sprint 3 (Inicio, Avisos, Ajustes,
+Onboarding).** El bot sigue en producción sin cambios
 (PID `80402`).
 
 ## Hecho en la última sesión
 
-- **Sprint 1** en `apps/android/` (sin UI nueva): tarea Gradle
-  `merge<Variant>Catalog` → `assets/catalog.json` (548/514/39/127, no
-  commiteado); `ApiConfig` empaquetada + carga remota opcional (12 h contando
-  intentos, 5 s, validación, fallback a última válida; HTTP solo para
-  `app.dbus.eus`; URL remota vacía); `DbusClient` → `StopFeed`; Room
-  (favoritos, avisos con índice único `(stopId, lineId)`, recientes 10, colores
-  de línea); dominio puro con tests de cada fila de la tabla §5 (DST marzo y
-  octubre, medianoche, una vez por franja, ONCE a 7 días); `Ticker` de 1 s.
-- `./gradlew check assembleDebug` verde: 66 tests JVM por variante, 0 errores de
-  lint (24 warnings de versiones/atributos). `@dbus/core` sigue verde (14 tests).
-- 5 fixtures reales nuevos en `packages/contracts/fixtures/` + `README.md`
-  (DATOS GPS, DATOS con avisos, SIN_SERVICIO con y sin motivo, NO DESC).
-- Dos ajustes deliberados al contrato (documentados en
-  `02-domain-contracts.md`): `remainingMinutes` no sube si el reloj va por
-  detrás del fetch; el matching compara solo código público (el alias interno
-  se resuelve antes con `toPublicLineId`).
+- **Sprint 2** en `apps/android/`: `AppContainer` en `BusDonostiaApp` (sin DI;
+  catálogo cargado en IO, `refreshIfDue` sin bloquear). A02 Paradas (buscador
+  offline con paridad `searchStops`, Cercanas top 20 Haversine con «X m · Y min»
+  a 80 m/min y nota de estimación, Favoritas STOP + STOP_LINE, Recientes,
+  permiso de ubicación no bloqueante, atribución ODbL). A05 Detalle (sondeo
+  `pollIntervalSec` con `repeatOnLifecycle(STARTED)`, 5 vistas vía
+  `stopArrivalsView`, `notice` también con datos, chips con color visto en
+  vivo, ★ STOP y STOP_LINE, recientes, `geo:` solo con coordenadas y app que
+  lo abra). A03 Líneas (búsqueda `32` → gana la pública, filtros Todas /
+  Favoritas / Nocturnas, ★ LINE) y A03b Itinerario (timeline, tap → A05 con la línea).
+- `./gradlew check assembleDebug` verde: 82 tests JVM por variante (164), 0
+  errores de lint. Probado en el AVD `dbus36` contra la API real: 340 en vivo,
+  parada 1 `SIN_SERVICIO` («Parada suprimida - traslado: L21, L28 Okendo 11»),
+  `STALE` y error en modo avión. 19 capturas en
+  `docs/07-android-mvp/capturas/sprint-2/`. `grep` de literales limpio.
+- Memoria: `gradle.properties` cierra los daemons a los 10 min y limita el de
+  Kotlin a 1 GB; el emulador se apaga al terminar las capturas.
+- Prompt del Sprint 3 en `docs/07-android-mvp/prompts/SPRINT-3.md`.
 
 ## Pendiente (por prioridad)
 
-- [ ] **Sprint 2 · Consulta** (ver `SPRINTS.md`; prompt
-      `docs/07-android-mvp/prompts/SPRINT-2.md`).
+- [ ] **Integrar `android/sprint-2` en `main`** (pendiente de autorización de Iker).
+- [ ] **Sprint 3** (prompt `docs/07-android-mvp/prompts/SPRINT-3.md`).
+- [ ] Revisar en móvil real Cercanas con ubicación aproximada (en Android 12+
+      se difumina ~2 km) y el tiempo hasta la primera posición.
 - [ ] Fixture real de `DATOS` con `tiempos` vacío: no observado aún (las
       paradas sin buses dan `SIN_SERVICIO`); capturarlo si aparece.
 - [ ] Propuesta a Iker: guardar `linea.color` en `build:catalog` (lane bot);
@@ -49,6 +54,16 @@ MVP Android nativo sin backend (ADR 009). Plan en
 - [ ] Catálogo duplicado: `packages/contracts/data/` vs `apps/bot/data/`.
 
 ## Decisiones tomadas (no reabrir)
+
+- 2026-11-22 · Android Sprint 2: se piden COARSE + FINE juntos (el usuario
+  elige aproximada o precisa en el diálogo; con solo aproximada Cercanas sería
+  poco útil). Ubicación sin Play Services (`LocationManagerCompat`), atajo con
+  la última posición del sistema de < 2 min, nunca persistida.
+- 2026-11-22 · A05: si falla un refresco, los datos válidos anteriores siguen
+  `live` mientras sean FRESH, pasan a `degraded` (banner con la hora real del
+  dato) si STALE y a `error` si EXPIRED. ★ STOP_LINE = botón bajo los chips
+  cuando hay una línea seleccionada; desde A03b o una favorita parada+línea se
+  entra con ese chip ya seleccionado.
 
 - 2026-11-22 · Android nativo (Kotlin + Compose), sin web app previa, sin
   backend ni FCM. Config remota = JSON estático opcional (ADR 009).
@@ -85,11 +100,14 @@ MVP Android nativo sin backend (ADR 009). Plan en
 - Rotación del token de Telegram (R6).
 - Validación conversacional del bot (PID `80402`).
 - Visto bueno al nombre «Bus Donostia» y al applicationId antes de Play.
+- Autorizar merge + push de `android/sprint-2` a `main` y borrado de la rama.
 
 ## Git
 
-Rama `android/sprint-1` integrada en `main` y borrada al cerrar esta sesión.
+Rama `android/sprint-2` con el Sprint 2, **sin integrar en `main`** (falta la
+orden de Iker). Ver `git log --oneline main..android/sprint-2`.
 
 ## Siguiente sesión
 
-- Prompt: `docs/07-android-mvp/prompts/SPRINT-2.md`.
+- Integrar `android/sprint-2` si Iker lo autoriza; después
+  `docs/07-android-mvp/prompts/SPRINT-3.md`.
