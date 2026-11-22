@@ -10,7 +10,7 @@ build debug). Estado de cada sprint: `ESTADO.md`.
 | 0 | Esqueleto verde | B4, B8, B14 (base) | hecho 2026-11-22 |
 | 1 | Datos y dominio | B1, B3, B12, B15, B16 | hecho 2026-11-22 |
 | 2 | Consulta: Paradas, Detalle, Líneas | B1, B2, B9, B11 | hecho 2026-11-22 |
-| 3 | Inicio, Avisos, Ajustes, Onboarding | B5, B10, B13 | pendiente |
+| 3 | Inicio, Avisos, Ajustes, Onboarding | B5, B10, B13 | hecho 2026-11-22 |
 | 4 | Motor de avisos y notificaciones | B6 | pendiente |
 | 5 | Publicación: repo público + config | — | pendiente |
 
@@ -73,6 +73,16 @@ build debug). Estado de cada sprint: `ESTADO.md`.
 - A07 Ajustes (tema, idioma, datos reales, fuentes, permisos) y A08 Onboarding.
 - Badge de Avisos con `computeAlertStatus`.
 - **DoD:** todas las pantallas con sus 5 estados; cero literales; capturas.
+- **Resultado (2026-11-22):** A06 (`ui/alerts/AlertEditScreen.kt`) con borrador,
+  validación, presets y dedup puros en `domain/AlertDraft.kt`; A04, A01 y badge
+  sobre `domain/AlertList.kt` (`alertItem` → `computeAlertStatus`, orden de §3).
+  Respuestas en vivo compartidas en memoria (`data/live/LiveFeeds.kt`, siempre
+  vía `stopArrivalsView`); `AppContainer.fetchStop` es la única puerta a la API.
+  A07 y A08 con AppCompat (idioma por app y tema). 13 tests JVM nuevos por
+  variante (95). Probado en el AVD `dbus36` contra la API real: 🔔 en 340 →
+  ONCE guardado → `Llegando`, Posponer/Pausar, dedup con «Actualizar», RECURRING
+  con franja en parada 1 (`Sin servicio`), Deshacer, es/eu, claro/oscuro y modo
+  avión. 31 capturas en `capturas/sprint-3/`. Sin motor (Sprint 4).
 
 ## Sprint 4 · Motor de avisos
 - Foreground Service `dataSync` (sondeo 30 s agrupado por parada).

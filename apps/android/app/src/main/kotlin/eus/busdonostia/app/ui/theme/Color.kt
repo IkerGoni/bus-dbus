@@ -53,6 +53,8 @@ val DarkStatusColors = StatusColors(
 
 val LightScheme: ColorScheme = lightColorScheme(
     primary = Color(0xFF005BB5),
+    // Acción del Snackbar (`Deshacer`) sobre fondo oscuro: el primario del tema oscuro.
+    inversePrimary = Color(0xFF60A5FA),
     onPrimary = Color(0xFFFFFFFF),
     primaryContainer = Color(0xFFEFF6FF),
     onPrimaryContainer = Color(0xFF005BB5),
@@ -74,6 +76,7 @@ val LightScheme: ColorScheme = lightColorScheme(
 
 val DarkScheme: ColorScheme = darkColorScheme(
     primary = Color(0xFF60A5FA),
+    inversePrimary = Color(0xFF005BB5),
     onPrimary = Color(0xFF082F49),
     primaryContainer = Color(0xFF1E3A5F),
     onPrimaryContainer = Color(0xFFDBEAFE),

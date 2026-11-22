@@ -1,14 +1,23 @@
 package eus.busdonostia.app
 
 import android.app.Application
+import android.content.Context
+import androidx.appcompat.app.AppCompatDelegate
 import eus.busdonostia.app.data.api.DbusClient
 import eus.busdonostia.app.data.catalog.loadCatalog
 import eus.busdonostia.app.data.config.ConfigRepository
 import eus.busdonostia.app.data.db.AppDatabase
+import eus.busdonostia.app.data.db.lineColors
 import eus.busdonostia.app.data.db.toDomain
+import eus.busdonostia.app.data.live.LiveFeeds
 import eus.busdonostia.app.data.location.LocationProvider
+import eus.busdonostia.app.data.settings.SettingsStore
+import eus.busdonostia.app.data.settings.currentAppLanguage
+import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.Catalog
 import eus.busdonostia.app.domain.Favorite
+import eus.busdonostia.app.domain.StopFeed
+import eus.busdonostia.app.domain.StopFeedStatus
 import eus.busdonostia.app.domain.Ticker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -62,10 +71,32 @@ class AppContainer(app: Application) {
         .map { list -> list.map { it.toDomain() } }
         .stateIn(appScope, SharingStarted.Eagerly, emptyList())
 
-    /** Idioma de la app para `tiemposParada` (`es` | `eu`). */
+    /** Avisos guardados; null mientras Room no ha respondido (estado `loading`). */
+    val alerts: StateFlow<List<AlertRule>?> = database.alerts().observeAll()
+        .map { list -> list.map { it.toDomain() } }
+        .stateIn(appScope, SharingStarted.Eagerly, null)
+
+    val settings = SettingsStore(app.getSharedPreferences("settings", Context.MODE_PRIVATE))
+
+    /** Respuestas en vivo de esta sesión por parada (A01, A04, A06 y badge). */
+    val liveFeeds = LiveFeeds()
+
+    /** Idioma de la app para `tiemposParada` (`es` | `eu`): el elegido en A07 o el del sistema. */
     private val resources = app.resources
 
-    fun apiLanguage(): String = if (resources.configuration.locales[0].language == "eu") "eu" else "es"
+    fun apiLanguage(): String = currentAppLanguage(resources.configuration.locales[0].language).tag
+
+    /**
+     * Única puerta a `tiemposParada` para la UI: guarda el resultado en [liveFeeds],
+     * la hora de la última respuesta real (A07) y los colores de línea vistos en vivo.
+     */
+    suspend fun fetchStop(stopId: String): StopFeed {
+        val feed = dbusClient.tiemposParada(stopId, apiLanguage())
+        liveFeeds.record(stopId, feed)
+        if (feed.status != StopFeedStatus.API_ERROR) settings.recordLiveFetch(feed.fetchedAtMs)
+        if (feed.status == StopFeedStatus.OK) appScope.launch { database.lineColors().upsertAll(feed.lineColors()) }
+        return feed
+    }
 
     val ticker = Ticker(appScope)
 
@@ -82,5 +113,7 @@ class BusDonostiaApp : Application() {
     override fun onCreate() {
         super.onCreate()
         container = AppContainer(this)
+        // Apariencia elegida en A07 (AppCompat no la guarda): antes de crear ninguna actividad.
+        AppCompatDelegate.setDefaultNightMode(container.settings.theme.value.nightMode)
     }
 }

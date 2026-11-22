@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- A07 · Ezarpenak -->
+    <string name="settings_title">Ezarpenak</string>
+    <string name="settings_section_appearance">Itxura</string>
+    <string name="settings_theme_system">Sistema</string>
+    <string name="settings_theme_light">Argia</string>
+    <string name="settings_theme_dark">Iluna</string>
+    <string name="settings_section_language">Hizkuntza</string>
+    <string name="settings_language_es">Español</string>
+    <string name="settings_language_eu">Euskara</string>
+    <string name="settings_section_notifications">Jakinarazpenak</string>
+    <string name="settings_notifications_on">Aktibatuta</string>
+    <string name="settings_notifications_off">Desaktibatuta</string>
+    <string name="settings_notifications_off_hint">Jakinarazpenik gabe, abisuek ez dute joko.</string>
+    <string name="settings_open_system">Sistemaren ezarpenak</string>
+    <string name="settings_section_background">Atzeko planoko abisuak</string>
+    <string name="settings_exact_alarms">Alarma zehatzak</string>
+    <string name="settings_exact_on">Baimenduta</string>
+    <string name="settings_exact_off">Ez daude baimenduta: errepikatzen diren abisuak berandu iritsi daitezke.</string>
+    <string name="settings_exact_grant">Baimendu alarma zehatzak</string>
+    <string name="settings_battery">Bateriaren optimizazioa</string>
+    <string name="settings_battery_ok">Murrizketarik gabe</string>
+    <string name="settings_battery_restricted">Optimizatuta: abisuak berandu iritsi daitezke</string>
+    <string name="settings_battery_change">Aldatu optimizazioa</string>
+    <string name="settings_section_data">Datuak</string>
+    <string name="settings_counts_join">%1$s · %2$s</string>
+    <string name="settings_catalog_date">Lineaz kanpoko katalogoaren sorrera-data</string>
+    <string name="settings_live_last">Zuzeneko azken kontsulta</string>
+    <string name="settings_live_never">Oraindik ez da geltokirik kontsultatu</string>
+    <string name="settings_section_about">Aplikazioari buruz</string>
+    <string name="settings_version">Bertsioa</string>
+    <string name="settings_credit_times">Denborak: Dbusen aplikazioaren zerbitzua (ez-ofiziala, loturarik gabe)</string>
+    <string name="settings_credit_osm">Geltokien koordenatuak © OpenStreetMap (ODbL)</string>
+    <string name="settings_credit_fonts">Letra-tipoak: Plus Jakarta Sans eta JetBrains Mono (SIL Open Font License 1.1)</string>
+
+    <!-- A08 · Onboarding -->
+    <string name="onboarding_bullet_live">Dbusen benetako iristeak eta inguruko geltokiak</string>
+    <string name="onboarding_bullet_alerts">Autobusa iritsi baino lehen nahi duzun minutu-kopuruarekin abisatuko dizugu</string>
+    <string name="onboarding_bullet_free">Iragarkirik gabe, gaztelaniaz eta euskaraz</string>
+    <string name="onboarding_privacy">Konturik eta zerbitzari propiorik gabe: zure gogokoak eta abisuak telefono honetan geratzen dira.</string>
+    <string name="onboarding_allow">Baimendu jakinarazpenak eta hasi</string>
+    <string name="onboarding_skip">Hasi jakinarazpenik gabe</string>
+</resources>

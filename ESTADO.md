@@ -1,6 +1,6 @@
 # Estado — bus-dbus
 
-Actualizado: 2026-11-22 15:00 · Última sesión: Android Sprint 2 (consulta)
+Actualizado: 2026-11-22 15:40 · Última sesión: Android Sprint 3 (Inicio, Avisos, Ajustes, Onboarding)
 
 > **`AGENTS.md` es la fuente de verdad.** Este archivo es el estado de sesión;
 > si algo aquí contradice a `AGENTS.md`, manda `AGENTS.md`.
@@ -8,34 +8,34 @@ Actualizado: 2026-11-22 15:00 · Última sesión: Android Sprint 2 (consulta)
 ## Objetivo actual
 
 MVP Android nativo sin backend (ADR 009). Plan en
-`docs/07-android-mvp/SPRINTS.md`. **Sprints 0, 1 y 2 hechos; siguiente: Sprint 3 (Inicio, Avisos, Ajustes,
-Onboarding).** El bot sigue en producción sin cambios
-(PID `80402`).
+`docs/07-android-mvp/SPRINTS.md`. **Sprints 0–3 hechos (el 3 en la rama
+`android/sprint-3`, sin integrar); siguiente: Sprint 4 (motor de avisos).**
+El bot sigue en producción sin cambios (PID `80402`).
 
 ## Hecho en la última sesión
 
-- **Sprint 2** en `apps/android/`: `AppContainer` en `BusDonostiaApp` (sin DI;
-  catálogo cargado en IO, `refreshIfDue` sin bloquear). A02 Paradas (buscador
-  offline con paridad `searchStops`, Cercanas top 20 Haversine con «X m · Y min»
-  a 80 m/min y nota de estimación, Favoritas STOP + STOP_LINE, Recientes,
-  permiso de ubicación no bloqueante, atribución ODbL). A05 Detalle (sondeo
-  `pollIntervalSec` con `repeatOnLifecycle(STARTED)`, 5 vistas vía
-  `stopArrivalsView`, `notice` también con datos, chips con color visto en
-  vivo, ★ STOP y STOP_LINE, recientes, `geo:` solo con coordenadas y app que
-  lo abra). A03 Líneas (búsqueda `32` → gana la pública, filtros Todas /
-  Favoritas / Nocturnas, ★ LINE) y A03b Itinerario (timeline, tap → A05 con la línea).
-- `./gradlew check assembleDebug` verde: 82 tests JVM por variante (164), 0
-  errores de lint. Probado en el AVD `dbus36` contra la API real: 340 en vivo,
-  parada 1 `SIN_SERVICIO` («Parada suprimida - traslado: L21, L28 Okendo 11»),
-  `STALE` y error en modo avión. 19 capturas en
-  `docs/07-android-mvp/capturas/sprint-2/`. `grep` de literales limpio.
-- Memoria: `gradle.properties` cierra los daemons a los 10 min y limita el de
-  Kotlin a 1 GB; el emulador se apaga al terminar las capturas.
-- Prompt del Sprint 3 en `docs/07-android-mvp/prompts/SPRINT-3.md`.
+- **Sprint 3** en `apps/android/`: A06 Configurar aviso (líneas y destinos
+  reales de la parada, antelación con chips + slider, ONCE / RECURRING con
+  días, presets y franja obligatoria ≤ 3 h, vista previa, dedup con
+  «Actualizar», `POST_NOTIFICATIONS` al guardar). A05 con 🔔 por llegada y pie
+  `Crear aviso en esta parada`. A04 Mis avisos (grupos, 5 estados + «Caducada»,
+  switch, editar, borrar con Deshacer). A01 Inicio (próximo aviso con Posponer
+  5' y Pausar + Deshacer, favoritas con 3 llegadas en vivo, pull-to-refresh,
+  búsqueda universal de paradas y líneas). Badge `ACTIVE | TRIGGERED` (`9+`).
+  A07 Ajustes y A08 Onboarding. Lógica en `domain/AlertDraft.kt` y
+  `domain/AlertList.kt`.
+- `./gradlew check assembleDebug` verde: 95 tests JVM por variante (190), 0
+  errores de lint. Probado en el AVD `dbus36` contra la API real (340 en vivo,
+  parada 1 `SIN_SERVICIO`, modo avión). 31 capturas en
+  `docs/07-android-mvp/capturas/sprint-3/`. `grep` de literales limpio.
+- Prompt del Sprint 4 en `docs/07-android-mvp/prompts/SPRINT-4.md`.
 
 ## Pendiente (por prioridad)
 
-- [ ] **Sprint 3** (prompt `docs/07-android-mvp/prompts/SPRINT-3.md`).
+- [ ] Integrar `android/sprint-3` en `main` (falta autorización de Iker).
+- [ ] **Sprint 4** (prompt `docs/07-android-mvp/prompts/SPRINT-4.md`).
+- [ ] Licencia del repo: la spec pide «licencia MIT» en A07, pero no hay
+      `LICENSE`. A07 no muestra licencia de la app hasta que Iker decida.
 - [ ] Revisar en móvil real Cercanas con ubicación aproximada (en Android 12+
       se difumina ~2 km) y el tiempo hasta la primera posición.
 - [ ] Fixture real de `DATOS` con `tiempos` vacío: no observado aún (las
@@ -52,6 +52,14 @@ Onboarding).** El bot sigue en producción sin cambios
 - [ ] Catálogo duplicado: `packages/contracts/data/` vs `apps/bot/data/`.
 
 ## Decisiones tomadas (no reabrir)
+
+- 2026-11-22 · Android Sprint 3: `MainActivity` pasa a `AppCompatActivity`
+  (appcompat 1.7.1) para idioma por app y tema también en Android < 13; tema en
+  `SharedPreferences`, idioma lo guarda AppCompat. Guardar o reactivar un ONCE
+  lo vuelve a armar (`createdAtMs = now`). Dedup al editar: queda un único
+  aviso (se escribe sobre el existente y se borra el editado). ONCE activo de
+  más de 7 días se muestra «Caducada», no «Pausada». La cabecera de Inicio usa
+  «Bus Donostia» (no «Dbus») por el aviso de no oficialidad.
 
 - 2026-11-22 · Android Sprint 2: se piden COARSE + FINE juntos (el usuario
   elige aproximada o precisa en el diálogo; con solo aproximada Cercanas sería
@@ -101,8 +109,10 @@ Onboarding).** El bot sigue en producción sin cambios
 
 ## Git
 
-Rama `android/sprint-2` integrada en `main` y borrada (autorizado por Iker).
+Rama `android/sprint-3` con el Sprint 3, sin integrar en `main`
+(`git log --oneline main..android/sprint-3`).
 
 ## Siguiente sesión
 
-- Prompt: `docs/07-android-mvp/prompts/SPRINT-3.md`.
+- Integrar `android/sprint-3` si Iker lo autoriza; después,
+  `docs/07-android-mvp/prompts/SPRINT-4.md`.

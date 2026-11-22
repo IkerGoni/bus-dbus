@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.Inbox
+import androidx.compose.material.icons.outlined.NotificationAdd
 import androidx.compose.material.icons.outlined.NightsStay
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.Button
@@ -81,7 +82,12 @@ private fun clockOf(ms: Long): String = HH_MM.format(Instant.ofEpochMilli(ms).at
 
 /** A05 · Detalle de parada. Sondea `tiemposParada` cada `pollIntervalSec` mientras está visible. */
 @Composable
-fun StopDetailScreen(stopId: String, highlightLine: String?, onBack: () -> Unit) {
+fun StopDetailScreen(
+    stopId: String,
+    highlightLine: String?,
+    onBack: () -> Unit,
+    onCreateAlert: (stopId: String, lineId: String?, destination: String?) -> Unit,
+) {
     val vm = appViewModel(key = "stop:$stopId") { StopDetailViewModel(it, stopId, highlightLine) }
     val state by vm.state.collectAsStateWithLifecycle()
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -138,7 +144,22 @@ fun StopDetailScreen(stopId: String, highlightLine: String?, onBack: () -> Unit)
                 )
             }
         }
-        Arrivals(state, vm::refresh)
+        Box(Modifier.weight(1f)) {
+            Arrivals(state, vm::refresh) { arrival -> onCreateAlert(stopId, arrival.lineId, arrival.destination.ifEmpty { null }) }
+        }
+        // Pie fijo: aviso en esta parada (A06 con la parada precargada).
+        HorizontalDivider(color = LocalStatusColors.current.border)
+        Button(
+            onClick = { onCreateAlert(stopId, null, null) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .heightIn(min = 48.dp),
+        ) {
+            Icon(Icons.Outlined.NotificationAdd, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(R.string.stop_create_alert), maxLines = 1)
+        }
     }
 }
 
@@ -170,7 +191,7 @@ private fun LineChips(state: StopDetailUiState, onSelect: (String?) -> Unit) {
 }
 
 @Composable
-private fun Arrivals(state: StopDetailUiState, onRetry: () -> Unit) {
+private fun Arrivals(state: StopDetailUiState, onRetry: () -> Unit, onBell: (Arrival) -> Unit) {
     val view = state.view
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 16.dp)) {
         item {
@@ -195,7 +216,7 @@ private fun Arrivals(state: StopDetailUiState, onRetry: () -> Unit) {
             }
             is ArrivalsView.Live -> {
                 notice(view.notice)
-                arrivalRows(view.arrivals, state)
+                arrivalRows(view.arrivals, state, onBell)
             }
             is ArrivalsView.Degraded -> when (view.reason) {
                 DegradedReason.NO_SERVICE -> item {
@@ -218,7 +239,7 @@ private fun Arrivals(state: StopDetailUiState, onRetry: () -> Unit) {
                         }
                     }
                     notice(view.notice)
-                    arrivalRows(view.arrivals, state)
+                    arrivalRows(view.arrivals, state, onBell)
                 }
             }
             ArrivalsView.Error -> item {
@@ -256,7 +277,7 @@ private fun LazyListScope.notice(text: String?) {
     }
 }
 
-private fun LazyListScope.arrivalRows(arrivals: List<Arrival>, state: StopDetailUiState) {
+private fun LazyListScope.arrivalRows(arrivals: List<Arrival>, state: StopDetailUiState, onBell: (Arrival) -> Unit) {
     val rows = filterArrivals(arrivals, state.selectedLine)
     if (rows.isEmpty()) {
         item {
@@ -269,18 +290,18 @@ private fun LazyListScope.arrivalRows(arrivals: List<Arrival>, state: StopDetail
         return
     }
     items(rows) { arrival ->
-        ArrivalRow(arrival, remainingMinutes(arrival, state.nowMs), state.lineColors[arrival.lineId])
+        ArrivalRow(arrival, remainingMinutes(arrival, state.nowMs), state.lineColors[arrival.lineId]) { onBell(arrival) }
         HorizontalDivider(Modifier.padding(start = 60.dp), color = LocalStatusColors.current.border)
     }
 }
 
 @Composable
-private fun ArrivalRow(arrival: Arrival, minutes: Int, colorArgb: Int?) {
+private fun ArrivalRow(arrival: Arrival, minutes: Int, colorArgb: Int?, onBell: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -303,6 +324,13 @@ private fun ArrivalRow(arrival: Arrival, minutes: Int, colorArgb: Int?) {
             )
         }
         MinutesLabel(minutes, arrival.source)
+        // 🔔 48 dp: A06 con parada, línea y destino de esta llegada.
+        IconButton(onClick = onBell) {
+            Icon(
+                Icons.Outlined.NotificationAdd,
+                contentDescription = stringResource(R.string.a11y_alert_for_arrival, arrival.lineId, arrival.destination),
+            )
+        }
     }
 }
 

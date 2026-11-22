@@ -8,15 +8,18 @@ import javax.xml.parsers.DocumentBuilderFactory
 
 /** B14: `es` (values/) y `eu` (values-eu/) tienen exactamente las mismas claves y ninguna vacía. */
 class StringsParityTest {
+    /** Todas las `<string>` de los `strings*.xml` de [dir]. */
     private fun load(dir: String): Map<String, String> {
-        val file = File("src/main/res/$dir/strings.xml")
-        assertTrue("No existe ${file.path}", file.exists())
-        val nodes = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-            .parse(file).getElementsByTagName("string")
-        return (0 until nodes.length).associate { i ->
-            val el = nodes.item(i)
-            el.attributes.getNamedItem("name").nodeValue to el.textContent.trim()
-        }
+        val files = File("src/main/res/$dir").listFiles { f -> f.name.startsWith("strings") && f.name.endsWith(".xml") }.orEmpty()
+        assertTrue("No hay strings*.xml en $dir", files.any { it.name == "strings.xml" })
+        return files.sortedBy { it.name }.flatMap { file ->
+            val nodes = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+                .parse(file).getElementsByTagName("string")
+            (0 until nodes.length).map { i ->
+                val el = nodes.item(i)
+                el.attributes.getNamedItem("name").nodeValue to el.textContent.trim()
+            }
+        }.toMap()
     }
 
     @Test
