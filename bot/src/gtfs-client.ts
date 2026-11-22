@@ -18,7 +18,7 @@ let rtDataCache: ParsedRT | null = null;
 let fetcherHealthy = false;
 let fetcherCheckInterval: ReturnType<typeof setInterval> | null = null;
 
-// Detect test environment to skip slow retry logic
+// Detect test environment to use mock data
 const isTestEnv =
   process.env.BOT_TOKEN === 'vitest_test_token' ||
   process.env.NODE_ENV === 'test';
@@ -76,7 +76,7 @@ async function checkFetcherHealth(): Promise<boolean> {
 }
 
 async function waitForFetcherReady(): Promise<void> {
-  // In test env, skip health check and immediately use fallback
+  // In test env, skip health check and immediately mark as unhealthy
   if (isTestEnv) {
     fetcherHealthy = false;
     return;
@@ -100,7 +100,7 @@ async function waitForFetcherReady(): Promise<void> {
     await sleep(delay + jitter);
   }
   console.error(
-    '[GTFS] Fetcher never became healthy, will continue with fallback data'
+    '[GTFS] Fetcher never became healthy after max retries. Live data unavailable.'
   );
   fetcherHealthy = false;
 }
@@ -309,95 +309,6 @@ function parseFeedMessage(buffer: Uint8Array): ParsedRT | null {
   }
 }
 
-export async function fetchAndParseGTFSRT(): Promise<ParsedRT | null> {
-  // If fetcher is not healthy, try to recover
-  if (!fetcherHealthy) {
-    console.warn('[GTFS] Fetcher unhealthy, attempting to recover...');
-    await waitForFetcherReady();
-  }
-
-  // Try to fetch from fetcher
-  const [tuBuffer, vpBuffer, alBuffer] = await Promise.all([
-    fetchWithRetry('tripUpdates'),
-    fetchWithRetry('vehiclePositions'),
-    fetchWithRetry('alerts'),
-  ]);
-
-  // If all fetches failed, use mock data as last resort fallback
-  if (!tuBuffer && !vpBuffer && !alBuffer) {
-    console.warn(
-      '[GTFS] All fetcher endpoints failed, using mock data as fallback'
-    );
-    rtDataCache = generateMockRT();
-    fetcherHealthy = false;
-    return rtDataCache;
-  }
-
-  // Parse whatever buffers we got
-  const results: ParsedRT = {
-    tripUpdates: [],
-    vehiclePositions: [],
-    alerts: [],
-    timestamp: Date.now(),
-    feedVersion: '2026.11-fetcher',
-  };
-
-  let anySuccess = false;
-
-  if (tuBuffer) {
-    const parsed = parseFeedMessage(tuBuffer);
-    if (parsed) {
-      results.tripUpdates = parsed.tripUpdates;
-      results.vehiclePositions = parsed.vehiclePositions;
-      results.alerts = parsed.alerts;
-      results.timestamp = parsed.timestamp;
-      results.feedVersion = parsed.feedVersion;
-      anySuccess = true;
-    }
-  }
-
-  if (vpBuffer && !anySuccess) {
-    const parsed = parseFeedMessage(vpBuffer);
-    if (parsed) {
-      results.tripUpdates = parsed.tripUpdates;
-      results.vehiclePositions = parsed.vehiclePositions;
-      results.alerts = parsed.alerts;
-      results.timestamp = parsed.timestamp;
-      results.feedVersion = parsed.feedVersion;
-      anySuccess = true;
-    }
-  }
-
-  if (alBuffer && !anySuccess) {
-    const parsed = parseFeedMessage(alBuffer);
-    if (parsed) {
-      results.tripUpdates = parsed.tripUpdates;
-      results.vehiclePositions = parsed.vehiclePositions;
-      results.alerts = parsed.alerts;
-      results.timestamp = parsed.timestamp;
-      results.feedVersion = parsed.feedVersion;
-      anySuccess = true;
-    }
-  }
-
-  if (anySuccess) {
-    fetcherHealthy = true;
-    rtDataCache = results;
-    console.log(
-      `[GTFS] Parsed real data: ${results.tripUpdates.length} trip updates, ${results.vehiclePositions.length} vehicle positions, ${results.alerts.length} alerts`
-    );
-    return rtDataCache;
-  }
-
-  // If we got buffers but couldn't parse any, fallback to mock
-  console.warn(
-    '[GTFS] Received buffers but failed to parse, using mock data as fallback'
-  );
-  rtDataCache = generateMockRT();
-  fetcherHealthy = false;
-  return rtDataCache;
-}
-
 function generateMockRT(): ParsedRT {
   const now = Date.now();
   const baseTime = Math.floor(now / 1000);
@@ -496,6 +407,109 @@ function generateMockRT(): ParsedRT {
   };
 }
 
+export async function fetchAndParseGTFSRT(): Promise<ParsedRT | null> {
+  // If fetcher is not healthy, try to recover
+  if (!fetcherHealthy) {
+    console.warn('[GTFS] Fetcher unhealthy, attempting to recover...');
+    await waitForFetcherReady();
+  }
+
+  // Try to fetch from fetcher
+  const [tuBuffer, vpBuffer, alBuffer] = await Promise.all([
+    fetchWithRetry('tripUpdates'),
+    fetchWithRetry('vehiclePositions'),
+    fetchWithRetry('alerts'),
+  ]);
+
+  // If all fetches failed
+  if (!tuBuffer && !vpBuffer && !alBuffer) {
+    if (isTestEnv) {
+      // In test env, use mock data
+      console.warn('[GTFS] Test env: using mock data');
+      rtDataCache = generateMockRT();
+      return rtDataCache;
+    }
+
+    // In production: NO mock fallback - return null
+    console.error(
+      '[GTFS] All fetcher endpoints failed - NO LIVE DATA AVAILABLE'
+    );
+    fetcherHealthy = false;
+    rtDataCache = null;
+    return null;
+  }
+
+  // Parse whatever buffers we got
+  const results: ParsedRT = {
+    tripUpdates: [],
+    vehiclePositions: [],
+    alerts: [],
+    timestamp: Date.now(),
+    feedVersion: '2026.11-fetcher',
+  };
+
+  let anySuccess = false;
+
+  if (tuBuffer) {
+    const parsed = parseFeedMessage(tuBuffer);
+    if (parsed) {
+      results.tripUpdates = parsed.tripUpdates;
+      results.vehiclePositions = parsed.vehiclePositions;
+      results.alerts = parsed.alerts;
+      results.timestamp = parsed.timestamp;
+      results.feedVersion = parsed.feedVersion;
+      anySuccess = true;
+    }
+  }
+
+  if (vpBuffer && !anySuccess) {
+    const parsed = parseFeedMessage(vpBuffer);
+    if (parsed) {
+      results.tripUpdates = parsed.tripUpdates;
+      results.vehiclePositions = parsed.vehiclePositions;
+      results.alerts = parsed.alerts;
+      results.timestamp = parsed.timestamp;
+      results.feedVersion = parsed.feedVersion;
+      anySuccess = true;
+    }
+  }
+
+  if (alBuffer && !anySuccess) {
+    const parsed = parseFeedMessage(alBuffer);
+    if (parsed) {
+      results.tripUpdates = parsed.tripUpdates;
+      results.vehiclePositions = parsed.vehiclePositions;
+      results.alerts = parsed.alerts;
+      results.timestamp = parsed.timestamp;
+      results.feedVersion = parsed.feedVersion;
+      anySuccess = true;
+    }
+  }
+
+  if (anySuccess) {
+    fetcherHealthy = true;
+    rtDataCache = results;
+    console.log(
+      `[GTFS] Parsed real data: ${results.tripUpdates.length} trip updates, ${results.vehiclePositions.length} vehicle positions, ${results.alerts.length} alerts`
+    );
+    return rtDataCache;
+  }
+
+  // If we got buffers but couldn't parse any
+  if (isTestEnv) {
+    console.warn('[GTFS] Test env: parse failed, using mock data');
+    rtDataCache = generateMockRT();
+    return rtDataCache;
+  }
+
+  console.error(
+    '[GTFS] Received buffers but failed to parse - NO LIVE DATA AVAILABLE'
+  );
+  fetcherHealthy = false;
+  rtDataCache = null;
+  return null;
+}
+
 export function startRTPolling(intervalMs = config.pollIntervalMs) {
   // Initial health check and wait for fetcher
   waitForFetcherReady().then(() => {
@@ -534,6 +548,3 @@ export function getRTCache(): ParsedRT | null {
 export function isFetcherHealthy(): boolean {
   return fetcherHealthy;
 }
-
-// Initialize with mock data
-rtDataCache = generateMockRT();

@@ -35,7 +35,8 @@
       "node_modules",
       ".vite",
       "*.excalidraw",
-      "public/proto"
+      "public/proto",
+      "bot/src/proto"
     ]
   }
 }

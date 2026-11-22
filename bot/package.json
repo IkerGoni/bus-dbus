@@ -9,17 +9,17 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "telegraf": "^4.16.0",
-    "protobufjs": "^7.3.0",
-    "better-sqlite3": "^11.7.0",
+    "better-sqlite3": "^13.2.0",
     "node-cron": "^3.0.3",
+    "protobufjs": "^7.3.0",
+    "telegraf": "^4.16.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {
-    "typescript": "^5.7.0",
+    "@types/better-sqlite3": "^7.6.11",
     "@types/node": "^22.0.0",
     "@types/node-cron": "^3.0.11",
-    "@types/better-sqlite3": "^7.6.11",
-    "tsx": "^4.19.0"
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
   }
 }
