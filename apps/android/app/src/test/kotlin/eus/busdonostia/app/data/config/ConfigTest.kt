@@ -65,8 +65,30 @@ class ConfigTest {
     fun apiBaseUrlHttpFueraDeDbusSeRechaza() {
         assertNull(ApiConfig.parse(variant("apiBaseUrl", "http://evil.example/ws")))
         assertNull(ApiConfig.parse(variant("apiBaseUrl", "http://otro.dbus.eus/ws")))
-        assertNotNull(ApiConfig.parse(variant("apiBaseUrl", "https://nuevo.dbus.eus/ws")))
+        assertNotNull(ApiConfig.parse(variant("apiBaseUrl", "https://app.dbus.eus/ws")))
         assertNull(ApiConfig.parse(variant("apiBaseUrl", "no es una url")))
+    }
+
+    @Test
+    fun apiBaseUrlSoloHaciaHostsPermitidos() {
+        // HTTPS no basta (H21): quien controle el hosting de la config no puede redirigir las consultas.
+        assertNull(ApiConfig.parse(variant("apiBaseUrl", "https://evil.example/ws")))
+        assertNull(ApiConfig.parse(variant("apiBaseUrl", "https://nuevo.dbus.eus/ws")))
+        assertNull(ApiConfig.parse(variant("apiBaseUrl", "https://app.dbus.eus.evil.example/ws")))
+        assertNotNull(ApiConfig.parse(variant("apiBaseUrl", "http://APP.dbus.eus/SSIIMovilWSv3/ws/cons")))
+        // La lista es parámetro de validate(): por defecto solo app.dbus.eus.
+        val otherHost = bundled.copy(apiBaseUrl = "https://nuevo.dbus.eus/ws")
+        assertEquals(emptyList<String>(), otherHost.validate(allowedHosts = setOf("app.dbus.eus", "nuevo.dbus.eus")))
+    }
+
+    @Test
+    fun cabecerasSoloDeLaListaBlanca() {
+        assertNotNull(bundled.copy(headers = mapOf("User-Agent" to "x", "accept-language" to "eu")).takeIf { it.validate().isEmpty() })
+        for (name in listOf("Authorization", "Cookie", "Host", "Proxy-Authorization", "X-Forwarded-For", "X-Api-Key")) {
+            assertTrue(name, bundled.copy(headers = mapOf(name to "x")).validate().isNotEmpty())
+        }
+        // Un valor con salto de línea no puede colar otra cabecera.
+        assertTrue(bundled.copy(headers = mapOf("User-Agent" to "x\r\nCookie: y")).validate().isNotEmpty())
     }
 
     @Test
