@@ -1,5 +1,7 @@
 # Tech Stack Decision — Dbus Mobile Web App
 
+> **Histórico:** ver [ADR 009](../03-architecture/adrs/009-android-nativo-mvp.md) (stack vigente: Kotlin + Compose).
+
 ## Versión
 v0.1 — Sprint 0 output | 2026-11-22
 

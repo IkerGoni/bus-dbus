@@ -81,3 +81,18 @@ se arregla editando un JSON, no publicando una versión en la tienda.
 - Política de Google Play para Foreground Service `dataSync` y para el nombre
   de la app: no debe parecer la app oficial (`com.indra.dbus`).
 - La API no es pública ni tiene contrato (`docs/06-api-externa/`).
+
+## Actualizaciones (2026-11-22, tras los Sprints 0–4)
+La decisión no cambia. Hechos posteriores:
+- **Sondeo adaptativo** (sustituye al «cada 30 s» de la Decisión 3): el motor
+  sondea cada 30 s si faltan ≤ 7 min para avisar, 1 min hasta 14 y 2 min más
+  allá; avisa 30 s antes (`NOTIFY_EARLY_MS`). La UI visible sigue a 30 s.
+  Detalle: [`04-android-platform.md`](../../07-android-mvp/docs/04-android-platform.md) §1.
+- **Avisos de un solo uso:** saltan una vez y se borran; sin recurrentes ni
+  alarmas exactas ni `BroadcastReceiver` propios.
+- **Hosting de `config.json` sin decidir:** el repo es privado y la licencia
+  está pendiente (decisión de Iker). `REMOTE_CONFIG_URL` sigue vacía y la app
+  usa la copia empaquetada. Las opciones de la sección «Configuración remota»
+  son candidatas, no un repo público decidido.
+- El toolchain (JDK 17 + Android SDK) ya está instalado: ver
+  [`apps/android/README.md`](../../../apps/android/README.md).

@@ -5,8 +5,10 @@ un mensaje de Telegram (texto Markdown) más su teclado inline opcional. Los
 flujos usan `safeEdit()` para editar el mensaje anterior en lugar de enviar uno
 nuevo; si el mensaje es demasiado antiguo, se envía uno nuevo.
 
-Implementación: `apps/bot/src/handlers.ts` (comandos, menús y callbacks),
-`apps/bot/src/alerts.ts` (avisos push), `apps/bot/src/arrival.ts` (formateo).
+Implementación (`apps/bot/src/`): `handlers.ts` (registro de comandos y
+callbacks), `commands.ts` (comandos y texto libre), `callbacks.ts` (botones),
+`render.ts` (textos y teclados), `location.ts` (`/ubicacion`), `session.ts`
+(sesión efímera), `alerts.ts` (avisos push) y `arrival.ts` (formateo).
 
 ## 1. Comandos
 
@@ -24,6 +26,7 @@ Implementación: `apps/bot/src/handlers.ts` (comandos, menús y callbacks),
 | `/fav [add\|linea\|remove ...]` | `handleFavCommand` | Listado/gestión de favoritos en texto |
 | `/actualizar` | `handleActualizar` | Refresca caché y catálogo; muestra diagnóstico |
 | `/estado` | `handleEstado` | Fuente, paradas en caché, avisos activos y uptime |
+| `/ubicacion` | `handleUbicacion` | Pide la ubicación (botón de Telegram) y lista paradas cercanas del índice local OSM; la ubicación no se guarda |
 
 Texto libre (sin `/`) se maneja con `bot.on('text')`: si la sesión está en
 `searching` → resultados de búsqueda; si está en `waiting_stop_arrivals` →
@@ -34,7 +37,7 @@ el texto no es numérico en un flujo de parada, se deriva al buscador.
 
 ### S01 · Menú principal
 
-**Disparador:** `/start`, callback `menu_main`, `menu_cancel`, o botón «Menú».
+**Disparador:** `/start`, callback `menu_main` o botón «Menú».
 
 ```text
 🚌 **Dbus Donostia — llegadas en tiempo real**
@@ -69,6 +72,7 @@ Elige una opción:
 `/lineas` — todas las líneas · `/lineas <parada>` — líneas en esa parada
 `/fav` — tus favoritos · `/fav add <parada> [linea]` · `/fav linea <linea>`
 `/actualizar` — refrescar datos · `/estado` — diagnóstico
+`/ubicacion` — paradas cercanas con OpenStreetMap (sin guardar tu posición)
 
 Busca por código (`1`), nombre (`Boulevard`), línea (`28`) o destino
 (`Ospitaleak`). Sin línea en `/fav add` guardas la parada completa.
@@ -226,12 +230,12 @@ Selecciona la línea:
 ```
 
 Un botón por línea con datos reales: `L{lineId} → {destino}` →
-`aline_{lineId}`. Estado: `select_line_alert`.
+`aline_{stopId}_{lineId}`.
 Sin líneas: `❌ No hay líneas con datos en la parada **{stopId}**.`
 
 ### S13 · Aviso: seleccionar minutos
 
-**Disparador:** `aline_{lineId}`.
+**Disparador:** `aline_{stopId}_{lineId}`.
 
 ```text
 🔔 **L{lineId}** en {stopName}
@@ -239,11 +243,11 @@ Sin líneas: `❌ No hay líneas con datos en la parada **{stopId}**.`
 ```
 
 Opciones: `2 min`, `3 min`, `5 min`, `8 min`, `10 min`, `15 min` →
-`minutes_{n}` (dos filas de tres) y `⬅️ Menú`. Estado: `select_minutes_alert`.
+`minutes_{stopId}_{lineId}_{n}` (dos filas de tres) y `⬅️ Menú`.
 
 ### S14 · Aviso creado
 
-**Disparador:** `minutes_{n}` o `/aviso ...`.
+**Disparador:** `minutes_{stopId}_{lineId}_{n}` o `/aviso ...`.
 
 ```text
 ✅ **Aviso creado** (ID: `{id}`)
@@ -387,8 +391,6 @@ sin teclado, y no altera la sesión.
 | Situación | Texto |
 |---|---|
 | Línea no pasa por la parada | `❌ La línea **L{linea}** no pasa por la parada **{stopId}** ahora mismo.\nLíneas con datos: L…` |
-| Sesión caducada en `aline_` | `❌ Sesión expirada, vuelve a crear el aviso` |
-| Sesión caducada en `minutes_` | `❌ Sesión expirada, intenta de nuevo` |
 | Minutos fuera de rango (callback) | `❌ Minutos fuera de rango` |
 | Minutos fuera de rango (`/aviso`) | `❌ Los minutos deben estar entre 1 y 60` |
 | Aviso ajeno o inexistente | `❌ Aviso no encontrado o no te pertenece` |
@@ -405,22 +407,21 @@ Respuestas efímeras vía `answerCbQuery` (toast de Telegram):
 ## 3. Sesión y ciclo de vida
 
 Estados (`Step`): `idle`, `searching`, `waiting_stop_arrivals`,
-`waiting_stop_alert`, `select_line_alert`, `select_minutes_alert`.
+`waiting_stop_alert` (solo texto libre de los flujos multi-paso).
 
 - TTL de sesión: 10 minutos; mapa limitado a 1000 entradas con poda.
 - `clearSession()` al llegar a resultados, confirmar aviso, consultar llegadas
   o pulsar `/start`.
 - Callbacks **stateless**: el dato viaja en `data` (`srch_s_1281`, `ld_42`,
-  `ls_1281_28`, `minutes_5`). No se guarda el dato en sesión salvo el estado
-  del flujo de aviso.
-- Un callback antiguo no reactiva un flujo abandonado: `aline_` y `minutes_`
-  comprueban el paso esperado antes de crear el aviso.
+  `ls_1281_28`, `aline_1_28`, `minutes_1_28_5`). La sesión solo guarda el paso
+  del texto libre; nunca se persiste en disco.
+- Un callback antiguo sigue funcionando: lleva parada, línea y minutos.
 
 ## 4. Mapa de callbacks
 
 | Patrón | Acción |
 |---|---|
-| `menu_main`, `menu_cancel` | Volver al menú principal |
+| `menu_main` | Volver al menú principal |
 | `menu_arrivals`, `menu_alert` | Pedir código de parada |
 | `menu_search` | Pedir texto de búsqueda |
 | `menu_favorites` | Ver favoritos inline |
@@ -433,8 +434,8 @@ Estados (`Step`): `idle`, `searching`, `waiting_stop_arrivals`,
 | `ls_\d+_.+` | Llegadas de parada en esa línea |
 | `lines_all`, `lpages_\d+` | Catálogo paginado de líneas |
 | `la_[^_]+`, `lapages_[^_]+_\d+` | Todas las paradas de la línea |
-| `aline_([^_]+)` | Elegir línea del aviso |
-| `minutes_\d+` | Elegir antelación y crear aviso |
+| `aline_\d+_[^_]+` | Elegir línea del aviso (parada + línea) |
+| `minutes_\d+_[^_]+_\d+` | Elegir antelación (1–60) y crear aviso |
 | `stop_refresh_\d+` | Invalidar caché de la parada y recargar |
 | `stop_alert_\d+` | Iniciar aviso desde llegadas |
 | `favstop_\d+` | Guardar parada favorita |
@@ -443,3 +444,4 @@ Estados (`Step`): `idle`, `searching`, `waiting_stop_arrivals`,
 | `favline_([^_]+)` | Guardar línea favorita |
 | `favline_view_(.+)`, `favlin_remove_\d+` | Ver/borrar línea favorita |
 | `adel_\d+` | Borrar aviso |
+| mensaje `location` | Paradas cercanas (botones `srch_s_{cod}`); la ubicación no se guarda |

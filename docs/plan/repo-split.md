@@ -1,5 +1,7 @@
 # Repo split: 2 products + shared core — parallel lanes
 
+> **Histórico:** ver [`AGENTS.md`](../../AGENTS.md) (estructura vigente). Hecho: workspaces `apps/` + `packages/` (`@dbus/core`, `@dbus/contracts`) y `session.ts`/`render.ts` en el bot. El resto quedó sin ejecutar y ADR 009 cambió el carril móvil a `apps/android`.
+
 Status: approved plan, not implemented.
 Decisions: Capacitor/TWA path to Android · mobile kept (not deleted) · pnpm workspaces ·
 **bot lane and mobile lane work in parallel after a short shared foundation**.

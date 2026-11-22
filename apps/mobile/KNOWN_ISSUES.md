@@ -1,5 +1,8 @@
 # Known issues — @dbus/mobile
 
+> **PWA congelada por [ADR 009](../../docs/03-architecture/adrs/009-android-nativo-mvp.md).**
+> Registro del build roto; no arreglar ni borrar sin acuerdo (`AGENTS.md`).
+
 Estado del Sprint 3 tras el split en workspaces. Nada de esto es nuevo: son
 los errores preexistentes del PWA, movidos a `apps/mobile/` sin tocar el
 código. Se documentan aquí para que CI y las próximas sesiones sepan qué falta

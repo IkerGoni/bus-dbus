@@ -1,5 +1,7 @@
 # Prompt de implementación — Android MVP v1 (bus-dbus)
 
+> **Histórico:** ver [`SPRINTS.md`](../SPRINTS.md) y [`SPRINT-5.md`](SPRINT-5.md). Prompt previo a los sprints: sus avisos recurrentes, alarmas exactas y «Posponer»/«Descartar» ya no existen (avisos de un solo uso, [`02-domain-contracts.md`](../docs/02-domain-contracts.md)).
+
 Sustituye al `AGENT-ARCHITECTURE-MIGRATION-PROMPT.md` del paquete externo
 (2026-11-22). Pégalo a la sesión del agente. Una fase por sesión.
 

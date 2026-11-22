@@ -1,5 +1,7 @@
 # ADR 008: Risk Register & Mitigations
 
+> **Histórico:** ver [`01-endpoints-y-riesgo.md`](../../06-api-externa/01-endpoints-y-riesgo.md) (riesgos de la API) y [ADR 009](009-android-nativo-mvp.md).
+
 ## Status
 Accepted
 

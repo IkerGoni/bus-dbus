@@ -73,6 +73,9 @@ supresión/traslado (p. ej. parada `1`: «Parada suprimida - traslados: L28 Pte.
 - Minutos hasta la llegada de cada bus a una parada (`minutos`).
 - Hora absoluta prevista de la llegada (`hora`, `HH:MM`).
 - Si el dato viene de GPS en tiempo real (`tipo=1`) o de horario programado (`tipo=2`).
+  El 2026-11-22 ~18:40 la parada 2 devolvió también `tipo=0` (L36, L46), de
+  significado desconocido: bot y Android lo tratan como horario (todo lo que no
+  es `1`).
 - Código público de línea (`linea.cod`) y su id interno de Dbus (`linea.id`).
 - Nombre de la línea, empresa (`dBUS`) y color entero de Dbus (`linea.color`).
 - Destino / headsign real de cada bus (`itinerario.destino`, `nombre`).

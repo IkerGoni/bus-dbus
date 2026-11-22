@@ -2,18 +2,21 @@
 
 Fuente de verdad del proyecto. Si este archivo contradice a un doc antiguo,
 manda aquí. `README.md` = visión y uso; `ESTADO.md` = estado de sesión;
-`docs/05-ui/` = inventario de UI + wireframes (exportable para diseño);
-`docs/07-android-mvp/` = spec del MVP Android (ADR 009);
-`docs/03-architecture/` = ADRs; `docs/04-planning/` y `docs/plan/` = planning;
-`docs/plan/repo-split.md` = plan de separación en workspaces (trabajo en curso).
+`docs/README.md` = índice de docs (qué mirar para cada cosa);
+`docs/05-ui/02-bot-telegram.md` = UI del bot (el resto de `docs/05-ui/` es la
+PWA, histórico); `docs/07-android-mvp/` = spec del MVP Android (ADR 009);
+`docs/03-architecture/` = ADRs (001–008 históricos, 009 vigente);
+`docs/04-planning/` y `docs/plan/` = planning histórico de la PWA y del split.
 
 ## Qué hay hoy
 
 - **Bot de Telegram** (`apps/bot/`): activo, datos reales de la API JSON de
   Dbus. Paquete `@dbus/bot`. SQLite en `apps/bot/bot.db`.
-- **App Android** (`apps/android/`): Sprint 0 hecho (esqueleto verde). MVP v1 nativo, Kotlin +
-  Compose, Gradle fuera de pnpm. Spec en `docs/07-android-mvp/`, prompt en
-  `docs/07-android-mvp/prompts/PROMPT-IMPLEMENTACION.md`, decisión en ADR 009.
+- **App Android** (`apps/android/`): Sprints 0–4 hechos (último merge
+  `b8e08f8`); Sprint 5 (publicación) pendiente. MVP v1 nativo, Kotlin +
+  Compose, Gradle fuera de pnpm. Spec en `docs/07-android-mvp/`, plan en
+  `docs/07-android-mvp/SPRINTS.md`, prompt pendiente en
+  `docs/07-android-mvp/prompts/SPRINT-5.md`, decisión en ADR 009.
 - **PWA** (`apps/mobile/`): **congelada** por ADR 009 (build roto, ver
   `KNOWN_ISSUES.md`). No arreglar ni borrar sin acuerdo. Paquete `@dbus/mobile`.
 - **Shared** (`packages/core/`, `packages/contracts/`): dominio y contratos
@@ -88,7 +91,7 @@ pnpm --filter @dbus/bot build      # tsc -b -> apps/bot/dist
 Android (toolchain en `apps/android/README.md`):
 
 ```bash
-cd apps/android && ./gradlew check assembleDebug   # lint + tests JVM + APK debug
+cd apps/android && ./gradlew check assembleDebug   # lint + 94 tests JVM por variante + APK debug
 ```
 
 Root: `pnpm verify` (lint + typecheck + tests de todos los paquetes). Los

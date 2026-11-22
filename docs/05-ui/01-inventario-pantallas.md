@@ -1,5 +1,9 @@
 # Inventario de UI y pantallas — bus-dbus
 
+> **Vigente solo para el bot.** Las secciones de la PWA son históricas (congelada
+> por ADR 009). Android: ver
+> [`01-inventario-pantallas-mvp.md`](../07-android-mvp/docs/01-inventario-pantallas-mvp.md).
+
 Índice y alcance del inventario de superficies de usuario del proyecto. Documento
 derivado del código y de los wireframes existentes; `AGENTS.md` sigue siendo la
 fuente de verdad del proyecto.
@@ -13,7 +17,8 @@ El proyecto tiene **dos superficies de usuario** con naturezas distintas:
 | Superficie | Paquete | Estado | Tipo de UI |
 |---|---|---|---|
 | Bot de Telegram | `@dbus/bot` (`apps/bot/`) | ✅ Activo, datos reales | Mensajes Markdown + inline keyboards |
-| PWA / móvil | `@dbus/mobile` (`apps/mobile/`) | 🔧 Sprint 3 bloqueado (TS/lint) | React + wouter, Tailwind 4 |
+| PWA / móvil | `@dbus/mobile` (`apps/mobile/`) | 🧊 Congelada (ADR 009, build roto) | React + wouter, Tailwind 4 |
+| App Android | `apps/android/` | ✅ MVP en curso (Sprints 0–4 hechos) | Ver `docs/07-android-mvp/` |
 
 Convención de este inventario: en el bot, una «pantalla» es un **estado de
 conversación** (un mensaje enviado o editado junto a su teclado inline). En la
@@ -40,8 +45,8 @@ Fuentes primarias:
 bus-dbus
 ├── Bot de Telegram ................ apps/bot
 │   ├── Comandos (/start, /parada, /aviso, /buscar, /linea, /lineas,
-│   │   /lista, /borrar, /fav, /actualizar, /estado, /help)
-│   ├── Menú inline principal + 7 entradas
+│   │   /lista, /borrar, /fav, /actualizar, /estado, /ubicacion, /help)
+│   ├── Menú inline principal + 8 botones
 │   ├── Flujos: llegadas · avisos · búsqueda · líneas · favoritos
 │   └── Push: scheduler de avisos (1 min) → mensaje al chat
 └── PWA / móvil .................... apps/mobile

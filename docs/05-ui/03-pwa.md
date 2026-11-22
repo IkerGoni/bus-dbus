@@ -1,5 +1,7 @@
 # Superficie B — PWA / móvil (`@dbus/mobile`)
 
+> **Histórico:** ver [`03-android-screens.md`](../07-android-mvp/docs/03-android-screens.md) (PWA congelada por ADR 009).
+
 Inventario de las pantallas de la PWA implementadas en `apps/mobile/src/` y de
 las que existen solo como wireframe. Estado: Sprint 3 bloqueado por errores de
 TypeScript y Tailwind 4 preexistentes (ver

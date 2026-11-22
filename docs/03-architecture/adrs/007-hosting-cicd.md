@@ -1,5 +1,7 @@
 # ADR 007: Hosting & CI/CD: Cloudflare Pages + GitHub Actions
 
+> **Histórico:** ver [ADR 009](009-android-nativo-mvp.md) (sin hosting propio; CI en `.github/workflows/`).
+
 ## Status
 Accepted — Superseded por ADR 009 para el cliente móvil (2026-11-22)
 

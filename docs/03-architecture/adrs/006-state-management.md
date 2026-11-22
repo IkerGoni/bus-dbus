@@ -1,5 +1,7 @@
 # ADR 006: State Management: preact/signals
 
+> **Histórico:** ver [ADR 009](009-android-nativo-mvp.md) (Compose + ViewModels en Android).
+
 ## Status
 Accepted
 

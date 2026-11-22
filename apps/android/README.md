@@ -1,7 +1,8 @@
 # apps/android — Bus Donostia (MVP v1)
 
 App Android nativa (Kotlin + Compose). Spec: `docs/07-android-mvp/`,
-plan: `docs/07-android-mvp/SPRINTS.md`, decisión: ADR 009.
+plan: `docs/07-android-mvp/SPRINTS.md`, decisión: ADR 009. Sprints 0–4 hechos;
+Sprint 5 (publicación) pendiente.
 
 ## Toolchain (macOS, instalado con Homebrew)
 
@@ -24,6 +25,9 @@ y `avdmanager create avd -n dbus36 -k "system-images;android-36;google_apis;arm6
 ./gradlew check assembleDebug   # lint (MissingTranslation/HardcodedText = error) + tests JVM + APK debug
 ```
 
+Resultado esperado: 94 tests JVM por variante (debug y release) y 0 errores de
+lint. CI: `.github/workflows/android.yml`.
+
 ## Versiones
 
 AGP 8.13.2 · Gradle 8.14.3 · Kotlin 2.2.21 · Compose BOM 2025.12.01 ·
@@ -34,13 +38,13 @@ Fuentes Plus Jakarta Sans y JetBrains Mono: OFL, ver `licenses/`.
 
 ## Datos (Sprint 1)
 
-- `assets/catalog.json` **no se commitea**: lo genera `merge<Variant>Catalog` en
+- El asset `catalog.json` **no se commitea**: lo genera `merge<Variant>Catalog` (en `app/build/`) en
   cada build fusionando `apps/bot/data/dbus-catalog.json` +
   `dbus-stop-coordinates.json` (548 paradas, 514 con coordenadas, 39 líneas,
   127 itinerarios). Para actualizarlo, regenerar el catálogo del bot.
-- `assets/config.json`: config de la API por defecto (ADR 009). La URL de la
-  config remota va en `BuildConfig.REMOTE_CONFIG_URL` (vacía hasta el Sprint 5;
-  solo HTTPS).
+- `app/src/main/assets/config.json`: config de la API por defecto (ADR 009). La
+  URL de la config remota va en `BuildConfig.REMOTE_CONFIG_URL` (vacía mientras
+  el repo sea privado y no haya hosting; solo HTTPS).
 - Paquetes: `domain/` (Kotlin puro, sin imports de Android), `data/api`
   (`DbusClient` → `StopFeed`), `data/config`, `data/catalog`, `data/db` (Room;
   esquema exportado en `app/schemas/`, commitearlo en cada cambio de versión).

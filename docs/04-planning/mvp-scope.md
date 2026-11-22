@@ -1,5 +1,7 @@
 # MVP Scope — Dbus Mobile Web App
 
+> **Histórico:** ver [`docs/07-android-mvp/README.md`](../07-android-mvp/README.md) (alcance vigente del MVP Android).
+
 ## Versión
 v0.1 — Sprint 0 output | 2026-11-22
 

@@ -1,5 +1,7 @@
 # Prompts de Google Stitch AI — Pantallas restantes (Android MVP v1)
 
+> **Histórico:** ver [`03-android-screens.md`](../docs/03-android-screens.md). Diseño anterior: A06 recurrente, «Posponer»/«Descartar», estados silenciados y licencia MIT ya no aplican.
+
 Adjunta siempre `stitch-references/inicio/code.html` (o su captura limpia) como
 referencia visual para mantener coherencia 100% con el sistema **Donostia Transit UI**:
 - Canvas `#F8FAFC`, tarjetas `#FFFFFF` con borde `1px #E2E8F0` y radio `16dp`
