@@ -1,59 +1,76 @@
 # Estado — bus-dbus
 
-Actualizado: 2026-11-22 09:30 · Última sesión: reinicio en producción y diagnosis de SIN_SERVICIO
+Actualizado: 2026-11-22 10:19 · Última sesión: remate de A+B, verificación y reinicio en producción
 
 > **`AGENTS.md` es la fuente de verdad.** Este archivo es el estado de sesión;
 > si algo aquí contradice a `AGENTS.md`, manda `AGENTS.md`.
 
 ## Objetivo actual
 
-Bot de Telegram operativo con datos reales de Dbus. Cerrada la versión `a7ff1a4`
-(catálogo con escaneo de ids 1..1000) ya desplegada. Prioridad siguiente: dos
-tareas en paralelo — (A) índice local de coordenadas de paradas desde OSM y
-(B) `/ubicacion` sin depender de Overpass en caliente.
+Bot de Telegram operativo con datos reales de Dbus. A (índice local de
+coordenadas) y B (`/ubicacion` sobre índice local) están hechos, verificados y
+desplegados. Ya no hay trabajo en curso en el lane bot.
 
-## Hecho en la última sesión
+## Hecho en esta sesión
 
-- **Reinicio de producción (regla 9) con autorización explícita del usuario.**
-  - Git limpio, `HEAD = origin/main = a7ff1a4`.
-  - `pnpm --filter @dbus/bot verify` → 62/62; `pnpm verify` → OK. `build` → OK.
-  - SIGTERM a PID `12954`, lock liberado; arranque desde `apps/bot` con
-    `npm run start` y `BOT_TOKEN` por entorno (clave literal `$BOT_TOKEN=` en
-    `.env` de la raíz; parseada sin imprimirla).
-  - Proceso vivo tras el reinicio: PID `31382`, lock `31382`. **Al cerrarse el
-    shell de background del harness, el proceso recibió SIGTERM y murió** (el
-    arranque usaba `exec`, así que npm era el proceso del shell). Restaurado con
-    doble `fork` + `setsid` (sin `exec`) para desacoplarlo del grupo de procesos.
-  - Proceso vivo actual: **PID `60268`** (padre `60245` = npm, sin tty), un solo
-    `node dist/index.js`, lock `60268`, log con `Bot handlers registered` /
-    `Dbus Telegram Bot started` y sin errores tras el arranque.
-- **Diagnosis de `SIN_SERVICIO`**: no fuimos nosotros. Llamadas directas con
-  `curl` (sin pasar por el bot) devuelven HTTP 200 y el estado literal de Dbus,
-  con `avisos` reales de supresiones/traslados. `/itinerariosLinea?idLinea=28`
-  sigue en `DATOS`. Muestreo de 20 paradas del índice: 12 `DATOS` con tiempos
-  reales (p. ej. parada 100 → L9 a Boulevard en 14 min) y 8 `SIN_SERVICIO`.
-  Nuestro build solo consulta `/itinerariosLinea`, nunca `/tiemposParada`, y el
-  patrón ya existía antes del reinicio de hoy. No hay indicios de sobrecarga
-  provocada por nuestro escaneo (ni 429/403 ni 5xx).
-- **`/ubicacion`**: el bot respondió correctamente sin inventar paradas cuando
-  Overpass no respondió. Sondeo directo a `overpass-api.de` dio HTTP 406.
-  Cookbook: migrar a índice local de coordenadas (tarea A + B).
+- **Consolidación (ya existía al abrir la sesión).** `main = 84db974 =
+  origin/main`, árbol limpio. El historial ya contenía A (`bc296b2` → merge
+  `b99eeab`) y B (`3f2cb80` → merge `9689ba6`), más los commits de docs
+  `3791453` (PID 60268) y `84db974` (wireframes en `docs/05-ui`). No existían
+  los refs `task/coords` / `consolidate/main` ni los worktrees `../bus-dbus-*`:
+  se eliminaron al fusionar. No hubo nada que integrar ni merge nuevo.
+  **Los cambios de docs que antes estaban sin commitear ya están commiteados en
+  `84db974`**; el árbol está limpio.
+- **Verificaciones sobre el árbol integrado** ( todas OK ):
+  - `pnpm --filter @dbus/bot verify` → 70/70 tests (4 ficheros).
+  - `pnpm verify` → lint + typecheck + tests de contratos/core/bot/mobile OK.
+  - `pnpm --filter @dbus/bot build` → `tsc -b` OK.
+- **Contrato del índice A** (`apps/bot/data/dbus-stop-coordinates.json`):
+  - `generatedAt` 2026-11-22T08:40:01.885Z · `source` OpenStreetMap (Overpass) ·
+    `attribution` "© OpenStreetMap contributors, ODbL".
+  - `coverage` 548 catálogo = 514 con coords + 34 sin coords (suma correcta;
+    514 filas en `stops`).
+  - 514/514 `cod` numéricos sin ceros a la izquierda, presentes en
+    `dbus-catalog.json`, únicos, con lat/lon válidos. No hizo falta tocar
+    `nearby.ts`: `parseStopRefs` ya normaliza los ceros a la izquierda.
+- **Smoke test local del índice real** (sin red, sin producción, script desechable
+  con `tsx`, no commiteado): `getNearbyStops(43.32, -1.982)` → 8 paradas reales
+  del catálogo, todas a ≤ 500 m (`config.nearbyRadiusM`) y ordenadas por
+  distancia: 321 (43.7 m), 103 (52.0 m), 207 (60.0 m), 495 (63.8 m), 80 (79.8 m),
+  157 (123.4 m), 32 (154.1 m), 225 (154.6 m). Descripción coincide con el
+  catálogo en todas.
+- **Rutas degradadas validadas en local**: índice ausente y JSON corrupto
+  producen `NearbyUnavailableError` (sin paradas inventadas) y el texto graceful
+  sugiere `/buscar`. El mensaje de `/ubicacion` incluye atribución ODbL.
+- **Dato de búsqueda**: "Boulevard" → líneas 5 y 16 incluyen la parada 340
+  "Pío Baroja 10" (catálogo real). `searchStops("Boulevard")` devuelve las 6
+  paradas con "Boulevard" en su nombre; la 340 se alcanza por destino de línea.
+- **Despliegue (regla 9) con autorización explícita de Iker en esta sesión**:
+  - Git limpio, `HEAD = origin/main = 84db974`, todo pusheado.
+  - PID vivo comprobado con lock + `ps`: lock `60766`, `node dist/index.js`
+    PID `60766` (padre npm `60739`). **No era 31382 ni 60268**.
+  - SIGTERM a `60766`: proceso muerto en 2 s, lock liberado, sin procesos
+    residuales.
+  - Recompilado desde `apps/bot` (`pnpm --filter @dbus/bot build`).
+  - Arrancado desde `apps/bot` con `npm run start` y `BOT_TOKEN` solo por entorno
+    (leído del `.env` de la raíz, sin imprimirlo), desacoplado con doble `fork` +
+    `setsid` (sin `exec`) para que no muera al cerrar el shell del harness.
+  - **Proceso vivo: PID `64221`** (padre `64195` = npm), lock `64221`, un solo
+    `node dist/index.js`. Log (`$TMPDIR/dbus-bot.log`) con `Bot handlers
+    registered` / `Dbus Telegram Bot started` y ningún error tras el arranque.
 
 ## Pendiente (por prioridad)
 
-- [ ] **A · Índice local de coordenadas**: script en `apps/bot/scripts/` que
-      consiga una vez las coordenadas de todas las paradas desde OSM y guarde
-      `apps/bot/data/dbus-stop-coordinates.json` (solo datos reales, sin
-      relleno; con `generatedAt`, `source`, `attribution` y cobertura). Luego
-      commit + push. Ver prompts en el chat de la sesión anterior.
-- [ ] **B · `/ubicacion` sobre índice local**: que `nearby.ts` use ese JSON en
-      vez de Overpass en caliente; eliminar el circuit breaker de red; test de
-      regresión; `verify` + commit + push + **reinicio con autorización**.
-      A y B son paralelizables si B define primero el contrato del JSON.
+- [ ] **Validación conversacional real en Telegram**: `/start`, botón "Buscar
+      parada o línea", "Boulevard" → parada 340, `/ubicacion` + compartir
+      ubicación. No se pudo ejecutar desde el harness: no hay cliente de
+      Telegram ni chat de prueba, y `AGENTS.md` prohíbe llamar `getUpdates` a
+      mano mientras hay polling. Queda para Iker en la app. Las rutas de código
+      equivalentes sí se validaron en local con datos reales (ver arriba).
 - [ ] Rotar el token de Telegram (aviso de seguridad de sesiones previas).
-- [ ] Validar conversación real: `/start`, botón "Buscar parada o línea",
-      "Boulevard" → parada 340 (Pío Baroja 10), `/ubicacion`.
-- [ ] PWA Sprint 3: 30 errores TS y 233 de lint (kanban `dbus-app`).
+- [ ] PWA Sprint 3: 30 errores TS y 233 de lint (kanban `dbus-app`, lane mobile).
+- [ ] Confirmar con Iker que el commit de docs `84db974` es el destino final
+      del lane de docs (ya no hay cambios sin commitear; no se descartó nada).
 
 ## Decisiones tomadas (no reabrir)
 
@@ -69,26 +86,28 @@ tareas en paralelo — (A) índice local de coordenadas de paradas desde OSM y
 - Catálogo JSON = índice de descubrimiento regenerable; llegadas siempre en vivo.
 - Sin "paradas populares": `/buscar` y `/linea` son la UX de descubrimiento.
 - Sin coordenadas inventadas: si falla la fuente, se dice y se sugiere `/buscar`.
+- Índice de coordenadas = fuente única para `/ubicacion`; sin Overpass en
+  caliente. Atribución ODbL visible en el mensaje.
 - Docs: `AGENTS.md` manda; `README.md` es uso; ADRs son decisiones históricas.
 
 ## Esperando a Iker
 
-- Rotación del token de Telegram (no bloquea A ni B).
-- Lanzar las dos sesiones paralelas con los prompts entregados en el chat.
+- Rotación del token de Telegram (no bloquea nada).
+- Validación conversacional real en Telegram con el bot vivo (PID 64221).
+- Confirmar el destino del commit de docs `84db974`.
 
 ## Git
 
-`main 5ae2580 = origin/main` ✓ · ramas abiertas: ninguna · worktrees: 1 (raíz)
-· stash: vacío. Hay cambios de **docs ajenos a esta sesión** sin commitear
-(`AGENTS.md`, `README.md`, `docs/05-ui/**`, renames de wireframes): revisar con
-su dueño antes de integrar. `ESTADO.md` se actualizó en `5ae2580` y se corrigió
-después con el PID `60268`.
+`main 84db974 = origin/main` ✓ · rama local: solo `main` · worktrees: 1 (raíz) ·
+stash: vacío · árbol limpio. Sin refs de trabajo (`task/coords`,
+`consolidate/main`): se eliminaron tras los merges. No se hicieron pushes ni
+merges nuevos en esta sesión: todo ya estaba integrado y pusheado.
 
 ## Siguiente sesión
 
 - Leer primero: `AGENTS.md`, `ESTADO.md`.
-- Empezar por: ejecutar los prompts A y B en paralelo (están completos en el
-  chat de la sesión anterior).
+- Bot desplegado en PID `64221`; comprobar lock + `ps` antes de cualquier
+  reinicio (los PIDs cambian).
 - Reglas específicas: alcance solo `apps/bot/` y `packages/**` aditivo; no
   tocar `apps/mobile`, CI ni state/kanban; secretos solo por entorno; todo
   cambio termina con `pnpm --filter @dbus/bot verify` y `pnpm verify`, commit +
