@@ -1,6 +1,8 @@
 package eus.busdonostia.app.data.api
 
+import eus.busdonostia.app.data.Warn
 import eus.busdonostia.app.data.await
+import eus.busdonostia.app.data.logcatWarn
 import eus.busdonostia.app.data.config.ApiConfig
 import eus.busdonostia.app.domain.StopFeed
 import eus.busdonostia.app.domain.StopFeedStatus
@@ -20,6 +22,7 @@ class DbusClient(
     private val http: OkHttpClient,
     private val config: () -> ApiConfig,
     private val nowMs: () -> Long = System::currentTimeMillis,
+    private val warn: Warn = logcatWarn("DbusClient"),
 ) {
     /** [stopId] = código público de marquesina (`codParada`); [language] = `es` | `eu`. */
     suspend fun tiemposParada(stopId: String, language: String): StopFeed {
@@ -37,7 +40,8 @@ class DbusClient(
                     val fetchedAtMs = nowMs()
                     if (!response.isSuccessful) error(fetchedAtMs) else parseStopFeed(response.body?.string().orEmpty(), fetchedAtMs)
                 }
-            } catch (_: IOException) {
+            } catch (e: IOException) {
+                warn("tiemposParada $stopId: sin respuesta", e)
                 error()
             }
         }

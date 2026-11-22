@@ -20,7 +20,8 @@ import eus.busdonostia.app.domain.remainingMinutes
 
 /*
  * Canales y notificaciones del motor (04-android-platform.md §1–§2). Si el usuario
- * deniega `POST_NOTIFICATIONS`, `notify` no hace nada y A04 lo avisa.
+ * deniega `POST_NOTIFICATIONS`, `notify` no hace nada y A04 lo avisa; el motor
+ * entonces no borra el aviso disparado ([canNotifyArrivals]).
  */
 
 const val CHANNEL_MONITORING = "dbus_monitoring"
@@ -57,6 +58,13 @@ private fun openAppIntent(context: Context): PendingIntent = PendingIntent.getAc
     Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
     PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
 )
+
+/** El usuario verá el aviso: notificaciones de la app permitidas y canal de llegadas sin bloquear. */
+fun canNotifyArrivals(context: Context): Boolean {
+    val manager = NotificationManagerCompat.from(context)
+    if (!manager.areNotificationsEnabled()) return false
+    return manager.getNotificationChannelCompat(CHANNEL_ARRIVALS)?.importance != NotificationManagerCompat.IMPORTANCE_NONE
+}
 
 /** «Vigilando L5 en Pío Baroja 10» (o «Vigilando N avisos»), silenciosa y fija mientras vive el servicio. */
 fun monitoringNotification(context: Context, watching: List<AlertRule>, pollIntervalSec: Int): Notification {

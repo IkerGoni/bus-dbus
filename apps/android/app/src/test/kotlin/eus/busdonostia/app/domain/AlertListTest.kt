@@ -28,6 +28,30 @@ class AlertListTest {
     )
 
     @Test
+    fun textoDeOrigenDelProximoAviso() {
+        val withArrival = alertItem(rule("a", "5"), listOf(arrival("5", 12, ArrivalSource.SCHEDULED)), now)
+        assertEquals(NextAlertSource.Known(ArrivalSource.SCHEDULED), nextAlertSource(withArrival, ArrivalsView.Error))
+        val none = alertItem(rule("a", "5"), emptyList(), now)
+        assertEquals(NextAlertSource.Waiting, nextAlertSource(none, null))
+        assertEquals(NextAlertSource.Waiting, nextAlertSource(none, ArrivalsView.Loading))
+        assertEquals(NextAlertSource.FeedError, nextAlertSource(none, ArrivalsView.Error))
+        val noService = ArrivalsView.Degraded(DegradedReason.NO_SERVICE, emptyList(), null, now)
+        assertEquals(NextAlertSource.NoService, nextAlertSource(none, noService))
+        assertEquals(NextAlertSource.NoArrivals, nextAlertSource(none, ArrivalsView.Empty(null)))
+    }
+
+    @Test
+    fun pistaDeLaParadaDeUnAviso() {
+        val stale = ArrivalsView.Degraded(DegradedReason.STALE, emptyList(), null, now - 60_000)
+        assertEquals(FeedHint.Stale(now - 60_000), feedHint(rule("a", "5"), stale))
+        assertEquals(FeedHint.FeedError, feedHint(rule("a", "5"), ArrivalsView.Error))
+        assertEquals(FeedHint.NoService, feedHint(rule("a", "5"), ArrivalsView.Degraded(DegradedReason.NO_SERVICE, emptyList(), null, now)))
+        assertNull(feedHint(rule("a", "5"), ArrivalsView.Live(emptyList(), null, now)))
+        assertNull(feedHint(rule("a", "5"), null))
+        assertNull(feedHint(rule("p", "5").copy(active = false), ArrivalsView.Error)) // pausado: nada que decir
+    }
+
+    @Test
     fun estadosYDetalle() {
         val arrivals = listOf(arrival("5", 3), arrival("28", 12))
         assertEquals(ComputedAlertStatus.TRIGGERED, alertItem(rule("t", "5"), arrivals, now).status)

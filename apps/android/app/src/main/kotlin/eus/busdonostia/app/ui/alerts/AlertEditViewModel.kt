@@ -104,7 +104,7 @@ class AlertEditViewModel(
     val state: StateFlow<AlertEditUiState> = combine(
         form,
         container.catalog,
-        container.liveFeeds.feeds,
+        container.live.feeds,
         container.lineColors,
     ) { f, catalogResult, feeds, colors ->
         val catalog = catalogResult?.getOrNull()
@@ -157,15 +157,15 @@ class AlertEditViewModel(
     private fun withStopName(draft: AlertDraft): AlertDraft {
         val stop = draft.stopId ?: return draft
         val name = container.catalog.value?.getOrNull()?.stopByCode(stop)?.desc
-            ?: container.liveFeeds.feeds.value[stop]?.lastValid?.stopName
+            ?: container.live.feeds.value[stop]?.lastValid?.stopName
             ?: draft.stopName
         return draft.copy(stopName = name)
     }
 
     /** Si la parada no se ha consultado en esta sesión, una consulta para conocer sus líneas y destinos en vivo. */
     private fun ensureLive(stopId: String) {
-        if (container.liveFeeds.feeds.value[stopId] != null) return
-        viewModelScope.launch { container.fetchStop(stopId) }
+        if (container.live.feeds.value[stopId] != null) return
+        viewModelScope.launch { container.live.fetchStop(stopId) }
     }
 
     private fun edit(change: (AlertDraft) -> AlertDraft) =

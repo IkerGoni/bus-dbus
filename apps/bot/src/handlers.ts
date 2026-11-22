@@ -44,7 +44,7 @@ import {
   handleText,
 } from './commands.js';
 import { config } from './config.js';
-import { fetchStopTimes, getDataSource } from './dbus-client.js';
+import { getDataSource } from './dbus-client.js';
 import { handleLocation, handleUbicacion } from './location.js';
 import { logger } from './logger.js';
 
@@ -116,7 +116,6 @@ export function setupBot(bot: Telegraf<Context>): void {
   bot.on('text', handleText);
 
   startAlertScheduler();
-  void fetchStopTimes('2'); // precargar conexión con una parada con servicio
 
   logger.info('🤖 Bot handlers registered');
   logger.info(`📡 Data source: ${getDataSource()}`);

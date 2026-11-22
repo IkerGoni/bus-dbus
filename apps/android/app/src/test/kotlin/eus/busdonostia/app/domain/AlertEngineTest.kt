@@ -99,6 +99,14 @@ class AlertEngineTest {
     }
 
     @Test
+    fun laUiReutilizaLoQueElMotorConsultoHaceMenosDe25s() {
+        val engineFeed = StopFeed(StopFeedStatus.OK, listOf(arrival("5", 4)), null, now - 10_000)
+        assertEquals(engineFeed, reusableFeed(engineFeed, now, 30_000)) // H16: no se repite la petición
+        assertNull(reusableFeed(engineFeed.copy(fetchedAtMs = now - 25_000), now, 30_000))
+        assertNull(reusableFeed(null, now, 30_000))
+    }
+
+    @Test
     fun sondeoAdaptativoSegunLoQueFaltaParaAvisar() {
         val base = 30_000L
         assertEquals(base, pollDelayMs(0, base))
@@ -118,6 +126,41 @@ class AlertEngineTest {
         assertEquals(base, nextPollDelayMs(listOf(rule, urgent), views, now, base))
         // Sin avisos en vigilancia, la base.
         assertEquals(base, nextPollDelayMs(emptyList(), emptyMap(), now, base))
+    }
+
+    @Test
+    fun unFalloInesperadoCuentaComoProblemaYAcabaParando() {
+        // Primera vuelta fallida: empieza la cuenta y se sigue.
+        val first = failedTick(null, now)
+        assertEquals(now, first.troubleSinceMs)
+        assertEquals(EngineAction.CONTINUE, first.action)
+        // Si ya había problemas, la cuenta no se reinicia.
+        assertEquals(now - 1_000, failedTick(now - 1_000, now).troubleSinceMs)
+        // Fallando seguido (Room roto) llega a NO_SERVICE_STOP_MS y se para: no sondea para siempre.
+        assertEquals(EngineAction.CONTINUE, failedTick(now, now + NO_SERVICE_STOP_MS - 1).action)
+        assertEquals(EngineAction.STOP_NO_SERVICE, failedTick(now, now + NO_SERVICE_STOP_MS).action)
+    }
+
+    @Test
+    fun sinPermisoDeNotificacionesNoSeBorraElAviso() {
+        val firings = evaluateTick(listOf(once("a")), mapOf("340" to live(arrival("5", 4))), now, null).firings
+        assertEquals(listOf("a"), firingsToDelete(firings, canNotify = true).map { it.rule.id })
+        // El usuario no lo vería: se queda en Mis avisos (A04 ya avisa de que faltan permisos).
+        assertTrue(firingsToDelete(firings, canNotify = false).isEmpty())
+    }
+
+    @Test
+    fun trasPararSeSigueSiSeGuardoUnAvisoEntretanto() {
+        val saved = listOf(once("nuevo"))
+        // Decidió STOP_IDLE, pero en la BD ya hay otro aviso en vigilancia (H15): se sigue.
+        assertTrue(resumeAfterStop(EngineAction.STOP_IDLE, saved, now, canNotify = true))
+        // Nada en vigilancia (vacío, pausado o caducado): se para.
+        assertFalse(resumeAfterStop(EngineAction.STOP_IDLE, emptyList(), now, canNotify = true))
+        assertFalse(resumeAfterStop(EngineAction.STOP_IDLE, listOf(once("p").copy(active = false)), now, canNotify = true))
+        // Sin servicio: los avisos siguen en la BD a propósito; no se reanuda.
+        assertFalse(resumeAfterStop(EngineAction.STOP_NO_SERVICE, saved, now, canNotify = true))
+        // Sin permiso de notificaciones el aviso disparado no se borra: reanudar sería un bucle.
+        assertFalse(resumeAfterStop(EngineAction.STOP_IDLE, saved, now, canNotify = false))
     }
 
     @Test

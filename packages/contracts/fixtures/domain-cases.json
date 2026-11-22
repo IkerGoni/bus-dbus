@@ -1,0 +1,398 @@
+{
+  "description": "Casos de dominio compartidos (ADR 009 §4, H6). Los ejecutan vitest (packages/core, apps/bot) y JUnit (apps/android). 'runs' dice qué lados aplican a cada sección; si a un lado le falta la función, se documenta aquí y no se finge la paridad.",
+  "runs": {
+    "tiemposParada": [
+      "@dbus/core",
+      "android"
+    ],
+    "matching": [
+      "@dbus/core",
+      "android"
+    ],
+    "haversineMeters": [
+      "@dbus/bot",
+      "android"
+    ],
+    "remainingMinutes": [
+      "android"
+    ],
+    "freshness": [
+      "android"
+    ]
+  },
+  "notApplicable": {
+    "remainingMinutes": "@dbus/core y el bot usan los 'minutos' de la respuesta tal cual (la caché del cliente dura 30 s); no recalculan contra un reloj.",
+    "freshness": "El bot no pinta datos viejos: si la caché caduca vuelve a pedir. No hay computeFreshness en @dbus/core.",
+    "haversineMeters": "No está en @dbus/core: la paridad se prueba contra apps/bot/src/nearby.ts (el bot no redondea; Android redondea al metro)."
+  },
+  "tiemposParada": [
+    {
+      "file": "tiemposParada-1-sin-servicio.json",
+      "estado": "SIN_SERVICIO",
+      "arrivals": []
+    },
+    {
+      "file": "tiemposParada-1.json",
+      "estado": "DATOS",
+      "arrivals": [
+        {
+          "lineId": "28",
+          "minutes": 36,
+          "realtime": false,
+          "destination": "Ospitaleak"
+        },
+        {
+          "lineId": "21",
+          "minutes": 116,
+          "realtime": false,
+          "destination": "Amara-Mutualitateak"
+        }
+      ]
+    },
+    {
+      "file": "tiemposParada-2-datos-tipo0.json",
+      "estado": "DATOS",
+      "arrivals": [
+        {
+          "lineId": "36",
+          "minutes": 5,
+          "realtime": false,
+          "destination": "SanRoque"
+        },
+        {
+          "lineId": "28",
+          "minutes": 8,
+          "realtime": true,
+          "destination": "Miramon"
+        },
+        {
+          "lineId": "46",
+          "minutes": 10,
+          "realtime": false,
+          "destination": "Morlans"
+        },
+        {
+          "lineId": "28",
+          "minutes": 16,
+          "realtime": true,
+          "destination": "Ospitaleak"
+        },
+        {
+          "lineId": "21",
+          "minutes": 17,
+          "realtime": true,
+          "destination": "Amara-Mutualitateak"
+        }
+      ]
+    },
+    {
+      "file": "tiemposParada-340-datos-avisos.json",
+      "estado": "DATOS",
+      "arrivals": [
+        {
+          "lineId": "35",
+          "minutes": 10,
+          "realtime": true,
+          "destination": "Ospitaleak"
+        }
+      ]
+    },
+    {
+      "file": "tiemposParada-50-datos.json",
+      "estado": "DATOS",
+      "arrivals": [
+        {
+          "lineId": "45",
+          "minutes": 41,
+          "realtime": true,
+          "destination": "Antiguo-Aiete"
+        },
+        {
+          "lineId": "25",
+          "minutes": 45,
+          "realtime": true,
+          "destination": "Belartza"
+        },
+        {
+          "lineId": "27",
+          "minutes": 73,
+          "realtime": true,
+          "destination": "Gros-Altza"
+        }
+      ]
+    },
+    {
+      "file": "tiemposParada-566-sin-servicio.json",
+      "estado": "SIN_SERVICIO",
+      "arrivals": []
+    },
+    {
+      "file": "tiemposParada-99999-no-desc.json",
+      "estado": "NO DESC",
+      "arrivals": []
+    }
+  ],
+  "matching": [
+    {
+      "name": "prefiere GPS aunque el horario llegue antes",
+      "arrivals": [
+        {
+          "lineId": "28",
+          "destination": "Ospitaleak",
+          "minutes": 3,
+          "realtime": false
+        },
+        {
+          "lineId": "28",
+          "destination": "Ospitaleak",
+          "minutes": 5,
+          "realtime": true
+        }
+      ],
+      "lineId": "28",
+      "destination": null,
+      "minutesAhead": 10,
+      "expectedIndex": 1
+    },
+    {
+      "name": "sin GPS, el horario más próximo",
+      "arrivals": [
+        {
+          "lineId": "28",
+          "destination": "Ospitaleak",
+          "minutes": 7,
+          "realtime": false
+        },
+        {
+          "lineId": "28",
+          "destination": "Ospitaleak",
+          "minutes": 4,
+          "realtime": false
+        }
+      ],
+      "lineId": "28",
+      "destination": null,
+      "minutesAhead": 10,
+      "expectedIndex": 1
+    },
+    {
+      "name": "filtra por destino",
+      "arrivals": [
+        {
+          "lineId": "28",
+          "destination": "Miramon",
+          "minutes": 2,
+          "realtime": true
+        },
+        {
+          "lineId": "28",
+          "destination": "Ospitaleak",
+          "minutes": 6,
+          "realtime": true
+        }
+      ],
+      "lineId": "28",
+      "destination": "ospitaleak",
+      "minutesAhead": 10,
+      "expectedIndex": 1
+    },
+    {
+      "name": "destino tolerante (contenido, sin mayúsculas)",
+      "arrivals": [
+        {
+          "lineId": "21",
+          "destination": "Amara-Mutualitateak",
+          "minutes": 4,
+          "realtime": true
+        }
+      ],
+      "lineId": "21",
+      "destination": "  AMARA ",
+      "minutesAhead": 10,
+      "expectedIndex": 0
+    },
+    {
+      "name": "'Servicio programado' no filtra",
+      "arrivals": [
+        {
+          "lineId": "28",
+          "destination": "Miramon",
+          "minutes": 2,
+          "realtime": true
+        }
+      ],
+      "lineId": "28",
+      "destination": "Servicio programado",
+      "minutesAhead": 10,
+      "expectedIndex": 0
+    },
+    {
+      "name": "minutos == antelación cuenta",
+      "arrivals": [
+        {
+          "lineId": "28",
+          "destination": "Ospitaleak",
+          "minutes": 10,
+          "realtime": true
+        }
+      ],
+      "lineId": "28",
+      "destination": null,
+      "minutesAhead": 10,
+      "expectedIndex": 0
+    },
+    {
+      "name": "fuera de la antelación: ninguna",
+      "arrivals": [
+        {
+          "lineId": "28",
+          "destination": "Ospitaleak",
+          "minutes": 11,
+          "realtime": true
+        }
+      ],
+      "lineId": "28",
+      "destination": null,
+      "minutesAhead": 10,
+      "expectedIndex": null
+    },
+    {
+      "name": "otra línea: ninguna",
+      "arrivals": [
+        {
+          "lineId": "21",
+          "destination": "Amara-Mutualitateak",
+          "minutes": 3,
+          "realtime": true
+        }
+      ],
+      "lineId": "28",
+      "destination": null,
+      "minutesAhead": 10,
+      "expectedIndex": null
+    },
+    {
+      "name": "destino contrario: ninguna",
+      "arrivals": [
+        {
+          "lineId": "28",
+          "destination": "Miramon",
+          "minutes": 3,
+          "realtime": true
+        }
+      ],
+      "lineId": "28",
+      "destination": "Ospitaleak",
+      "minutesAhead": 10,
+      "expectedIndex": null
+    }
+  ],
+  "haversineMeters": [
+    {
+      "name": "parada 1 → 2",
+      "from": [
+        43.3224596,
+        -1.9830778
+      ],
+      "to": [
+        43.3178904,
+        -1.9834986
+      ],
+      "expectedMeters": 509
+    },
+    {
+      "name": "parada 2 → 340",
+      "from": [
+        43.3178904,
+        -1.9834986
+      ],
+      "to": [
+        43.3112765,
+        -1.9960369
+      ],
+      "expectedMeters": 1253
+    },
+    {
+      "name": "parada 1 → 50",
+      "from": [
+        43.3224596,
+        -1.9830778
+      ],
+      "to": [
+        43.3023356,
+        -2.0041965
+      ],
+      "expectedMeters": 2815
+    },
+    {
+      "name": "mismo punto",
+      "from": [
+        43.3178904,
+        -1.9834986
+      ],
+      "to": [
+        43.3178904,
+        -1.9834986
+      ],
+      "expectedMeters": 0
+    }
+  ],
+  "remainingMinutes": [
+    {
+      "name": "recién consultada",
+      "minutesAtFetch": 5,
+      "elapsedMs": 0,
+      "expected": 5
+    },
+    {
+      "name": "no baja antes del minuto",
+      "minutesAtFetch": 5,
+      "elapsedMs": 59999,
+      "expected": 5
+    },
+    {
+      "name": "baja al minuto",
+      "minutesAtFetch": 5,
+      "elapsedMs": 60000,
+      "expected": 4
+    },
+    {
+      "name": "reloj atrasado: no sube",
+      "minutesAtFetch": 5,
+      "elapsedMs": -30000,
+      "expected": 5
+    },
+    {
+      "name": "nunca negativo",
+      "minutesAtFetch": 1,
+      "elapsedMs": 180000,
+      "expected": 0
+    }
+  ],
+  "freshness": [
+    {
+      "ageMs": 0,
+      "expected": "FRESH"
+    },
+    {
+      "ageMs": 45999,
+      "expected": "FRESH"
+    },
+    {
+      "ageMs": 46000,
+      "expected": "STALE"
+    },
+    {
+      "ageMs": 90999,
+      "expected": "STALE"
+    },
+    {
+      "ageMs": 91000,
+      "expected": "EXPIRED"
+    },
+    {
+      "ageMs": -5000,
+      "expected": "FRESH"
+    }
+  ]
+}

@@ -3,9 +3,9 @@ import { stopAlertScheduler } from './alerts.js';
 import { config } from './config.js';
 import { getActiveAlerts } from './db.js';
 import {
-  fetchStopTimes,
   getCachedStopCodes,
   getDataSource,
+  refreshStopTimes,
 } from './dbus-client.js';
 import { setupBot } from './handlers.js';
 import { logger } from './logger.js';
@@ -48,7 +48,8 @@ const REFRESH_CONCURRENCY = 6;
 const MAX_REFRESH_STOPS = 80;
 
 /**
- * Refresca las paradas en caché y las de los avisos activos.
+ * Refresca las paradas de los avisos activos y las que algún usuario ha mirado
+ * en los últimos 2 min (`RECENT_STOP_MS`). Sin avisos ni usuarios, 0 peticiones.
  *
  * Concurrencia acotada y guard anti-solapamiento: un ciclo secuencial de hasta
  * 200 paradas × 2 intentos × 10 s desborda los 30 s del intervalo y los
@@ -74,7 +75,7 @@ function startLiveRefresh(intervalMs: number): () => void {
           while (cursor < codes.length) {
             const code = codes[cursor++];
             try {
-              await fetchStopTimes(code, true);
+              await refreshStopTimes(code);
             } catch (error) {
               logger.error(
                 `[Refresh] ${code}: ${error instanceof Error ? error.message : String(error)}`

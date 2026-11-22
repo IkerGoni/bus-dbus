@@ -45,6 +45,13 @@ fun nextPollDelayMs(watching: List<AlertRule>, views: Map<String, ArrivalsView>,
 fun isFetchDue(lastFetchedAtMs: Long?, nowMs: Long, intervalMs: Long): Boolean =
     lastFetchedAtMs == null || nowMs - lastFetchedAtMs >= intervalMs - FETCH_SLACK_MS
 
+/**
+ * Respuesta que el sondeo de la UI puede reutilizar en vez de pedir otra (H16): la de
+ * alguien (el motor) que consultó la parada hace menos de un intervalo; null = hay que pedir.
+ */
+fun reusableFeed(known: StopFeed?, nowMs: Long, intervalMs: Long): StopFeed? =
+    known?.takeUnless { isFetchDue(it.fetchedAtMs, nowMs, intervalMs) }
+
 /** Aviso que acaba de pasar a `TRIGGERED` y la llegada que lo dispara: se notifica y se borra (un solo uso). */
 data class Firing(val rule: AlertRule, val arrival: Arrival)
 
@@ -102,3 +109,32 @@ private fun isTrouble(view: ArrivalsView): Boolean =
 fun firingDestination(rule: AlertRule, arrival: Arrival): String? =
     arrival.destination.trim().ifEmpty { null }
         ?: rule.destination?.trim()?.takeIf { it.isNotEmpty() && !destinationsMatch(it, UNKNOWN_DESTINATION) }
+
+/** Vuelta que ha fallado por algo inesperado (BD, bug): cuenta como problema, igual que sin servicio. */
+data class FailedTick(val troubleSinceMs: Long, val action: EngineAction)
+
+/**
+ * Un fallo inesperado no tumba la vigilancia, pero tampoco la deja sondeando para siempre:
+ * suma al tiempo seguido con problemas y, a los [NO_SERVICE_STOP_MS], el motor se para y lo notifica.
+ */
+fun failedTick(troubleSinceMs: Long?, nowMs: Long): FailedTick {
+    val since = troubleSinceMs ?: nowMs
+    val action = if (nowMs - since >= NO_SERVICE_STOP_MS) EngineAction.STOP_NO_SERVICE else EngineAction.CONTINUE
+    return FailedTick(since, action)
+}
+
+/**
+ * Avisos disparados que se pueden borrar ya notificados. Si el usuario no puede ver la
+ * notificación ([canNotify] false: permiso denegado o canal bloqueado), no se consume el aviso.
+ */
+fun firingsToDelete(firings: List<Firing>, canNotify: Boolean): List<Firing> = if (canNotify) firings else emptyList()
+
+/**
+ * Tras decidir parar y soltar `running`, el servicio vuelve a leer la BD: si entretanto se
+ * guardó un aviso, `ensureMonitoring` vio el servicio vivo y no lo arrancó, así que hay que
+ * seguir (H15). Solo tras [EngineAction.STOP_IDLE]: sin servicio los avisos siguen ahí a
+ * propósito, y sin permiso de notificaciones ([canNotify] false) el disparado no se borra
+ * y reanudar sería un bucle.
+ */
+fun resumeAfterStop(action: EngineAction, rules: List<AlertRule>, nowMs: Long, canNotify: Boolean): Boolean =
+    action == EngineAction.STOP_IDLE && canNotify && rules.any { isWatching(it, nowMs) }

@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import eus.busdonostia.app.AppContainer
 import eus.busdonostia.app.data.db.toggle
+import eus.busdonostia.app.domain.ArrivalRow
 import eus.busdonostia.app.domain.ArrivalsView
+import eus.busdonostia.app.domain.arrivalRows
 import eus.busdonostia.app.domain.FavoriteType
 import eus.busdonostia.app.domain.StopFeed
 import eus.busdonostia.app.domain.StopFeedStatus
@@ -14,6 +16,7 @@ import eus.busdonostia.app.domain.stopArrivalsView
 import eus.busdonostia.app.domain.stopByCode
 import eus.busdonostia.app.domain.stopLineIds
 import eus.busdonostia.app.domain.toPublicLineId
+import eus.busdonostia.app.domain.usableArrivals
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -35,7 +38,11 @@ data class StopDetailUiState(
     /** Chip seleccionado; null = `Todas`. */
     val selectedLine: String? = null,
     val view: ArrivalsView = ArrivalsView.Loading,
-    val nowMs: Long = 0,
+    /**
+     * Llegadas de [view] de la línea elegida con sus minutos. Sin la hora en el estado:
+     * con el reloj de 1 s, el estado solo cambia cuando cambia un minuto mostrado (H10).
+     */
+    val rows: List<ArrivalRow> = emptyList(),
     val refreshing: Boolean = false,
     val starred: Boolean = false,
     /** ★ parada+línea de [selectedLine]. */
@@ -80,6 +87,8 @@ class StopDetailViewModel(
         val valid = feed.lastValid
         val selected = feed.selectedLine?.let { line -> catalog?.toPublicLineId(line, stopId) ?: line }
         val ids = favorites.map { it.id }.toSet()
+        val nowMs = now.toEpochMilli()
+        val view = stopArrivalsView(feed.latest, valid, nowMs)
         StopDetailUiState(
             stopId = stopId,
             name = stop?.desc ?: valid?.stopName,
@@ -87,8 +96,8 @@ class StopDetailViewModel(
             lon = stop?.lon,
             lineIds = catalog?.let { stopLineIds(it, stopId, valid?.arrivals.orEmpty()) }.orEmpty(),
             selectedLine = selected,
-            view = stopArrivalsView(feed.latest, valid, now.toEpochMilli()),
-            nowMs = now.toEpochMilli(),
+            view = view,
+            rows = arrivalRows(usableArrivals(view), selected, nowMs),
             refreshing = feed.refreshing,
             starred = favoriteId(FavoriteType.STOP, stopId, null) in ids,
             lineStarred = selected != null && favoriteId(FavoriteType.STOP_LINE, stopId, selected) in ids,
@@ -107,7 +116,7 @@ class StopDetailViewModel(
     /** Sondeo mientras la pantalla está visible (la UI lo lanza con `repeatOnLifecycle(STARTED)`). */
     suspend fun pollWhileVisible() {
         while (true) {
-            fetch()
+            fetch(reuseRecent = true)
             delay(container.configRepository.config.value.pollIntervalSec * 1_000L)
         }
     }
@@ -116,10 +125,11 @@ class StopDetailViewModel(
         viewModelScope.launch { fetch() }
     }
 
-    private suspend fun fetch() = fetchLock.withLock {
+    /** [reuseRecent]: sondeo periódico, que reutiliza lo que el motor acaba de consultar; `Reintentar` siempre pide. */
+    private suspend fun fetch(reuseRecent: Boolean = false) = fetchLock.withLock {
         refreshing.value = true
         try {
-            val feed = container.fetchStop(stopId)
+            val feed = if (reuseRecent) container.live.pollStop(stopId) else container.live.fetchStop(stopId)
             latest.value = feed
             if (feed.status != StopFeedStatus.API_ERROR) lastValid.value = feed
         } finally {

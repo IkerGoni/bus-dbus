@@ -59,8 +59,6 @@ import eus.busdonostia.app.R
 import eus.busdonostia.app.domain.Arrival
 import eus.busdonostia.app.domain.ArrivalsView
 import eus.busdonostia.app.domain.DegradedReason
-import eus.busdonostia.app.domain.filterArrivals
-import eus.busdonostia.app.domain.remainingMinutes
 import eus.busdonostia.app.ui.appViewModel
 import eus.busdonostia.app.ui.components.FavoriteStar
 import eus.busdonostia.app.ui.components.InfoBanner
@@ -220,7 +218,7 @@ private fun Arrivals(state: StopDetailUiState, onRetry: () -> Unit, onStar: (Arr
             }
             is ArrivalsView.Live -> {
                 notice(view.notice)
-                arrivalRows(view.arrivals, state, onStar, onBell)
+                arrivalItems(state, onStar, onBell)
             }
             is ArrivalsView.Degraded -> when (view.reason) {
                 DegradedReason.NO_SERVICE -> item {
@@ -243,7 +241,7 @@ private fun Arrivals(state: StopDetailUiState, onRetry: () -> Unit, onStar: (Arr
                         }
                     }
                     notice(view.notice)
-                    arrivalRows(view.arrivals, state, onStar, onBell)
+                    arrivalItems(state, onStar, onBell)
                 }
             }
             ArrivalsView.Error -> item {
@@ -281,13 +279,12 @@ private fun LazyListScope.notice(text: String?) {
     }
 }
 
-private fun LazyListScope.arrivalRows(
-    arrivals: List<Arrival>,
+private fun LazyListScope.arrivalItems(
     state: StopDetailUiState,
     onStar: (Arrival) -> Unit,
     onBell: (Arrival) -> Unit,
 ) {
-    val rows = filterArrivals(arrivals, state.selectedLine)
+    val rows = state.rows
     if (rows.isEmpty()) {
         item {
             StatusMessage(
@@ -298,10 +295,11 @@ private fun LazyListScope.arrivalRows(
         }
         return
     }
-    items(rows) { arrival ->
+    items(rows, key = { it.key }) { row ->
+        val arrival = row.arrival
         ArrivalRow(
             arrival = arrival,
-            minutes = remainingMinutes(arrival, state.nowMs),
+            minutes = row.minutes,
             colorArgb = state.lineColors[arrival.lineId],
             stopName = state.name ?: state.stopId,
             starred = arrival.lineId in state.starredLines,

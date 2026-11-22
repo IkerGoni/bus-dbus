@@ -42,7 +42,7 @@ class AlertsViewModel(private val container: AppContainer) : ViewModel() {
 
     val state: StateFlow<AlertsUiState> = combine(
         container.alerts,
-        container.liveFeeds.feeds,
+        container.live.feeds,
         container.ticker.now,
         refreshing,
         container.lineColors,
@@ -69,7 +69,7 @@ class AlertsViewModel(private val container: AppContainer) : ViewModel() {
         viewModelScope.launch {
             refreshing.value = true
             try {
-                container.fetchStops(stopsToWatch(rules))
+                container.live.fetchStops(stopsToWatch(rules))
             } finally {
                 refreshing.value = false
             }

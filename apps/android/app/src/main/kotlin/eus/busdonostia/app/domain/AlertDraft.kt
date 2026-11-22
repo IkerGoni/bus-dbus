@@ -1,5 +1,7 @@
 package eus.busdonostia.app.domain
 
+import java.util.Locale
+
 /*
  * A06 · Configurar aviso: borrador, validación y dedup (02-domain-contracts.md §1).
  * Puro: sin Android. La UI solo pinta y llama a estas funciones.
@@ -101,3 +103,10 @@ fun lineDestinationsAtStop(catalog: Catalog, stopId: String, lineId: String, arr
         .map { it.destination.trim() }
     return (fromCatalog + fromLive).distinctBy { it.lowercase() }
 }
+
+/**
+ * Chips de destino de A06: los de la línea en la parada más el elegido (p. ej. precargado
+ * desde una llegada que ya no sale), sin repetir aunque cambien las mayúsculas.
+ */
+fun destinationChoices(destinations: List<String>, chosen: String?): List<String> =
+    (destinations + listOfNotNull(chosen)).distinctBy { it.lowercase(Locale.ROOT) }

@@ -96,3 +96,50 @@ fun badgeText(count: Int): String? = when {
     count > 9 -> "9+"
     else -> count.toString()
 }
+
+/** Línea de estado del próximo aviso (A01) bajo la cuenta atrás. La UI la traduce. */
+sealed interface NextAlertSource {
+    /** `En vivo · Aviso 5'` u `Horario · Aviso 5'`. */
+    data class Known(val source: ArrivalSource) : NextAlertSource
+
+    /** Aún sin respuesta de la parada: solo `Aviso 5'`. */
+    data object Waiting : NextAlertSource
+
+    data object FeedError : NextAlertSource
+
+    data object NoService : NextAlertSource
+
+    /** La parada responde, pero sin bus de la línea. */
+    data object NoArrivals : NextAlertSource
+}
+
+fun nextAlertSource(item: AlertItem, view: ArrivalsView?): NextAlertSource {
+    item.nextArrival?.let { return NextAlertSource.Known(it.source) }
+    return when {
+        view == null || view == ArrivalsView.Loading -> NextAlertSource.Waiting
+        view == ArrivalsView.Error -> NextAlertSource.FeedError
+        view is ArrivalsView.Degraded && view.reason == DegradedReason.NO_SERVICE -> NextAlertSource.NoService
+        else -> NextAlertSource.NoArrivals
+    }
+}
+
+/** Pista bajo un aviso de A04 sobre su parada: sin servicio, error o datos viejos. */
+sealed interface FeedHint {
+    data object FeedError : FeedHint
+
+    data object NoService : FeedHint
+
+    /** Datos viejos: se enseña la hora real del dato. */
+    data class Stale(val fetchedAtMs: Long) : FeedHint
+}
+
+/** null si el aviso está pausado o no hay nada que decir de su parada. */
+fun feedHint(rule: AlertRule, view: ArrivalsView?): FeedHint? {
+    if (!rule.active) return null
+    return when (view) {
+        ArrivalsView.Error -> FeedHint.FeedError
+        is ArrivalsView.Degraded ->
+            if (view.reason == DegradedReason.NO_SERVICE) FeedHint.NoService else FeedHint.Stale(view.fetchedAtMs)
+        else -> null
+    }
+}

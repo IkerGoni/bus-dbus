@@ -45,8 +45,11 @@ class ConfigTest {
     private var now = 1_700_000_000_000L
     private val cacheFile get() = tmp.root.resolve("api-config.json")
 
+    /** Avisos que el repositorio manda a logcat (en JVM no hay `android.util.Log`). */
+    private val warnings = mutableListOf<String>()
+
     private fun repo(http: OkHttpClient = OkHttpClient()) =
-        ConfigRepository(bundled, cacheFile, server.url("/config.json"), http, nowMs = { now })
+        ConfigRepository(bundled, cacheFile, server.url("/config.json"), http, nowMs = { now }, warn = { msg, _ -> warnings += msg })
 
     // ── Validación ──
 
@@ -62,8 +65,30 @@ class ConfigTest {
     fun apiBaseUrlHttpFueraDeDbusSeRechaza() {
         assertNull(ApiConfig.parse(variant("apiBaseUrl", "http://evil.example/ws")))
         assertNull(ApiConfig.parse(variant("apiBaseUrl", "http://otro.dbus.eus/ws")))
-        assertNotNull(ApiConfig.parse(variant("apiBaseUrl", "https://nuevo.dbus.eus/ws")))
+        assertNotNull(ApiConfig.parse(variant("apiBaseUrl", "https://app.dbus.eus/ws")))
         assertNull(ApiConfig.parse(variant("apiBaseUrl", "no es una url")))
+    }
+
+    @Test
+    fun apiBaseUrlSoloHaciaHostsPermitidos() {
+        // HTTPS no basta (H21): quien controle el hosting de la config no puede redirigir las consultas.
+        assertNull(ApiConfig.parse(variant("apiBaseUrl", "https://evil.example/ws")))
+        assertNull(ApiConfig.parse(variant("apiBaseUrl", "https://nuevo.dbus.eus/ws")))
+        assertNull(ApiConfig.parse(variant("apiBaseUrl", "https://app.dbus.eus.evil.example/ws")))
+        assertNotNull(ApiConfig.parse(variant("apiBaseUrl", "http://APP.dbus.eus/SSIIMovilWSv3/ws/cons")))
+        // La lista es parámetro de validate(): por defecto solo app.dbus.eus.
+        val otherHost = bundled.copy(apiBaseUrl = "https://nuevo.dbus.eus/ws")
+        assertEquals(emptyList<String>(), otherHost.validate(allowedHosts = setOf("app.dbus.eus", "nuevo.dbus.eus")))
+    }
+
+    @Test
+    fun cabecerasSoloDeLaListaBlanca() {
+        assertNotNull(bundled.copy(headers = mapOf("User-Agent" to "x", "accept-language" to "eu")).takeIf { it.validate().isEmpty() })
+        for (name in listOf("Authorization", "Cookie", "Host", "Proxy-Authorization", "X-Forwarded-For", "X-Api-Key")) {
+            assertTrue(name, bundled.copy(headers = mapOf(name to "x")).validate().isNotEmpty())
+        }
+        // Un valor con salto de línea no puede colar otra cabecera.
+        assertTrue(bundled.copy(headers = mapOf("User-Agent" to "x\r\nCookie: y")).validate().isNotEmpty())
     }
 
     @Test
@@ -132,6 +157,7 @@ class ConfigTest {
         val elapsedSec = (System.nanoTime() - started) / 1e9
         assertTrue("timeout tardó $elapsedSec s", elapsedSec in 4.5..8.0)
         assertEquals(bundled, r.config.value)
+        assertEquals(1, warnings.size) // el timeout no es mudo (H5)
     }
 
     @Test
@@ -153,5 +179,6 @@ class ConfigTest {
     fun cacheCorruptaEnDiscoSeIgnora() {
         cacheFile.writeText("basura")
         assertEquals(bundled, repo().config.value)
+        assertEquals(1, warnings.size) // corrupta: se avisa (H5); ausente es lo normal y no
     }
 }

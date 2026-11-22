@@ -33,6 +33,12 @@ export interface DbusClientOptions {
   retryDelayMs?: number;
   maxCachedStops?: number;
   logger?: Logger;
+  /**
+   * Si se indica, `getCachedStopCodes()` solo devuelve las paradas pedidas
+   * (`getStopTimes`, `getArrivals`, `getStopLines`) en los últimos `maxIdleMs`;
+   * `refreshStop` no cuenta como uso. Sin él, todas las de la caché (como antes).
+   */
+  maxIdleMs?: number;
 }
 
 export interface GetArrivalsOptions {
@@ -50,6 +56,8 @@ export interface DbusClient {
     options?: GetArrivalsOptions
   ): Promise<Arrival[]>;
   getStopLines(stopCode: string): Promise<Line[]>;
+  /** Pide la parada a Dbus ignorando la caché, sin contarla como uso (refresco en segundo plano). */
+  refreshStop(stopCode: string): Promise<DbusStopTimes | null>;
   fetchPopularStops(): Promise<DbusParada[]>;
   getStopName(code: string): string;
   getCachedStopCodes(): string[];
@@ -99,6 +107,7 @@ export function createDbusClient(options: DbusClientOptions): DbusClient {
   const retryDelayMs = options.retryDelayMs ?? DEFAULT_RETRY_DELAY_MS;
   const maxCachedStops = options.maxCachedStops ?? DEFAULT_MAX_CACHED_STOPS;
   const now = options.now ?? Date.now;
+  const maxIdleMs = options.maxIdleMs;
   const log = options.logger ?? console;
   const fetchImpl: typeof fetch =
     options.fetch ?? ((input, init) => globalThis.fetch(input, init));
@@ -107,6 +116,8 @@ export function createDbusClient(options: DbusClientOptions): DbusClient {
   const inflight = new Map<string, Promise<DbusStopTimes | null>>();
   let popularCache: CacheEntry<DbusParada[]> | null = null;
   let lastSync: number | null = null;
+  /** Último uso de cada parada (solo con `maxIdleMs`). */
+  const lastUse = new Map<string, number>();
 
   async function getJson(path: string): Promise<unknown | null> {
     const url = `${baseUrl}${path}`;
@@ -138,7 +149,20 @@ export function createDbusClient(options: DbusClientOptions): DbusClient {
   ): Promise<DbusStopTimes | null> {
     const code = String(codParada ?? '').trim();
     if (!/^\d+$/.test(code)) return null;
+    if (maxIdleMs !== undefined) lastUse.set(code, now());
+    return loadStopTimes(code, forceRefresh);
+  }
 
+  async function refreshStop(stopCode: string): Promise<DbusStopTimes | null> {
+    const code = String(stopCode ?? '').trim();
+    if (!/^\d+$/.test(code)) return null;
+    return loadStopTimes(code, true);
+  }
+
+  async function loadStopTimes(
+    code: string,
+    forceRefresh: boolean
+  ): Promise<DbusStopTimes | null> {
     const cached = stopCache.get(code);
     if (!forceRefresh && cached && now() - cached.ts < ttlMs) {
       return cached.data;
@@ -233,7 +257,13 @@ export function createDbusClient(options: DbusClientOptions): DbusClient {
   }
 
   function getCachedStopCodes(): string[] {
-    return [...stopCache.keys()];
+    const codes = [...stopCache.keys()];
+    if (maxIdleMs === undefined) return codes;
+    const t = now();
+    for (const [code, used] of lastUse) {
+      if (t - used > maxIdleMs) lastUse.delete(code);
+    }
+    return codes.filter((code) => lastUse.has(code));
   }
 
   function invalidateStop(code: string): void {
@@ -256,6 +286,7 @@ export function createDbusClient(options: DbusClientOptions): DbusClient {
     getStopTimes,
     getArrivals,
     getStopLines,
+    refreshStop,
     fetchPopularStops,
     getStopName,
     getCachedStopCodes,

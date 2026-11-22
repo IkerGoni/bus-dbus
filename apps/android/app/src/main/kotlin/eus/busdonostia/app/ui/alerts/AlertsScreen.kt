@@ -51,7 +51,8 @@ import eus.busdonostia.app.R
 import eus.busdonostia.app.domain.AlertItem
 import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.ArrivalsView
-import eus.busdonostia.app.domain.DegradedReason
+import eus.busdonostia.app.domain.FeedHint
+import eus.busdonostia.app.domain.feedHint
 import eus.busdonostia.app.ui.appViewModel
 import eus.busdonostia.app.ui.components.BorderedCard
 import eus.busdonostia.app.ui.components.InfoBanner
@@ -214,7 +215,7 @@ private fun AlertCard(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(top = 4.dp, end = 12.dp),
             )
-            feedHint(rule, stopView)?.let {
+            feedHintText(rule, stopView)?.let {
                 Text(
                     it,
                     style = MaterialTheme.typography.bodySmall,
@@ -246,16 +247,9 @@ private fun AlertCard(
 
 /** Sin servicio, error o datos viejos de la parada de un aviso activo; null si no hay nada que decir. */
 @Composable
-private fun feedHint(rule: AlertRule, view: ArrivalsView?): String? {
-    if (!rule.active) return null
-    return when (view) {
-        ArrivalsView.Error -> stringResource(R.string.alert_feed_error)
-        is ArrivalsView.Degraded ->
-            if (view.reason == DegradedReason.NO_SERVICE) {
-                stringResource(R.string.alert_feed_no_service)
-            } else {
-                stringResource(R.string.stop_stale, clockOf(view.fetchedAtMs))
-            }
-        else -> null
-    }
+private fun feedHintText(rule: AlertRule, view: ArrivalsView?): String? = when (val hint = feedHint(rule, view)) {
+    FeedHint.FeedError -> stringResource(R.string.alert_feed_error)
+    FeedHint.NoService -> stringResource(R.string.alert_feed_no_service)
+    is FeedHint.Stale -> stringResource(R.string.stop_stale, clockOf(hint.fetchedAtMs))
+    null -> null
 }

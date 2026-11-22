@@ -31,6 +31,7 @@ import { logger } from '../src/logger.js';
 import { haversineMeters, rankNearbyStops } from '../src/nearby.js';
 import {
   acquireInstanceLock,
+  pidAlive,
   releaseInstanceLock,
 } from '../src/single-instance.js';
 import type { NextArrivalResult } from '../src/types.js';
@@ -332,6 +333,21 @@ describe('single-instance lock', () => {
     } finally {
       fs.rmSync(file, { force: true });
     }
+  });
+});
+
+describe('pidAlive (H14)', () => {
+  const failWith = (code: string) => () => {
+    throw Object.assign(new Error(code), { code });
+  };
+
+  it('EPERM es un proceso vivo de otro usuario: el lock no se roba', () => {
+    expect(pidAlive(123, failWith('EPERM'))).toBe(true);
+  });
+
+  it('ESRCH es un proceso muerto: el lock se puede reclamar', () => {
+    expect(pidAlive(123, failWith('ESRCH'))).toBe(false);
+    expect(pidAlive(123, () => true)).toBe(true);
   });
 });
 

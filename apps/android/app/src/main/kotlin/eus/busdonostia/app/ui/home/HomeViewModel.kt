@@ -85,7 +85,7 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
     val state: StateFlow<HomeUiState> = combine(
         container.catalog,
         inputs,
-        container.liveFeeds.feeds,
+        container.live.feeds,
         container.ticker.now,
         container.lineColors,
     ) { catalogResult, input, feeds, now, colors ->
@@ -123,7 +123,7 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
         viewModelScope.launch {
             refreshing.value = true
             try {
-                container.fetchStops(stops)
+                container.live.fetchStops(stops)
             } finally {
                 refreshing.value = false
             }

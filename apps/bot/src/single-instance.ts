@@ -4,12 +4,20 @@ import path from 'node:path';
 
 const LOCK_FILE = path.join(os.tmpdir(), 'dbus-alarm-bot.lock');
 
-function pidAlive(pid: number): boolean {
+/**
+ * `kill(pid, 0)` lanza `EPERM` si el proceso existe pero es de otro usuario:
+ * cuenta como vivo para no robarle el lock (H14). Solo `ESRCH` (u otro error)
+ * es un proceso muerto.
+ */
+export function pidAlive(
+  pid: number,
+  kill: (pid: number, signal: number) => unknown = process.kill
+): boolean {
   try {
-    process.kill(pid, 0);
+    kill(pid, 0);
     return true;
-  } catch {
-    return false;
+  } catch (error) {
+    return (error as NodeJS.ErrnoException).code === 'EPERM';
   }
 }
 
