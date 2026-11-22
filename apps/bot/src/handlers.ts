@@ -104,8 +104,8 @@ export function setupBot(bot: Telegraf<Context>): void {
   bot.action(/^favstop_\d+$/, handleSaveStopFavorite);
   bot.action(/^stop_refresh_\d+$/, handleStopRefresh);
   bot.action(/^stop_alert_\d+$/, handleStopAlert);
-  bot.action(/^aline_([^_]+)$/, handleLineCallback);
-  bot.action(/^minutes_\d+$/, handleMinutesCallback);
+  bot.action(/^aline_\d+_[^_]+$/, handleLineCallback);
+  bot.action(/^minutes_\d+_[^_]+_\d+$/, handleMinutesCallback);
   bot.action(/^fav_add_\d+_([^_]+)$/, handleFavAdd);
   bot.action(/^fav_view_\d+$/, handleFavView);
   bot.action(/^fav_remove_\d+$/, handleFavRemove);

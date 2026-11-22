@@ -50,6 +50,17 @@ describe('parseStopTimes + mapTiemposParada (fixture real)', () => {
     expect(arrivals[0].lineId).toBe('28');
   });
 
+  it('conserva los avisos reales de Dbus (incluso en SIN_SERVICIO)', () => {
+    const sinServicio = parseStopTimes({
+      estado: 'SIN_SERVICIO',
+      parada: null,
+      tiempos: [],
+      avisos: ['obras en la línea 28', '  ', null, 42],
+    });
+    expect(sinServicio?.avisos).toEqual(['obras en la línea 28', '42']);
+    expect(parsed?.avisos).toEqual([]); // fixture real: avisos: null
+  });
+
   it('devuelve lista vacía si la parada no tiene datos', () => {
     expect(mapTiemposParada(null, { stopCode: '1' })).toEqual([]);
     expect(
@@ -152,6 +163,22 @@ describe('createDbusClient', () => {
     });
     await expect(client.getArrivals('1')).resolves.toEqual([]);
     expect(errors).toHaveLength(1);
+  });
+
+  it('reintenta un HTTP 500 y devuelve datos válidos en el segundo intento', async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(fakeResponse({}, false))
+      .mockResolvedValueOnce(fakeResponse(fixture));
+    const client = createDbusClient({
+      baseUrl: 'http://test.local/cons',
+      fetch: fetchImpl as unknown as typeof fetch,
+      retryDelayMs: 0,
+    });
+
+    const times = await client.getStopTimes('1');
+    expect(times?.estado).toBe('DATOS');
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
   });
 
   it('rechaza códigos de parada no numéricos sin hacer red', async () => {

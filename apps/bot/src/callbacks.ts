@@ -30,7 +30,7 @@ import {
   showMinutesSelector,
   showStopLines,
 } from './render.js';
-import { clearSession, getSession } from './session.js';
+import { clearSession } from './session.js';
 
 export async function handleMenuCallback(ctx: Context): Promise<void> {
   const data = callbackData(ctx);
@@ -176,46 +176,32 @@ export async function handleStopAlert(ctx: Context): Promise<void> {
   await answer(ctx);
 }
 
+/**
+ * Callbacks stateless (regla 8): parada y línea viajan en `callback_data`.
+ * Un botón antiguo ya no puede crear un aviso en la parada equivocada aunque
+ * el chat esté en otro flujo.
+ */
 export async function handleLineCallback(ctx: Context): Promise<void> {
-  const match = callbackData(ctx).match(/^aline_([^_]+)$/);
-  const chatId = ctx.chat?.id;
-  if (!match || !chatId) return;
-  const session = getSession(chatId);
-  // Un callback antiguo (mensajes editados quedan en el historial) no debe
-  // reactivar un flujo abandonado ni crear avisos con datos a medias.
-  if (session.step !== 'select_line_alert' || !session.stopId) {
-    await safeEdit(ctx, '❌ Sesión expirada, vuelve a crear el aviso');
-    await answer(ctx);
-    return;
-  }
-  session.lineId = normalizeLine(match[1]);
-  await showMinutesSelector(ctx);
+  const match = callbackData(ctx).match(/^aline_(\d+)_([^_]+)$/);
+  if (!match) return;
+  const [, stopId, lineId] = match;
+  await showMinutesSelector(ctx, stopId, normalizeLine(lineId));
   await answer(ctx);
 }
 
 export async function handleMinutesCallback(ctx: Context): Promise<void> {
-  const match = callbackData(ctx).match(/^minutes_(\d+)$/);
-  const chatId = ctx.chat?.id;
-  if (!match || !chatId) return;
-  const session = getSession(chatId);
-  if (
-    session.step !== 'select_minutes_alert' ||
-    !session.stopId ||
-    !session.lineId
-  ) {
-    await safeEdit(ctx, '❌ Sesión expirada, intenta de nuevo');
-    await answer(ctx);
-    return;
-  }
-  const minutes = Number.parseInt(match[1], 10);
+  const match = callbackData(ctx).match(/^minutes_(\d+)_([^_]+)_(\d+)$/);
+  if (!match) return;
+  const [, stopId, lineId, rawMinutes] = match;
+  const minutes = Number.parseInt(rawMinutes, 10);
   if (minutes < 1 || minutes > 60) {
     await answer(ctx, '❌ Minutos fuera de rango');
     return;
   }
   const result = await createAndConfirmAlert(
     ctx,
-    session.stopId,
-    session.lineId,
+    stopId,
+    normalizeLine(lineId),
     minutes,
     true
   );

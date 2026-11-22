@@ -32,7 +32,14 @@ export function setBotInstance(bot: Telegraf<Context>): void {
 export function startAlertScheduler(): void {
   if (scheduledTask) return;
   scheduledTask = cron.schedule('* * * * *', () => {
-    void checkAlerts();
+    // checkAlerts() tiene try/finally para el guard, pero no catch: un fallo
+    // de SQLite al leer avisos debe loguearse, no convertirse en unhandled
+    // rejection que mate el proceso.
+    void checkAlerts().catch((error: unknown) => {
+      logger.error(
+        `[Alerts] Revisión fallida: ${error instanceof Error ? error.message : String(error)}`
+      );
+    });
   });
   logger.info('📅 Alert scheduler started (checking every minute)');
 }

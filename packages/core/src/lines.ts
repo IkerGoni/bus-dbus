@@ -10,11 +10,15 @@
  * Acepta `28`, `L28` y `028`.
  */
 export function normalizeLine(lineId: string): string {
-  return lineId
-    .trim()
-    .toUpperCase()
-    .replace(/^L/, '')
-    .replace(/^0+(?=\d)/, '');
+  return (
+    lineId
+      .trim()
+      .toUpperCase()
+      .replace(/^L/, '')
+      // Los ceros a la izquierda pueden ir después del prefijo alfabético
+      // ("b09" -> "B9"), no solo al principio ("028" -> "28").
+      .replace(/^([A-Z]*)0+(?=\d)/, '$1')
+  );
 }
 
 /** Comprueba si una llegada pertenece a la línea indicada (pública o interna). */

@@ -18,7 +18,11 @@ import {
   getCatalogStopName,
   toPublicLineId,
 } from './catalog.js';
-import { fetchStopTimes, getStopName } from './dbus-client.js';
+import {
+  type DbusStopTimes,
+  fetchStopTimes,
+  getStopName,
+} from './dbus-client.js';
 import type { NextArrivalResult } from './types.js';
 
 export { getCatalogLinesForStop, toPublicLineId };
@@ -50,10 +54,13 @@ export type { AlertMatchOptions } from '@dbus/core';
 export async function getNextArrivals(
   stopId: string,
   lineId?: string,
-  forceRefresh = false
+  forceRefresh = false,
+  /** Respuesta ya consultada: evita una segunda llamada a la API en vivo. */
+  times?: DbusStopTimes | null
 ): Promise<NextArrivalResult[]> {
-  const times = await fetchStopTimes(stopId, forceRefresh);
-  return mapTiemposParada(times, {
+  const data =
+    times !== undefined ? times : await fetchStopTimes(stopId, forceRefresh);
+  return mapTiemposParada(data, {
     stopCode: stopId,
     stopName: getStopName(stopId),
     lineId,
@@ -63,9 +70,10 @@ export async function getNextArrivals(
 
 export async function getNextArrival(
   stopId: string,
-  lineId: string
+  lineId: string,
+  times?: DbusStopTimes | null
 ): Promise<NextArrivalResult | null> {
-  const arrivals = await getNextArrivals(stopId, lineId);
+  const arrivals = await getNextArrivals(stopId, lineId, false, times);
   return arrivals[0] ?? null;
 }
 
@@ -76,9 +84,12 @@ export interface StopLine {
 }
 
 /** Líneas que pasan por una parada, según los datos reales del momento. */
-export async function getStopLines(stopId: string): Promise<StopLine[]> {
-  const times = await fetchStopTimes(stopId);
-  return linesFromStopTimes(times);
+export async function getStopLines(
+  stopId: string,
+  times?: DbusStopTimes | null
+): Promise<StopLine[]> {
+  const data = times !== undefined ? times : await fetchStopTimes(stopId);
+  return linesFromStopTimes(data);
 }
 
 /**
@@ -87,9 +98,10 @@ export async function getStopLines(stopId: string): Promise<StopLine[]> {
  * líneas pasan, siempre etiquetado como índice y sin horarios inventados.
  */
 export async function getStopLinesWithSource(
-  stopId: string
+  stopId: string,
+  times?: DbusStopTimes | null
 ): Promise<{ lines: StopLine[]; source: 'live' | 'catalog' }> {
-  const live = await getStopLines(stopId);
+  const live = await getStopLines(stopId, times);
   if (live.length) return { lines: live, source: 'live' };
   return { lines: getCatalogLinesForStop(stopId), source: 'catalog' };
 }

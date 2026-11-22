@@ -48,7 +48,9 @@ modifica de forma aditiva. No tocar el lane ajeno salvo acuerdo explícito.
 8. **UX de descubrimiento.** Sin "paradas populares": usar `/buscar`,
    `/linea` y `/lineas` (listado completo de líneas y de sus paradas).
    Callbacks stateless: el dato va en `data` (`srch_s_1`, `ld_1281`,
-   `ls_1_28`), no en sesiones.
+   `ls_1_28`, `aline_<parada>_<línea>`, `minutes_<parada>_<línea>_<min>`),
+   no en sesiones. La única sesión efímera permitida es el texto libre de los
+   flujos multi-paso (`session.ts`); nunca se persiste en disco.
 9. **Reinicio obligatorio en cada versión nueva del bot.** Todo cambio en
    `apps/bot/**` (o en `packages/**` que el bot consuma) solo existe en
    producción tras reiniciar: commit + push → SIGTERM al PID anterior →
@@ -61,7 +63,7 @@ modifica de forma aditiva. No tocar el lane ajeno salvo acuerdo explícito.
 ## Verificación
 
 ```bash
-pnpm --filter @dbus/bot verify     # tsc -b + biome + 62 tests (BOT_TOKEN + DB_PATH=:memory:)
+pnpm --filter @dbus/bot verify     # tsc -b + biome + 86 tests (BOT_TOKEN + DB_PATH=:memory:)
 pnpm --filter @dbus/bot build      # tsc -b -> apps/bot/dist
 ```
 

@@ -88,10 +88,15 @@ export function parseStopTimes(value: unknown): DbusStopTimes | null {
     .map(normalizeTiempo)
     .filter((t): t is DbusTiempo => t !== null);
 
+  const avisos = arr(raw.avisos)
+    .map((aviso) => str(aviso).trim())
+    .filter(Boolean);
+
   return {
     estado,
     parada: normalizeParada(raw.parada),
     tiempos,
     creacion: raw.creacion == null ? null : str(raw.creacion),
+    avisos,
   };
 }

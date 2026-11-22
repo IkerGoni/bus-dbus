@@ -10,6 +10,7 @@ import {
 import { setupBot } from './handlers.js';
 import { logger } from './logger.js';
 import { acquireInstanceLock, releaseInstanceLock } from './single-instance.js';
+import { launchWithRetry } from './telegram-launch.js';
 
 if (!acquireInstanceLock()) {
   logger.error(
@@ -89,7 +90,13 @@ function startLiveRefresh(intervalMs: number): () => void {
   }
 
   const timer = setInterval(() => {
-    void refreshOnce();
+    // getActiveAlerts()/getCachedStopCodes() pueden fallar (SQLite bloqueado):
+    // una promise rechazada sin catch tumbaría el proceso en Node >=15.
+    void refreshOnce().catch((error: unknown) => {
+      logger.error(
+        `[Refresh] Ciclo fallido: ${error instanceof Error ? error.message : String(error)}`
+      );
+    });
   }, intervalMs);
   timer.unref();
   return () => clearInterval(timer);
@@ -105,37 +112,17 @@ function onLaunched(): void {
   logger.info(`🔄 Refreshing every ${config.pollIntervalMs / 1000}s`);
 }
 
-/**
- * Telegram solo permite un getUpdates long-polling a la vez. Al reiniciar,
- * la conexión anterior puede tardar bastantes segundos en liberarse (409).
- * Reintentamos con backoff creciente en vez de morir al primer conflicto.
- */
-async function launchWithRetry(maxAttempts = 12): Promise<void> {
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      await bot.launch({}, onLaunched);
-      return;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      const isConflict =
-        message.includes('409') || message.includes('Conflict');
-      if (!isConflict || attempt === maxAttempts) throw error;
-      const delay = Math.min(2000 * 2 ** (attempt - 1), 30_000);
-      logger.warn(
-        `[Telegram] Polling conflict (attempt ${attempt}/${maxAttempts}); retrying in ${delay / 1000}s`
-      );
-      await new Promise((resolve) => setTimeout(resolve, delay));
-    }
+// Reintenta solo conflictos 409: la lógica vive en telegram-launch.ts y es
+// testeable sin importar este composition root.
+void launchWithRetry(() => bot.launch({}, onLaunched)).catch(
+  (error: unknown) => {
+    logger.error(
+      'Failed to start bot:',
+      error instanceof Error ? error.message : String(error)
+    );
+    process.exit(1);
   }
-}
-
-void launchWithRetry().catch((error: unknown) => {
-  logger.error(
-    'Failed to start bot:',
-    error instanceof Error ? error.message : String(error)
-  );
-  process.exit(1);
-});
+);
 
 function shutdown(signal: string): void {
   logger.info(`\n🛑 ${signal} — stopping bot`);

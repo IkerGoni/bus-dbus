@@ -52,7 +52,7 @@ describe('Dbus live data', () => {
     }
   });
 
-  it('builds a real catalog of popular stops', async () => {
+  it('carga la semilla real de Dbus usada por /estado', async () => {
     const stops = await fetchPopularStops();
     expect(stops.length).toBeGreaterThan(5);
     expect(stops.every((s) => /^\d+$/.test(s.cod))).toBe(true);
@@ -61,10 +61,29 @@ describe('Dbus live data', () => {
   });
 });
 
+/**
+ * Dbus caído NO es un skip: `fetchStopTimes` devuelve null y el test falla.
+ * `SIN_SERVICIO` con HTTP 200 es un estado operativo real: en ese caso se
+ * exige CERO llegadas (nunca inventadas), no silencio.
+ */
+async function liveTimes() {
+  const times = await fetchStopTimes(STOP, true);
+  expect(
+    times,
+    'Dbus sin respuesta: no silenciar el fallo de red'
+  ).not.toBeNull();
+  return times!;
+}
+
 describe('Arrival logic (live)', () => {
   it('returns normalized arrivals sorted by proximity', async () => {
-    const arrivals = await getNextArrivals(STOP);
-    if (!arrivals.length) return; // sin servicio en el momento del test
+    const times = await liveTimes();
+    const arrivals = await getNextArrivals(STOP, undefined, true, times);
+    if (times.estado === 'DATOS') {
+      expect(arrivals.length).toBeGreaterThan(0);
+    } else {
+      expect(arrivals).toEqual([]);
+    }
     for (const arrival of arrivals) {
       expect(arrival.lineId).toBeTruthy();
       expect(arrival.minutes).toBeGreaterThanOrEqual(0);
@@ -80,28 +99,48 @@ describe('Arrival logic (live)', () => {
   });
 
   it('filters arrivals by line (accepts L prefix)', async () => {
-    const arrivals = await getNextArrivals(STOP);
-    if (!arrivals.length) return;
+    const times = await liveTimes();
+    const arrivals = await getNextArrivals(STOP, undefined, true, times);
+    if (times.estado !== 'DATOS') {
+      expect(arrivals).toEqual([]);
+      return;
+    }
     const lineId = arrivals[0].lineId;
-    const filtered = await getNextArrivals(STOP, `L${lineId}`);
+    const filtered = await getNextArrivals(STOP, `L${lineId}`, true, times);
     expect(filtered.length).toBeGreaterThan(0);
     expect(filtered.every((a) => a.lineId === lineId)).toBe(true);
-    expect((await getNextArrival(STOP, lineId))?.lineId).toBe(lineId);
+    expect((await getNextArrival(STOP, lineId, times))?.lineId).toBe(lineId);
   });
 
   it('lists real lines serving the stop', async () => {
-    const lines = await getStopLines(STOP);
-    if (!lines.length) return;
-    expect(lines[0].lineId).toBeTruthy();
-    expect(lines[0].destination).toBeTruthy();
+    const times = await liveTimes();
+    const lines = await getStopLines(STOP, times);
+    if (times.estado === 'DATOS') {
+      expect(lines.length).toBeGreaterThan(0);
+      expect(lines[0].lineId).toBeTruthy();
+      expect(lines[0].destination).toBeTruthy();
+    } else {
+      expect(lines).toEqual([]);
+    }
   });
 
   it('formats arrivals for Telegram', async () => {
-    const arrivals = await getNextArrivals(STOP);
-    if (!arrivals.length) return;
-    expect(formatArrival(arrivals[0])).toContain('L');
-    expect(formatArrival(arrivals[0])).toMatch(/min|ahora/);
-    expect(formatArrivalsList('Urbieta 12', arrivals)).toContain('Urbieta');
+    const times = await liveTimes();
+    const arrivals = await getNextArrivals(STOP, undefined, true, times);
+    const text = formatArrivalsList(
+      'Urbieta 12',
+      arrivals,
+      times.estado,
+      STOP,
+      times.avisos
+    );
+    expect(text).toContain('Urbieta');
+    if (arrivals.length) {
+      expect(formatArrival(arrivals[0])).toContain('L');
+      expect(formatArrival(arrivals[0])).toMatch(/min|ahora/);
+    } else {
+      expect(text).toMatch(/Sin servicio|No hay llegadas|No se pudo consultar/);
+    }
   });
 });
 

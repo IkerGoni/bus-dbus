@@ -9,7 +9,9 @@ import type {
 
 /** Escapa los caracteres especiales del Markdown clásico de Telegram. */
 export function escapeMd(text: string): string {
-  return text.replace(/([_*`[])/g, '\\$1');
+  // Telegram Markdown clásico: hay que escapar también '\' y ']', si no un
+  // texto que termina en '\' deja el entity en negrita sin cerrar.
+  return text.replace(/([\\_*`[\]])/g, '\\$1');
 }
 
 function lineIdFromNombre(nombre: string): string {

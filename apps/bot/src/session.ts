@@ -10,9 +10,7 @@ export type Step =
   | 'idle'
   | 'searching'
   | 'waiting_stop_arrivals'
-  | 'waiting_stop_alert'
-  | 'select_line_alert'
-  | 'select_minutes_alert';
+  | 'waiting_stop_alert';
 
 export interface BotSession {
   step: Step;

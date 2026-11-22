@@ -10,19 +10,22 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { Catalog } from '@dbus/contracts';
-import { normalizeLine } from '@dbus/core';
+import { type Catalog, CatalogSchema } from '@dbus/contracts';
 import {
+  getAllStopsForLine as allStopsForLine,
   getCatalogMeta as catalogMeta,
+  getLinesForStop as coreLinesForStop,
   searchKey as coreSearchKey,
   searchLines as coreSearchLines,
   searchStops as coreSearchStops,
+  toPublicLineId as coreToPublicLineId,
   getItinerariesForLine as itinerariesForLine,
   getItineraryById as itineraryById,
   getLineByCode as lineByCode,
   getStopByCode as stopByCode,
   getStopsForItinerary as stopsForItinerary,
 } from '@dbus/core';
+import { z } from 'zod';
 
 export type {
   CatalogItinerary,
@@ -32,7 +35,69 @@ export type {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const catalogPath = path.resolve(__dirname, '../data/dbus-catalog.json');
-const data = JSON.parse(fs.readFileSync(catalogPath, 'utf8')) as Catalog;
+
+/**
+ * El contrato compartido y el campo `coverage` que añade el generador.
+ * `passthrough()` conserva metadata futura sin copiar el esquema al bot.
+ */
+const catalogFileSchema = CatalogSchema.passthrough().extend({
+  coverage: z
+    .object({
+      lineIdsScanned: z.number().int().nonnegative(),
+      lastLineIdWithData: z.number().int().nonnegative(),
+      emptyTail: z.number().int().nonnegative(),
+    })
+    .optional(),
+});
+
+/** Error de carga legible; nunca contiene datos del usuario. */
+export class CatalogLoadError extends Error {
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, options);
+    this.name = 'CatalogLoadError';
+  }
+}
+
+/** Lee y valida el índice: ausente/corrupto falla con motivo explícito. */
+function loadCatalog(): Catalog {
+  const file = process.env.DBUS_CATALOG_PATH || catalogPath;
+  let raw: string;
+  try {
+    raw = fs.readFileSync(file, 'utf8');
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    throw new CatalogLoadError(
+      code === 'ENOENT'
+        ? `Índice de paradas no encontrado (${file}).`
+        : `No se pudo leer el índice de paradas (${file}).`,
+      { cause: error }
+    );
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    throw new CatalogLoadError(
+      `Índice de paradas corrupto: JSON inválido (${file}).`,
+      { cause: error }
+    );
+  }
+
+  const result = catalogFileSchema.safeParse(parsed);
+  if (!result.success) {
+    const detail = result.error.issues
+      .slice(0, 3)
+      .map((issue) => issue.path.join('.') || 'raíz')
+      .join(', ');
+    throw new CatalogLoadError(
+      `Índice de paradas con formato inválido (${detail}).`
+    );
+  }
+  return result.data as Catalog;
+}
+
+const data = loadCatalog();
 
 export const searchKey = coreSearchKey;
 
@@ -65,18 +130,7 @@ export function getCatalogLinesForStop(cod: string): {
   internalLineId: string;
   destination: string;
 }[] {
-  const stop = getStopByCode(cod);
-  if (!stop) return [];
-  return stop.lines.flatMap((code) => {
-    const line = getLineByCode(code);
-    return [
-      {
-        lineId: line?.cod ?? normalizeLine(code),
-        internalLineId: line?.id ?? '',
-        destination: line?.destinations[0] ?? '',
-      },
-    ];
-  });
+  return coreLinesForStop(data, cod);
 }
 
 /** Acepta código público (`28`) o id interno (`32`). */
@@ -135,10 +189,7 @@ export function listAllLines() {
  * en el orden del catálogo. Un mismo destino no muestra toda la línea.
  */
 export function getAllStopsForLine(lineId: string) {
-  const codes = new Set(
-    getItinerariesForLine(lineId).flatMap((itinerario) => itinerario.stops)
-  );
-  return data.stops.filter((stop) => codes.has(stop.cod));
+  return allStopsForLine(data, lineId);
 }
 
 /**
@@ -151,16 +202,7 @@ export function getAllStopsForLine(lineId: string) {
  * contexto de una parada debe valer la que realmente pasa por ella.
  */
 export function toPublicLineId(lineId: string, stopId?: string): string {
-  const key = normalizeLine(lineId);
-  if (stopId) {
-    const atStop = getCatalogLinesForStop(stopId);
-    // El código público manda (regla 5): en paradas con 26 (id 28) y 28,
-    // escribir "28" es la línea 28, no el alias interno de la 26.
-    if (atStop.some((line) => line.lineId === key)) return key;
-    const byInternal = atStop.find((line) => line.internalLineId === key);
-    if (byInternal) return byInternal.lineId;
-  }
-  return getLineByCode(key)?.cod ?? key;
+  return coreToPublicLineId(data, lineId, stopId);
 }
 
 export interface Page<T> {

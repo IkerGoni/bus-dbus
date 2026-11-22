@@ -38,6 +38,7 @@ import {
   alertsKeyboard,
   answer,
   buildAlertsText,
+  buildSearchRows,
   createAndConfirmAlert,
   mainKeyboard,
   safeEdit,
@@ -90,15 +91,17 @@ export async function handleParada(ctx: Context): Promise<void> {
     return;
   }
   const requestedLine = args[2] ? normalizeLine(args[2]) : undefined;
+  // Una sola respuesta en vivo para validar y mostrar: sin doble petición.
+  const times = await fetchStopTimes(stopId);
   if (requestedLine) {
-    const error = await validateLineAtStop(stopId, requestedLine);
+    const error = await validateLineAtStop(stopId, requestedLine, times);
     if (error) {
       await ctx.reply(error, { parse_mode: 'Markdown' });
       return;
     }
   }
   // Misma vista que por callback: botones de refrescar, aviso y favorito.
-  await showArrivalsForStop(ctx, stopId, requestedLine);
+  await showArrivalsForStop(ctx, stopId, requestedLine, times);
 }
 
 export async function handleLineas(ctx: Context): Promise<void> {
@@ -151,23 +154,7 @@ export async function handleBuscar(ctx: Context): Promise<void> {
     });
     return;
   }
-  const rows: ReturnType<typeof Markup.button.callback>[][] = [];
-  for (const stop of stops) {
-    rows.push([
-      Markup.button.callback(
-        `🚏 ${stop.desc.slice(0, 28)} (${stop.cod})`,
-        `srch_s_${stop.cod}`
-      ),
-    ]);
-  }
-  for (const line of lines) {
-    rows.push([
-      Markup.button.callback(
-        `🚌 L${line.cod} · ${line.destinations[0]?.slice(0, 22) ?? ''}`,
-        `srch_l_${line.cod}`
-      ),
-    ]);
-  }
+  const rows = buildSearchRows(stops, lines, false);
   await ctx.reply(`🔎 Resultados para **${escapeMd(query)}**:`, {
     parse_mode: 'Markdown',
     ...Markup.inlineKeyboard(rows),
@@ -206,12 +193,13 @@ export async function handleAviso(ctx: Context): Promise<void> {
   }
   // Aceptar tanto el código público (28) como el id interno (32), pero no
   // crear avisos para líneas que no pasan por la parada.
-  const error = await validateLineAtStop(stopId, lineId);
+  const times = await fetchStopTimes(stopId);
+  const error = await validateLineAtStop(stopId, lineId, times);
   if (error) {
     await ctx.reply(error, { parse_mode: 'Markdown' });
     return;
   }
-  await createAndConfirmAlert(ctx, stopId, lineId, minutesAhead, false);
+  await createAndConfirmAlert(ctx, stopId, lineId, minutesAhead, false, times);
 }
 
 export async function handleLista(ctx: Context): Promise<void> {
@@ -309,7 +297,7 @@ export async function handleEstado(ctx: Context): Promise<void> {
   const alertsStats = getAlertStats();
   const msg = `🟢 **Estado del bot**
  📡 Fuente: ${escapeMd(getDataSource())}
- 🚏 Paradas en caché: ${stats.stops} · catálogo: ${stats.popularStops}
+ 🚏 Paradas en caché: ${stats.stops} · semilla Dbus: ${stats.popularStops}
  📚 Índice: ${catalog.lines} líneas · ${catalog.stops} paradas · ${ageDays} d${
    ageDays > 7 ? ' ⚠️ regenerar con `npm run build:catalog`' : ''
  }

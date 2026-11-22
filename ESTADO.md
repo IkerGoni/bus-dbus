@@ -1,6 +1,6 @@
 # Estado — bus-dbus
 
-Actualizado: 2026-11-22 10:19 · Última sesión: remate de A+B, verificación y reinicio en producción
+Actualizado: 2026-11-22 11:55 · Última sesión: remediación de auditoría (código listo, SIN desplegar)
 
 > **`AGENTS.md` es la fuente de verdad.** Este archivo es el estado de sesión;
 > si algo aquí contradice a `AGENTS.md`, manda `AGENTS.md`.
@@ -9,9 +9,43 @@ Actualizado: 2026-11-22 10:19 · Última sesión: remate de A+B, verificación y
 
 Bot de Telegram operativo con datos reales de Dbus. A (índice local de
 coordenadas) y B (`/ubicacion` sobre índice local) están hechos, verificados y
-desplegados. Ya no hay trabajo en curso en el lane bot.
+desplegados. Remediación de la auditoría terminada, verificada, commiteada y
+pusheada en `main`; **pendiente solo del reinicio (regla 9) para que exista en
+producción**.
 
-## Hecho en esta sesión
+## Remediación de auditoría (esta sesión, sin desplegar)
+
+Corregidos los 13 problemas reales del informe (R6 queda fuera: rotar el token
+requiere acción de Iker con BotFather). Resumen:
+
+- Avisos reales de Dbus conservados en `parseStopTimes` (`avisos` en
+  `DbusStopTimes`): `SIN_SERVICIO` vuelve a mostrar el motivo.
+- Una sola consulta en vivo por comando (`times` reutilizado en validación,
+  llegadas y creación de avisos); sin doble/triple fetch.
+- `.catch` en los dos timers (`index.ts`, `alerts.ts`) contra unhandled
+  rejections; dedup de favoritos con índices `UNIQUE` + migración v3;
+  lock de instancia con creación atómica `wx`.
+- Callbacks de avisos stateless (`aline_<parada>_<línea>`,
+  `minutes_<parada>_<línea>_<min>`); teclado de búsqueda único; `/estado` ya no
+  etiqueta la semilla de caché como "catálogo".
+- Catálogo validado con Zod al cargar (error tipado `CatalogLoadError`);
+  identidad de línea y funciones puras de catálogo unificadas en `@dbus/core`;
+  eliminado el helper Overpass muerto y los elementos falsos del índice local.
+- `escapeMd` escapa también `\` y `]`; `normalizeLine` acepta `B09` → `B9`.
+- Tests: 86 en el bot (antes 70) y 14 en core (antes 12). Nuevos: avisos
+  (7 días/reentrada/MAX_SEND_FAILURES), retry 409, migración BD, validación de
+  línea, `SIN_SERVICIO` sin invenciones, config, `escapeMd`, carga del catálogo.
+  Los tests de red ya no silencian un Dbus caído: distinguen outage de
+  `SIN_SERVICIO`.
+- Verificación: `pnpm --filter @dbus/bot verify` 86/86 · `pnpm verify` OK ·
+  `pnpm --filter @dbus/bot build` OK. Docs: `AGENTS.md` (el doc decía 62
+  tests, el recuento real era 70; ahora 86) y excepción de sesión documentada.
+
+**No hecho a propósito:** O1 (refresco background), O3 (micro-optimizaciones),
+O4 (extraer `actions.ts` de `render.ts`): desaconsejados en la auditoría.
+R6 (token en claro en `.env`, gitignored) sigue pendiente de rotación.
+
+## Hecho en la sesión anterior (A+B, despliegue incluido)
 
 - **Consolidación (ya existía al abrir la sesión).** `main = 84db974 =
   origin/main`, árbol limpio. El historial ya contenía A (`bc296b2` → merge
@@ -69,8 +103,8 @@ desplegados. Ya no hay trabajo en curso en el lane bot.
       equivalentes sí se validaron en local con datos reales (ver arriba).
 - [ ] Rotar el token de Telegram (aviso de seguridad de sesiones previas).
 - [ ] PWA Sprint 3: 30 errores TS y 233 de lint (kanban `dbus-app`, lane mobile).
-- [ ] Confirmar con Iker que el commit de docs `84db974` es el destino final
-      del lane de docs (ya no hay cambios sin commitear; no se descartó nada).
+- [x] Commit de docs `84db974` superado: `HEAD` actual es `fbcb70e` (añade
+      `docs/06-api-externa/**`, commit externo a esta sesión).
 
 ## Decisiones tomadas (no reabrir)
 
@@ -92,16 +126,22 @@ desplegados. Ya no hay trabajo en curso en el lane bot.
 
 ## Esperando a Iker
 
+- **Autorización para reiniciar** (regla 9): commit+push ya hechos; el bot vivo
+  (PID 64221) todavía ejecuta el `dist` anterior.
 - Rotación del token de Telegram (no bloquea nada).
 - Validación conversacional real en Telegram con el bot vivo (PID 64221).
-- Confirmar el destino del commit de docs `84db974`.
+- Nada sobre `84db974`: fue superado por `6fdf763` y por el commit externo
+  `fbcb70e` (`docs/06-api-externa/**`).
 
 ## Git
 
-`main 84db974 = origin/main` ✓ · rama local: solo `main` · worktrees: 1 (raíz) ·
-stash: vacío · árbol limpio. Sin refs de trabajo (`task/coords`,
-`consolidate/main`): se eliminaron tras los merges. No se hicieron pushes ni
-merges nuevos en esta sesión: todo ya estaba integrado y pusheado.
+`main = origin/main` ✓ (hash en `git log -1`: commit de remediación) · rama
+local: solo `main` · worktrees: 1 (raíz) · stash: vacío · **árbol limpio**:
+remediación de auditoría commiteada y pusheada (24 ficheros modificados + 5
+nuevos, incluye 2 docs). El commit externo `fbcb70e` añadió
+`docs/06-api-externa/**` y no solapó estos cambios. El bot en
+producción sigue ejecutando el `dist` anterior (PID 64221): estos cambios
+solo existirán en producción tras el reinicio de la regla 9.
 
 ## Siguiente sesión
 

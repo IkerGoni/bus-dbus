@@ -222,8 +222,10 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
       await bot.handleUpdate(messageUpdate('/start', 22, target) as never);
       await bot.handleUpdate(callbackUpdate('menu_alert', 23, target) as never);
       await bot.handleUpdate(messageUpdate('2', 24, target) as never);
-      await bot.handleUpdate(callbackUpdate('aline_28', 25, target) as never);
-      await bot.handleUpdate(callbackUpdate('minutes_5', 26, target) as never);
+      await bot.handleUpdate(callbackUpdate('aline_2_28', 25, target) as never);
+      await bot.handleUpdate(
+        callbackUpdate('minutes_2_28_5', 26, target) as never
+      );
       const first = textsSince(start);
       expect(first).toContain('Aviso creado');
       expect(first).toContain('Próxima llegada');
@@ -231,8 +233,10 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
       start = sent.length;
       await bot.handleUpdate(callbackUpdate('menu_alert', 27, target) as never);
       await bot.handleUpdate(messageUpdate('2', 28, target) as never);
-      await bot.handleUpdate(callbackUpdate('aline_28', 29, target) as never);
-      await bot.handleUpdate(callbackUpdate('minutes_5', 30, target) as never);
+      await bot.handleUpdate(callbackUpdate('aline_2_28', 29, target) as never);
+      await bot.handleUpdate(
+        callbackUpdate('minutes_2_28_5', 30, target) as never
+      );
       expect(textsSince(start)).toContain('Ya tienes un aviso activo');
       const answers = sent
         .slice(start)

@@ -1,11 +1,13 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   UNKNOWN_DESTINATION,
+  escapeMd,
   findMatchingArrival,
   formatArrivalsList,
+  getNextArrivals,
   matchesLine,
   normalizeLine,
   toPublicLineId,
@@ -22,16 +24,11 @@ import {
   searchLines,
   searchStops,
 } from '../src/catalog.js';
-import { config } from '../src/config.js';
+import { config, configSchema } from '../src/config.js';
 import { evictOldestEntries } from '../src/dbus-client.js';
 import { getSessionCount, pruneSessions } from '../src/handlers.js';
 import { logger } from '../src/logger.js';
-import {
-  buildOverpassQuery,
-  haversineMeters,
-  parseStopRefs,
-  rankNearbyStops,
-} from '../src/nearby.js';
+import { haversineMeters, rankNearbyStops } from '../src/nearby.js';
 import {
   acquireInstanceLock,
   releaseInstanceLock,
@@ -229,24 +226,8 @@ describe('stop cache eviction', () => {
   });
 });
 
-describe('paradas cercanas (OSM + catálogo)', () => {
-  it('construye una consulta Overpass acotada a la posición', () => {
-    const query = buildOverpassQuery(43.318012345, -1.985, 500);
-    expect(query).toContain('around:500,43.318012,-1.985000');
-    expect(query).toContain('["ref"]');
-    expect(query).toContain('out center;');
-  });
-
-  it('extrae refs de paradas con varios operadores', () => {
-    expect(parseStopRefs('39 (dbus);4779 (Lurraldebus)')).toEqual([
-      '39',
-      '4779',
-    ]);
-    expect(parseStopRefs('034')).toEqual(['34']);
-    expect(parseStopRefs(undefined)).toEqual([]);
-  });
-
-  it('calcula distancias y cruza solo refs presentes en el catálogo', () => {
+describe('paradas cercanas (índice local + catálogo)', () => {
+  it('calcula distancias y cruza solo códigos presentes en el catálogo', () => {
     expect(haversineMeters(43.318, -1.985, 43.318, -1.985)).toBe(0);
     // ~111 m por milésima de grado de latitud.
     expect(haversineMeters(43.318, -1.985, 43.319, -1.985)).toBeGreaterThan(
@@ -256,27 +237,9 @@ describe('paradas cercanas (OSM + catálogo)', () => {
 
     const ranked = rankNearbyStops(
       [
-        {
-          type: 'node',
-          id: 1,
-          lat: 43.318,
-          lon: -1.985,
-          tags: { ref: '39 (dbus);4779 (TBH)' },
-        },
-        {
-          type: 'node',
-          id: 2,
-          lat: 43.318,
-          lon: -1.985,
-          tags: { ref: '99999' },
-        },
-        {
-          type: 'node',
-          id: 3,
-          lat: 43.32,
-          lon: -1.985,
-          tags: { ref: '39 (dbus)' },
-        },
+        { cod: '39', lat: 43.318, lon: -1.985 },
+        { cod: '99999', lat: 43.318, lon: -1.985 },
+        { cod: '39', lat: 43.32, lon: -1.985 },
       ],
       43.318,
       -1.985,
@@ -369,5 +332,107 @@ describe('single-instance lock', () => {
     } finally {
       fs.rmSync(file, { force: true });
     }
+  });
+});
+
+describe('escapeMd (convención de AGENTS.md)', () => {
+  it('escapa todos los caracteres especiales del Markdown clásico', () => {
+    expect(escapeMd('a_b *c* `d` [e](x) \\ ]')).toBe(
+      'a\\_b \\*c\\* \\`d\\` \\[e\\](x) \\\\ \\]'
+    );
+  });
+});
+
+describe('identidad alfanumérica de línea (regla 5)', () => {
+  it('acepta B4/B9 en normalizeLine y en matchesLine', () => {
+    expect(normalizeLine(' b09 ')).toBe('B9');
+    expect(normalizeLine('Lb4')).toBe('B4');
+    const b9 = arrival({ lineId: 'B9', internalLineId: '77' });
+    expect(matchesLine(b9, 'B9')).toBe(true);
+    expect(matchesLine(b9, 'b09')).toBe(true);
+    expect(matchesLine(b9, 'B4')).toBe(false);
+  });
+});
+
+describe('configSchema (validación del entorno)', () => {
+  const base = { botToken: 'test-token' };
+
+  it('acepta la configuración mínima y aplica defaults', () => {
+    const parsed = configSchema.parse(base);
+    expect(parsed.language).toBe('es');
+    expect(parsed.cacheTtlMs).toBe(30_000);
+    expect(parsed.nearbyEnabled).toBe(true);
+  });
+
+  it('rechaza token vacío, URL inválida, idioma, TTL y radio fuera de rango', () => {
+    expect(configSchema.safeParse({}).success).toBe(false);
+    expect(configSchema.safeParse({ ...base, botToken: '' }).success).toBe(
+      false
+    );
+    expect(
+      configSchema.safeParse({ ...base, dbusBaseUrl: 'no-es-url' }).success
+    ).toBe(false);
+    expect(configSchema.safeParse({ ...base, language: 'de' }).success).toBe(
+      false
+    );
+    expect(configSchema.safeParse({ ...base, cacheTtlMs: 0 }).success).toBe(
+      false
+    );
+    expect(configSchema.safeParse({ ...base, nearbyRadiusM: 49 }).success).toBe(
+      false
+    );
+    expect(
+      configSchema.safeParse({ ...base, nearbyRadiusM: 2001 }).success
+    ).toBe(false);
+  });
+});
+
+describe('sin llegadas inventadas', () => {
+  it('SIN_SERVICIO con aviso real no produce llegadas y muestra el aviso', async () => {
+    const times = {
+      estado: 'SIN_SERVICIO',
+      parada: null,
+      tiempos: [],
+      creacion: null,
+      avisos: ['sin servicio hasta las 14:00'],
+    };
+    const arrivals = await getNextArrivals('340', undefined, false, times);
+    expect(arrivals).toEqual([]);
+
+    const text = formatArrivalsList(
+      'Pío Baroja 10',
+      arrivals,
+      times.estado,
+      '340',
+      times.avisos
+    );
+    expect(text).toContain('Sin servicio en este momento');
+    expect(text).toContain('sin servicio hasta las 14:00');
+    expect(text).not.toMatch(/\d+ min/);
+  });
+});
+
+describe('carga del índice de catálogo', () => {
+  const tmp = path.join(os.tmpdir(), `dbus-catalog-test-${process.pid}.json`);
+
+  afterEach(() => {
+    process.env.DBUS_CATALOG_PATH = '';
+    fs.rmSync(tmp, { force: true });
+    vi.resetModules();
+  });
+
+  it('falla con error claro si falta, está corrupto o no cumple el contrato', async () => {
+    vi.resetModules();
+    process.env.DBUS_CATALOG_PATH = `${tmp}.missing`;
+    await expect(import('../src/catalog.js')).rejects.toThrow(/no encontrado/);
+
+    vi.resetModules();
+    fs.writeFileSync(tmp, '{esto no es json');
+    process.env.DBUS_CATALOG_PATH = tmp;
+    await expect(import('../src/catalog.js')).rejects.toThrow(/corrupto/);
+
+    vi.resetModules();
+    fs.writeFileSync(tmp, JSON.stringify({ generatedAt: '2026-11-22' }));
+    await expect(import('../src/catalog.js')).rejects.toThrow(/inválido/);
   });
 });

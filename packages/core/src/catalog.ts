@@ -96,6 +96,58 @@ export function getLineByCode(
   );
 }
 
+/** Líneas del índice que pasan por una parada (descubrimiento, sin horarios). */
+export function getLinesForStop(
+  catalog: Catalog,
+  cod: string
+): { lineId: string; internalLineId: string; destination: string }[] {
+  const stop = getStopByCode(catalog, cod);
+  if (!stop) return [];
+  return stop.lines.flatMap((code) => {
+    const line = getLineByCode(catalog, code);
+    return [
+      {
+        lineId: line?.cod ?? normalizeLine(code),
+        internalLineId: line?.id ?? '',
+        destination: line?.destinations[0] ?? '',
+      },
+    ];
+  });
+}
+
+/**
+ * Código público de una línea. Con datos en vivo la llegada ya trae el código
+ * público; sin servicio el índice resuelve el alias (id interno 32 → 28).
+ * En contexto de parada manda la línea pública que realmente pasa por ella.
+ */
+export function toPublicLineId(
+  catalog: Catalog,
+  lineId: string,
+  stopId?: string
+): string {
+  const key = normalizeLine(lineId);
+  if (stopId) {
+    const atStop = getLinesForStop(catalog, stopId);
+    if (atStop.some((line) => line.lineId === key)) return key;
+    const byInternal = atStop.find((line) => line.internalLineId === key);
+    if (byInternal) return byInternal.lineId;
+  }
+  return getLineByCode(catalog, key)?.cod ?? key;
+}
+
+/** Todas las paradas de una línea (unión de itinerarios, sin duplicados). */
+export function getAllStopsForLine(
+  catalog: Catalog,
+  lineId: string
+): CatalogStop[] {
+  const codes = new Set(
+    getItinerariesForLine(catalog, lineId).flatMap(
+      (itinerario) => itinerario.stops
+    )
+  );
+  return catalog.stops.filter((stop) => codes.has(stop.cod));
+}
+
 export function getItinerariesForLine(
   catalog: Catalog,
   lineId: string

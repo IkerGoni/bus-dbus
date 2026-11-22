@@ -92,6 +92,26 @@ function migrate(): void {
     db.prepare('INSERT INTO schema_version (version) VALUES (2)').run();
     version = 2;
   }
+
+  if (version < 3) {
+    // El dedup de favoritos era find + insert sin transacción: una BD ya
+    // poblada puede tener duplicados. Se conserva el registro más antiguo y
+    // se añaden índices UNIQUE para que la constraint cierre la carrera.
+    db.exec(`
+      DELETE FROM user_favorites WHERE id NOT IN (
+        SELECT MIN(id) FROM user_favorites GROUP BY chat_id, stop_id, line_id
+      );
+      DELETE FROM user_favorite_lines WHERE id NOT IN (
+        SELECT MIN(id) FROM user_favorite_lines GROUP BY chat_id, line_id
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_favorites_dedup
+        ON user_favorites(chat_id, stop_id, line_id);
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_fav_lines_dedup
+        ON user_favorite_lines(chat_id, line_id);
+    `);
+    db.prepare('INSERT INTO schema_version (version) VALUES (3)').run();
+    version = 3;
+  }
 }
 migrate();
 
@@ -296,15 +316,17 @@ function rowToFavorite(row: FavoriteRow): UserFavorite {
   };
 }
 
+const insertFavoriteStmt = db.prepare(`
+  INSERT INTO user_favorites (chat_id, stop_id, stop_name, line_id, line_name, destination, created_at)
+  VALUES (?, ?, ?, ?, ?, ?, ?)
+  ON CONFLICT(chat_id, stop_id, line_id) DO NOTHING
+`);
+
 export function addFavorite(
   fav: Omit<UserFavorite, 'id' | 'createdAt'>
 ): UserFavorite {
   const now = Date.now();
-  const stmt = db.prepare(`
-    INSERT INTO user_favorites (chat_id, stop_id, stop_name, line_id, line_name, destination, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
-  `);
-  const result = stmt.run(
+  const result = insertFavoriteStmt.run(
     fav.chatId,
     fav.stopId,
     fav.stopName,
@@ -313,6 +335,12 @@ export function addFavorite(
     fav.destination,
     now
   );
+  if (result.changes === 0) {
+    // Otro callback ganó la carrera: devolver el registro ya guardado.
+    const existing = findFavorite(fav.chatId, fav.stopId, fav.lineId);
+    if (existing) return existing;
+    throw new Error('No se pudo guardar el favorito');
+  }
   return { ...fav, id: result.lastInsertRowid as number, createdAt: now };
 }
 
@@ -376,21 +404,28 @@ function rowToFavoriteLine(row: FavoriteLineRow): FavoriteLine {
   };
 }
 
+const insertFavoriteLineStmt = db.prepare(`
+  INSERT INTO user_favorite_lines (chat_id, line_id, line_name, destination, created_at)
+  VALUES (?, ?, ?, ?, ?)
+  ON CONFLICT(chat_id, line_id) DO NOTHING
+`);
+
 export function addFavoriteLine(
   fav: Omit<FavoriteLine, 'id' | 'createdAt'>
 ): FavoriteLine {
   const now = Date.now();
-  const stmt = db.prepare(`
-    INSERT INTO user_favorite_lines (chat_id, line_id, line_name, destination, created_at)
-    VALUES (?, ?, ?, ?, ?)
-  `);
-  const result = stmt.run(
+  const result = insertFavoriteLineStmt.run(
     fav.chatId,
     fav.lineId,
     fav.lineName,
     fav.destination,
     now
   );
+  if (result.changes === 0) {
+    const existing = findFavoriteLine(fav.chatId, fav.lineId);
+    if (existing) return existing;
+    throw new Error('No se pudo guardar la línea favorita');
+  }
   return { ...fav, id: result.lastInsertRowid as number, createdAt: now };
 }
 

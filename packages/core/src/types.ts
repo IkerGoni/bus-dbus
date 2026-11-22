@@ -49,6 +49,8 @@ export interface DbusStopTimes {
   tiempos: DbusTiempo[];
   /** Marca de tiempo del response ("DD/MM/YYYY HH:MM:SS"). */
   creacion: string | null;
+  /** Avisos de servicio reales de Dbus (p. ej. motivo de SIN_SERVICIO). */
+  avisos?: string[] | null;
 }
 
 export interface CacheEntry<T> {
