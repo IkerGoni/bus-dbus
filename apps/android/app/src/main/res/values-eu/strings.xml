@@ -12,12 +12,91 @@
     <string name="home_cta_nearby">Ikusi inguruko geltokiak</string>
     <string name="home_cta_lines">Arakatu lineak</string>
 
-    <string name="stops_empty_title">Bilatu zure geltokia</string>
-    <string name="stops_empty_body">Hemen geltokiak kodearen edo kalearen arabera bilatu eta hurbilenak ikusi ahal izango dituzu.</string>
-
-    <string name="lines_empty_title">Dbus-en lineak</string>
-    <string name="lines_empty_body">Hemen linea guztiak eta haien ibilbideak ikusiko dituzu.</string>
-
     <string name="alerts_empty_title">Ez duzu abisurik</string>
     <string name="alerts_empty_body">Sortu abisu bat geltoki batetik eta zure autobusa iritsi baino minutu batzuk lehenago abisatuko dizugu.</string>
+
+    <!-- Komunak -->
+    <string name="back">Itzuli</string>
+    <string name="retry">Saiatu berriro</string>
+    <string name="refresh">Eguneratu</string>
+    <string name="loading">Kargatzen</string>
+    <string name="search_clear">Ezabatu bilaketa</string>
+    <string name="filter_all">Guztiak</string>
+    <string name="catalog_error_title">Ezin izan da geltokien katalogoa irakurri</string>
+    <string name="catalog_error_body">Katalogoa aplikazioaren barruan dator. Instalatu edo eguneratu berriro.</string>
+    <string name="osm_attribution">Geltokien koordenatuak: %1$s</string>
+    <string name="distance_m">%1$d m</string>
+    <string name="distance_km">%1$.1f km</string>
+    <string name="minutes_short">%1$d min</string>
+    <string name="minutes_now">Orain</string>
+    <string name="source_live">Zuzenean</string>
+    <string name="source_scheduled">Ordutegia</string>
+    <string name="destination_unknown">Helmuga adierazi gabe</string>
+    <string name="a11y_line">%1$s linea</string>
+    <string name="a11y_favorite_stop">%1$s geltokia gogokoetan</string>
+    <string name="a11y_favorite_stop_line">%1$s linea %2$s geltokian gogokoetan</string>
+    <string name="a11y_favorite_line">%1$s linea gogokoetan</string>
+
+    <!-- A02 · Geltokiak -->
+    <string name="stops_title">Geltokiak</string>
+    <string name="stops_search_hint">Kodea edo kalea (adib. 340, Boulevard)</string>
+    <string name="stops_refresh_location">Eguneratu kokapena</string>
+    <string name="stops_tab_nearby">Hurbilekoak</string>
+    <string name="stops_tab_favorites">Gogokoak</string>
+    <string name="stops_tab_recents">Azkenak</string>
+    <string name="stops_section_nearby">Zure inguruan</string>
+    <string name="stops_section_results">Emaitzak</string>
+    <string name="stops_by_distance">Distantziaren arabera</string>
+    <string name="stops_distance_walk">%1$s · %2$d min</string>
+    <string name="stops_walk_estimate_note">Distantzia lerro zuzenean. Oinezko minutuak 80 m/min-ko estimazioa dira.</string>
+    <string name="stops_location_title">Ikusi geltoki hurbilenak</string>
+    <string name="stops_location_body">Zure kokapena mugikorrean bakarrik erabiltzen dugu geltokiak distantziaren arabera ordenatzeko. Ez da gordetzen ez bidaltzen.</string>
+    <string name="stops_location_allow">Baimendu kokapena</string>
+    <string name="stops_location_unavailable">Ezin izan da zure kokapena lortu. Egiaztatu aktibatuta dagoela.</string>
+    <string name="stops_no_results_title">Ez dago «%1$s» bilaketarekin bat datorren geltokirik</string>
+    <string name="stops_no_results_body">Saiatu markesinaren kodearekin edo kalearen izenaren zati batekin.</string>
+    <string name="stops_favorites_empty_title">Oraindik ez duzu geltoki gogokorik</string>
+    <string name="stops_favorites_empty_body">Ukitu geltoki baten izarra beti eskura izateko.</string>
+    <string name="stops_recents_empty_title">Ez duzu geltokirik ireki</string>
+    <string name="stops_recents_empty_body">Kontsultatzen dituzun azken 10 geltokiak hemen agertuko dira.</string>
+
+    <!-- A05 · Geltokiaren xehetasuna -->
+    <string name="stop_title_fallback">%1$s geltokia</string>
+    <string name="stop_directions">Nola iritsi</string>
+    <string name="stop_next_arrivals">Hurrengo iritsierak</string>
+    <string name="stop_line_star">Gorde %1$s linea geltoki honetan</string>
+    <string name="stop_line_starred">%1$s linea geltoki honetan gordeta</string>
+    <string name="stop_notice">Dbus-en oharra: %1$s</string>
+    <string name="stop_empty_title">Ez dago iritsiera hurbilik</string>
+    <string name="stop_line_empty">Ez dago %1$s linearen iritsiera hurbilik</string>
+    <string name="stop_no_service_title">Zerbitzurik ez une honetan</string>
+    <string name="stop_no_service_body">Dbus-ek adierazten du orain ez dela autobusik pasatzen geltoki honetatik.</string>
+    <string name="stop_stale">Ezin izan da eguneratu. %1$s-(e)ko datuak.</string>
+    <string name="stop_error_title">Errorea Dbus kontsultatzean</string>
+    <string name="stop_error_body">Egiaztatu zure konexioa eta saiatu berriro.</string>
+
+    <!-- A03 · Lineak eta A03b · Ibilbidea -->
+    <string name="lines_title">Lineak</string>
+    <plurals name="lines_count">
+        <item quantity="one">Linea %1$d</item>
+        <item quantity="other">%1$d linea</item>
+    </plurals>
+    <string name="lines_search_hint">Zenbakia edo helmuga (adib. 28, Ospitaleak)</string>
+    <string name="lines_filter_favorites">Gogokoak ★</string>
+    <string name="lines_filter_night">Gauekoak</string>
+    <string name="lines_no_results_title">Ez dago «%1$s» bilaketarekin bat datorren linearik</string>
+    <string name="lines_no_results_body">Bilatu linea-zenbakiaren edo helmugaren arabera.</string>
+    <string name="lines_favorites_empty_title">Oraindik ez duzu linea gogokorik</string>
+    <string name="lines_favorites_empty_body">Ukitu linea baten izarra gordetzeko.</string>
+    <string name="lines_show_all">Ikusi linea guztiak</string>
+    <string name="line_title">%1$s linea</string>
+    <string name="line_towards">%1$s aldera</string>
+    <plurals name="stops_count">
+        <item quantity="one">Geltoki %1$d</item>
+        <item quantity="other">%1$d geltoki</item>
+    </plurals>
+    <string name="line_not_found_title">%1$s linea ez dago katalogoan</string>
+    <string name="line_not_found_body">Itzuli lineen zerrendara eta aukeratu beste bat.</string>
+    <string name="line_no_itineraries_title">Linea honek ez du ibilbiderik katalogoan</string>
+    <string name="line_no_itineraries_body">Aplikazioaren katalogoak ez ditu bere geltokiak.</string>
 </resources>

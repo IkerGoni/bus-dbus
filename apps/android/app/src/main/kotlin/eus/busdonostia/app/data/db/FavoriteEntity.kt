@@ -8,6 +8,7 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import eus.busdonostia.app.domain.Favorite
 import eus.busdonostia.app.domain.FavoriteType
+import eus.busdonostia.app.domain.favoriteId
 import kotlinx.coroutines.flow.Flow
 
 /** Favorito persistido. `id` = `favoriteId(type, stopId, lineId)` (dedup determinista). */
@@ -38,4 +39,16 @@ interface FavoriteDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM favorites WHERE id = :id)")
     suspend fun exists(id: String): Boolean
+}
+
+/** Añade el favorito o lo quita si ya estaba (dedup por `favoriteId`). Devuelve si queda guardado. */
+suspend fun FavoriteDao.toggle(type: FavoriteType, stopId: String?, lineId: String?, nowMs: Long): Boolean {
+    val id = favoriteId(type, stopId, lineId)
+    return if (exists(id)) {
+        delete(id)
+        false
+    } else {
+        insert(Favorite(type, stopId, lineId, nowMs).toEntity())
+        true
+    }
 }
