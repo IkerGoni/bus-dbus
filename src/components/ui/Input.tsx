@@ -1,7 +1,7 @@
 import { InputHTMLAttributes, forwardRef } from 'react'
 import { LucideIcon } from 'lucide-react'
 
-interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'leftIcon' | 'rightIcon' | 'fullWidth'> {
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string
   error?: string
   helperText?: string
@@ -16,18 +16,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       label, 
       error, 
       helperText, 
+      leftIcon, 
+      rightIcon, 
+      fullWidth, 
       className = '', 
       id, 
       ...restProps 
     } = props
-    
-    // Now destructure custom props from restProps
-    const { 
-      leftIcon, 
-      rightIcon, 
-      fullWidth, 
-      ...cleanRestProps 
-    } = restProps
     
     const inputId = id || label?.toLowerCase().replace(/\s+/g, '-')
     
@@ -55,7 +50,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               ${className}`}
             aria-invalid={error ? 'true' : 'false'}
             aria-describedby={error ? `${inputId}-error` : helperText ? `${inputId}-helper` : undefined}
-            {...cleanRestProps}
+            {...restProps}
           />
           {rightIcon && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none">

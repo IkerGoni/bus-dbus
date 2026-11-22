@@ -1,0 +1,22 @@
+{
+  "name": "dbus-gtfs-fetcher",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "install-browsers": "playwright install chromium"
+  },
+  "dependencies": {
+    "fastify": "^4.28.0",
+    "playwright": "^1.45.0",
+    "protobufjs": "^7.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}
