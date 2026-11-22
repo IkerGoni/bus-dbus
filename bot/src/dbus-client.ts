@@ -67,17 +67,8 @@ let popularCache: CacheEntry<DbusParada[]> | null = null;
 
 const POPULAR_TTL_MS = 12 * 60 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 10_000;
+const RETRY_DELAY_MS = 300;
 const SEED_ITINERARIES = ['1280', '1281', '450'];
-
-/** Fallback solo si la API no responde al construir el catálogo. */
-const FALLBACK_STOPS: DbusParada[] = [
-  { id: '64', cod: '1', desc: 'Boulevard 9' },
-  { id: '140', cod: '2', desc: 'Urbieta 12' },
-  { id: '142', cod: '3', desc: 'Urbieta 58' },
-  { id: '144', cod: '4', desc: 'Antso Jakituna / Sancho Sabio 12' },
-  { id: '146', cod: '5', desc: 'Antso Jakituna / Sancho Sabio 28' },
-  { id: '148', cod: '6', desc: 'Madrid 14' },
-];
 
 // --- normalizadores tolerantes a que la API devuelva null en cualquier campo ---
 
@@ -168,22 +159,26 @@ function normalizeStopTimes(value: unknown): DbusStopTimes | null {
 
 async function getJson(path: string): Promise<unknown | null> {
   const url = `${config.dbusBaseUrl}${path}`;
-  try {
-    const response = await fetch(url, {
-      headers: { Accept: 'application/json' },
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    });
-    if (!response.ok) {
-      console.error(`[Dbus] HTTP ${response.status} for ${path}`);
-      return null;
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const response = await fetch(url, {
+        headers: { Accept: 'application/json' },
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      return (await response.json()) as unknown;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (attempt === 2) {
+        console.error(`[Dbus] Request failed (${path}): ${message}`);
+        return null;
+      }
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
     }
-    return (await response.json()) as unknown;
-  } catch (error) {
-    console.error(
-      `[Dbus] Request failed (${path}): ${error instanceof Error ? error.message : String(error)}`
-    );
-    return null;
   }
+  return null;
 }
 
 /**
@@ -246,9 +241,10 @@ export async function fetchPopularStops(): Promise<DbusParada[]> {
     }
   }
 
-  const stops = [...collected.values()].slice(0, 24);
-  const data = stops.length ? stops : FALLBACK_STOPS;
-  popularCache = { data, ts: Date.now() };
+  const data = [...collected.values()].slice(0, 24);
+  // Si la API falla, devolver catálogo vacío: mejor decirlo que mostrar
+  // paradas inventadas. El error se hace visible en los handlers.
+  popularCache = { data, ts: data.length ? Date.now() : 0 };
   return data;
 }
 
@@ -262,6 +258,11 @@ export function getStopName(code: string): string {
 
 export function getCachedStopCodes(): string[] {
   return [...stopCache.keys()];
+}
+
+/** Invalida solo una parada (para refrescos sin tirar todo el catálogo). */
+export function invalidateStop(code: string): void {
+  stopCache.delete(code.trim());
 }
 
 export function clearCache(): void {

@@ -8,6 +8,16 @@ import {
   getDataSource,
 } from './dbus-client.js';
 import { setBotReference, setupBot } from './handlers.js';
+import { acquireInstanceLock, releaseInstanceLock } from './single-instance.js';
+
+if (!acquireInstanceLock()) {
+  console.error(
+    '❌ Ya hay otra instancia del bot en ejecución. ' +
+      'Detenla antes de arrancar otra (Telegram solo permite un getUpdates).'
+  );
+  process.exit(1);
+}
+process.once('exit', () => releaseInstanceLock());
 
 const bot = new Telegraf(config.botToken);
 
@@ -44,10 +54,10 @@ function onLaunched(): void {
 
 /**
  * Telegram solo permite un getUpdates long-polling a la vez. Al reiniciar,
- * la conexión anterior puede tardar unos segundos en liberarse (409).
- * Reintentamos con backoff en vez de morir.
+ * la conexión anterior puede tardar bastantes segundos en liberarse (409).
+ * Reintentamos con backoff creciente en vez de morir al primer conflicto.
  */
-async function launchWithRetry(maxAttempts = 6): Promise<void> {
+async function launchWithRetry(maxAttempts = 12): Promise<void> {
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       await bot.launch({}, onLaunched);
@@ -57,7 +67,7 @@ async function launchWithRetry(maxAttempts = 6): Promise<void> {
       const isConflict =
         message.includes('409') || message.includes('Conflict');
       if (!isConflict || attempt === maxAttempts) throw error;
-      const delay = Math.min(2000 * 2 ** (attempt - 1), 15_000);
+      const delay = Math.min(2000 * 2 ** (attempt - 1), 30_000);
       console.warn(
         `[Telegram] Polling conflict (attempt ${attempt}/${maxAttempts}); retrying in ${delay / 1000}s`
       );

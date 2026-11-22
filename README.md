@@ -9,7 +9,7 @@ Aplicación PWA móvil para notificaciones push de llegada de autobús Dbus (San
 | **Planning (Sprints 0-2)** | ✅ Completo | 3 docs en `04-planning/`, 12 wireframes en `02-wireframes/`, 8 ADRs en `03-architecture/adrs/` |
 | **PWA Shell (Sprint 3)** | 🔧 Bloqueado | `npm run typecheck`: 30 errores TS · `npm run lint`: 233 errores (preexistentes, en `src/`) |
 | **Bot: datos reales** | ✅ Activo | API JSON de Dbus (`tiemposParada`), sin mocks en producción |
-| **Tests del bot** | ✅ 13/13 pasan | `npm run test` (8 integración + 5 E2E de handlers) |
+| **Tests del bot** | ✅ 27/27 pasan | `npm run test` (10 unit + 10 integración + 7 E2E de handlers) |
 | **TypeScript del bot** | ✅ 0 errores | `npx tsc --noEmit` en `bot/` |
 | **Lint del bot** | ✅ 0 errores | `npx biome check bot/src/` |
 | **Kanban** | `t_dbdce90c` (Sprint 3) en `ready` | `state/kanban/kanban.db` |
@@ -70,7 +70,7 @@ npm run build         # Build de producción (tsc + vite build) — ❌ bloquead
 npm run lint          # Biome check
 npm run lint:fix      # Biome autocorregible
 npm run typecheck     # tsc --noEmit — ❌ bloqueado por errores TS
-npm run test          # Vitest (tests del bot: 15/15 pasan)
+npm run test          # Vitest (tests del bot: 27/27 pasan)
 
 # Bot de Telegram (carpeta bot/)
 cd bot && npm run dev   # tsx watch
@@ -103,6 +103,14 @@ Comandos del bot: `/start`, `/parada <codigo> [linea]`, `/lineas <codigo>`,
 `/aviso <parada> <linea> <minutos>`, `/lista`, `/borrar <id>`, `/fav`,
 `/populares`, `/actualizar`, `/help`. El código de parada es el número visible
 en la marquesina (p. ej. `1` = Boulevard 9).
+
+El bot acepta tanto el código público de línea (`28`, `L28`) como el id interno
+de Dbus (`32` = línea pública `28`), pero siempre guarda y muestra el código
+público. Avisos y favoritos se deduplican por `(parada, línea)` y los avisos
+caducan a los 7 días. `/lista` incluye botones para borrar cada aviso;
+`/actualizar` recarga el catálogo completo y `stop_refresh` solo invalida la
+parada consultada. El arranque tiene lock de instancia única y reintenta los
+conflictos `409` de Telegram con backoff (12 intentos, hasta 30 s).
 
 ## Roadmap (Milestones)
 

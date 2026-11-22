@@ -6,8 +6,29 @@ export function escapeMd(text: string): string {
   return text.replace(/([_*`[])/g, '\\$1');
 }
 
-function normalizeLine(lineId: string): string {
-  return lineId.trim().toUpperCase().replace(/^L/, '');
+/**
+ * Normaliza un identificador de línea introducido por el usuario.
+ * Acepta `28`, `L28` y `028`.
+ */
+export function normalizeLine(lineId: string): string {
+  return lineId
+    .trim()
+    .toUpperCase()
+    .replace(/^L/, '')
+    .replace(/^0+(?=\d)/, '');
+}
+
+/** Dbus usa un id interno (32) distinto del código público (28). */
+export function matchesLine(
+  arrival: Pick<NextArrivalResult, 'lineId' | 'internalLineId'>,
+  lineId: string
+): boolean {
+  const wanted = normalizeLine(lineId);
+  return Boolean(
+    wanted &&
+      (normalizeLine(arrival.lineId) === wanted ||
+        normalizeLine(arrival.internalLineId) === wanted)
+  );
 }
 
 function toArrival(
@@ -23,6 +44,7 @@ function toArrival(
     arrivalTime: Date.now() + minutes * 60_000,
     minutes,
     lineId,
+    internalLineId: linea.id,
     destination:
       tiempo.itinerario.destino ||
       tiempo.itinerario.nombre ||
@@ -57,7 +79,7 @@ export async function getNextArrivals(
 
   return times.tiempos
     .map((tiempo) => toArrival(tiempo, stopId, stopName))
-    .filter((arrival) => !wanted || arrival.lineId === wanted)
+    .filter((arrival) => !wanted || matchesLine(arrival, wanted))
     .sort((a, b) => a.arrivalTime - b.arrivalTime);
 }
 
@@ -71,6 +93,7 @@ export async function getNextArrival(
 
 export interface StopLine {
   lineId: string;
+  internalLineId: string;
   destination: string;
 }
 
@@ -88,6 +111,7 @@ export async function getStopLines(stopId: string): Promise<StopLine[]> {
     if (!lines.has(rawId)) {
       lines.set(rawId, {
         lineId: rawId,
+        internalLineId: tiempo.itinerario.linea.id,
         destination:
           tiempo.itinerario.destino ||
           tiempo.itinerario.nombre ||
@@ -97,6 +121,62 @@ export async function getStopLines(stopId: string): Promise<StopLine[]> {
   }
   return [...lines.values()].sort((a, b) =>
     a.lineId.localeCompare(b.lineId, 'es', { numeric: true })
+  );
+}
+
+export interface AlertMatchOptions {
+  /** Código público o id interno de Dbus. */
+  lineId: string;
+  /** Si se indicó al crear el aviso, evita avisar de la dirección contraria. */
+  destination?: string;
+  minutesAhead: number;
+}
+
+/** Marcador usado cuando no había datos de destino al crear el aviso. */
+export const UNKNOWN_DESTINATION = 'Servicio programado';
+
+function normalizeDestination(value: string): string {
+  return value.trim().toLocaleLowerCase('es').replace(/\s+/g, ' ');
+}
+
+/** Comparación tolerante: Dbus varía el texto del destino entre responses. */
+function destinationsMatch(actual: string, expected: string): boolean {
+  const a = normalizeDestination(actual);
+  const b = normalizeDestination(expected);
+  return Boolean(a && b && (a === b || a.includes(b) || b.includes(a)));
+}
+
+/**
+ * Elige la llegada que dispara un aviso. Prefiere estimaciones GPS sobre
+ * horarios programados y, entre ellas, la más próxima. Pura y testeable.
+ */
+export function findMatchingArrival(
+  arrivals: NextArrivalResult[],
+  options: AlertMatchOptions
+): NextArrivalResult | null {
+  // Si no se guardó un destino real, no filtrar: mejor avisar que silenciar.
+  const destination =
+    options.destination &&
+    normalizeDestination(options.destination) !==
+      normalizeDestination(UNKNOWN_DESTINATION)
+      ? options.destination
+      : undefined;
+  const candidates = arrivals.filter((arrival) => {
+    if (!matchesLine(arrival, options.lineId)) return false;
+    if (arrival.minutes < 0 || arrival.minutes > options.minutesAhead)
+      return false;
+    if (destination && !destinationsMatch(arrival.destination, destination)) {
+      return false;
+    }
+    return true;
+  });
+
+  const realtime = candidates.filter((arrival) => arrival.realtime);
+  const pool = realtime.length ? realtime : candidates;
+  return pool.reduce<NextArrivalResult | null>(
+    (best, arrival) =>
+      !best || arrival.minutes < best.minutes ? arrival : best,
+    null
   );
 }
 

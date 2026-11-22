@@ -1,11 +1,18 @@
 import cron from 'node-cron';
 import type { Context, Telegraf } from 'telegraf';
-import { escapeMd, formatArrival, getNextArrivals } from './arrival.js';
+import {
+  escapeMd,
+  findMatchingArrival,
+  formatArrival,
+  getNextArrivals,
+} from './arrival.js';
 import { getActiveAlerts, updateAlert } from './db.js';
 import type { UserAlert } from './types.js';
 
+const MAX_ALERT_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 let scheduledTask: cron.ScheduledTask | null = null;
 let botInstance: Telegraf<Context> | null = null;
+let checking = false;
 
 export function setBotInstance(bot: Telegraf<Context>): void {
   botInstance = bot;
@@ -28,12 +35,30 @@ export function stopAlertScheduler(): void {
 }
 
 async function checkAlerts(): Promise<void> {
+  // node-cron puede disparar otra pasada antes de que termine la anterior
+  // (muchas paradas × latencia de API). Sin este guard se enviaría dos veces.
+  if (checking) return;
+  checking = true;
+  try {
+    await checkAlertsUnsafe();
+  } finally {
+    checking = false;
+  }
+}
+
+async function checkAlertsUnsafe(): Promise<void> {
   if (!botInstance) {
     console.warn('Bot instance not set, skipping alert check');
     return;
   }
 
-  const alerts = getActiveAlerts();
+  const now = Date.now();
+  const alerts = getActiveAlerts().filter((alert) => {
+    if (now - alert.createdAt <= MAX_ALERT_AGE_MS) return true;
+    updateAlert(alert.id, { active: false });
+    console.log(`🧹 Alert ${alert.id} expired (older than 7 days)`);
+    return false;
+  });
   if (!alerts.length) return;
 
   // Agrupar por parada para minimizar peticiones a la API.
@@ -48,23 +73,31 @@ async function checkAlerts(): Promise<void> {
     try {
       const arrivals = await getNextArrivals(stopId);
       for (const alert of stopAlerts) {
-        const match = arrivals.find(
-          (arrival) =>
-            arrival.lineId === alert.lineId &&
-            arrival.minutes >= 0 &&
-            arrival.minutes <= alert.minutesAhead
-        );
+        const match = findMatchingArrival(arrivals, {
+          lineId: alert.lineId,
+          destination: alert.destination,
+          minutesAhead: alert.minutesAhead,
+        });
         if (!match) continue;
 
         const msg =
           `🔔 **¡Aviso! L${escapeMd(alert.lineId)} llega en ${match.minutes} min**\n` +
           `${formatArrival(match)}`;
 
-        await botInstance.telegram.sendMessage(alert.chatId, msg, {
-          parse_mode: 'Markdown',
-        });
-        updateAlert(alert.id, { active: false });
-        console.log(`✅ Alert ${alert.id} triggered for chat ${alert.chatId}`);
+        try {
+          await botInstance.telegram.sendMessage(alert.chatId, msg, {
+            parse_mode: 'Markdown',
+          });
+          updateAlert(alert.id, { active: false });
+          console.log(
+            `✅ Alert ${alert.id} triggered for chat ${alert.chatId}`
+          );
+        } catch (error) {
+          // Un chat bloqueado no debe impedir avisar al resto.
+          console.error(
+            `[Alerts] Send failed for chat ${alert.chatId}: ${error instanceof Error ? error.message : String(error)}`
+          );
+        }
       }
     } catch (error) {
       console.error(

@@ -10,10 +10,13 @@ import {
   addFavorite,
   createAlert,
   deleteAlert,
+  findActiveAlert,
+  findFavorite,
   getActiveAlerts,
   getAlertsByChat,
   getFavorites,
   removeFavorite,
+  updateAlert,
 } from '../src/db.js';
 import { fetchPopularStops, fetchStopTimes, getStopName } from '../src/dbus-client.js';
 
@@ -116,6 +119,26 @@ describe('Database - Alerts', () => {
     expect(deleteAlert(alert.id)).toBe(true);
     expect(getAlertsByChat(testChatId).find((a) => a.id === alert.id)).toBeUndefined();
   });
+
+  it('finds an active alert for dedup and ignores inactive ones', () => {
+    const chatId = 777777777;
+    for (const alert of getAlertsByChat(chatId)) deleteAlert(alert.id);
+
+    const alert = createAlert({
+      chatId,
+      stopId: STOP,
+      stopName: 'Boulevard 9',
+      lineId: '28',
+      lineName: 'L28',
+      destination: 'Ospitaleak',
+      minutesAhead: 5,
+      active: true,
+    });
+    expect(findActiveAlert(chatId, STOP, '28')?.id).toBe(alert.id);
+    updateAlert(alert.id, { active: false });
+    expect(findActiveAlert(chatId, STOP, '28')).toBeNull();
+    deleteAlert(alert.id);
+  });
 });
 
 describe('Database - Favorites', () => {
@@ -139,5 +162,22 @@ describe('Database - Favorites', () => {
     expect(getFavorites(testChatId).length).toBeGreaterThan(0);
     expect(removeFavorite(fav.id)).toBe(true);
     expect(getFavorites(testChatId).find((f) => f.id === fav.id)).toBeUndefined();
+  });
+
+  it('finds a favorite for dedup', () => {
+    const chatId = 666666666;
+    for (const fav of getFavorites(chatId)) removeFavorite(fav.id);
+
+    const fav = addFavorite({
+      chatId,
+      stopId: STOP,
+      stopName: 'Boulevard 9',
+      lineId: '28',
+      lineName: 'L28',
+      destination: 'Ospitaleak',
+    });
+    expect(findFavorite(chatId, STOP, '28')?.id).toBe(fav.id);
+    expect(findFavorite(chatId, STOP, '21')).toBeNull();
+    removeFavorite(fav.id);
   });
 });

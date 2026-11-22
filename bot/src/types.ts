@@ -17,6 +17,8 @@ export interface NextArrivalResult {
   minutes: number;
   /** código público de línea, p. ej. "28". */
   lineId: string;
+  /** id interno de Dbus, p. ej. "32" para la línea pública 28. */
+  internalLineId: string;
   /** destino/headsign real devuelto por Dbus. */
   destination: string;
   stopId: string;

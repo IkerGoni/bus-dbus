@@ -28,6 +28,8 @@ db.exec(`
   
   CREATE INDEX IF NOT EXISTS idx_alerts_chat ON user_alerts(chat_id);
   CREATE INDEX IF NOT EXISTS idx_alerts_active ON user_alerts(active);
+  CREATE INDEX IF NOT EXISTS idx_alerts_dedup
+    ON user_alerts(chat_id, stop_id, line_id, active);
 
   CREATE TABLE IF NOT EXISTS user_favorites (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,6 +43,8 @@ db.exec(`
   );
   
   CREATE INDEX IF NOT EXISTS idx_favorites_chat ON user_favorites(chat_id);
+  CREATE INDEX IF NOT EXISTS idx_favorites_dedup
+    ON user_favorites(chat_id, stop_id, line_id);
 `);
 
 // Tipos de filas de SQLite (snake_case -> tipos estrictos, sin `any`)
@@ -114,6 +118,19 @@ export function getAlertsByChat(chatId: number): UserAlert[] {
   return stmt.all(chatId).map((row): UserAlert => rowToAlert(row as AlertRow));
 }
 
+/** Evita avisos duplicados para la misma parada y línea. */
+export function findActiveAlert(
+  chatId: number,
+  stopId: string,
+  lineId: string
+): UserAlert | null {
+  const stmt = db.prepare(
+    'SELECT * FROM user_alerts WHERE chat_id = ? AND stop_id = ? AND line_id = ? AND active = 1 LIMIT 1'
+  );
+  const row = stmt.get(chatId, stopId, lineId);
+  return row ? rowToAlert(row as AlertRow) : null;
+}
+
 export function getActiveAlerts(): UserAlert[] {
   const stmt = db.prepare('SELECT * FROM user_alerts WHERE active = 1');
   return stmt.all().map((row): UserAlert => rowToAlert(row as AlertRow));
@@ -135,7 +152,11 @@ export function updateAlert(
   if (!fields.length) return false;
 
   const setClause = fields.map((f) => `${f} = ?`).join(', ');
-  const values = fields.map((f) => updates[f as keyof typeof updates]);
+  // better-sqlite3 no acepta booleanos: SQLite los guarda como 0/1.
+  const values = fields.map((f) => {
+    const value = updates[f as keyof typeof updates];
+    return typeof value === 'boolean' ? (value ? 1 : 0) : value;
+  });
   values.push(Date.now(), id);
 
   const stmt = db.prepare(
@@ -207,6 +228,18 @@ export function getFavorites(chatId: number): UserFavorite[] {
   return stmt
     .all(chatId)
     .map((row): UserFavorite => rowToFavorite(row as FavoriteRow));
+}
+
+export function findFavorite(
+  chatId: number,
+  stopId: string,
+  lineId: string
+): UserFavorite | null {
+  const stmt = db.prepare(
+    'SELECT * FROM user_favorites WHERE chat_id = ? AND stop_id = ? AND line_id = ? LIMIT 1'
+  );
+  const row = stmt.get(chatId, stopId, lineId);
+  return row ? rowToFavorite(row as FavoriteRow) : null;
 }
 
 export function removeFavorite(id: number): boolean {

@@ -1,5 +1,5 @@
 # Estado — bus-dbus
-Actualizado: 2026-11-22 05:49 · Última sesión: bot Dbus con datos reales
+Actualizado: 2026-11-22 06:05 · Última sesión: mejoras y endurecimiento del bot Dbus
 
 ## Objetivo actual
 PWA de llegadas de Dbus (San Sebastián) + bot de Telegram con avisos.
@@ -7,17 +7,30 @@ El bot ya opera con datos reales de la API oficial; la PWA sigue bloqueada
 en el Sprint 3 por errores preexistentes de TypeScript/lint.
 
 ## Hecho en la última sesión
-- Bot migrado de GTFS-RT/protobuf (feeds `.pb` con 403 desde S3) a la API JSON
-  real de Dbus `SSIIMovilWSv2/ws/cons/tiemposParada` (HTTP, sin auth).
-- Llegadas reales: línea, destino, minutos, hora y flag GPS vs. horario;
-  caché de 30 s, deduplicación de peticiones y catálogo de paradas desde
-  `paradasItinerario`.
-- Flujos del bot reescritos alrededor del código público de parada; avisos y
-  favoritos usan datos reales. Nuevos comandos: `/lineas`, `/populares`, `/help`.
-- Retry con backoff ante conflictos 409 de long-polling de Telegram.
+- Auditoría del aviso `❌ No hay paradas configuradas para L32`: solo existía
+  en commits antiguos (`f86b23a` y anteriores), nunca en el código/dist actual.
+  Causa: `AVAILABLE_LINES` incluía `32` pero `STOPS_BY_LINE` solo tenía 12/17/18.
+- Alias de línea: Dbus usa id interno `32` = código público `28`. Se aceptan
+  ambos (`28`, `L28`, `32`) y siempre se guarda/muestra el código público.
+- Bug real corregido: `updateAlert()` enlazaba booleanos y SQLite fallaba
+  (`SQLite3 can only bind numbers...`) — rompía la desactivación de avisos,
+  incluido el caducado automático. Ahora convierte `true/false` a `1/0`.
+- Avisos: dedup por `(chat, parada, línea)`, caducidad a 7 días, filtro por
+  destino tolerante (contención) y por GPS/horario, guard de reentrada del
+  scheduler, aislamiento de fallos de envío por chat.
+- Favoritos deduplicados; `/lista` con botones `adel_` para borrar cada aviso;
+  `/actualizar` recarga catálogo completo; `stop_refresh` invalida solo una
+  parada; sesiones con TTL de 10 min y poda; `safeEdit` tolera mensajes
+  anticuados/"not modified" y responde como mensaje nuevo cuando hace falta.
+- Arranque: lock de instancia única (PID, tolera locks caducados) y retry de
+  conflictos 409 con 12 intentos y backoff hasta 30 s.
+- Sin mocks en producción: eliminado `FALLBACK_STOPS`; catálogo vacío = error
+  explícito. `getJson` reintenta una vez con 300 ms.
+- 27 tests en verde (10 unit + 10 integración + 7 E2E); `tsc`, `biome check
+  src/` y `build` del bot sin errores. README actualizado.
+- Migración previa: GTFS-RT/protobuf (`.pb` con 403 desde S3) → API JSON real
+  de Dbus `SSIIMovilWSv2/ws/cons/tiemposParada` (HTTP, sin auth).
 - Eliminados `gtfs-client.ts`, `src/proto/` y la dependencia `protobufjs` del bot.
-- 13 tests en verde (8 integración + 5 E2E de handlers); `tsc`, `biome` y
-  `build` del bot sin errores. README y `.env.example` actualizados.
 
 ## Pendiente (por prioridad)
 - [ ] PWA Shell (Sprint 3): 30 errores TS y 233 errores de lint en `src/`
@@ -35,13 +48,17 @@ en el Sprint 3 por errores preexistentes de TypeScript/lint.
 - 2026-11-22 · Sin fallback a datos mock en producción · Evita avisos falsos.
 - 2026-11-22 · Ejecutar el bot con `npm run start`, no `npm run dev` ·
   Los reinicios de `tsx watch` provocaban 409; además existe retry automático.
+- 2026-11-22 · Línea = código público (`28`), nunca el id interno (`32`) ·
+  Se acepta el id como alias de entrada por compatibilidad, pero no se
+  persiste: evita avisos duplicados para la misma línea con dos identificadores.
 
 ## Esperando a Iker
 - Enviar `/start` a `@dbus_alarm_bot` para confirmar el round-trip real.
 
 ## Git
-main 63ba889 = origin/main · ramas abiertas: ninguna
-(HEAD incluye además el commit de este ESTADO.md)
+Base: main 8ce2694 = origin/main · ramas abiertas: ninguna
+Los cambios de esta sesión están commiteados localmente, pendientes de push
+(y el bot hay que reiniciarlo con `BOT_TOKEN` del entorno).
 
 ## Siguiente sesión
 - Leer primero: `ESTADO.md`, `README.md`, `bot/src/dbus-client.ts`,
