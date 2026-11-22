@@ -63,7 +63,6 @@ import eus.busdonostia.app.ui.components.ScreenHeader
 import eus.busdonostia.app.ui.components.SearchPill
 import eus.busdonostia.app.ui.components.SectionLabel
 import eus.busdonostia.app.ui.components.SkeletonList
-import eus.busdonostia.app.ui.components.StopCodePill
 import eus.busdonostia.app.ui.screens.EmptyAction
 import eus.busdonostia.app.ui.screens.EmptyState
 import eus.busdonostia.app.ui.theme.CountdownHero
@@ -132,14 +131,13 @@ fun HomeScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         state.nextAlert?.let { next ->
-                            item(key = "next-label") {
+                            item(key = "next-label", contentType = "section_label") {
                                 SectionLabel(stringResource(R.string.home_next_alert), Modifier.padding(horizontal = 0.dp))
                             }
-                            item(key = "next") {
+                            item(key = "next", contentType = "next_alert") {
                                 NextAlertCard(
                                     item = next,
                                     view = state.nextAlertView,
-                                    nowMs = state.nowMs,
                                     colorArgb = state.lineColors[next.rule.lineId],
                                     onOpen = { onOpenStop(next.rule.stopId, next.rule.lineId) },
                                     onPause = { onPause(next.rule) },
@@ -167,17 +165,16 @@ private fun SearchResults(
     }
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
         if (state.stopResults.isNotEmpty()) {
-            item { SectionLabel(stringResource(R.string.nav_stops)) }
-            items(state.stopResults, key = { "s-${it.cod}" }) { stop ->
+            item(key = "search-stops-label", contentType = "section_label") { SectionLabel(stringResource(R.string.nav_stops)) }
+            items(state.stopResults, key = { "s-${it.cod}" }, contentType = { "stop_result" }) { stop ->
                 ResultRow(onClick = { onOpenStop(stop.cod, null) }) {
-                    StopCodePill(stop.cod)
                     Text(stop.desc, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
                 }
             }
         }
         if (state.lineResults.isNotEmpty()) {
-            item { SectionLabel(stringResource(R.string.nav_lines)) }
-            items(state.lineResults, key = { "l-${it.cod}" }) { line ->
+            item(key = "search-lines-label", contentType = "section_label") { SectionLabel(stringResource(R.string.nav_lines)) }
+            items(state.lineResults, key = { "l-${it.cod}" }, contentType = { "line_result" }) { line ->
                 ResultRow(onClick = { onOpenLine(line.cod) }) {
                     LineBadge(line.cod, state.lineColors[line.cod])
                     Text(
@@ -211,7 +208,6 @@ private fun ResultRow(onClick: () -> Unit, content: @Composable androidx.compose
 private fun NextAlertCard(
     item: AlertItem,
     view: ArrivalsView?,
-    nowMs: Long,
     colorArgb: Int?,
     onOpen: () -> Unit,
     onPause: () -> Unit,
@@ -231,7 +227,7 @@ private fun NextAlertCard(
                     modifier = Modifier.weight(1f),
                 )
                 if (arrival != null) {
-                    val minutes = remainingMinutes(arrival, nowMs)
+                    val minutes = item.remainingMin ?: remainingMinutes(arrival, arrival.fetchedAtMs)
                     Text(
                         if (minutes <= 0) stringResource(R.string.minutes_now) else stringResource(R.string.minutes_short, minutes),
                         style = CountdownHero,
@@ -242,7 +238,7 @@ private fun NextAlertCard(
                 }
             }
             Text(
-                stringResource(R.string.stop_with_code, rule.stopName, rule.stopId),
+                rule.stopName,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
@@ -284,8 +280,12 @@ private fun nextAlertSourceText(item: AlertItem, view: ArrivalsView?): String {
 
 private fun LazyListScope.favorites(state: HomeUiState, vm: HomeViewModel, onOpenStop: (String, String?) -> Unit) {
     if (state.favorites.isEmpty()) return
-    item(key = "fav-label") { SectionLabel(stringResource(R.string.home_favorites), Modifier.padding(horizontal = 0.dp)) }
-    items(state.favorites, key = { "fav-${it.row.stopId}-${it.row.favoriteLineId.orEmpty()}" }) { card ->
+    item(key = "fav-label", contentType = "section_label") { SectionLabel(stringResource(R.string.home_favorites), Modifier.padding(horizontal = 0.dp)) }
+    items(
+        items = state.favorites,
+        key = { "fav-${it.row.stopId}-${it.row.favoriteLineId.orEmpty()}" },
+        contentType = { "favorite_stop" },
+    ) { card ->
         FavoriteCard(card, state, onOpen = { onOpenStop(card.row.stopId, card.row.favoriteLineId) }, onUnstar = { vm.unstar(card.row) }, onRetry = vm::refresh)
     }
 }
@@ -303,7 +303,6 @@ private fun FavoriteCard(card: FavoriteStopCard, state: HomeUiState, onOpen: () 
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false),
                 )
-                StopCodePill(row.stopId)
                 row.favoriteLineId?.let { LineBadge(it, state.lineColors[it], size = 24.dp) }
                 Box(Modifier.weight(1f))
                 FavoriteStar(
@@ -339,13 +338,14 @@ private fun FavoriteArrivals(card: FavoriteStopCard, state: HomeUiState, onRetry
             if (view is ArrivalsView.Degraded) {
                 Text(stringResource(R.string.stop_stale, clockOf(view.fetchedAtMs)), color = muted, style = MaterialTheme.typography.bodySmall)
             }
-            if (card.arrivals.isEmpty()) {
+            if (card.rows.isEmpty()) {
                 Text(
                     card.row.favoriteLineId?.let { stringResource(R.string.stop_line_empty, it) } ?: stringResource(R.string.stop_empty_title),
                     color = muted,
                 )
             }
-            card.arrivals.forEach { arrival ->
+            card.rows.forEach { arrivalRow ->
+                val arrival = arrivalRow.arrival
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     LineBadge(arrival.lineId, state.lineColors[arrival.lineId], size = 24.dp)
                     Text(
@@ -354,7 +354,7 @@ private fun FavoriteArrivals(card: FavoriteStopCard, state: HomeUiState, onRetry
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f),
                     )
-                    MinutesLabel(remainingMinutes(arrival, state.nowMs), arrival.source)
+                    MinutesLabel(arrivalRow.minutes, arrival.source)
                 }
             }
         }

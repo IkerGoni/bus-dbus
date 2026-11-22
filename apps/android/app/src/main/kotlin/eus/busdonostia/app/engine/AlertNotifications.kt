@@ -12,9 +12,9 @@ import androidx.core.net.toUri
 import eus.busdonostia.app.MainActivity
 import eus.busdonostia.app.R
 import eus.busdonostia.app.domain.AlertRule
+import eus.busdonostia.app.domain.AlertsConfig
 import eus.busdonostia.app.domain.ArrivalSource
 import eus.busdonostia.app.domain.Firing
-import eus.busdonostia.app.domain.NOTIFY_EARLY_MS
 import eus.busdonostia.app.domain.firingDestination
 import eus.busdonostia.app.domain.remainingMinutes
 
@@ -96,17 +96,22 @@ fun updateMonitoringNotification(context: Context, watching: List<AlertRule>, po
  * borrado (un solo uso); tocarla abre A05 y deslizarla la cierra. Una por aviso (tag = id).
  */
 @SuppressLint("MissingPermission")
-fun notifyArrival(context: Context, firing: Firing, nowMs: Long) {
+fun notifyArrival(
+    context: Context,
+    firing: Firing,
+    nowMs: Long,
+    alertsConfig: AlertsConfig = AlertsConfig(),
+) {
     val rule = firing.rule
-    // Los mismos minutos con los que ha disparado (30 s por delante): cuadra con la antelación elegida.
-    val minutes = remainingMinutes(firing.arrival, nowMs + NOTIFY_EARLY_MS)
+    val notifyEarlyMs = alertsConfig.triggerBufferSec * 1_000L
+    val minutes = remainingMinutes(firing.arrival, nowMs + notifyEarlyMs)
     val title = firingDestination(rule, firing.arrival)
         ?.let { context.getString(R.string.notif_title, rule.lineId, it, minutes) }
         ?: context.getString(R.string.notif_title_no_destination, rule.lineId, minutes)
     val source = context.getString(
         if (firing.arrival.source == ArrivalSource.LIVE) R.string.source_live else R.string.source_scheduled,
     )
-    val body = context.getString(R.string.notif_body, rule.stopName, rule.stopId, source)
+    val body = context.getString(R.string.notif_body, rule.stopName, source)
     val open = PendingIntent.getActivity(
         context,
         0,

@@ -1,0 +1,33 @@
+# Baseline Profile — Bus Donostia (Sprint 5.0)
+# Rutas calientes de arranque en frío, parseo de catálogo/config, cliente Dbus y pantallas Compose principales.
+
+HSPLeus/busdonostia/app/BusDonostiaApp;->**(**)**
+HSPLeus/busdonostia/app/AppContainer;->**(**)**
+HSPLeus/busdonostia/app/MainActivity;->**(**)**
+HSPLeus/busdonostia/app/data/config/ConfigRepository;->**(**)**
+HSPLeus/busdonostia/app/data/config/ApiConfig;->**(**)**
+HSPLeus/busdonostia/app/data/catalog/CatalogParserKt;->**(**)**
+HSPLeus/busdonostia/app/data/api/DbusClient;->**(**)**
+HSPLeus/busdonostia/app/data/live/LiveFeeds;->**(**)**
+HSPLeus/busdonostia/app/data/live/LiveRepositoryKt;->**(**)**
+HSPLeus/busdonostia/app/domain/AlertEngineKt;->**(**)**
+HSPLeus/busdonostia/app/domain/AlertsKt;->**(**)**
+HSPLeus/busdonostia/app/domain/AlertListKt;->**(**)**
+HSPLeus/busdonostia/app/domain/ArrivalsKt;->**(**)**
+HSPLeus/busdonostia/app/domain/FreshnessKt;->**(**)**
+HSPLeus/busdonostia/app/domain/GeoKt;->**(**)**
+HSPLeus/busdonostia/app/domain/SearchKt;->**(**)**
+HSPLeus/busdonostia/app/domain/StopViewKt;->**(**)**
+HSPLeus/busdonostia/app/domain/Ticker;->**(**)**
+HSPLeus/busdonostia/app/ui/home/HomeViewModel;->**(**)**
+HSPLeus/busdonostia/app/ui/home/HomeViewModelKt;->**(**)**
+HSPLeus/busdonostia/app/ui/home/HomeScreenKt;->**(**)**
+HSPLeus/busdonostia/app/ui/stops/StopsViewModel;->**(**)**
+HSPLeus/busdonostia/app/ui/stops/StopsViewModelKt;->**(**)**
+HSPLeus/busdonostia/app/ui/stopdetail/StopDetailViewModel;->**(**)**
+HSPLeus/busdonostia/app/ui/alerts/AlertsViewModel;->**(**)**
+HSPLeus/busdonostia/app/ui/alerts/AlertsSharedKt;->**(**)**
+HSPLeus/busdonostia/app/ui/stops/StopsScreenKt;->**(**)**
+HSPLeus/busdonostia/app/ui/stopdetail/StopDetailScreenKt;->**(**)**
+HSPLeus/busdonostia/app/ui/lines/LinesScreenKt;->**(**)**
+HSPLeus/busdonostia/app/ui/lines/LineDetailViewModel;->**(**)**

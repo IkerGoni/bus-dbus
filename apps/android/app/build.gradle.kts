@@ -88,8 +88,8 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 1
-        versionName = "0.1.0"
-        // URL HTTPS del config.json remoto (ADR 009). Vacía hasta el Sprint 5: solo la empaquetada.
+        versionName = "1.0.0"
+        // URL HTTPS del config.json remoto (ADR 009). Vacía hasta configurar el hosting estático: solo la empaquetada.
         buildConfigField("String", "REMOTE_CONFIG_URL", "\"\"")
     }
 
@@ -108,7 +108,10 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
             signingConfig = signingConfigs.findByName("release")
         }
     }
@@ -189,6 +192,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.profileinstaller)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)

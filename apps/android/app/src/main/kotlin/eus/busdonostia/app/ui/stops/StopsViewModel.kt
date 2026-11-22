@@ -83,7 +83,8 @@ class StopsViewModel(private val container: AppContainer) : ViewModel() {
         inputs,
         container.database.recentStops().observe(),
         container.lineColors,
-    ) { input, recents, colors ->
+        container.configRepository.config,
+    ) { input, recents, colors, cfg ->
         val catalog = input.catalog?.getOrNull()
         if (catalog == null) {
             return@combine StopsUiState(catalogReady = input.catalog?.let { false }, query = input.query, tab = input.tab)
@@ -94,9 +95,17 @@ class StopsViewModel(private val container: AppContainer) : ViewModel() {
 
         val recentRows = recents.mapNotNull { catalog.stopByCode(it.stopId)?.let(::row) }
         val rows = when {
-            input.query.isNotBlank() -> searchStops(catalog, input.query, STOP_SEARCH_LIMIT).map(::row)
+            input.query.isNotBlank() -> searchStops(catalog, input.query, cfg.uiLimits.searchStopsLimit).map(::row)
             input.tab == StopsTab.NEARBY -> (input.location as? LocationState.Located)
-                ?.let { nearbyStops(catalog, it.lat, it.lon).map { n -> row(n.stop, n.meters, n.walkMinutes) } }
+                ?.let {
+                    nearbyStops(
+                        catalog = catalog,
+                        lat = it.lat,
+                        lon = it.lon,
+                        limit = cfg.uiLimits.nearbyStopsLimit,
+                        walkingSpeedKmh = cfg.geo.walkingSpeedKmh,
+                    ).map { n -> row(n.stop, n.meters, n.walkMinutes) }
+                }
                 .orEmpty()
             input.tab == StopsTab.FAVORITES -> favoriteRows(catalog, input.favorites)
             else -> recentRows

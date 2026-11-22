@@ -9,12 +9,16 @@ import eus.busdonostia.app.data.live.feedView
 import eus.busdonostia.app.domain.AlertItem
 import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.Arrival
+import eus.busdonostia.app.domain.ArrivalRow
 import eus.busdonostia.app.domain.ArrivalsView
 import eus.busdonostia.app.domain.Catalog
 import eus.busdonostia.app.domain.CatalogLine
 import eus.busdonostia.app.domain.CatalogStop
 import eus.busdonostia.app.domain.Favorite
 import eus.busdonostia.app.domain.FavoriteType
+import eus.busdonostia.app.domain.FreshnessConfig
+import eus.busdonostia.app.domain.UiLimitsConfig
+import eus.busdonostia.app.domain.arrivalRows
 import eus.busdonostia.app.domain.filterArrivals
 import eus.busdonostia.app.domain.nextAlert
 import eus.busdonostia.app.domain.remainingMinutes
@@ -32,18 +36,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-
-/** Máximo de llegadas por tarjeta de favorita (A01: 2–3). */
-const val HOME_ARRIVALS_PER_STOP = 3
 
 data class FavoriteStopCard(
     val row: StopRow,
     /** Vista de 5 estados de la parada. */
     val view: ArrivalsView,
-    /** Próximas llegadas (de su línea si es parada+línea), como mucho [HOME_ARRIVALS_PER_STOP]. */
+    /** Próximas llegadas (de su línea si es parada+línea), como mucho `homeFavoriteMaxArrivals`. */
     val arrivals: List<Arrival>,
+    /** Filas precalculadas con `minutes` restantes para aislar `nowMs` del `HomeUiState`. */
+    val rows: List<ArrivalRow> = emptyList(),
 )
 
 data class HomeUiState(
@@ -56,7 +60,6 @@ data class HomeUiState(
     val query: String = "",
     val stopResults: List<CatalogStop> = emptyList(),
     val lineResults: List<CatalogLine> = emptyList(),
-    val nowMs: Long = 0,
     val refreshing: Boolean = false,
     val lineColors: Map<String, Int> = emptyMap(),
 ) {
@@ -65,13 +68,25 @@ data class HomeUiState(
 }
 
 /** Paradas favoritas (STOP y STOP_LINE) con sus próximas llegadas en vivo. */
-fun favoriteCards(catalog: Catalog, favorites: List<Favorite>, feeds: Map<String, StopFeeds>, nowMs: Long): List<FavoriteStopCard> =
+fun favoriteCards(
+    catalog: Catalog,
+    favorites: List<Favorite>,
+    feeds: Map<String, StopFeeds>,
+    nowMs: Long,
+    freshnessConfig: FreshnessConfig = FreshnessConfig(),
+    uiLimitsConfig: UiLimitsConfig = UiLimitsConfig(),
+): List<FavoriteStopCard> =
     favoriteRows(catalog, favorites).map { row ->
-        val view = feedView(feeds, row.stopId, nowMs)
+        val view = feedView(feeds, row.stopId, nowMs, freshnessConfig)
         val arrivals = filterArrivals(usableArrivals(view), row.favoriteLineId)
             .sortedBy { remainingMinutes(it, nowMs) }
-            .take(HOME_ARRIVALS_PER_STOP)
-        FavoriteStopCard(row, view, arrivals)
+            .take(uiLimitsConfig.homeFavoriteMaxArrivals)
+        FavoriteStopCard(
+            row = row,
+            view = view,
+            arrivals = arrivals,
+            rows = arrivalRows(arrivals, lineId = null, nowMs = nowMs),
+        )
     }
 
 private data class Inputs(val favorites: List<Favorite>, val alerts: List<AlertRule>?, val query: String, val refreshing: Boolean)
@@ -81,34 +96,37 @@ class HomeViewModel(private val container: AppContainer) : ViewModel() {
     private val query = MutableStateFlow("")
     private val refreshing = MutableStateFlow(false)
     private val inputs = combine(container.favorites, container.alerts, query, refreshing, ::Inputs)
+    private val liveAndConfig = combine(
+        container.live.feeds,
+        container.ticker.now,
+        container.configRepository.config,
+    ) { feeds, nowMs, cfg -> Triple(feeds, nowMs, cfg) }
 
     val state: StateFlow<HomeUiState> = combine(
         container.catalog,
         inputs,
-        container.live.feeds,
-        container.ticker.now,
+        liveAndConfig,
         container.lineColors,
-    ) { catalogResult, input, feeds, now, colors ->
+    ) { catalogResult, input, (feeds, nowMs, cfg), colors ->
         val catalog = catalogResult?.getOrNull()
         if (catalog == null) {
             return@combine HomeUiState(catalogReady = catalogResult?.let { false }, query = input.query, lineColors = colors)
         }
-        val nowMs = now.toEpochMilli()
-        val next = input.alerts?.let { nextAlert(alertItems(it, feeds, nowMs)) }
+        val next = input.alerts?.let { nextAlert(alertItems(it, feeds, nowMs, cfg.freshness, cfg.alerts)) }
+        val searchLimit = cfg.uiLimits.homeSearchLimit
         HomeUiState(
             catalogReady = true,
             alertsLoaded = input.alerts != null,
             nextAlert = next,
-            nextAlertView = next?.let { feedView(feeds, it.rule.stopId, nowMs) },
-            favorites = favoriteCards(catalog, input.favorites, feeds, nowMs),
+            nextAlertView = next?.let { feedView(feeds, it.rule.stopId, nowMs, cfg.freshness) },
+            favorites = favoriteCards(catalog, input.favorites, feeds, nowMs, cfg.freshness, cfg.uiLimits),
             query = input.query,
-            stopResults = searchStops(catalog, input.query, limit = 6),
-            lineResults = searchLines(catalog, input.query, limit = 6),
-            nowMs = nowMs,
+            stopResults = searchStops(catalog, input.query, limit = searchLimit),
+            lineResults = searchLines(catalog, input.query, limit = searchLimit),
             refreshing = input.refreshing,
             lineColors = colors,
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), HomeUiState())
+    }.distinctUntilChanged().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), HomeUiState())
 
     private val watched = combine(container.favorites, container.alerts) { favorites, alerts ->
         favoriteStops(favorites) + stopsToWatch(alerts.orEmpty())

@@ -7,6 +7,8 @@ import eus.busdonostia.app.data.live.feedView
 import eus.busdonostia.app.data.live.StopFeeds
 import eus.busdonostia.app.domain.AlertItem
 import eus.busdonostia.app.domain.AlertRule
+import eus.busdonostia.app.domain.AlertsConfig
+import eus.busdonostia.app.domain.FreshnessConfig
 import eus.busdonostia.app.domain.alertItem
 import eus.busdonostia.app.domain.usableArrivals
 import eus.busdonostia.app.domain.withActive
@@ -20,14 +22,27 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 /** Estado calculado de cada aviso con las llegadas que haya de su parada (A01, A04 y badge). */
-fun alertItems(rules: List<AlertRule>, feeds: Map<String, StopFeeds>, nowMs: Long): List<AlertItem> =
-    rules.map { rule -> alertItem(rule, usableArrivals(feedView(feeds, rule.stopId, nowMs)), nowMs) }
+fun alertItems(
+    rules: List<AlertRule>,
+    feeds: Map<String, StopFeeds>,
+    nowMs: Long,
+    freshnessConfig: FreshnessConfig = FreshnessConfig(),
+    alertsConfig: AlertsConfig = AlertsConfig(),
+): List<AlertItem> =
+    rules.map { rule ->
+        alertItem(
+            rule = rule,
+            arrivals = usableArrivals(feedView(feeds, rule.stopId, nowMs, freshnessConfig)),
+            nowMs = nowMs,
+            config = alertsConfig,
+        )
+    }
 
 /** Paradas que hay que sondear: las de avisos activos (los pausados no necesitan llegadas). */
 fun stopsToWatch(rules: List<AlertRule>): Set<String> = rules.filter { it.active }.mapTo(sortedSetOf()) { it.stopId }
 
 /**
- * Sondea las paradas de [stops] cada `pollIntervalSec` mientras se colecta (la UI lo
+ * Sondea las paradas de [stops] cada `foregroundVisibleSec` mientras se colecta (la UI lo
  * lanza con `repeatOnLifecycle(STARTED)`). Si cambia el conjunto, consulta ya el nuevo.
  * Lo que el motor acaba de consultar no se vuelve a pedir (`LiveRepository.pollStop`).
  */
@@ -36,7 +51,7 @@ suspend fun AppContainer.pollStops(stops: Flow<Set<String>>) {
         if (set.isEmpty()) return@collectLatest
         while (true) {
             coroutineScope { set.map { async { live.pollStop(it) } }.awaitAll() }
-            delay(configRepository.config.value.pollIntervalSec * 1_000L)
+            delay(configRepository.pollingConfig.value.foregroundVisibleSec * 1_000L)
         }
     }
 }

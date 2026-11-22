@@ -42,11 +42,16 @@ sealed interface ArrivalsView {
  * mientras sean `FRESH` (live) o `STALE` (degraded); `EXPIRED` → error.
  * Una respuesta válida que envejece sin repetirse pasa a `degraded`, nunca se da por viva.
  */
-fun stopArrivalsView(latest: StopFeed?, lastValid: StopFeed?, nowMs: Long): ArrivalsView {
+fun stopArrivalsView(
+    latest: StopFeed?,
+    lastValid: StopFeed?,
+    nowMs: Long,
+    freshnessConfig: FreshnessConfig = FreshnessConfig(),
+): ArrivalsView {
     if (latest == null) return ArrivalsView.Loading
     val failed = latest.status == StopFeedStatus.API_ERROR
     val feed = (if (failed) lastValid else latest) ?: return ArrivalsView.Error
-    val freshness = computeFreshness(feed.fetchedAtMs, nowMs)
+    val freshness = computeFreshness(feed.fetchedAtMs, nowMs, freshnessConfig)
     if (failed && freshness == FreshnessLevel.EXPIRED) return ArrivalsView.Error
     return when (feed.status) {
         StopFeedStatus.NO_SERVICE ->
@@ -87,10 +92,11 @@ data class ArrivalRow(val key: String, val arrival: Arrival, val minutes: Int)
  * estable entre refrescos.
  */
 fun arrivalRows(arrivals: List<Arrival>, lineId: String?, nowMs: Long): List<ArrivalRow> {
-    val seen = HashMap<String, Int>()
+    val seen = mutableMapOf<String, Int>()
     return filterArrivals(arrivals, lineId).map { arrival ->
         val base = "${arrival.lineId}|${arrival.destination}"
-        val n = seen.merge(base, 1, Int::plus)!!
+        val n = (seen[base] ?: 0) + 1
+        seen[base] = n
         ArrivalRow("$base|$n", arrival, remainingMinutes(arrival, nowMs))
     }
 }

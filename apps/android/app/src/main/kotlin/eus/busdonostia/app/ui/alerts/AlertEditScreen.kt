@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eus.busdonostia.app.R
 import eus.busdonostia.app.domain.DraftError
-import eus.busdonostia.app.domain.MINUTES_RANGE
 import eus.busdonostia.app.domain.QUICK_MINUTES
 import eus.busdonostia.app.domain.destinationChoices
 import eus.busdonostia.app.ui.appViewModel
@@ -113,7 +112,7 @@ fun AlertEditScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     StopAndLine(state, vm)
-                    MinutesAhead(state.draft.minutesAhead, vm::setMinutes)
+                    MinutesAhead(state.draft.minutesAhead, state.minutesRange, vm::setMinutes)
                     // Un solo uso: avisa una vez y se borra.
                     Text(
                         stringResource(R.string.alert_once_hint),
@@ -264,10 +263,10 @@ private fun StopAndLine(state: AlertEditUiState, vm: AlertEditViewModel) {
     }
 }
 
-/** Paso 2: display grande + 6 chips rápidos sincronizados con slider 1–30. */
+/** Paso 2: display grande + chips rápidos sincronizados con slider en [range] (`alerts.min/maxMinutesAhead`). */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun MinutesAhead(minutes: Int, onChange: (Int) -> Unit) {
+private fun MinutesAhead(minutes: Int, range: IntRange, onChange: (Int) -> Unit) {
     SectionLabel(stringResource(R.string.alert_step_minutes), modifier = Modifier.padding(horizontal = 0.dp))
     // Mono solo para la cifra (DESIGN.md §2); el resto del texto en la fuente de interfaz.
     Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -280,7 +279,7 @@ private fun MinutesAhead(minutes: Int, onChange: (Int) -> Unit) {
         Text(stringResource(R.string.alert_minutes_before_suffix), style = MaterialTheme.typography.titleMedium, maxLines = 1)
     }
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        QUICK_MINUTES.forEach { value ->
+        QUICK_MINUTES.filter { it in range }.forEach { value ->
             FilterChip(
                 selected = minutes == value,
                 onClick = { onChange(value) },
@@ -293,7 +292,7 @@ private fun MinutesAhead(minutes: Int, onChange: (Int) -> Unit) {
     Slider(
         value = minutes.toFloat(),
         onValueChange = { onChange(Math.round(it)) },
-        valueRange = MINUTES_RANGE.first.toFloat()..MINUTES_RANGE.last.toFloat(),
+        valueRange = range.first.toFloat()..range.last.toFloat(),
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 48.dp)

@@ -12,6 +12,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 /**
  * Cliente de `tiemposParada`. Lee base URL, path, parámetros y cabeceras de
@@ -34,9 +35,14 @@ class DbusClient(
             ?.build()
             ?: return error()
         val request = Request.Builder().url(url).apply { cfg.headers.forEach { (k, v) -> header(k, v) } }.build()
+        // Timeouts de la config efectiva (empaquetada o remota), no los del cliente compartido.
+        val client = http.newBuilder()
+            .connectTimeout(cfg.connectTimeoutSec.toLong(), TimeUnit.SECONDS)
+            .callTimeout(cfg.callTimeoutSec.toLong(), TimeUnit.SECONDS)
+            .build()
         return withContext(Dispatchers.IO) {
             try {
-                http.newCall(request).await().use { response ->
+                client.newCall(request).await().use { response ->
                     val fetchedAtMs = nowMs()
                     if (!response.isSuccessful) error(fetchedAtMs) else parseStopFeed(response.body?.string().orEmpty(), fetchedAtMs)
                 }

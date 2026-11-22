@@ -7,9 +7,9 @@ import eus.busdonostia.app.AppContainer
 import eus.busdonostia.app.data.db.toDomain
 import eus.busdonostia.app.data.db.toEntity
 import eus.busdonostia.app.domain.AlertDraft
+import eus.busdonostia.app.domain.AlertsConfig
 import eus.busdonostia.app.domain.CatalogStop
 import eus.busdonostia.app.domain.DraftError
-import eus.busdonostia.app.domain.MINUTES_RANGE
 import eus.busdonostia.app.domain.SavePlan
 import eus.busdonostia.app.domain.lineDestinationsAtStop
 import eus.busdonostia.app.domain.normalizeLine
@@ -54,6 +54,8 @@ data class AlertEditUiState(
     val pickingStop: Boolean = false,
     val stopQuery: String = "",
     val stopResults: List<CatalogStop> = emptyList(),
+    /** Rango de antelación permitido (`alerts.minMinutesAhead..maxMinutesAhead` de la config). */
+    val minutesRange: IntRange = AlertsConfig().let { it.minMinutesAhead..it.maxMinutesAhead },
 )
 
 data class ConflictInfo(val lineId: String, val stopName: String)
@@ -106,7 +108,8 @@ class AlertEditViewModel(
         container.catalog,
         container.live.feeds,
         container.lineColors,
-    ) { f, catalogResult, feeds, colors ->
+        container.configRepository.config,
+    ) { f, catalogResult, feeds, colors, cfg ->
         val catalog = catalogResult?.getOrNull()
         val draft = f.draft
         if (catalogResult == null || (draft == null && !f.notFound)) {
@@ -130,14 +133,15 @@ class AlertEditViewModel(
                 emptyList()
             },
             lineColors = colors,
-            errors = validateDraft(resolved),
+            errors = validateDraft(resolved, cfg.alerts),
             showErrors = f.showErrors,
             conflict = f.conflict,
             saving = f.saving,
             saved = f.saved,
             pickingStop = f.pickingStop,
             stopQuery = f.stopQuery,
-            stopResults = searchStops(catalog, f.stopQuery, limit = 20),
+            stopResults = searchStops(catalog, f.stopQuery, limit = cfg.uiLimits.searchStopsLimit),
+            minutesRange = cfg.alerts.minMinutesAhead..cfg.alerts.maxMinutesAhead,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), AlertEditUiState(editing = alertId != null))
 
@@ -193,13 +197,16 @@ class AlertEditViewModel(
 
     fun selectDestination(destination: String?) = edit { it.copy(destination = destination) }
 
-    fun setMinutes(minutes: Int) = edit { it.copy(minutesAhead = minutes.coerceIn(MINUTES_RANGE)) }
+    fun setMinutes(minutes: Int) {
+        val alertsCfg = container.configRepository.alertsConfig.value
+        edit { it.copy(minutesAhead = minutes.coerceIn(alertsCfg.minMinutesAhead..alertsCfg.maxMinutesAhead)) }
+    }
 
     /** Marca los errores visibles y dice si se puede guardar (antes de pedir permisos). */
     fun validateForSave(): Boolean {
         form.update { it.copy(showErrors = true) }
         val draft = form.value.draft ?: return false
-        return validateDraft(withStopName(draft)).isEmpty()
+        return validateDraft(withStopName(draft), container.configRepository.alertsConfig.value).isEmpty()
     }
 
     fun dismissConflict() = form.update { it.copy(conflict = null) }
@@ -207,7 +214,8 @@ class AlertEditViewModel(
     /** Guarda con dedup `(stopId, lineId)`; con [confirmed] actualiza el aviso que ya existía. */
     fun save(confirmed: Boolean = false) {
         val draft = form.value.draft?.let(::withStopName) ?: return
-        if (validateDraft(draft).isNotEmpty() || form.value.saving) return
+        val alertsCfg = container.configRepository.alertsConfig.value
+        if (validateDraft(draft, alertsCfg).isNotEmpty() || form.value.saving) return
         form.update { it.copy(saving = true, conflict = null) }
         viewModelScope.launch {
             try {

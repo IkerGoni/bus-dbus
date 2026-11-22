@@ -38,11 +38,9 @@ import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Motor de avisos (04-android-platform.md §1): Foreground Service `dataSync` que,
- * mientras haya avisos en vigilancia, consulta sus paradas (cada `pollIntervalSec`,
- * o más espaciado si el bus aún está lejos: [nextPollDelayMs])
- * (una petición por parada, por `LiveRepository.fetchStop`) y dispara lo que esté
- * `TRIGGERED`: notifica y, si el usuario puede verlo, borra el aviso (un solo uso).
- * La decisión es [evaluateTick]; aquí solo se consulta, notifica y borra.
+ * mientras haya avisos en vigilancia, consulta sus paradas (según [nextPollDelayMs] y
+ * `PollingConfig` de `config.json`) y dispara lo que esté `TRIGGERED`: notifica y, si
+ * el usuario puede verlo, borra el aviso (un solo uso).
  */
 class AlertMonitorService : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -65,7 +63,8 @@ class AlertMonitorService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val now = System.currentTimeMillis()
-        val watching = container.alerts.value.orEmpty().filter { isWatching(it, now) }
+        val cfg = container.configRepository.config.value
+        val watching = container.alerts.value.orEmpty().filter { isWatching(it, now, cfg.alerts) }
         ServiceCompat.startForeground(
             this,
             MONITORING_NOTIFICATION_ID,
@@ -97,7 +96,7 @@ class AlertMonitorService : Service() {
         super.onDestroy()
     }
 
-    private fun pollIntervalSec(): Int = container.configRepository.config.value.pollIntervalSec
+    private fun pollIntervalSec(): Int = container.configRepository.config.value.polling.baseBackgroundSec
 
     private suspend fun runUntilStopped() {
         val ruleChanges = scope.launch { container.alerts.filterNotNull().drop(1).collect { wake.trySend(Unit) } }
@@ -106,8 +105,9 @@ class AlertMonitorService : Service() {
                 val action = watchUntilDone()
                 if (action == EngineAction.STOP_NO_SERVICE) notifyStopped(this, R.string.notif_stopped_no_service)
                 running = false
+                val alertsCfg = container.configRepository.config.value.alerts
                 // Un aviso guardado antes de soltar `running` no arrancó el servicio (lo veía vivo): se relee la BD.
-                if (resumeAfterStop(action, savedRules(), System.currentTimeMillis(), canNotifyArrivals(this))) {
+                if (resumeAfterStop(action, savedRules(), System.currentTimeMillis(), canNotifyArrivals(this), alertsCfg)) {
                     running = true
                     continue
                 }
@@ -129,11 +129,12 @@ class AlertMonitorService : Service() {
         emptyList()
     }
 
-    /** Vueltas cada `pollIntervalSec` hasta que el motor decide parar; devuelve el motivo. */
+    /** Vueltas cada `baseBackgroundSec` (o el escalón adaptativo) hasta que el motor decide parar. */
     private suspend fun watchUntilDone(): EngineAction {
         var troubleSinceMs: Long? = null
         while (true) {
-            val baseMs = pollIntervalSec() * 1_000L
+            val pollingCfg = container.configRepository.config.value.polling
+            val baseMs = pollingCfg.baseBackgroundSec * 1_000L
             var delayMs = baseMs
             val action = try {
                 val rules = container.database.alerts().getAll().map { it.toDomain() }
@@ -149,7 +150,7 @@ class AlertMonitorService : Service() {
                 Log.w(TAG, "vuelta del motor fallida", e)
                 val failed = failedTick(troubleSinceMs, System.currentTimeMillis())
                 troubleSinceMs = failed.troubleSinceMs
-                delayMs = pollDelayMs(null, baseMs)
+                delayMs = pollDelayMs(null, baseMs, pollingCfg)
                 failed.action
             }
             if (action != EngineAction.CONTINUE) return action
@@ -160,20 +161,26 @@ class AlertMonitorService : Service() {
     private class TickResult(val troubleSinceMs: Long?, val action: EngineAction, val delayMs: Long)
 
     private suspend fun tick(rules: List<AlertRule>, baseMs: Long, troubleSinceMs: Long?): TickResult {
+        val cfg = container.configRepository.config.value
+        val alertsCfg = cfg.alerts
+        val pollingCfg = cfg.polling
+        val freshnessCfg = cfg.freshness
         val startMs = System.currentTimeMillis()
         val known = container.live.feeds.value
         container.live.fetchStops(
-            stopsToPoll(rules, startMs).filterTo(sortedSetOf()) { isFetchDue(known[it]?.latest?.fetchedAtMs, startMs, baseMs) },
+            stopsToPoll(rules, startMs, alertsCfg).filterTo(sortedSetOf()) {
+                isFetchDue(known[it]?.latest?.fetchedAtMs, startMs, baseMs)
+            },
         )
         val now = System.currentTimeMillis()
         val feeds = container.live.feeds.value
-        val views = stopsToPoll(rules, now).associateWith { feedView(feeds, it, now) }
-        val tick = evaluateTick(rules, views, now, troubleSinceMs)
+        val views = stopsToPoll(rules, now, alertsCfg).associateWith { feedView(feeds, it, now, freshnessCfg) }
+        val tick = evaluateTick(rules, views, now, troubleSinceMs, alertsCfg)
         // Primero se notifica; solo se borra (un solo uso) si el usuario puede ver la notificación.
-        tick.firings.forEach { notifyArrival(this, it, now) }
+        tick.firings.forEach { notifyArrival(this, it, now, alertsCfg) }
         firingsToDelete(tick.firings, canNotifyArrivals(this)).forEach { container.database.alerts().delete(it.rule.id) }
         // Sondeo adaptativo: más espaciado cuanto más lejos está el bus de la antelación.
-        val delayMs = nextPollDelayMs(tick.watching, views, now, baseMs)
+        val delayMs = nextPollDelayMs(tick.watching, views, now, baseMs, pollingCfg)
         if (tick.action == EngineAction.CONTINUE) updateMonitoringNotification(this, tick.watching, (delayMs / 1_000).toInt())
         return TickResult(tick.troubleSinceMs, tick.action, delayMs)
     }

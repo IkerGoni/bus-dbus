@@ -12,7 +12,7 @@ enum class AlertDetail {
     /** `active = false`. */
     PAUSED,
 
-    /** Activo con más de 7 días sin avisar: caducado. */
+    /** Activo con más de `expirationDays` días sin avisar: caducado. */
     EXPIRED,
 }
 
@@ -50,10 +50,15 @@ fun usableArrivals(view: ArrivalsView): List<Arrival> = when (view) {
     else -> emptyList()
 }
 
-fun alertItem(rule: AlertRule, arrivals: List<Arrival>, nowMs: Long): AlertItem {
-    // Misma anticipación que `computeAlertStatus`: el bus que entra en la antelación dentro de 30 s ya cuenta.
-    val matching = findMatchingArrival(arrivals, rule.lineId, rule.destination, rule.minutesAhead, nowMs + NOTIFY_EARLY_MS)
-    val status = computeAlertStatus(rule, nowMs, matching)
+fun alertItem(
+    rule: AlertRule,
+    arrivals: List<Arrival>,
+    nowMs: Long,
+    config: AlertsConfig = AlertsConfig(),
+): AlertItem {
+    val notifyEarlyMs = config.triggerBufferSec * 1_000L
+    val matching = findMatchingArrival(arrivals, rule.lineId, rule.destination, rule.minutesAhead, nowMs + notifyEarlyMs)
+    val status = computeAlertStatus(rule, nowMs, matching, config)
     val detail = when (status) {
         ComputedAlertStatus.INACTIVE -> if (rule.active) AlertDetail.EXPIRED else AlertDetail.PAUSED
         else -> AlertDetail.NONE
@@ -90,10 +95,10 @@ fun nextAlert(items: List<AlertItem>): AlertItem? = groupAlerts(items).first.fir
 fun alertBadgeCount(items: List<AlertItem>): Int =
     items.count { it.status == ComputedAlertStatus.ACTIVE || it.status == ComputedAlertStatus.TRIGGERED }
 
-/** Texto del badge: null sin badge, `9+` por encima de 9. */
-fun badgeText(count: Int): String? = when {
+/** Texto del badge: null sin badge, `maxBadgeCount+` por encima de `maxBadgeCount`. */
+fun badgeText(count: Int, config: AlertsConfig = AlertsConfig()): String? = when {
     count <= 0 -> null
-    count > 9 -> "9+"
+    count > config.maxBadgeCount -> "${config.maxBadgeCount}+"
     else -> count.toString()
 }
 

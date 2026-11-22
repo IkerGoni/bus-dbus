@@ -132,7 +132,7 @@
     <string name="alert_edit">Editatu abisua</string>
     <string name="alert_delete">Ezabatu abisua</string>
     <string name="alert_active_switch">Abisu aktiboa</string>
-    <string name="alert_subtitle">%1$s (%2$s) · %3$d\'-ko abisua</string>
+    <string name="alert_subtitle">%1$s · %2$d\'-ko abisua</string>
     <string name="alert_ahead_short">%1$d\'-ko abisua</string>
     <string name="alert_feed_error">Ezin izan da Dbus kontsultatu</string>
     <string name="alert_feed_no_service">Zerbitzurik ez une honetan</string>

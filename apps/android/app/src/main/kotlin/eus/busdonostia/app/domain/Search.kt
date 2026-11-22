@@ -1,23 +1,37 @@
 package eus.busdonostia.app.domain
 
-import java.text.Normalizer
-import java.util.Locale
 import kotlin.math.ceil
 
 /*
  * Búsqueda offline y cercanía sobre el catálogo (paridad con `searchKey`,
  * `searchStops`, `searchLines` e `getItinerariesForLine` de `packages/core/src/catalog.ts`).
+ * Puro KMP: sin java.text.Normalizer ni java.util.Locale.
  */
 
-private val MARKS = Regex("\\p{M}+")
 private val SPACES = Regex("\\s+")
-private val ES = Locale.forLanguageTag("es")
+
+private fun foldChar(ch: Char): Char = when (ch) {
+    'á', 'à', 'ä', 'â', 'ã', 'å', 'Á', 'À', 'Ä', 'Â', 'Ã', 'Å' -> 'a'
+    'é', 'è', 'ë', 'ê', 'É', 'È', 'Ë', 'Ê' -> 'e'
+    'í', 'ì', 'ï', 'î', 'Í', 'Ì', 'Ï', 'Î' -> 'i'
+    'ó', 'ò', 'ö', 'ô', 'õ', 'Ó', 'Ò', 'Ö', 'Ô', 'Õ' -> 'o'
+    'ú', 'ù', 'ü', 'û', 'Ú', 'Ù', 'Ü', 'Û' -> 'u'
+    'ñ', 'Ñ' -> 'n'
+    'ç', 'Ç' -> 'c'
+    in '\u0300'..'\u036f' -> '\u0000'
+    else -> ch.lowercaseChar()
+}
+
+private fun stripDiacriticsLower(value: String): String = buildString(value.length) {
+    for (ch in value) {
+        val folded = foldChar(ch)
+        if (folded != '\u0000') append(folded)
+    }
+}
 
 /** Clave de búsqueda sin acentos, mayúsculas ni espacios duplicados (incluye `normalizeLine`, como en TS). */
 fun searchKey(value: String): String =
-    Normalizer.normalize(normalizeLine(value), Normalizer.Form.NFD)
-        .replace(MARKS, "")
-        .lowercase(ES)
+    stripDiacriticsLower(normalizeLine(value))
         .replace(SPACES, " ")
         .trim()
 
@@ -85,15 +99,29 @@ fun sortLines(lines: List<CatalogLine>): List<CatalogLine> =
 const val WALK_METERS_PER_MIN = 80.0
 
 /** Minutos a pie en línea recta, redondeando hacia arriba (mínimo 1). */
-fun walkMinutes(meters: Long): Int = maxOf(1, ceil(meters / WALK_METERS_PER_MIN).toInt())
+fun walkMinutes(
+    meters: Long,
+    geoConfig: GeoConfig? = null,
+    walkingSpeedKmh: Double = geoConfig?.walkingSpeedKmh ?: GeoConfig().walkingSpeedKmh,
+): Int {
+    val metersPerMin = if (walkingSpeedKmh > 0.0) (walkingSpeedKmh * 1_000.0) / 60.0 else WALK_METERS_PER_MIN
+    return maxOf(1, ceil(meters / metersPerMin).toInt())
+}
 
 data class NearbyStop(val stop: CatalogStop, val meters: Long, val walkMinutes: Int)
 
 /** Las [limit] paradas más cercanas; solo las que tienen coordenadas (514 de 548). Sin red. */
-fun nearbyStops(catalog: Catalog, lat: Double, lon: Double, limit: Int = 20): List<NearbyStop> =
+fun nearbyStops(
+    catalog: Catalog,
+    lat: Double,
+    lon: Double,
+    limit: Int = 20,
+    geoConfig: GeoConfig? = null,
+    walkingSpeedKmh: Double = geoConfig?.walkingSpeedKmh ?: GeoConfig().walkingSpeedKmh,
+): List<NearbyStop> =
     catalog.stops.mapNotNull { stop ->
         val sLat = stop.lat ?: return@mapNotNull null
         val sLon = stop.lon ?: return@mapNotNull null
         val meters = haversineMeters(lat, lon, sLat, sLon)
-        NearbyStop(stop, meters, walkMinutes(meters))
+        NearbyStop(stop, meters, walkMinutes(meters, geoConfig, walkingSpeedKmh))
     }.sortedBy { it.meters }.take(limit)

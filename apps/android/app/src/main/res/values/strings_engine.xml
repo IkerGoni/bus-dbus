@@ -12,7 +12,7 @@
         <item quantity="other">Vigilando %1$d avisos</item>
     </plurals>
     <string name="notif_monitoring_body">Consulta Dbus cada %1$d s hasta que llegue el bus.</string>
-    <string name="notif_body">%1$s (%2$s) · %3$s</string>
+    <string name="notif_body">%1$s · %2$s</string>
 
     <string name="notif_stopped_title">Avisos sin vigilar</string>
     <string name="notif_stopped_no_service">Dbus lleva 60 min sin servicio o sin responder. Abre la app para volver a vigilar.</string>

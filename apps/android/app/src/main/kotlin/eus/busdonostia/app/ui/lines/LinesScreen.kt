@@ -105,7 +105,7 @@ fun LinesScreen(onOpenLine: (String) -> Unit) {
                 listOf(EmptyAction(stringResource(R.string.lines_show_all), primary = true) { vm.onFilterChange(LinesFilter.ALL) }),
             )
             else -> LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 16.dp)) {
-                items(state.rows, key = { it.lineId }) { row ->
+                items(state.rows, key = { it.lineId }, contentType = { "line_card" }) { row ->
                     LineCard(row, state.lineColors[row.lineId], onClick = { onOpenLine(row.lineId) }, onStar = { vm.toggleStar(row.lineId) })
                 }
             }
@@ -192,7 +192,12 @@ fun LineDetailScreen(lineId: String, onBack: () -> Unit, onOpenStop: (stopId: St
                 val color = lineColor(state.colorArgb)
                 val hole = MaterialTheme.colorScheme.background
                 LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(top = 8.dp, bottom = 16.dp)) {
-                    itemsIndexed(state.stops) { index, stop ->
+                    itemsIndexed(
+                        state.stops,
+                        // Posición + parada: estable dentro del itinerario aunque una parada se repita (líneas circulares).
+                        key = { index, stop -> "$index-${stop.stopId}" },
+                        contentType = { _, _ -> "timeline_row" },
+                    ) { index, stop ->
                         TimelineRow(
                             stop = stop,
                             first = index == 0,

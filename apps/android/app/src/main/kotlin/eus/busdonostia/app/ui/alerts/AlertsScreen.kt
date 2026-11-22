@@ -122,7 +122,7 @@ fun AlertsScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     if (!system.notificationsEnabled) {
-                        item {
+                        item(key = "banner-notifications-off", contentType = "info_banner") {
                             InfoBanner(stringResource(R.string.alerts_notifications_off), warning = true) {
                                 TextButton(
                                     onClick = { context.openSettings(notificationSettingsIntent(context)) },
@@ -132,7 +132,7 @@ fun AlertsScreen(
                         }
                     }
                     if (state.anyError) {
-                        item {
+                        item(key = "banner-error", contentType = "info_banner") {
                             InfoBanner(stringResource(R.string.alerts_error_banner), warning = true) {
                                 TextButton(onClick = vm::refresh, modifier = Modifier.heightIn(min = 48.dp)) {
                                     Text(stringResource(R.string.retry))
@@ -166,10 +166,10 @@ private fun LazyListScope.group(
     onDelete: (AlertRule) -> Unit,
 ) {
     if (items.isEmpty()) return
-    item(key = "section-$title") {
+    item(key = "section-$title", contentType = "section_label") {
         SectionLabel(stringResource(title), modifier = Modifier.padding(horizontal = 0.dp), trailing = items.size.toString())
     }
-    items(items, key = { it.rule.id }) { item ->
+    items(items, key = { it.rule.id }, contentType = { "alert_card" }) { item ->
         AlertCard(
             item = item,
             stopView = state.stopViews[item.rule.stopId],
@@ -208,7 +208,7 @@ private fun AlertCard(
                 }
             }
             Text(
-                stringResource(R.string.alert_subtitle, rule.stopName, rule.stopId, rule.minutesAhead),
+                stringResource(R.string.alert_subtitle, rule.stopName, rule.minutesAhead),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,

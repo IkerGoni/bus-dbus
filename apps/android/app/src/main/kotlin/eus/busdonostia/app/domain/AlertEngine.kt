@@ -1,8 +1,9 @@
 package eus.busdonostia.app.domain
 
 /*
- * Motor de avisos (04-android-platform.md §1): decisión pura de cada vuelta del
- * Foreground Service. El servicio solo consulta, borra lo que avisa y notifica.
+ * Motor de avisos (04-android-platform.md §1 y 04-background-bateria-y-recurrentes.md):
+ * decisión pura de cada vuelta del Foreground Service. El servicio solo consulta,
+ * borra lo que avisa y notifica.
  */
 
 /** Tras este tiempo seguido sin servicio o con errores en todas las paradas, el motor se para y lo notifica. */
@@ -12,33 +13,86 @@ const val NO_SERVICE_STOP_MS = 60 * 60_000L
 const val FETCH_SLACK_MS = 5_000L
 
 /** En vigilancia: el servicio tiene que seguir vivo por este aviso (activo y sin caducar). */
-fun isWatching(rule: AlertRule, nowMs: Long): Boolean = computeAlertStatus(rule, nowMs) == ComputedAlertStatus.ACTIVE
+fun isWatching(
+    rule: AlertRule,
+    nowMs: Long,
+    alertsConfig: AlertsConfig = AlertsConfig(),
+): Boolean = computeAlertStatus(rule, nowMs, config = alertsConfig) == ComputedAlertStatus.ACTIVE
 
 /** Paradas que hay que consultar: las de avisos en vigilancia. */
-fun stopsToPoll(rules: List<AlertRule>, nowMs: Long): Set<String> =
-    rules.filter { isWatching(it, nowMs) }.mapTo(sortedSetOf()) { it.stopId }
+fun stopsToPoll(
+    rules: List<AlertRule>,
+    nowMs: Long,
+    alertsConfig: AlertsConfig = AlertsConfig(),
+): Set<String> =
+    rules.filter { isWatching(it, nowMs, alertsConfig) }.mapTo(sortedSetOf()) { it.stopId }
 
 /**
- * Sondeo adaptativo (cada [baseMs] = `pollIntervalSec`, 30 s): cuanto más le falta al bus
- * para entrar en la antelación del aviso ([gapMinutes] = minutos restantes − antelación),
- * menos se consulta. Dbus da minutos enteros y a veces salta varios de golpe, así que
- * se deja mucho margen (decisión de Iker):
- * ≤ 7 min → base (30 s) · 8–14 min → 2× (1 min) · ≥ 15 min → 4× (2 min) ·
- * sin bus de la línea en la respuesta (o sin servicio / error) → 2× (1 min).
+ * Sondeo adaptativo en 4 escalones desde [config] (`PollingConfig`):
+ * cuanto más le falta al bus para entrar en la antelación del aviso
+ * ([gapMinutes] = minutos restantes − antelación), menos se consulta:
+ * - gap >= 31 min → 600 s (10 min)
+ * - gap 15..30 min → 240 s (4 min)
+ * - gap 8..14 min → 60 s (1 min)
+ * - gap <= 7 min → 30 s
+ * - sin bus de la línea en la respuesta (o sin servicio / error: `gapMinutes == null`) →
+ *   `baseBackgroundSec * noServiceOrErrorMultiplier` (60 s).
  */
-fun pollDelayMs(gapMinutes: Int?, baseMs: Long): Long = when {
-    gapMinutes == null -> 2 * baseMs
-    gapMinutes <= 7 -> baseMs
-    gapMinutes <= 14 -> 2 * baseMs
-    else -> 4 * baseMs
+fun pollDelayMs(
+    gapMinutes: Int?,
+    config: PollingConfig = PollingConfig(),
+): Long {
+    val baseMs = config.baseBackgroundSec * 1_000L
+    if (gapMinutes == null) {
+        return baseMs * config.noServiceOrErrorMultiplier
+    }
+    val tier = config.adaptiveTiers
+        .sortedByDescending { it.minGapMin }
+        .firstOrNull { gapMinutes >= it.minGapMin }
+    return (tier?.delaySec?.times(1_000L)) ?: baseMs
+}
+
+/** Overload de compatibilidad con `baseMs` explícito escalando proporcionalmente los escalones de `PollingConfig`. */
+fun pollDelayMs(
+    gapMinutes: Int?,
+    baseMs: Long,
+    config: PollingConfig = PollingConfig(),
+): Long {
+    val defaultBaseMs = config.baseBackgroundSec * 1_000L
+    val rawDelayMs = pollDelayMs(gapMinutes, config)
+    return if (baseMs == defaultBaseMs || defaultBaseMs <= 0L) {
+        rawDelayMs
+    } else {
+        (rawDelayMs * baseMs) / defaultBaseMs
+    }
 }
 
 /** Espera hasta la próxima vuelta: la del aviso más urgente entre los que siguen en vigilancia. */
-fun nextPollDelayMs(watching: List<AlertRule>, views: Map<String, ArrivalsView>, nowMs: Long, baseMs: Long): Long =
+fun nextPollDelayMs(
+    watching: List<AlertRule>,
+    views: Map<String, ArrivalsView>,
+    nowMs: Long,
+    config: PollingConfig = PollingConfig(),
+): Long {
+    val baseMs = config.baseBackgroundSec * 1_000L
+    return watching.minOfOrNull { rule ->
+        val arrivals = usableArrivals(views[rule.stopId] ?: ArrivalsView.Loading)
+        val next = nextArrivalFor(arrivals, rule.lineId, rule.destination, nowMs)
+        pollDelayMs(next?.let { remainingMinutes(it, nowMs) - rule.minutesAhead }, config)
+    } ?: baseMs
+}
+
+fun nextPollDelayMs(
+    watching: List<AlertRule>,
+    views: Map<String, ArrivalsView>,
+    nowMs: Long,
+    baseMs: Long,
+    config: PollingConfig = PollingConfig(),
+): Long =
     watching.minOfOrNull { rule ->
         val arrivals = usableArrivals(views[rule.stopId] ?: ArrivalsView.Loading)
         val next = nextArrivalFor(arrivals, rule.lineId, rule.destination, nowMs)
-        pollDelayMs(next?.let { remainingMinutes(it, nowMs) - rule.minutesAhead }, baseMs)
+        pollDelayMs(next?.let { remainingMinutes(it, nowMs) - rule.minutesAhead }, baseMs, config)
     } ?: baseMs
 
 /** Hay que consultar si nunca se ha hecho o la última respuesta tiene casi un intervalo (la UI también sondea). */
@@ -79,16 +133,22 @@ data class EngineTick(
  * Dispara lo que esté `TRIGGERED` (misma `computeAlertStatus` que A01/A04), decide si
  * seguir con los que quedan y lleva la cuenta del tiempo seguido sin servicio ([troubleSinceMs]).
  */
-fun evaluateTick(rules: List<AlertRule>, views: Map<String, ArrivalsView>, nowMs: Long, troubleSinceMs: Long?): EngineTick {
+fun evaluateTick(
+    rules: List<AlertRule>,
+    views: Map<String, ArrivalsView>,
+    nowMs: Long,
+    troubleSinceMs: Long?,
+    alertsConfig: AlertsConfig = AlertsConfig(),
+): EngineTick {
     val firings = rules.mapNotNull { rule ->
-        val item = alertItem(rule, usableArrivals(views[rule.stopId] ?: ArrivalsView.Loading), nowMs)
+        val item = alertItem(rule, usableArrivals(views[rule.stopId] ?: ArrivalsView.Loading), nowMs, alertsConfig)
         val arrival = item.nextArrival
         if (item.status == ComputedAlertStatus.TRIGGERED && arrival != null) Firing(rule, arrival) else null
     }
     val fired = firings.mapTo(HashSet()) { it.rule.id }
-    val watching = rules.filter { it.id !in fired && isWatching(it, nowMs) }
+    val watching = rules.filter { it.id !in fired && isWatching(it, nowMs, alertsConfig) }
 
-    val polled = stopsToPoll(rules, nowMs).mapNotNull { views[it] }.filter { it != ArrivalsView.Loading }
+    val polled = stopsToPoll(rules, nowMs, alertsConfig).mapNotNull { views[it] }.filter { it != ArrivalsView.Loading }
     val trouble = when {
         polled.isEmpty() -> troubleSinceMs // nada consultado todavía: no cuenta ni a favor ni en contra
         polled.all(::isTrouble) -> troubleSinceMs ?: nowMs
@@ -136,5 +196,11 @@ fun firingsToDelete(firings: List<Firing>, canNotify: Boolean): List<Firing> = i
  * propósito, y sin permiso de notificaciones ([canNotify] false) el disparado no se borra
  * y reanudar sería un bucle.
  */
-fun resumeAfterStop(action: EngineAction, rules: List<AlertRule>, nowMs: Long, canNotify: Boolean): Boolean =
-    action == EngineAction.STOP_IDLE && canNotify && rules.any { isWatching(it, nowMs) }
+fun resumeAfterStop(
+    action: EngineAction,
+    rules: List<AlertRule>,
+    nowMs: Long,
+    canNotify: Boolean,
+    alertsConfig: AlertsConfig = AlertsConfig(),
+): Boolean =
+    action == EngineAction.STOP_IDLE && canNotify && rules.any { isWatching(it, nowMs, alertsConfig) }

@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -26,7 +27,6 @@ data class AlertsUiState(
     val silenced: List<AlertItem> = emptyList(),
     /** Vista de 5 estados de cada parada vigilada (sin servicio, error, datos viejos). */
     val stopViews: Map<String, ArrivalsView> = emptyMap(),
-    val nowMs: Long = 0,
     val refreshing: Boolean = false,
     val lineColors: Map<String, Int> = emptyMap(),
 ) {
@@ -39,27 +39,29 @@ data class AlertsUiState(
 /** A04 · Mis avisos. */
 class AlertsViewModel(private val container: AppContainer) : ViewModel() {
     private val refreshing = MutableStateFlow(false)
+    private val liveAndConfig = combine(
+        container.live.feeds,
+        container.ticker.now,
+        container.configRepository.config,
+    ) { feeds, nowMs, cfg -> Triple(feeds, nowMs, cfg) }
 
     val state: StateFlow<AlertsUiState> = combine(
         container.alerts,
-        container.live.feeds,
-        container.ticker.now,
+        liveAndConfig,
         refreshing,
         container.lineColors,
-    ) { rules, feeds, now, isRefreshing, colors ->
+    ) { rules, (feeds, nowMs, cfg), isRefreshing, colors ->
         if (rules == null) return@combine AlertsUiState(lineColors = colors)
-        val nowMs = now.toEpochMilli()
-        val (active, silenced) = groupAlerts(alertItems(rules, feeds, nowMs))
+        val (active, silenced) = groupAlerts(alertItems(rules, feeds, nowMs, cfg.freshness, cfg.alerts))
         AlertsUiState(
             loading = false,
             active = active,
             silenced = silenced,
-            stopViews = stopsToWatch(rules).associateWith { feedView(feeds, it, nowMs) },
-            nowMs = nowMs,
+            stopViews = stopsToWatch(rules).associateWith { feedView(feeds, it, nowMs, cfg.freshness) },
             refreshing = isRefreshing,
             lineColors = colors,
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), AlertsUiState())
+    }.distinctUntilChanged().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), AlertsUiState())
 
     /** Sondeo de las paradas con avisos activos mientras la pantalla está visible. */
     suspend fun pollWhileVisible() = container.pollStops(container.alerts.filterNotNull().map(::stopsToWatch))

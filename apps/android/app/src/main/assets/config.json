@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "apiBaseUrl": "http://app.dbus.eus/SSIIMovilWSv2/ws/cons",
   "endpoints": {
     "tiemposParada": "/tiemposParada"
@@ -10,6 +10,58 @@
   },
   "headers": {},
   "pollIntervalSec": 30,
+  "connectTimeoutSec": 10,
+  "callTimeoutSec": 15,
+  "remoteConfigCacheHours": 12,
+  "remoteConfigTimeoutSec": 5,
+  "polling": {
+    "uiTickerSec": 30,
+    "foregroundVisibleSec": 30,
+    "baseBackgroundSec": 30,
+    "noServiceOrErrorMultiplier": 2,
+    "adaptiveTiers": [
+      {
+        "minGapMin": 31,
+        "delaySec": 600
+      },
+      {
+        "minGapMin": 15,
+        "delaySec": 240
+      },
+      {
+        "minGapMin": 8,
+        "delaySec": 60
+      },
+      {
+        "minGapMin": 0,
+        "delaySec": 30
+      }
+    ]
+  },
+  "freshness": {
+    "freshMaxSec": 45,
+    "staleMaxSec": 90,
+    "liveFeedHistorySize": 3
+  },
+  "alerts": {
+    "triggerBufferSec": 30,
+    "expirationDays": 7,
+    "minMinutesAhead": 1,
+    "maxMinutesAhead": 30,
+    "maxBadgeCount": 9,
+    "recurringWakeupBeforeMin": 25,
+    "recurringExpiryAfterMin": 25,
+    "recurringWindowToleranceMin": 5
+  },
+  "geo": {
+    "walkingSpeedKmh": 4.8
+  },
+  "uiLimits": {
+    "homeFavoriteMaxArrivals": 3,
+    "homeSearchLimit": 6,
+    "searchStopsLimit": 50,
+    "nearbyStopsLimit": 10
+  },
   "minAppVersion": 1,
   "notice": null
 }

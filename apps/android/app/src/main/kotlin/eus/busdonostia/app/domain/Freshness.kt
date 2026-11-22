@@ -1,11 +1,15 @@
 package eus.busdonostia.app.domain
 
-/** Con refresco cada 30 s, FRESH ≤ 45 s deja margen para la latencia; STALE ≤ 90 s. */
-fun computeFreshness(fetchedAtMs: Long, nowMs: Long): FreshnessLevel {
-    val ageSec = maxOf(0L, Math.floorDiv(nowMs - fetchedAtMs, 1_000L))
+/** Frescura de una respuesta según `freshness` de la config: FRESH ≤ `freshMaxSec`, STALE ≤ `staleMaxSec`, si no EXPIRED. */
+fun computeFreshness(
+    fetchedAtMs: Long,
+    nowMs: Long,
+    config: FreshnessConfig = FreshnessConfig(),
+): FreshnessLevel {
+    val ageSec = maxOf(0L, (nowMs - fetchedAtMs) / 1_000L)
     return when {
-        ageSec <= 45 -> FreshnessLevel.FRESH
-        ageSec <= 90 -> FreshnessLevel.STALE
+        ageSec <= config.freshMaxSec -> FreshnessLevel.FRESH
+        ageSec <= config.staleMaxSec -> FreshnessLevel.STALE
         else -> FreshnessLevel.EXPIRED
     }
 }

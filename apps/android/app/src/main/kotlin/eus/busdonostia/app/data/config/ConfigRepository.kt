@@ -4,6 +4,11 @@ import android.content.res.AssetManager
 import eus.busdonostia.app.data.Warn
 import eus.busdonostia.app.data.await
 import eus.busdonostia.app.data.logcatWarn
+import eus.busdonostia.app.domain.AlertsConfig
+import eus.busdonostia.app.domain.FreshnessConfig
+import eus.busdonostia.app.domain.GeoConfig
+import eus.busdonostia.app.domain.PollingConfig
+import eus.busdonostia.app.domain.UiLimitsConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,34 +26,79 @@ import java.util.concurrent.TimeUnit
 
 /**
  * Config efectiva: la última remota válida o, si no hay, la empaquetada. Descarga
- * como mucho cada 12 h (cuenta el intento, salga bien o mal), timeout 5 s, valida
+ * como mucho cada `remoteConfigCacheHours` (cuenta el intento, salga bien o mal), timeout `remoteConfigTimeoutSec`, valida
  * esquema y rangos; ante cualquier fallo se queda con la que tenía. Nunca bloquea
  * el arranque: [config] tiene valor desde el constructor.
  */
 class ConfigRepository(
-    private val bundled: ApiConfig,
+    @Volatile private var bundled: ApiConfig,
     private val cacheFile: File,
-    /** null = sin config remota (hasta el Sprint 5). Ver [remoteConfigUrl]. */
+    /** null = sin config remota. Ver [remoteConfigUrl]. */
     private val remoteUrl: HttpUrl?,
-    http: OkHttpClient,
+    private val http: OkHttpClient,
     private val nowMs: () -> Long = System::currentTimeMillis,
     private val warn: Warn = logcatWarn("ConfigRepository"),
 ) {
-    private val http = http.newBuilder().callTimeout(TIMEOUT_SEC, TimeUnit.SECONDS).build()
-    private var cache: Cached? = if (remoteUrl == null) null else readCache()
-    private val state = MutableStateFlow(cache?.config ?: bundled)
+    @Volatile
+    private var cache: Cached? = null
+
+    private val state = MutableStateFlow(bundled)
     val config: StateFlow<ApiConfig> = state.asStateFlow()
+
+    private val _pollingConfig = MutableStateFlow(state.value.polling)
+    val pollingConfig: StateFlow<PollingConfig> = _pollingConfig.asStateFlow()
+
+    private val _freshnessConfig = MutableStateFlow(state.value.freshness)
+    val freshnessConfig: StateFlow<FreshnessConfig> = _freshnessConfig.asStateFlow()
+
+    private val _alertsConfig = MutableStateFlow(state.value.alerts)
+    val alertsConfig: StateFlow<AlertsConfig> = _alertsConfig.asStateFlow()
+
+    private val _geoConfig = MutableStateFlow(state.value.geo)
+    val geoConfig: StateFlow<GeoConfig> = _geoConfig.asStateFlow()
+
+    private val _uiLimitsConfig = MutableStateFlow(state.value.uiLimits)
+    val uiLimitsConfig: StateFlow<UiLimitsConfig> = _uiLimitsConfig.asStateFlow()
+
+    /**
+     * Inicializa desde disco (`assets/config.json` y `remote-config.json`) fuera del Main Thread.
+     */
+    fun initializeFromDisk(loadBundledFn: () -> ApiConfig = { bundled }) {
+        val loadedBundled = runCatching(loadBundledFn).getOrElse { e ->
+            warn("no se pudo leer assets/config.json", e)
+            bundled
+        }
+        bundled = loadedBundled
+        if (remoteUrl != null) {
+            cache = readCache()
+        }
+        applyConfig(cache?.config ?: bundled)
+    }
+
+    private fun applyConfig(next: ApiConfig) {
+        state.value = next
+        _pollingConfig.value = next.polling
+        _freshnessConfig.value = next.freshness
+        _alertsConfig.value = next.alerts
+        _geoConfig.value = next.geo
+        _uiLimitsConfig.value = next.uiLimits
+    }
 
     /** true si se descargó y aplicó una config nueva válida. */
     suspend fun refreshIfDue(): Boolean {
         val url = remoteUrl ?: return false
         val now = nowMs()
         val last = cache?.lastAttemptMs
-        if (last != null && now - last in 0 until REFRESH_INTERVAL_MS) return false
+        val refreshIntervalMs = state.value.remoteConfigCacheHours * 3_600_000L
+        if (last != null && now - last in 0 until refreshIntervalMs) return false
 
         val fetched = withContext(Dispatchers.IO) {
             try {
-                http.newCall(Request.Builder().url(url).build()).await().use { response ->
+                // Timeout de la config efectiva en cada intento (la remota puede cambiarlo).
+                http.newBuilder()
+                    .callTimeout(state.value.remoteConfigTimeoutSec.toLong(), TimeUnit.SECONDS)
+                    .build()
+                    .newCall(Request.Builder().url(url).build()).await().use { response ->
                     if (response.isSuccessful) response.body?.string()?.let(ApiConfig::parse) else null
                 }
             } catch (e: IOException) {
@@ -58,9 +108,11 @@ class ConfigRepository(
         }
         val updated = Cached(lastAttemptMs = now, config = fetched ?: cache?.config)
         cache = updated
-        writeCache(updated)
+        withContext(Dispatchers.IO) {
+            writeCache(updated)
+        }
         if (fetched == null) return false
-        state.value = fetched
+        applyConfig(fetched)
         return true
     }
 
@@ -68,14 +120,14 @@ class ConfigRepository(
     private data class Cached(val lastAttemptMs: Long, val config: ApiConfig?)
 
     private fun readCache(): Cached? = if (!cacheFile.exists()) {
-        null // Primera vez: lo normal, no se avisa.
+        null
     } else {
         try {
             json.decodeFromString(Cached.serializer(), cacheFile.readText())
                 .let { it.copy(config = it.config?.takeIf { c -> c.validate().isEmpty() }) }
         } catch (e: Exception) {
             warn("caché de config ilegible: se ignora", e)
-            null // Corrupta: como si no hubiera.
+            null
         }
     }
 
@@ -86,12 +138,10 @@ class ConfigRepository(
             if (!tmp.renameTo(cacheFile)) tmp.delete()
         } catch (e: IOException) {
             warn("no se pudo guardar la caché de config", e)
-            // Sin caché en disco solo se pierde el intervalo de 12 h; nunca bloquea.
         }
     }
 
     companion object {
-        const val TIMEOUT_SEC = 5L
         const val REFRESH_INTERVAL_MS = 12 * 3_600_000L
         private val json = Json { ignoreUnknownKeys = true }
 

@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -74,21 +75,24 @@ class StopDetailViewModel(
     private val fetchLock = Mutex()
 
     private val feedState = combine(latest, lastValid, refreshing, selectedLine, ::FeedState)
+    private val timeAndConfig = combine(
+        container.ticker.now,
+        container.configRepository.config,
+    ) { nowMs, cfg -> nowMs to cfg }
 
     val state: StateFlow<StopDetailUiState> = combine(
         container.catalog,
         feedState,
-        container.ticker.now,
+        timeAndConfig,
         container.favorites,
         container.lineColors,
-    ) { catalogResult, feed, now, favorites, colors ->
+    ) { catalogResult, feed, (nowMs, cfg), favorites, colors ->
         val catalog = catalogResult?.getOrNull()
         val stop = catalog?.stopByCode(stopId)
         val valid = feed.lastValid
         val selected = feed.selectedLine?.let { line -> catalog?.toPublicLineId(line, stopId) ?: line }
         val ids = favorites.map { it.id }.toSet()
-        val nowMs = now.toEpochMilli()
-        val view = stopArrivalsView(feed.latest, valid, nowMs)
+        val view = stopArrivalsView(feed.latest, valid, nowMs, cfg.freshness)
         StopDetailUiState(
             stopId = stopId,
             name = stop?.desc ?: valid?.stopName,
@@ -107,7 +111,7 @@ class StopDetailViewModel(
             lineColors = colors,
             coordinatesAttribution = catalog?.coordinates?.attribution,
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), StopDetailUiState(stopId))
+    }.distinctUntilChanged().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), StopDetailUiState(stopId))
 
     init {
         container.appScope.launch { container.database.recentStops().record(stopId, System.currentTimeMillis()) }
@@ -117,7 +121,7 @@ class StopDetailViewModel(
     suspend fun pollWhileVisible() {
         while (true) {
             fetch(reuseRecent = true)
-            delay(container.configRepository.config.value.pollIntervalSec * 1_000L)
+            delay(container.configRepository.pollingConfig.value.foregroundVisibleSec * 1_000L)
         }
     }
 

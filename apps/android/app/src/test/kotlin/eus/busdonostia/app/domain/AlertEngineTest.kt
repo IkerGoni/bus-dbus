@@ -110,14 +110,17 @@ class AlertEngineTest {
     fun sondeoAdaptativoSegunLoQueFaltaParaAvisar() {
         val base = 30_000L
         assertEquals(base, pollDelayMs(0, base))
-        assertEquals(base, pollDelayMs(7, base)) // menos de 7 min para avisar: cada 30 s
+        assertEquals(base, pollDelayMs(7, base)) // <= 7 min para avisar: cada 30 s
         assertEquals(60_000L, pollDelayMs(8, base))
-        assertEquals(60_000L, pollDelayMs(14, base))
-        assertEquals(120_000L, pollDelayMs(15, base))
+        assertEquals(60_000L, pollDelayMs(14, base)) // 8..14 min: cada 1 min
+        assertEquals(240_000L, pollDelayMs(15, base))
+        assertEquals(240_000L, pollDelayMs(30, base)) // 15..30 min: cada 4 min
+        assertEquals(600_000L, pollDelayMs(31, base)) // > 30 min: cada 10 min
         assertEquals(60_000L, pollDelayMs(null, base)) // sin bus de la línea, sin servicio o error
-        // Aviso 5' con el bus a 25 min (falta 20) → 2 min; a 15 (falta 10) → 1 min; a 12 (falta 7) → 30 s.
+        // Aviso 5' con el bus a 40 min (falta 35) → 10 min; a 25 (falta 20) → 4 min; a 15 (falta 10) → 1 min; a 12 (falta 7) → 30 s.
         val rule = once("a")
-        assertEquals(120_000L, nextPollDelayMs(listOf(rule), mapOf("340" to live(arrival("5", 25))), now, base))
+        assertEquals(600_000L, nextPollDelayMs(listOf(rule), mapOf("340" to live(arrival("5", 40))), now, base))
+        assertEquals(240_000L, nextPollDelayMs(listOf(rule), mapOf("340" to live(arrival("5", 25))), now, base))
         assertEquals(60_000L, nextPollDelayMs(listOf(rule), mapOf("340" to live(arrival("5", 15))), now, base))
         assertEquals(base, nextPollDelayMs(listOf(rule), mapOf("340" to live(arrival("5", 12))), now, base))
         // Con varios avisos manda el más urgente.
@@ -126,6 +129,24 @@ class AlertEngineTest {
         assertEquals(base, nextPollDelayMs(listOf(rule, urgent), views, now, base))
         // Sin avisos en vigilancia, la base.
         assertEquals(base, nextPollDelayMs(emptyList(), emptyMap(), now, base))
+    }
+
+    @Test
+    fun sondeoAdaptativoLeeLosEscalonesDePollingConfig() {
+        val cfg = PollingConfig(
+            baseBackgroundSec = 20,
+            noServiceOrErrorMultiplier = 3,
+            adaptiveTiers = listOf(AdaptivePollTier(minGapMin = 10, delaySec = 120), AdaptivePollTier(minGapMin = 0, delaySec = 20)),
+        )
+        assertEquals(20_000L, pollDelayMs(9, cfg))
+        assertEquals(120_000L, pollDelayMs(10, cfg))
+        assertEquals(60_000L, pollDelayMs(null, cfg)) // base × multiplicador
+        assertEquals(20_000L, pollDelayMs(-2, cfg)) // ya dentro de la antelación: la base
+        // Valores por defecto (= config.json): los 4 escalones del Sprint 5.0.
+        assertEquals(30_000L, pollDelayMs(7))
+        assertEquals(60_000L, pollDelayMs(8))
+        assertEquals(240_000L, pollDelayMs(15))
+        assertEquals(600_000L, pollDelayMs(31))
     }
 
     @Test

@@ -1,15 +1,12 @@
 package eus.busdonostia.app.domain
 
-import java.util.Locale
-
 /*
  * A06 · Configurar aviso: borrador, validación y dedup (02-domain-contracts.md §1).
- * Puro: sin Android. La UI solo pinta y llama a estas funciones.
+ * Puro: sin Android ni java.*. La UI solo pinta y llama a estas funciones.
  */
 
 /** Chips rápidos de antelación, sincronizados con el slider. */
 val QUICK_MINUTES = listOf(2, 3, 5, 8, 10, 15)
-val MINUTES_RANGE = 1..30
 
 data class AlertDraft(
     val stopId: String? = null,
@@ -23,23 +20,32 @@ data class AlertDraft(
 enum class DraftError { NO_STOP, NO_LINE, MINUTES_OUT_OF_RANGE }
 
 /** Errores que impiden guardar; vacío = se puede guardar. */
-fun validateDraft(draft: AlertDraft): List<DraftError> = buildList {
+fun validateDraft(
+    draft: AlertDraft,
+    config: AlertsConfig = AlertsConfig(),
+): List<DraftError> = buildList {
     if (draft.stopId.isNullOrBlank()) add(DraftError.NO_STOP)
     if (draft.lineId.isNullOrBlank()) add(DraftError.NO_LINE)
-    if (draft.minutesAhead !in MINUTES_RANGE) add(DraftError.MINUTES_OUT_OF_RANGE)
+    if (draft.minutesAhead !in config.minMinutesAhead..config.maxMinutesAhead) {
+        add(DraftError.MINUTES_OUT_OF_RANGE)
+    }
 }
 
 /**
  * Regla a guardar. Guardar vuelve a armar el aviso: activo, vigila desde [nowMs]
- * (caduca a los 7 días desde aquí).
+ * (caduca a los `expirationDays` desde aquí).
  */
-fun AlertDraft.toRule(id: String, nowMs: Long): AlertRule = AlertRule(
+fun AlertDraft.toRule(
+    id: String,
+    nowMs: Long,
+    config: AlertsConfig = AlertsConfig(),
+): AlertRule = AlertRule(
     id = id,
     stopId = checkNotNull(stopId),
     stopName = stopName ?: stopId,
     lineId = normalizeLine(checkNotNull(lineId)),
     destination = destination,
-    minutesAhead = minutesAhead.coerceIn(MINUTES_RANGE),
+    minutesAhead = minutesAhead.coerceIn(config.minMinutesAhead..config.maxMinutesAhead),
     active = true,
     createdAtMs = nowMs,
 )
@@ -75,13 +81,14 @@ fun planSave(
     confirmed: Boolean,
     newId: String,
     nowMs: Long,
+    config: AlertsConfig = AlertsConfig(),
 ): SavePlan {
     val other = conflict?.takeIf { it.id != editingId }
     return when {
-        other == null && editingId == null -> SavePlan.Write(draft.toRule(newId, nowMs), insert = true)
-        other == null -> SavePlan.Write(draft.toRule(checkNotNull(editingId), nowMs), insert = false)
+        other == null && editingId == null -> SavePlan.Write(draft.toRule(newId, nowMs, config), insert = true)
+        other == null -> SavePlan.Write(draft.toRule(checkNotNull(editingId), nowMs, config), insert = false)
         !confirmed -> SavePlan.NeedsConfirmation(other)
-        else -> SavePlan.Write(draft.toRule(other.id, nowMs), insert = false, deleteId = editingId)
+        else -> SavePlan.Write(draft.toRule(other.id, nowMs, config), insert = false, deleteId = editingId)
     }
 }
 
@@ -109,4 +116,4 @@ fun lineDestinationsAtStop(catalog: Catalog, stopId: String, lineId: String, arr
  * desde una llegada que ya no sale), sin repetir aunque cambien las mayúsculas.
  */
 fun destinationChoices(destinations: List<String>, chosen: String?): List<String> =
-    (destinations + listOfNotNull(chosen)).distinctBy { it.lowercase(Locale.ROOT) }
+    (destinations + listOfNotNull(chosen)).distinctBy { it.lowercase() }

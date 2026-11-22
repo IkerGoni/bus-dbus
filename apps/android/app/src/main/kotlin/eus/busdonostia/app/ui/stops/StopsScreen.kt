@@ -250,7 +250,7 @@ private fun LazyListScope.rows(
     onOpenStop: (String, String?) -> Unit,
     onStar: (StopRow) -> Unit,
 ) {
-    items(rows, key = { "${it.stopId}:${it.favoriteLineId.orEmpty()}" }) { row ->
+    items(rows, key = { "${it.stopId}:${it.favoriteLineId.orEmpty()}" }, contentType = { "stop_card" }) { row ->
         StopCard(row, state.lineColors, onClick = { onOpenStop(row.stopId, row.favoriteLineId) }, onStar = { onStar(row) })
     }
 }

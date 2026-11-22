@@ -2,9 +2,11 @@ package eus.busdonostia.app
 
 import android.app.Application
 import android.content.Context
+import android.os.StrictMode
 import androidx.appcompat.app.AppCompatDelegate
 import eus.busdonostia.app.data.api.DbusClient
 import eus.busdonostia.app.data.catalog.loadCatalog
+import eus.busdonostia.app.data.config.ApiConfig
 import eus.busdonostia.app.data.config.ConfigRepository
 import eus.busdonostia.app.data.db.AppDatabase
 import eus.busdonostia.app.data.db.toDomain
@@ -37,16 +39,18 @@ class AppContainer(private val app: Application) {
     /** Vive lo que el proceso: carga del catálogo, config remota y escrituras que no deben cancelarse. */
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    /** Dbus responde en < 0,3 s; con 8 s una parada colgada no retrasa toda la vuelta del motor (H7). */
+    private val defaultConfig = ApiConfig.default()
+
+    /** Dbus responde en < 0,3 s; timeouts configurados desde el esquema v2 (H7). */
     val http: OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(8, TimeUnit.SECONDS)
-        .callTimeout(8, TimeUnit.SECONDS)
+        .connectTimeout(defaultConfig.connectTimeoutSec.toLong(), TimeUnit.SECONDS)
+        .callTimeout(defaultConfig.callTimeoutSec.toLong(), TimeUnit.SECONDS)
         .build()
 
     val database: AppDatabase = AppDatabase.build(app)
 
     val configRepository = ConfigRepository(
-        bundled = ConfigRepository.loadBundled(app.assets),
+        bundled = defaultConfig,
         cacheFile = File(app.filesDir, "remote-config.json"),
         remoteUrl = ConfigRepository.remoteConfigUrl(BuildConfig.REMOTE_CONFIG_URL),
         http = http,
@@ -87,20 +91,33 @@ class AppContainer(private val app: Application) {
     val live = LiveRepository(
         client = dbusClient,
         language = ::apiLanguage,
-        pollIntervalMs = { configRepository.config.value.pollIntervalSec * 1_000L },
+        pollIntervalMs = { configRepository.config.value.polling.foregroundVisibleSec * 1_000L },
         onLiveFetch = settings::recordLiveFetch,
         onLineColors = { database.lineColors().upsertAll(it) },
         scope = appScope,
+        historySize = { configRepository.config.value.freshness.liveFeedHistorySize },
     )
 
-    val ticker = Ticker(appScope)
+    val ticker = Ticker(
+        scope = appScope,
+        nowMs = System::currentTimeMillis,
+        periodMs = { configRepository.config.value.polling.uiTickerSec * 1_000L },
+    )
 
     /** Arranca el motor de avisos con cada cambio de avisos y al abrir la app. */
-    val monitoring = MonitoringStarter(app, alerts, appScope)
+    val monitoring = MonitoringStarter(
+        context = app,
+        alerts = alerts,
+        scope = appScope,
+        alertsConfig = { configRepository.config.value.alerts },
+    )
 
     init {
-        // Sin bloquear el arranque: si no hay remota o falla, sigue la empaquetada.
-        appScope.launch { configRepository.refreshIfDue() }
+        // Cero I/O en Main Thread: carga assets/config.json y remote-config.json en Dispatchers.IO.
+        appScope.launch(Dispatchers.IO) {
+            configRepository.initializeFromDisk { ConfigRepository.loadBundled(app.assets) }
+            configRepository.refreshIfDue()
+        }
     }
 }
 
@@ -110,6 +127,17 @@ class BusDonostiaApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // Antes de crear el contenedor: así StrictMode audita también el arranque (config y catálogo fuera del Main Thread).
+        if (BuildConfig.DEBUG) {
+            StrictMode.setThreadPolicy(
+                StrictMode.ThreadPolicy.Builder()
+                    .detectDiskReads()
+                    .detectDiskWrites()
+                    .detectNetwork()
+                    .penaltyLog()
+                    .build(),
+            )
+        }
         createNotificationChannels(this)
         container = AppContainer(this)
         // Apariencia elegida en A07 (AppCompat no la guarda): antes de crear ninguna actividad.

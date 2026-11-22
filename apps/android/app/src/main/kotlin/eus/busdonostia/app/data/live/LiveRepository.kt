@@ -3,6 +3,7 @@ package eus.busdonostia.app.data.live
 import eus.busdonostia.app.data.api.DbusClient
 import eus.busdonostia.app.data.db.LineColorEntity
 import eus.busdonostia.app.data.db.lineColors
+import eus.busdonostia.app.domain.FreshnessConfig
 import eus.busdonostia.app.domain.StopFeed
 import eus.busdonostia.app.domain.StopFeedStatus
 import eus.busdonostia.app.domain.reusableFeed
@@ -22,14 +23,15 @@ class LiveRepository(
     private val client: DbusClient,
     /** `es` | `eu`: el idioma de la app. */
     private val language: () -> String,
-    /** `pollIntervalSec` de la config, en ms. */
+    /** `foregroundVisibleSec` de la config, en ms. */
     private val pollIntervalMs: () -> Long,
     private val onLiveFetch: (fetchedAtMs: Long) -> Unit,
     private val onLineColors: suspend (List<LineColorEntity>) -> Unit,
     private val scope: CoroutineScope,
     private val nowMs: () -> Long = System::currentTimeMillis,
+    historySize: () -> Int = { FreshnessConfig().liveFeedHistorySize },
 ) {
-    private val live = LiveFeeds()
+    private val live = LiveFeeds(historySize)
     private val inFlight = InFlight<String, StopFeed>(scope)
 
     /** Respuestas de esta sesión por parada (A01, A04, A06, badge y motor). */

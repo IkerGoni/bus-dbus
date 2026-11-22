@@ -56,9 +56,25 @@ class ConfigTest {
     @Test
     fun laEmpaquetadaEsValida() {
         assertEquals(emptyList<String>(), bundled.validate())
+        assertEquals(2, bundled.schemaVersion)
         assertEquals("http://app.dbus.eus/SSIIMovilWSv2/ws/cons", bundled.apiBaseUrl)
         assertEquals("/tiemposParada", bundled.endpoints.tiemposParada)
         assertEquals(30, bundled.pollIntervalSec)
+        assertEquals(30, bundled.polling.uiTickerSec)
+        assertEquals(30, bundled.polling.foregroundVisibleSec)
+        assertEquals(30, bundled.polling.baseBackgroundSec)
+        assertEquals(2, bundled.polling.noServiceOrErrorMultiplier)
+        assertEquals(4, bundled.polling.adaptiveTiers.size)
+        assertEquals(45, bundled.freshness.freshMaxSec)
+        assertEquals(90, bundled.freshness.staleMaxSec)
+        assertEquals(3, bundled.freshness.liveFeedHistorySize)
+        assertEquals(30, bundled.alerts.triggerBufferSec)
+        assertEquals(7, bundled.alerts.expirationDays)
+        assertEquals(1, bundled.alerts.minMinutesAhead)
+        assertEquals(30, bundled.alerts.maxMinutesAhead)
+        assertEquals(9, bundled.alerts.maxBadgeCount)
+        assertEquals(4.8, bundled.geo.walkingSpeedKmh, 0.001)
+        assertEquals(3, bundled.uiLimits.homeFavoriteMaxArrivals)
     }
 
     @Test
@@ -95,9 +111,43 @@ class ConfigTest {
     fun rangosYEsquema() {
         assertNull(ApiConfig.parse(variantInt("pollIntervalSec", 19)))
         assertNotNull(ApiConfig.parse(variantInt("pollIntervalSec", 20)))
-        assertNull(ApiConfig.parse(variantInt("schemaVersion", 2)))
-        assertNull(ApiConfig.parse("{\"schemaVersion\":1}"))
+        assertNull(ApiConfig.parse(variantInt("schemaVersion", 3)))
+        assertNull(ApiConfig.parse("{\"schemaVersion\":2}"))
         assertNull(ApiConfig.parse("no json"))
+        assertTrue(bundled.copy(freshness = bundled.freshness.copy(freshMaxSec = 90, staleMaxSec = 90)).validate().isNotEmpty())
+        assertTrue(bundled.copy(freshness = bundled.freshness.copy(liveFeedHistorySize = 0)).validate().isNotEmpty())
+        assertTrue(bundled.copy(alerts = bundled.alerts.copy(minMinutesAhead = 35, maxMinutesAhead = 30)).validate().isNotEmpty())
+        assertTrue(bundled.copy(geo = bundled.geo.copy(walkingSpeedKmh = 0.0)).validate().isNotEmpty())
+        assertTrue(bundled.copy(uiLimits = bundled.uiLimits.copy(homeFavoriteMaxArrivals = 0)).validate().isNotEmpty())
+    }
+
+    @Test
+    fun escalonesAdaptativosEstrictamenteDescendentesYEnRango() {
+        val tiers = bundled.polling.adaptiveTiers
+        assertTrue(bundled.copy(polling = bundled.polling.copy(adaptiveTiers = tiers.reversed())).validate().isNotEmpty())
+        assertTrue(bundled.copy(polling = bundled.polling.copy(adaptiveTiers = tiers + tiers.last())).validate().isNotEmpty())
+        assertTrue(bundled.copy(polling = bundled.polling.copy(adaptiveTiers = emptyList())).validate().isNotEmpty())
+        val tooFast = tiers.map { it.copy(delaySec = 5) }
+        assertTrue(bundled.copy(polling = bundled.polling.copy(adaptiveTiers = tooFast)).validate().isNotEmpty())
+    }
+
+    @Test
+    fun limitesDeUiEnRango() {
+        assertTrue(bundled.copy(uiLimits = bundled.uiLimits.copy(homeSearchLimit = 0)).validate().isNotEmpty())
+        assertTrue(bundled.copy(uiLimits = bundled.uiLimits.copy(searchStopsLimit = 0)).validate().isNotEmpty())
+        assertTrue(bundled.copy(uiLimits = bundled.uiLimits.copy(nearbyStopsLimit = 1_000)).validate().isNotEmpty())
+    }
+
+    @Test
+    fun configRemotaConRangosInvalidosSeRechazaYSeQuedaLaEmpaquetada() = runTest {
+        val root = Json.parseToJsonElement(TestData.bundledConfigJson).jsonObject
+        val freshness = root.getValue("freshness").jsonObject
+        val inverted = JsonObject(freshness + ("freshMaxSec" to JsonPrimitive(120)) + ("staleMaxSec" to JsonPrimitive(60)))
+        server.enqueue(MockResponse().setBody(JsonObject(root + ("freshness" to inverted)).toString()))
+        val r = repo()
+        assertFalse(r.refreshIfDue())
+        assertEquals(bundled, r.config.value)
+        assertEquals(bundled.freshness, r.freshnessConfig.value)
     }
 
     @Test
@@ -124,8 +174,10 @@ class ConfigTest {
         assertEquals(bundled, r.config.value) // arranca con la empaquetada, sin esperar
         assertTrue(r.refreshIfDue())
         assertEquals(45, r.config.value.pollIntervalSec)
-        // Un arranque posterior parte de la última válida, sin red.
-        assertEquals(45, repo().config.value.pollIntervalSec)
+        // Un arranque posterior carga la última válida desde disco en IO, sin red.
+        val nextRepo = repo()
+        nextRepo.initializeFromDisk()
+        assertEquals(45, nextRepo.config.value.pollIntervalSec)
     }
 
     @Test
@@ -176,9 +228,11 @@ class ConfigTest {
     }
 
     @Test
-    fun cacheCorruptaEnDiscoSeIgnora() {
+    fun cacheCorruptaEnDiscoSeIgnora() = runTest {
         cacheFile.writeText("basura")
-        assertEquals(bundled, repo().config.value)
+        val r = repo()
+        r.initializeFromDisk()
+        assertEquals(bundled, r.config.value)
         assertEquals(1, warnings.size) // corrupta: se avisa (H5); ausente es lo normal y no
     }
 }

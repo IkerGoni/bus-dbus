@@ -295,7 +295,7 @@ private fun LazyListScope.arrivalItems(
         }
         return
     }
-    items(rows, key = { it.key }) { row ->
+    items(rows, key = { it.key }, contentType = { "arrival_row" }) { row ->
         val arrival = row.arrival
         ArrivalRow(
             arrival = arrival,

@@ -1,14 +1,13 @@
 package eus.busdonostia.app.domain
 
-import java.util.Locale
-
 /**
  * Minutos restantes para pintar. Nunca segundos: la API no da esa precisión.
- * El reloj de 1 s solo decide cuándo baja el minuto.
+ * El reloj de 1 s / 30 s solo decide cuándo baja el minuto.
  */
 fun remainingMinutes(arrival: Arrival, nowMs: Long): Int {
     // Si el reloj va por detrás del fetch, el minuto no sube (el TS de referencia daría +1).
-    val elapsedMin = maxOf(0L, Math.floorDiv(nowMs - arrival.fetchedAtMs, 60_000L)).toInt()
+    val elapsedMs = nowMs - arrival.fetchedAtMs
+    val elapsedMin = if (elapsedMs <= 0L) 0 else (elapsedMs / 60_000L).toInt()
     return maxOf(0, arrival.minutesAtFetch - elapsedMin)
 }
 
@@ -16,9 +15,8 @@ fun remainingMinutes(arrival: Arrival, nowMs: Long): Int {
 const val UNKNOWN_DESTINATION = "Servicio programado"
 
 private val SPACES = Regex("\\s+")
-private val ES = Locale.forLanguageTag("es")
 
-private fun normalizeDestination(value: String) = value.trim().lowercase(ES).replace(SPACES, " ")
+private fun normalizeDestination(value: String) = value.trim().lowercase().replace(SPACES, " ")
 
 /** Comparación tolerante: Dbus varía el texto del destino entre respuestas. */
 fun destinationsMatch(actual: String, expected: String): Boolean {
