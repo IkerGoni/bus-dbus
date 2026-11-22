@@ -1,60 +1,56 @@
 # Estado — bus-dbus
 
-Actualizado: 2026-11-22 12:11 · Última sesión: auditoría, remediación y despliegue
+Actualizado: 2026-11-22 13:15 · Última sesión: spec Android + Sprint 0
 
 > **`AGENTS.md` es la fuente de verdad.** Este archivo es el estado de sesión;
 > si algo aquí contradice a `AGENTS.md`, manda `AGENTS.md`.
 
 ## Objetivo actual
 
-Bot de Telegram con datos reales de Dbus operativo y con la remediación de la
-auditoría **desplegada**. No hay trabajo en curso en el lane bot. Siguiente
-hito: validación conversacional en Telegram y decisión de prioridad (PWA vs.
-deuda opcional del bot).
+MVP Android nativo sin backend (ADR 009). Plan en
+`docs/07-android-mvp/SPRINTS.md`. **Sprint 0 hecho; siguiente: Sprint 1
+(datos y dominio).** El bot sigue en producción sin cambios (PID `80402`).
 
 ## Hecho en la última sesión
 
-- Auditoría solo lectura de `apps/bot/**` + `packages/{core,contracts}/**`:
-  14 problemas reales (13 corregidos; R6 queda para Iker), 5 hallazgos
-  opcionales documentados.
-- **Remediación committed, pusheada y desplegada** (`484f42b` + docs
-  `7823788`, `b9cbae4`, `bbe125b`):
-  - avisos reales de Dbus conservados (`SIN_SERVICIO` muestra motivo);
-  - una sola consulta en vivo por comando (sin doble/triple fetch);
-  - `.catch` en timers, dedup de favoritos con `UNIQUE` + migración v3;
-  - lock con `wx` y retry 409 extraído a `telegram-launch.ts`;
-  - callbacks de avisos stateless; catálogo validado con Zod;
-  - identidad de línea en `@dbus/core`; Overpass muerto eliminado;
-  - `escapeMd` y `normalizeLine` corregidos.
-- Tests: bot **86** (antes 70), core **14** (antes 12); sin silent-skips de
-  red. Auditoría final independiente: 13/13 cerrados, sin P0/P1 nuevos.
-- **Reinicio regla 9 completado** con autorización: PID `64221` detenido,
-  recompilado, arrancado con `npm run start` y `BOT_TOKEN` solo por entorno.
-  Bot vivo **PID `80402`** (npm `80382`), lock `80402`, log sin errores ni
-  conflictos desde el arranque.
-- Verificación: `pnpm --filter @dbus/bot verify` 86/86 · `pnpm verify` OK ·
-  `pnpm --filter @dbus/bot build` OK.
+- Paquete externo `dbus-donostia-android-mvp/` importado en
+  `docs/07-android-mvp/` y corregido contra la API real (tabla §5 de
+  `docs/02-domain-contracts.md`): minutos enteros, 514/548 paradas con
+  coordenadas, franja obligatoria en avisos recurrentes, sin FCM, colores de
+  línea inventados eliminados (L27 real `#747719`).
+- ADR 009: Kotlin + Compose, sin backend; única pieza remota opcional, un
+  `config.json` estático con copia empaquetada. ADR 001/002/003/007 sustituidos
+  para el cliente móvil. PWA congelada.
+- Toolchain instalado con brew: `openjdk@17`, `android-commandlinetools`
+  (platform 36, build-tools 36, emulador + imagen `android-36` arm64, AVD
+  `dbus36`), `gradle`. Ver `apps/android/README.md`.
+- **Sprint 0**: `apps/android/` con NavigationBar de 4 destinos, tema
+  claro/oscuro, fuentes OFL, `es`/`eu`. `./gradlew check assembleDebug` verde
+  (2 tests, 0 errores de lint, 13 warnings de versiones). Las barreras i18n
+  (lint + test) se comprobaron fallando con una clave solo en `es`. Probado en
+  emulador: navegación, CTA, oscuro y euskera; 0 crashes. Capturas en
+  `docs/07-android-mvp/capturas/sprint-0/`. CI: `.github/workflows/android.yml`.
 
 ## Pendiente (por prioridad)
 
-- [ ] **Validación conversacional real** con PID `80402`: `/start`, botón
-      "Buscar parada o línea", `Boulevard` → parada 340, `/ubicacion` +
-      compartir ubicación. No se pudo hacer desde el harness (sin cliente de
-      Telegram; `AGENTS.md` prohíbe `getUpdates` a mano con polling activo).
-- [ ] **Rotar token de Telegram** (R6): hay un token real en claro en `.env`
-      de la raíz (gitignored, no commiteado). Requiere BotFather.
-- [ ] Decidir prioridad: PWA Sprint 3 (30 errores TS, 233 lint; lane mobile,
-      **no tocar sin acuerdo**) vs. deuda opcional del bot (O1 refresco ~2,7
-      req/s, O4 `actions.ts`) — O3 y O4 fueron desaconsejados en la auditoría;
-      O1 solo si Dbus presiona.
-- [ ] Residuales menores, solo si aparecen: pid-reuse en `pidAlive()` (falsa
-      negación rara) y ventana microscópica en el reclaim del lock caducado;
-      15 tests de integración siguen dependientes de `app.dbus.eus`.
-- [ ] Revisar `docs/06-api-externa/**` (riesgo de corte de acceso a la API):
-      no hay plan de contingencia implementado.
+- [ ] **Sprint 1 · Datos y dominio** (ver `SPRINTS.md`).
+- [ ] Sprint 5: antes de hacer público el repo, auditar el historial en busca
+      de secretos; publicar ahí `config.json`.
+- [ ] Bot: validación conversacional con PID `80402`; rotar token de Telegram
+      (R6, `.env` raíz, gitignored).
+- [ ] Bot (opcional): residuales menores de la auditoría; 15 tests de
+      integración dependen de `app.dbus.eus`.
+- [ ] El `ci.yml` existente usa `npm ci` en un monorepo pnpm: revisar si pasa.
+- [ ] Catálogo duplicado: `packages/contracts/data/` vs `apps/bot/data/`.
 
 ## Decisiones tomadas (no reabrir)
 
+- 2026-11-22 · Android nativo (Kotlin + Compose), sin web app previa, sin
+  backend ni FCM. Config remota = JSON estático opcional (ADR 009).
+- 2026-11-22 · AGP 8.13.2 / Gradle 8.14.3 / Kotlin 2.2.21 por estabilidad;
+  AGP 9 es migración aparte. applicationId `eus.busdonostia.app`.
+- 2026-11-22 · Avisos recurrentes con franja `windowFrom/windowTo`, una vez por
+  franja; sin silencio nocturno. ONCE caduca a 7 días.
 - 2026-11-22 · `SIN_SERVICIO` = HTTP 200 + `avisos`, estado operativo real,
   no outage. El motivo se muestra al usuario.
 - 2026-11-22 · Reinicio de producción solo con autorización explícita;
@@ -78,21 +74,13 @@ deuda opcional del bot).
 ## Esperando a Iker
 
 - Rotación del token de Telegram (R6).
-- Validación conversacional en la app con el bot vivo (PID `80402`).
-- Prioridad para la próxima sesión: PWA Sprint 3 o deuda optativa del bot.
+- Validación conversacional del bot (PID `80402`).
+- Visto bueno al nombre «Bus Donostia» y al applicationId antes de Play.
 
 ## Git
 
-`main bbe125b = origin/main` ✓ · ramas abiertas: ninguna · worktrees: 1 (raíz) ·
-stash: vacío · árbol limpio. Commit externo `fbcb70e` (`docs/06-api-externa/**`)
-ya integrado en `main` sin solapes.
+Rama `android/sprint-0` integrada en `main` y borrada al cerrar esta sesión.
 
 ## Siguiente sesión
 
-- Leer primero: `AGENTS.md`, `ESTADO.md`.
-- Empezar por: validación conversacional con PID `80402`; si Iker prioriza
-  seguridad, rotar el token antes.
-- Reglas específicas: alcance solo `apps/bot/**` y `packages/**` aditivo; no
-  tocar `apps/mobile`, CI ni `state/kanban` sin acuerdo; secretos solo por
-  entorno; todo cambio termina con `pnpm --filter @dbus/bot verify` y
-  `pnpm verify`, y solo se despliega con autorización (regla 9).
+- Prompt: `docs/07-android-mvp/prompts/SPRINT-1.md`.
