@@ -9,7 +9,7 @@ build debug). Estado de cada sprint: `ESTADO.md`.
 |---|---|---|---|
 | 0 | Esqueleto verde | B4, B8, B14 (base) | hecho 2026-11-22 |
 | 1 | Datos y dominio | B1, B3, B12, B15, B16 | hecho 2026-11-22 |
-| 2 | Consulta: Paradas, Detalle, Líneas | B1, B2, B9, B11 | hecho 2026-11-22 (rama sin integrar) |
+| 2 | Consulta: Paradas, Detalle, Líneas | B1, B2, B9, B11 | hecho 2026-11-22 |
 | 3 | Inicio, Avisos, Ajustes, Onboarding | B5, B10, B13 | pendiente |
 | 4 | Motor de avisos y notificaciones | B6 | pendiente |
 | 5 | Publicación: repo público + config | — | pendiente |

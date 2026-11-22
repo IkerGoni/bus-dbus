@@ -8,8 +8,7 @@ Actualizado: 2026-11-22 15:00 · Última sesión: Android Sprint 2 (consulta)
 ## Objetivo actual
 
 MVP Android nativo sin backend (ADR 009). Plan en
-`docs/07-android-mvp/SPRINTS.md`. **Sprints 0, 1 y 2 hechos (el 2 en la rama
-`android/sprint-2`, sin integrar); siguiente: Sprint 3 (Inicio, Avisos, Ajustes,
+`docs/07-android-mvp/SPRINTS.md`. **Sprints 0, 1 y 2 hechos; siguiente: Sprint 3 (Inicio, Avisos, Ajustes,
 Onboarding).** El bot sigue en producción sin cambios
 (PID `80402`).
 
@@ -36,7 +35,6 @@ Onboarding).** El bot sigue en producción sin cambios
 
 ## Pendiente (por prioridad)
 
-- [ ] **Integrar `android/sprint-2` en `main`** (pendiente de autorización de Iker).
 - [ ] **Sprint 3** (prompt `docs/07-android-mvp/prompts/SPRINT-3.md`).
 - [ ] Revisar en móvil real Cercanas con ubicación aproximada (en Android 12+
       se difumina ~2 km) y el tiempo hasta la primera posición.
@@ -100,14 +98,11 @@ Onboarding).** El bot sigue en producción sin cambios
 - Rotación del token de Telegram (R6).
 - Validación conversacional del bot (PID `80402`).
 - Visto bueno al nombre «Bus Donostia» y al applicationId antes de Play.
-- Autorizar merge + push de `android/sprint-2` a `main` y borrado de la rama.
 
 ## Git
 
-Rama `android/sprint-2` con el Sprint 2, **sin integrar en `main`** (falta la
-orden de Iker). Ver `git log --oneline main..android/sprint-2`.
+Rama `android/sprint-2` integrada en `main` y borrada (autorizado por Iker).
 
 ## Siguiente sesión
 
-- Integrar `android/sprint-2` si Iker lo autoriza; después
-  `docs/07-android-mvp/prompts/SPRINT-3.md`.
+- Prompt: `docs/07-android-mvp/prompts/SPRINT-3.md`.
