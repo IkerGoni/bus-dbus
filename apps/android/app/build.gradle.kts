@@ -60,6 +60,22 @@ abstract class MergeCatalogTask : DefaultTask() {
     }
 }
 
+/**
+ * Firma de release (H8). Con Play App Signing esta es la clave de subida: la crea y la
+ * custodia Iker, nunca va al repo (`*.jks` y `*.keystore` están ignorados). Se lee de
+ * `~/.gradle/gradle.properties` (`dbus.release.storeFile`, `…storePassword`,
+ * `…keyAlias`, `…keyPassword`) o de variables de entorno (`DBUS_RELEASE_STORE_FILE`,
+ * `…_STORE_PASSWORD`, `…_KEY_ALIAS`, `…_KEY_PASSWORD`). Si falta alguna, empaquetar
+ * release falla con un mensaje claro; `-Pdbus.release.unsigned=true` genera un APK sin
+ * firmar (solo para medir tamaño). Debug, `check` y los tests no la necesitan.
+ */
+val releaseSigning: Map<String, String?> = listOf("storeFile", "storePassword", "keyAlias", "keyPassword").associateWith { key ->
+    val env = "DBUS_RELEASE_" + key.replace(Regex("([A-Z])"), "_$1").uppercase()
+    providers.gradleProperty("dbus.release.$key").orElse(providers.environmentVariable(env)).orNull?.takeIf { it.isNotBlank() }
+}
+val missingReleaseSigning = releaseSigning.filterValues { it == null }.keys
+val unsignedRelease = providers.gradleProperty("dbus.release.unsigned").orNull == "true"
+
 val botData = layout.projectDirectory.dir("../../bot/data")
 val contractFixtures = layout.projectDirectory.dir("../../../packages/contracts/fixtures")
 
@@ -77,10 +93,23 @@ android {
         buildConfigField("String", "REMOTE_CONFIG_URL", "\"\"")
     }
 
+    signingConfigs {
+        if (missingReleaseSigning.isEmpty()) {
+            create("release") {
+                storeFile = file(releaseSigning.getValue("storeFile")!!)
+                storePassword = releaseSigning.getValue("storePassword")
+                keyAlias = releaseSigning.getValue("keyAlias")
+                keyPassword = releaseSigning.getValue("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 
@@ -126,6 +155,16 @@ androidComponents {
             coordinatesFile.set(botData.file("dbus-stop-coordinates.json"))
         }
         variant.sources.assets?.addGeneratedSourceDirectory(task, MergeCatalogTask::outputDir)
+    }
+}
+
+// Sin firma, empaquetar release (APK o AAB) falla aquí y no al subirlo a Play.
+if (missingReleaseSigning.isNotEmpty() && !unsignedRelease) {
+    val message = "Falta la firma de release: ${missingReleaseSigning.joinToString { "dbus.release.$it" }}. " +
+        "Ponlas en ~/.gradle/gradle.properties o en variables DBUS_RELEASE_* (ver apps/android/README.md), " +
+        "o usa -Pdbus.release.unsigned=true para un APK sin firmar."
+    tasks.matching { it.name == "packageRelease" || it.name == "packageReleaseBundle" }.configureEach {
+        doFirst { throw GradleException(message) }
     }
 }
 

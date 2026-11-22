@@ -28,6 +28,25 @@ y `avdmanager create avd -n dbus36 -k "system-images;android-36;google_apis;arm6
 Resultado esperado: 94 tests JVM por variante (debug y release) y 0 errores de
 lint. CI: `.github/workflows/android.yml`.
 
+## Release firmado (H8)
+
+La clave de subida la crea y custodia Iker (Play App Signing); nunca va al repo.
+Gradle la lee de `~/.gradle/gradle.properties`:
+
+```properties
+dbus.release.storeFile=/ruta/fuera/del/repo/upload.jks
+dbus.release.storePassword=…
+dbus.release.keyAlias=…
+dbus.release.keyPassword=…
+```
+
+o de `DBUS_RELEASE_STORE_FILE`, `DBUS_RELEASE_STORE_PASSWORD`,
+`DBUS_RELEASE_KEY_ALIAS` y `DBUS_RELEASE_KEY_PASSWORD`. Sin ellas,
+`assembleRelease`/`bundleRelease` fallan con un mensaje que dice qué falta.
+Para medir tamaño sin firma: `./gradlew assembleRelease -Pdbus.release.unsigned=true`.
+Ojo: con la caché de configuración activa, Gradle guarda esos valores en
+`apps/android/.gradle/` (ignorado por git); bórrala si el equipo se comparte.
+
 ## Versiones
 
 AGP 8.13.2 · Gradle 8.14.3 · Kotlin 2.2.21 · Compose BOM 2025.12.01 ·
