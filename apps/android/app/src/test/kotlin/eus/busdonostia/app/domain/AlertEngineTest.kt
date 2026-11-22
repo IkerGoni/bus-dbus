@@ -102,18 +102,19 @@ class AlertEngineTest {
     fun sondeoAdaptativoSegunLoQueFaltaParaAvisar() {
         val base = 30_000L
         assertEquals(base, pollDelayMs(0, base))
-        assertEquals(base, pollDelayMs(3, base))
-        assertEquals(60_000L, pollDelayMs(4, base))
-        assertEquals(60_000L, pollDelayMs(7, base))
-        assertEquals(120_000L, pollDelayMs(8, base))
+        assertEquals(base, pollDelayMs(7, base)) // menos de 7 min para avisar: cada 30 s
+        assertEquals(60_000L, pollDelayMs(8, base))
+        assertEquals(60_000L, pollDelayMs(14, base))
+        assertEquals(120_000L, pollDelayMs(15, base))
         assertEquals(60_000L, pollDelayMs(null, base)) // sin bus de la línea, sin servicio o error
-        // Aviso 5' con el bus a 20 min (falta 15) → 2 min; a 9 min (falta 4) → 1 min.
+        // Aviso 5' con el bus a 25 min (falta 20) → 2 min; a 15 (falta 10) → 1 min; a 12 (falta 7) → 30 s.
         val rule = once("a")
-        assertEquals(120_000L, nextPollDelayMs(listOf(rule), mapOf("340" to live(arrival("5", 20))), now, base))
-        assertEquals(60_000L, nextPollDelayMs(listOf(rule), mapOf("340" to live(arrival("5", 9))), now, base))
+        assertEquals(120_000L, nextPollDelayMs(listOf(rule), mapOf("340" to live(arrival("5", 25))), now, base))
+        assertEquals(60_000L, nextPollDelayMs(listOf(rule), mapOf("340" to live(arrival("5", 15))), now, base))
+        assertEquals(base, nextPollDelayMs(listOf(rule), mapOf("340" to live(arrival("5", 12))), now, base))
         // Con varios avisos manda el más urgente.
         val urgent = once("b", line = "28")
-        val views = mapOf("340" to live(arrival("5", 20), arrival("28", 7)))
+        val views = mapOf("340" to live(arrival("5", 25), arrival("28", 7)))
         assertEquals(base, nextPollDelayMs(listOf(rule, urgent), views, now, base))
         // Sin avisos en vigilancia, la base.
         assertEquals(base, nextPollDelayMs(emptyList(), emptyMap(), now, base))

@@ -34,14 +34,19 @@ El bot sigue en producción sin cambios (PID `80402`).
 
 - **Tras el Sprint 4** (rama `android/favoritas-sondeo`): ★ por llegada en A05
   (favorita parada+línea junto a la 🔔; la hora pasa bajo el destino) y sondeo
-  adaptativo del motor (30 s / 1 min / 2 min según lo que le falta al bus).
-  94 tests por variante. Probado en el AVD: ★ de la L27 en 344 → aparece en
-  Favoritas de Inicio; aviso con el bus a 57 min → «Consulta Dbus cada 120 s».
+  adaptativo del motor (cada 30 s si faltan ≤ 7 min para avisar, 1 min hasta
+  14, 2 min más allá) y aviso 30 s antes (`NOTIFY_EARLY_MS`). 94 tests por
+  variante. Probado en el AVD: ★ de la L27 en 344 → aparece en Favoritas de
+  Inicio; aviso con el bus a 57 min → «cada 120 s»; L28 en Boulevard 9 a 6 min
+  con aviso 5' → «cada 30 s» → notificación «en 5 min» a los 41 s.
 
 ## Pendiente (por prioridad)
 
 - [ ] Merge de `android/favoritas-sondeo` a `main` + push + borrar rama (falta la orden de Iker).
 - [ ] Iker: probar en su móvil el APK debug (`~/Downloads/bus-donostia-debug.apk`).
+- [ ] Idea de Iker (no para este sprint): opción «Sonido de alarma» para los
+      avisos (canal aparte con audio de alarma, vibración fuerte y repetición
+      hasta que se toque). Ver propuesta en la conversación del 2026-11-22.
 - [ ] **Sprint 5** (prompt `docs/07-android-mvp/prompts/SPRINT-5.md`).
 - [ ] Licencia y repo público: los decide Iker más adelante (repo privado hasta entonces).
 - [ ] Probar en móvil real el motor con Doze y fabricantes agresivos con la batería.
@@ -67,8 +72,9 @@ El bot sigue en producción sin cambios (PID `80402`).
 - 2026-11-22 · Iker: **avisos de un solo uso**: saltan una vez a los X min y
   desaparecen. Sin recurrentes, sin Posponer/Descartar en la notificación y
   sin Posponer en Inicio (solo Pausar).
-- 2026-11-22 · Sondeo adaptativo solo en el motor en segundo plano (≤ 3 min de
-  margen → 30 s, 4–7 → 1 min, ≥ 8 → 2 min, sin datos → 1 min); la pantalla
+- 2026-11-22 · Iker: sondeo adaptativo solo en el motor en segundo plano con
+  mucho margen (≤ 7 min para avisar → 30 s, 8–14 → 1 min, ≥ 15 → 2 min, sin
+  datos → 1 min) y avisar 30 s antes: mejor pronto que tarde. La pantalla
   visible sigue a 30 s (guardrails §3). ★ por llegada en A05 = `STOP_LINE`.
 - 2026-11-22 · Android Sprint 4: el motor arranca desde un observador de
   `alerts` en `AppContainer` (guardar, switch, Deshacer) y

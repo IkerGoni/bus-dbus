@@ -14,6 +14,7 @@ import eus.busdonostia.app.R
 import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.ArrivalSource
 import eus.busdonostia.app.domain.Firing
+import eus.busdonostia.app.domain.NOTIFY_EARLY_MS
 import eus.busdonostia.app.domain.firingDestination
 import eus.busdonostia.app.domain.remainingMinutes
 
@@ -89,7 +90,8 @@ fun updateMonitoringNotification(context: Context, watching: List<AlertRule>, po
 @SuppressLint("MissingPermission")
 fun notifyArrival(context: Context, firing: Firing, nowMs: Long) {
     val rule = firing.rule
-    val minutes = remainingMinutes(firing.arrival, nowMs)
+    // Los mismos minutos con los que ha disparado (30 s por delante): cuadra con la antelación elegida.
+    val minutes = remainingMinutes(firing.arrival, nowMs + NOTIFY_EARLY_MS)
     val title = firingDestination(rule, firing.arrival)
         ?.let { context.getString(R.string.notif_title, rule.lineId, it, minutes) }
         ?: context.getString(R.string.notif_title_no_destination, rule.lineId, minutes)

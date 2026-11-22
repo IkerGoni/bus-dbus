@@ -21,15 +21,15 @@ fun stopsToPoll(rules: List<AlertRule>, nowMs: Long): Set<String> =
 /**
  * Sondeo adaptativo (cada [baseMs] = `pollIntervalSec`, 30 s): cuanto más le falta al bus
  * para entrar en la antelación del aviso ([gapMinutes] = minutos restantes − antelación),
- * menos se consulta. Dbus da minutos enteros y una estimación puede bajar 2 min de golpe,
- * así que el intervalo nunca supera la mitad del margen:
- * ≤ 3 min → base (30 s) · 4–7 min → 2× (1 min) · ≥ 8 min → 4× (2 min) ·
+ * menos se consulta. Dbus da minutos enteros y a veces salta varios de golpe, así que
+ * se deja mucho margen (decisión de Iker):
+ * ≤ 7 min → base (30 s) · 8–14 min → 2× (1 min) · ≥ 15 min → 4× (2 min) ·
  * sin bus de la línea en la respuesta (o sin servicio / error) → 2× (1 min).
  */
 fun pollDelayMs(gapMinutes: Int?, baseMs: Long): Long = when {
     gapMinutes == null -> 2 * baseMs
-    gapMinutes <= 3 -> baseMs
-    gapMinutes <= 7 -> 2 * baseMs
+    gapMinutes <= 7 -> baseMs
+    gapMinutes <= 14 -> 2 * baseMs
     else -> 4 * baseMs
 }
 
