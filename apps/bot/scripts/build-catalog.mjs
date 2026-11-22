@@ -11,10 +11,11 @@
  * `/lineasParada` existe pero responden 400 de Tomcat para toda combinación de
  * parámetros probada (GET/POST, codParada/idParada/id...). Tampoco hay WSDL.
  * Por tanto el rango se DESCUBRE sondeando `/itinerariosLinea?idLinea=N`:
- * se empieza en 1, se avanza en bloques y se para tras COLA_VACIA ids
- * consecutivos sin DATOS, con un mínimo conocido (BASE_MIN_MAX_ID=120) para no
- * perder cobertura. Los ids 121..300 están vacíos hoy, pero (el día que Dbus
- * añada líneas) el escaneo las encontrará sin tocar el código.
+ * se recorren TODOS los ids de 1 a HARD_CAP (1000) en bloques, sin parar en
+ * huecos de 30 vacíos (un bloque temporal sin datos recortaba el catálogo).
+ * Los ids 121..300 están vacíos hoy, pero el día que Dbus añada líneas el
+ * escaneo las encontrará sin tocar el código. HARD_CAP es configurable con
+ * DBUS_MAX_LINE_ID; el rango real se guarda en `coverage`.
  *
  * Uso: node scripts/build-catalog.mjs
  *      DBUS_BASE_URL=... node scripts/build-catalog.mjs
@@ -27,10 +28,12 @@ const BASE =
   process.env.DBUS_BASE_URL || 'http://app.dbus.eus/SSIIMovilWSv2/ws/cons';
 const CONCURRENCY = 6;
 const FIRST_LINE_ID = 1;
-const BASE_MIN_MAX_ID = 120; // suelo de cobertura, NO techo
-const COLA_VACIA = 30; // ids seguidos sin datos para cerrar el escaneo
 const BLOCK = 10;
-const HARD_CAP = 1000; // salvaguarda ante una API que siempre devuelva DATOS
+// Techo del sondeo: se recorre entero para no recortar ante huecos temporales.
+const HARD_CAP = Number.parseInt(process.env.DBUS_MAX_LINE_ID ?? '1000', 10);
+if (!Number.isInteger(HARD_CAP) || HARD_CAP < 120 || HARD_CAP > 5000) {
+  throw new Error('[catalog] DBUS_MAX_LINE_ID debe estar entre 120 y 5000');
+}
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
 const outFile = path.resolve(dir, '../data/dbus-catalog.json');
@@ -78,8 +81,9 @@ async function discoverLines() {
   let scanned = FIRST_LINE_ID - 1;
 
   while (scanned < HARD_CAP) {
-    const block = Array.from({ length: BLOCK }, (_, i) =>
-      String(scanned + i + 1)
+    const block = Array.from(
+      { length: Math.min(BLOCK, HARD_CAP - scanned) },
+      (_, i) => String(scanned + i + 1)
     );
     const batch = await mapLimit(block, CONCURRENCY, (id) =>
       getJson(`/itinerariosLinea?idLinea=${id}`)
@@ -96,16 +100,8 @@ async function discoverLines() {
       }
     });
     scanned += BLOCK;
-    if (scanned >= BASE_MIN_MAX_ID && scanned - lastWithData >= COLA_VACIA) {
-      break;
-    }
   }
 
-  if (scanned >= HARD_CAP && scanned - lastWithData < COLA_VACIA) {
-    throw new Error(
-      `[catalog] rango no acotado antes de id ${HARD_CAP}; revisa el criterio de cola vacía`
-    );
-  }
   return { responses: [...responses.values()], scanned, lastWithData };
 }
 
@@ -185,7 +181,7 @@ const catalog = {
   coverage: {
     lineIdsScanned: discovered.scanned,
     lastLineIdWithData: discovered.lastWithData,
-    emptyTail: COLA_VACIA,
+    emptyTail: discovered.scanned - discovered.lastWithData,
   },
   lines,
   itineraries,

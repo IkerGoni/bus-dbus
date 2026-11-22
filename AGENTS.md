@@ -60,7 +60,7 @@ modifica de forma aditiva. No tocar el lane ajeno salvo acuerdo explícito.
 ## Verificación
 
 ```bash
-pnpm --filter @dbus/bot verify     # tsc -b + biome + 52 tests (BOT_TOKEN + DB_PATH=:memory:)
+pnpm --filter @dbus/bot verify     # tsc -b + biome + 62 tests (BOT_TOKEN + DB_PATH=:memory:)
 pnpm --filter @dbus/bot build      # tsc -b -> apps/bot/dist
 ```
 

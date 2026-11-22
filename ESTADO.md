@@ -1,6 +1,6 @@
 # Estado — bus-dbus
 
-Actualizado: 2026-11-22 07:55 · Última sesión: fix del buscador por texto, split de `handlers.ts` y reinicio del bot
+Actualizado: 2026-11-22 09:15 · Última sesión: sin servicio real, catálogo dinámico, GPS con Overpass, logger, revisión y deriva de docs
 
 > **`AGENTS.md` es la fuente de verdad.** Este archivo es el estado de sesión;
 > si algo aquí contradice a `AGENTS.md`, manda `AGENTS.md`.
@@ -9,9 +9,9 @@ Actualizado: 2026-11-22 07:55 · Última sesión: fix del buscador por texto, sp
 
 | Área | Estado |
 |------|--------|
-| Bot de Telegram | ✅ Activo con datos reales desde `apps/bot`, build de `8445239`, PID `73125`, `node dist/index.js`, lock y log verificados |
-| Calidad del bot | ✅ 52/52 tests · `pnpm --filter @dbus/bot verify` (tsc + biome + tests) · `build` OK |
-| Descubrimiento | ✅ `/buscar` + `/linea` sobre catálogo real (39 líneas, 127 itinerarios, 548 paradas) |
+| Bot de Telegram | ✅ Activo con datos reales desde `apps/bot`, desplegado con `9d02d4b`, PID `12954`, `node dist/index.js`, lock y log verificados |
+| Calidad del bot | ✅ 62/62 tests (26 unit + 15 integración + 21 E2E) · `pnpm --filter @dbus/bot verify` y `pnpm verify` OK |
+| Descubrimiento | ✅ `/buscar` + `/linea` sobre catálogo real (39 líneas, 127 itinerarios, 548 paradas, ids 1..1000 sondeados) |
 | Favoritos | ✅ parada completa, parada+línea y línea favorita |
 | PWA (Sprint 3) | 🔧 Bloqueada: errores TS/lint preexistentes en `apps/mobile/src/` |
 | Workspace | 🔧 Split a pnpm en curso en el working tree (`apps/`, `packages/`, `docs/`); ver `docs/plan/repo-split.md` |
@@ -66,6 +66,21 @@ petición explícita.
 - Test de regresión: simula el 400 real y exige resultados sin error genérico.
   Verificado que falla con el código anterior.
 
+### Sin servicio, catálogo dinámico, GPS y logger (`5c4f759`..`9d02d4b`)
+- API Dbus en `SIN_SERVICIO` global: se muestran nombre y líneas reales del
+  índice (etiquetados como índice, sin horarios) y el aviso real de la API.
+- Corregido el prompt del botón de búsqueda; alias id interno→público resuelto
+  con el índice en contexto de parada (el código público gana en 5/27/28/32).
+- `build-catalog.mjs` sin `MAX_LINE_ID` hardcodeado: sondeo de ids, `coverage`
+  en el JSON, guarda ante catálogo vacío. La regeneración semanal es un script
+  + plantilla launchd/cron, **NO instalada** (el destino final es RS).
+- `/ubicacion` + `bot.on('location')`: Overpass read-only, refs OSM cruzados con
+  el catálogo, coordenadas efímeras, circuit breaker si Overpass falla.
+- `logger.ts` con `LOG_LEVEL` (default info); eliminado `menu_cancel`.
+- Revisión de código: corregido `28 → 26` en paradas con 26 y 28, PATH de cron
+  y `Array.isArray(avisos)`. 62/62 tests.
+- Producción reiniciada dos veces (regla 9): PID final `12954`, lock verificado.
+
 ### Verificación de buscador y favoritos
 - Suite completa 52/52 en `apps/bot/` con `BOT_TOKEN` inyectado por entorno y BD en memoria.
 - 4 flujos comprobados contra la API real con un test temporal (borrado):
@@ -87,6 +102,8 @@ petición explícita.
 
 ## Pendiente (por prioridad)
 
+- [ ] **Tras el cambio de `apps/bot/scripts/build-catalog.mjs`: reiniciar el bot
+      (regla 9).** Pendiente a propósito para la siguiente sesión.
 - [ ] Rotar el token de Telegram y reiniciar con el nuevo valor por entorno.
 - [ ] Validar conversación real: enviar `/start` a `@dbus_alarm_bot`.
 - [ ] Comprobar disparo de aviso con bus en servicio (`tipo=1`, GPS).
@@ -109,13 +126,16 @@ petición explícita.
 ## Git
 
 `8ce2694` → `f1ed9a0` → `65d2b08` → `e10eb3c` → `8445239` → `99621cf`
-(docs) → `482b53f` (split a workspaces pnpm: `apps/`, `packages/`, `docs/`),
-todo pusheado. `main = origin/main`, working tree limpio, una sola rama y un
-solo worktree. Token solo por entorno.
+(docs) → `482b53f` (split a workspaces pnpm) → `8afc1c0` → `5c4f759` →
+`20ceaf0` → `0cf03d0` → `5d4e9a4` → `e49a375` → `9d02d4b` → (este commit de
+docs y `COLA_VACIA`), todo pusheado. `main = origin/main`, working tree limpio,
+una sola rama y un solo worktree. Token solo por entorno (`.env` de la raíz, no
+trackeado).
 
 ## Siguiente sesión
 
 - Leer primero: `AGENTS.md`, `README.md`, `ESTADO.md`.
-- Empezar por: rotar el token y validar el round-trip real en Telegram.
+- Empezar por: reiniciar el bot tras el cambio de `build-catalog.mjs` (regla 9),
+  luego validar el round-trip real en Telegram y rotar el token.
 - No reabrir: mocks, `.pb`, `tsx watch` en producción, listas de paradas
   "populares", ni escribir el token en archivos.
