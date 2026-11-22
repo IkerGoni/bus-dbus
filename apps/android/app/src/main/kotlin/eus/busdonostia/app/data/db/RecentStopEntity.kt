@@ -32,7 +32,7 @@ abstract class RecentStopDao {
 
     @Query(
         "DELETE FROM recent_stops WHERE stopId NOT IN " +
-            "(SELECT stopId FROM recent_stops ORDER BY viewedAtMs DESC LIMIT 10)",
+            "(SELECT stopId FROM recent_stops ORDER BY viewedAtMs DESC LIMIT $MAX_RECENTS)",
     )
     protected abstract suspend fun trim()
 
