@@ -44,14 +44,23 @@ modifica de forma aditiva. No tocar el lane ajeno salvo acuerdo explícito.
 7. **Avisos.** Dedup por `(chat, parada, línea)`, caducidad a 7 días,
    preferencia GPS (`tipo=1`), filtro de destino, aislamiento de envíos y
    guard de reentrada del scheduler. No quitar estas garantías.
-8. **UX de descubrimiento.** Sin "paradas populares": usar `/buscar` y
-   `/linea`. Callbacks stateless: el dato va en `data` (`srch_s_1`, `ld_1281`,
+8. **UX de descubrimiento.** Sin "paradas populares": usar `/buscar`,
+   `/linea` y `/lineas` (listado completo de líneas y de sus paradas).
+   Callbacks stateless: el dato va en `data` (`srch_s_1`, `ld_1281`,
    `ls_1_28`), no en sesiones.
+9. **Reinicio obligatorio en cada versión nueva del bot.** Todo cambio en
+   `apps/bot/**` (o en `packages/**` que el bot consuma) solo existe en
+   producción tras reiniciar: commit + push → SIGTERM al PID anterior →
+   recompilar → arrancar con `BOT_TOKEN` por entorno y `npm run start` →
+   comprobar log y lock con el PID nuevo. `git push` **no** despliega: el
+   proceso vivo sigue ejecutando el `dist` anterior. No dar una versión por
+   terminada sin este paso; pedir autorización si el reinicio requiere
+   intervención en producción.
 
 ## Verificación
 
 ```bash
-pnpm --filter @dbus/bot verify     # tsc -b + biome + 40 tests (con BOT_TOKEN)
+pnpm --filter @dbus/bot verify     # tsc -b + biome + 45 tests (con BOT_TOKEN)
 pnpm --filter @dbus/bot build      # tsc -b -> apps/bot/dist
 ```
 
@@ -61,10 +70,10 @@ silenciarlo. No dar nada por bueno sin ejecutar la verificación.
 
 ## Despliegue (instrucción permanente del usuario)
 
-Tras cualquier cambio de código: commit + push, parar el proceso anterior con
-SIGTERM, recompilar, arrancar desde `apps/bot` con `BOT_TOKEN` por entorno y
-`npm run start`, comprobar log y lock. Un cambio solo de docs no requiere
-reiniciar el bot.
+Aplica a **toda versión nueva del bot**, sin excepción (regla 9): commit +
+push, parar el proceso anterior con SIGTERM, recompilar, arrancar desde
+`apps/bot` con `BOT_TOKEN` por entorno y `npm run start`, comprobar log, lock y
+PID nuevo. Un cambio solo de docs no requiere reiniciar el bot.
 
 ## Convenciones
 
