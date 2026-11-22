@@ -8,8 +8,8 @@ Actualizado: 2026-11-22 15:40 · Última sesión: Android Sprint 3 (Inicio, Avis
 ## Objetivo actual
 
 MVP Android nativo sin backend (ADR 009). Plan en
-`docs/07-android-mvp/SPRINTS.md`. **Sprints 0–3 hechos (el 3 en la rama
-`android/sprint-3`, sin integrar); siguiente: Sprint 4 (motor de avisos).**
+`docs/07-android-mvp/SPRINTS.md`. **Sprints 0–3 hechos e integrados en `main`; siguiente: Sprint 4 (motor de
+avisos).**
 El bot sigue en producción sin cambios (PID `80402`).
 
 ## Hecho en la última sesión
@@ -32,7 +32,6 @@ El bot sigue en producción sin cambios (PID `80402`).
 
 ## Pendiente (por prioridad)
 
-- [ ] Integrar `android/sprint-3` en `main` (falta autorización de Iker).
 - [ ] **Sprint 4** (prompt `docs/07-android-mvp/prompts/SPRINT-4.md`).
 - [ ] Licencia del repo: la spec pide «licencia MIT» en A07, pero no hay
       `LICENSE`. A07 no muestra licencia de la app hasta que Iker decida.
@@ -109,10 +108,9 @@ El bot sigue en producción sin cambios (PID `80402`).
 
 ## Git
 
-Rama `android/sprint-3` con el Sprint 3, sin integrar en `main`
-(`git log --oneline main..android/sprint-3`).
+Rama `android/sprint-3` integrada en `main` (`eebee12`), pusheada y borrada
+(autorizado por Iker).
 
 ## Siguiente sesión
 
-- Integrar `android/sprint-3` si Iker lo autoriza; después,
-  `docs/07-android-mvp/prompts/SPRINT-4.md`.
+- Prompt: `docs/07-android-mvp/prompts/SPRINT-4.md`.
