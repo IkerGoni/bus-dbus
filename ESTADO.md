@@ -21,6 +21,9 @@ MVP Android nativo sin backend (ADR 009). Plan en
   specs Android con avisos de un solo uso, ★ en A05 y sondeo adaptativo;
   `/ubicacion` y callbacks del bot en `docs/05-ui/02-bot-telegram.md`;
   B1–B16 marcadas por sprint. 98 enlaces internos, 0 rotos.
+- **6 reglas nuevas en `AGENTS.md`** (Iker delegó la decisión): `tipo` solo
+  `1` = GPS, `/ubicacion` en la regla 8, `strings*.xml`, alcance de
+  `pnpm verify`, ruta de tests Android y sección Documentación.
 - Verificación: bot 85/86 (falla el test de integración: la API devolvió
   `tipo=0`, que el test no acepta); `pnpm verify` igual (core 14 y contracts 7
   verdes). Android: 94 tests JVM por variante y 0 errores de lint en el build
@@ -136,15 +139,13 @@ MVP Android nativo sin backend (ADR 009). Plan en
 
 ## Esperando a Iker
 
-- Revisar las reglas de `AGENTS.md` propuestas en el informe de la sesión de
-  docs (no se cambiaron).
 - Rotación del token de Telegram (R6).
 - Validación conversacional del bot.
 - Visto bueno al nombre «Bus Donostia» y al applicationId antes de Play.
 
 ## Git
 
-`main` = `0f19b4e` (Sprints 0–4 + docs al día). Rama abierta:
+`main` = `24b23ef` (Sprints 0–4 + docs al día + reglas). Rama abierta:
 `audit/arquitectura` (worktree `../bus-dbus-audit`, sesión paralela).
 
 ## Siguiente sesión
