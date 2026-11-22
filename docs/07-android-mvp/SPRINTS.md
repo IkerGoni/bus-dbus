@@ -86,28 +86,27 @@ build debug). Estado de cada sprint: `ESTADO.md`.
 
 ## Sprint 4 · Motor de avisos
 - Foreground Service `dataSync` (sondeo 30 s agrupado por parada).
-- Alarmas exactas para RECURRING, reprogramación en boot/cambio de hora.
-- Canales, notificación con `Posponer 5'` / `Descartar` por `BroadcastReceiver`.
-- `POST_NOTIFICATIONS` con fallback a ajustes; deep link `dbus://stop/{stopId}`.
-- **DoD:** flujo completo en emulador: cercana → A05 → 🔔 → guardar ONCE →
-  notificación real → `Posponer 5'` → segunda notificación.
+- Canales y notificación; deep link `dbus://stop/{stopId}`.
+- `POST_NOTIFICATIONS` con fallback a ajustes.
+- **DoD:** flujo completo en emulador: cercana → A05 → 🔔 → guardar →
+  notificación real.
 - **Resultado (2026-11-22):** decisión pura en `domain/AlertEngine.kt`
-  (`evaluateTick`: disparar / seguir / parar, 60 min sin servicio, `nextAlarmAtMs`
-  con DST y cruce de medianoche). `engine/`: `AlertMonitorService` (FGS
-  `dataSync`, una petición por parada vía `fetchStop`, sin repetir lo que la UI
-  acaba de consultar), canales `dbus_monitoring` / `dbus_arrivals_high`,
-  `AlertActionReceiver` (Posponer / Descartar), una sola alarma exacta en el
-  próximo `windowFrom` (`AlertAlarmReceiver`) y reprogramación en boot, hora, TZ,
-  actualización y permiso de alarmas. `AppContainer` reprograma y arranca el
-  motor en cada cambio de avisos y al abrir la app. Deep link
-  `dbus://stop/{stopId}?highlightLine={lineId}`. A04 avisa si faltan
-  notificaciones o alarmas exactas. Posponer en RECURRING olvida el disparo de la
-  franja para volver a avisar. 11 tests JVM nuevos por variante (106). Probado en
-  el AVD `dbus36` contra la API real con la app en segundo plano: ONCE en 344 →
-  «Vigilando L35» → notificación → `Posponer 5'` → segunda notificación;
-  RECURRING 16:10–16:40 con el proceso matado → alarma exacta → servicio →
-  notificación; reinicio → alarma reprogramada; sin permiso, alarma inexacta.
-  15 capturas en `capturas/sprint-4/`.
+  (`evaluateTick`: disparar / seguir / parar, 60 min sin servicio).
+  `engine/AlertMonitorService` (FGS `dataSync`, una petición por parada vía
+  `fetchStop`, sin repetir lo que la UI acaba de consultar, `onTimeout` de
+  Android 15), canales `dbus_monitoring` / `dbus_arrivals_high`, deep link
+  `dbus://stop/{stopId}?highlightLine={lineId}`, aviso en A04 si faltan
+  notificaciones. `AppContainer` arranca el motor en cada cambio de avisos y al
+  abrir la app.
+- **Cambio de Iker en la misma sesión:** los avisos son **de un solo uso**:
+  saltan una vez y se borran. Fuera los recurrentes (días, franja, alarmas
+  exactas, receptores de boot/hora) y los botones `Posponer 5'` / `Descartar` de
+  la notificación; Inicio conserva `Posponer 5'`. Room v2 (`MIGRATION_1_2`)
+  borra recurrentes y avisos ya disparados. 95 tests JVM por variante (con
+  test de migración). Probado en el AVD `dbus36` contra la API real con la app
+  en segundo plano: 344 → 🔔 L16 → «Vigilando L16 en Pio Baroja 15» →
+  notificación `L16 → Igeldo en 5 min` sin botones → el aviso desaparece de A04
+  y el servicio se para. 10 capturas en `capturas/sprint-4/`.
 
 ## Sprint 5 · Publicación
 - Auditar el historial de git en busca de secretos **antes** de hacer público

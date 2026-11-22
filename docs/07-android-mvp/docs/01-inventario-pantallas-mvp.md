@@ -24,7 +24,7 @@ bus-dbus (Android MVP v1)
 │   └── Tab 4: A04 · Mis Avisos (dbus://alerts) — 5 estados + FAB nuevo aviso
 ├── Pantallas de detalle / flujo (sin NavigationBar inferior)
 │   ├── A05 · Detalle de parada (dbus://stop/{stopId}) — Llegadas RT + 🔔 por fila + Cómo llegar (geo:)
-│   ├── A06 · Configurar aviso (dbus://alert/new | /edit) — X min antes · Solo esta vez / Recurrente
+│   ├── A06 · Configurar aviso (dbus://alert/new | /edit) — X min antes · un solo uso
 │   ├── A07 · Ajustes (dbus://settings) — Tema · ES/EU · Notificaciones · Caché real
 │   └── A08 · Onboarding ligero (primera apertura) — 1 pantalla + POST_NOTIFICATIONS
 ├── Superficie de sistema
@@ -38,8 +38,8 @@ bus-dbus (Android MVP v1)
 1. **Consulta en 1 segundo:** `A01 Inicio` → ver cuenta atrás de tu aviso activo
    y próximas 2–3 llegadas de tus paradas favoritas.
 2. **Parada cercana a aviso en 3 toques:** `A02 Paradas (Cercanas)` → tocar parada
-   → `A05 Detalle de parada` → tocar `🔔` junto a tu autobús → `A06` (`5 min`,
-   `Solo esta vez` o `Recurrente`) → `Guardar aviso`.
+   → `A05 Detalle de parada` → tocar `🔔` junto a tu autobús → `A06` (`5 min`;
+   avisa una vez y se borra) → `Guardar aviso`.
 3. **Explorar línea y guardar parada:** `A03 Líneas` → elegir línea con color Dbus
    → `A03b Itinerario` → elegir sentido → tocar parada → `A05` (★ favorita o 🔔 aviso).
 4. **Aviso disparado (Push):** el Foreground Service local dispara cuando `remainingMinutes <= minutesAhead` →

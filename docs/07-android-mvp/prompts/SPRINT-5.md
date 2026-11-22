@@ -17,7 +17,7 @@ Implementa el **Sprint 5** del MVP Android de bus-dbus.
 export JAVA_HOME=/opt/homebrew/opt/openjdk@17
 export ANDROID_HOME=/opt/homebrew/share/android-commandlinetools
 export PATH="$JAVA_HOME/bin:$PATH"
-cd apps/android && ./gradlew check assembleDebug   # verde antes de empezar (106 tests por variante)
+cd apps/android && ./gradlew check assembleDebug   # verde antes de empezar (95 tests por variante)
 ```
 Emulador: AVD `dbus36`. Memoria (Iker): apaga el emulador (`adb emu kill`) y
 `./gradlew --stop` al terminar.
@@ -35,9 +35,10 @@ y docs.
   `REMOTE_CONFIG_URL` sigue vacía (la app usa la copia empaquetada). Si Iker
   elige otro hosting estático en la sesión, se fija entonces.
 
-**Ya existe (Sprints 1–4), no lo dupliques:** motor de avisos en
-`engine/` (FGS `dataSync`, alarmas, receptores, canales) con la decisión pura
-en `domain/AlertEngine.kt`; deep link `dbus://stop/{stopId}?highlightLine=`;
+**Ya existe (Sprints 1–4), no lo dupliques:** motor de avisos de **un solo
+uso** (saltan una vez y se borran; sin recurrentes ni botones en la
+notificación) en `engine/` (FGS `dataSync`, canales) con la decisión pura en
+`domain/AlertEngine.kt`; deep link `dbus://stop/{stopId}?highlightLine=`;
 `ConfigRepository` con remota opcional; A07 con aviso de app no oficial.
 
 **Entregables:**
@@ -51,8 +52,8 @@ en `domain/AlertEngine.kt`; deep link `dbus://stop/{stopId}?highlightLine=`;
    no lo generes tú ni lo guardes en el repo.
 3. **R8 en release:** `assembleRelease` con `isMinifyEnabled = true` sin romper
    kotlinx.serialization, Room ni OkHttp (reglas en `proguard-rules.pro`);
-   prueba el APK release en el emulador: Cercanas, A05 en vivo, guardar ONCE →
-   notificación real.
+   prueba el APK release en el emulador: Cercanas, A05 en vivo, guardar aviso →
+   notificación real → el aviso desaparece de A04.
 4. **Nombre e icono no oficiales** («Bus Donostia (no oficial)» o lo que Iker
    apruebe; `applicationId` `eus.busdonostia.app` pendiente de su visto bueno).
    Icono adaptativo propio que no se parezca al de `com.indra.dbus`.

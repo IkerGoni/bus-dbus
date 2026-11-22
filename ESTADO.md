@@ -1,6 +1,6 @@
 # Estado — bus-dbus
 
-Actualizado: 2026-11-22 16:40 · Última sesión: Android Sprint 4 (motor de avisos)
+Actualizado: 2026-11-22 17:15 · Última sesión: Android Sprint 4 (motor de avisos, de un solo uso)
 
 > **`AGENTS.md` es la fuente de verdad.** Este archivo es el estado de sesión;
 > si algo aquí contradice a `AGENTS.md`, manda `AGENTS.md`.
@@ -15,34 +15,31 @@ El bot sigue en producción sin cambios (PID `80402`).
 
 ## Hecho en la última sesión
 
-- **Sprint 4** en `apps/android/` (rama `android/sprint-4`): decisión pura en
-  `domain/AlertEngine.kt` (`evaluateTick`, `stopsToPoll`, `isFetchDue`,
-  `nextAlarmAtMs`, `firingDestination`); `engine/AlertMonitorService` (FGS
-  `dataSync`, sondeo cada `pollIntervalSec` agrupado por parada, se para sin
-  avisos en vigilancia o tras 60 min sin servicio y lo notifica, `onTimeout` de
-  Android 15); canales `dbus_monitoring` (LOW) y `dbus_arrivals_high` (HIGH);
-  `AlertActionReceiver` (Posponer 5' / Descartar sin abrir la app); una alarma
-  exacta en el próximo `windowFrom` (inexacta sin permiso) reprogramada en boot,
-  hora, TZ, actualización y cambio de permiso; deep link
-  `dbus://stop/{stopId}?highlightLine={lineId}`; A04 avisa si faltan
-  notificaciones o alarmas exactas.
-- `./gradlew check assembleDebug` verde: 106 tests JVM por variante (212), 0
-  errores de lint. Probado en el AVD `dbus36` contra la API real con la app en
-  segundo plano: ONCE → «Vigilando L35» → notificación → Posponer → segunda
-  notificación → tap abre A05 con la línea; RECURRING 16:10–16:40 con el proceso
-  matado → alarma exacta → notificación; reinicio → alarma reprogramada.
-  15 capturas en `docs/07-android-mvp/capturas/sprint-4/`.
-- Prompt del Sprint 5 en `docs/07-android-mvp/prompts/SPRINT-5.md` (con repo
-  privado y licencia pendiente).
+- **Sprint 4** en `apps/android/` (rama `android/sprint-4`): motor de avisos
+  con FGS `dataSync` (`engine/AlertMonitorService`), decisión pura en
+  `domain/AlertEngine.kt`, canales `dbus_monitoring` y `dbus_arrivals_high`,
+  deep link `dbus://stop/{stopId}?highlightLine={lineId}` y aviso en A04 si
+  faltan notificaciones.
+- **Avisos de un solo uso** (decisión de Iker): saltan una vez y se borran.
+  Quitados los recurrentes (días, franja, alarmas exactas, receptores de
+  boot/hora, permisos `SCHEDULE_EXACT_ALARM` y `RECEIVE_BOOT_COMPLETED`) y los
+  botones de la notificación. Room v2 con `MIGRATION_1_2` (borra recurrentes y
+  ya disparados). Specs actualizadas (`02-domain-contracts.md`,
+  `03-android-screens.md`, `04-android-platform.md`).
+- `./gradlew check assembleDebug` verde: 95 tests JVM por variante, 0 errores
+  de lint. Probado en el AVD `dbus36` contra la API real con la app en segundo
+  plano: aviso L16 en 344 → «Vigilando» → notificación sin botones → el aviso
+  desaparece de A04 y el servicio se para; deep link a A05 con la línea.
+  10 capturas en `docs/07-android-mvp/capturas/sprint-4/`.
+- Prompt del Sprint 5 en `docs/07-android-mvp/prompts/SPRINT-5.md`.
 
 ## Pendiente (por prioridad)
 
 - [ ] Merge de `android/sprint-4` a `main` + push + borrar rama (falta la orden de Iker).
 - [ ] **Sprint 5** (prompt `docs/07-android-mvp/prompts/SPRINT-5.md`).
 - [ ] Licencia y repo público: los decide Iker más adelante (repo privado hasta entonces).
-- [ ] Probar en móvil real el motor con Doze y fabricantes agresivos con la batería;
-      Android 14+ niega `SCHEDULE_EXACT_ALARM` por defecto: sin él, el RECURRING
-      no puede arrancar el servicio en segundo plano y avisa para abrir la app.
+- [ ] Probar en móvil real el motor con Doze y fabricantes agresivos con la batería.
+- [ ] Iker: ¿Inicio conserva «Posponer 5'» del próximo aviso? (hoy sí).
 - [ ] Revisar en móvil real Cercanas con ubicación aproximada (en Android 12+
       se difumina ~2 km) y el tiempo hasta la primera posición.
 - [ ] Fixture real de `DATOS` con `tiempos` vacío: no observado aún (las
@@ -62,14 +59,13 @@ El bot sigue en producción sin cambios (PID `80402`).
 
 - 2026-11-22 · Iker: **licencia se decide más tarde; repo privado hasta que él
   decida.** Sin `LICENSE` ni `config.json` remoto publicado mientras tanto.
-- 2026-11-22 · Android Sprint 4: una sola alarma (la del próximo inicio de franja
-  de todos los RECURRING), no una por aviso. `Posponer 5'` en RECURRING borra
-  `lastTriggeredAtMs` para volver a avisar en la misma franja. El motor arranca
-  desde un observador de `alerts` en `AppContainer` (cubre guardar, switch,
-  Posponer y Deshacer) y al abrir la app; tras un reinicio solo se reprograma la
-  alarma (Android 15 no deja arrancar `dataSync` desde `BOOT_COMPLETED`): un ONCE
-  activo se retoma al abrir la app. El servicio no repite una consulta que la UI
-  hizo hace < 25 s.
+- 2026-11-22 · Iker: **avisos de un solo uso**: saltan una vez a los X min y
+  desaparecen. Sin recurrentes y sin Posponer/Descartar en la notificación.
+- 2026-11-22 · Android Sprint 4: el motor arranca desde un observador de
+  `alerts` en `AppContainer` (guardar, switch, Posponer de Inicio, Deshacer) y
+  al abrir la app; tras reiniciar el móvil, un aviso activo se retoma al abrir
+  la app (Android 15 no deja arrancar `dataSync` desde `BOOT_COMPLETED`). El
+  servicio no repite una consulta que la UI hizo hace < 25 s.
 
 - 2026-11-22 · Android Sprint 3: `MainActivity` pasa a `AppCompatActivity`
   (appcompat 1.7.1) para idioma por app y tema también en Android < 13; tema en

@@ -23,15 +23,13 @@ Decisión de arquitectura: ADR 009 (`docs/03-architecture/adrs/009-android-nativ
   petición por parada, como el bot) y evalúa `computeAlertStatus`.
 - Se para cuando no queda ningún aviso en vigilancia, o tras 60 min seguidos
   sin servicio/errores (y entonces lo notifica). Android 15 limita `dataSync` a
-  6 h/24 h: con avisos de franja ≤ 3 h no se alcanza; si se alcanza, se avisa.
-- **ONCE:** el servicio arranca al pulsar `Guardar aviso` (gesto del usuario,
-  arranque en primer plano permitido).
-- **RECURRING:** `AlarmManager.setExactAndAllowWhileIdle` en `windowFrom` de
-  cada día marcado; la alarma arranca el servicio (las alarmas exactas están
-  exentas de la restricción de arrancar FGS desde segundo plano). Requiere
-  `SCHEDULE_EXACT_ALARM` (Android 14+: el usuario lo concede en ajustes).
-  Si no está concedido: alarma inexacta + aviso visible en A04/A07 de que
-  puede llegar tarde. Reprogramar en `BOOT_COMPLETED` y al cambiar hora/TZ.
+  6 h/24 h: si se alcanza, se para y se avisa (`onTimeout`).
+- **Avisos de un solo uso** (2026-11-22): al disparar se notifica y el aviso
+  se borra. Sin recurrentes, sin `AlarmManager` ni `SCHEDULE_EXACT_ALARM`.
+- **Arranque:** al guardar en A06 y al reactivar o posponer en la app (gestos
+  del usuario, arranque en primer plano permitido) y al abrir la app. Tras
+  reiniciar el móvil, un aviso activo se retoma al abrir la app (Android 15 no
+  deja arrancar `dataSync` desde `BOOT_COMPLETED`).
 - **FCM queda para v2**: exige Firebase, registro de tokens y un servidor
   siempre encendido (otra IP única ante Dbus).
 
@@ -39,11 +37,7 @@ Decisión de arquitectura: ADR 009 (`docs/03-architecture/adrs/009-android-nativ
 - **Canal:** `dbus_arrivals_high` (`IMPORTANCE_HIGH`, sonido + vibración, visible en bloqueo).
 - **Contenido:** título `L{lineId} → {destination} en {min} min` · cuerpo
   `{stopName} ({stopId}) · {En vivo | Horario}`.
-- **Acciones (BroadcastReceiver, sin abrir UI):**
-  1. `Posponer 5'` → `snoozedUntilMs = now + 300_000`, `active = true`,
-     cierra la notificación y mantiene el servicio vigilando.
-  2. `Descartar` → `ONCE`: `active = false`. `RECURRING`: nada más que
-     cerrar (ya tiene `lastTriggeredAtMs` de esta franja).
+- **Sin botones:** el aviso ya está borrado; deslizar la notificación la cierra.
 - **Tap en el cuerpo:** deep link `dbus://stop/{stopId}?highlightLine={lineId}`.
 
 ## 3. Permisos y navegación nativa

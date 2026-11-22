@@ -44,7 +44,7 @@
 
 ### A04 · Mis Avisos (`dbus://alerts`)
 - **Cabecera:** `Mis avisos` + Ajustes. FAB inferior derecho: `+ Nuevo aviso` → `A06`.
-- **Agrupación:** `ACTIVOS` (`TRIGGERED`, `ACTIVE`, `SNOOZED`) y `SILENCIADOS Y PAUSADOS` (`SILENCED`, `INACTIVE`).
+- **Agrupación:** `ACTIVOS` (`TRIGGERED`, `ACTIVE`, `SNOOZED`) y `PAUSADOS` (`INACTIVE`: pausados o caducados). Los que ya avisaron no aparecen: se borran al avisar.
 - **Tarjeta:** badge Dbus + línea/destino + minutos actuales, subtítulo `{stopName} ({stopId}) · Aviso {min}' · {frecuencia}`, estado (`⚡ Llegando`, `● Activa`, `⏱ Pospuesta`, `🌙 Fuera de franja` / `✓ Avisado hoy`, `Pausada`); la frecuencia muestra la franja (`L–V 07:45–08:30`), switch `active`, Editar (`A06`) y Eliminar (con `Deshacer`).
 - **Estado vacío:** explicación breve + CTA `Elegir parada y crear aviso` → `A02`.
 
@@ -60,8 +60,8 @@
 ### A06 · Configurar Aviso (`dbus://alert/new?stopId=&lineId=` · `dbus://alert/{id}/edit`)
 - **Paso 1 — Parada y Línea:** tarjeta de parada (precargada + `Cambiar`) + chips solo de las líneas reales de esa parada (más selector de destino si hay varios).
 - **Paso 2 — Antelación:** display grande `{n} min antes`, 6 chips rápidos (`2'`, `3'`, `5'`, `8'`, `10'`, `15'`) sincronizados con slider `1–30 min`.
-- **Paso 3 — Frecuencia:** segmented button `Solo esta vez` (`ONCE`, por defecto al entrar desde 🔔 en una llegada; vigila desde ya, caduca a los 7 días) vs `Recurrente` (`RECURRING`, despliega chips `L M X J V S D`, presets `Laborables / Diario / Fines` y **franja obligatoria `Desde–Hasta`** con time pickers, máx. 3 h; avisa una vez por franja). Si falta `SCHEDULE_EXACT_ALARM`, explicar y enlazar a ajustes.
-- **Vista previa:** tarjeta con el texto que tendrá la notificación construido con los valores elegidos (`L5 → Amara en 5 min`, `Posponer 5'`, `Descartar`); etiquetada como vista previa.
+- **Paso 3 — Un solo uso** (2026-11-22): sin selector de frecuencia; texto `Vigila desde que lo guardas, avisa una vez y se borra. Caduca a los 7 días si no llega a avisar.` Sin avisos recurrentes ni alarmas exactas.
+- **Vista previa:** tarjeta con el texto que tendrá la notificación construido con los valores elegidos (`L5 → Amara en 5 min`, sin botones); etiquetada como vista previa.
 - **Guardar:** dedup por `(stopId, lineId)` (ofrecer actualizar si ya existe), solicitar `POST_NOTIFICATIONS` si falta permiso y persistir en DB.
 
 ### A07 · Ajustes (`dbus://settings`)
