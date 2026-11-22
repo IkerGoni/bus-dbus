@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- A07 · Ajustes -->
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_section_appearance">Apariencia</string>
+    <string name="settings_theme_system">Sistema</string>
+    <string name="settings_theme_light">Claro</string>
+    <string name="settings_theme_dark">Oscuro</string>
+    <string name="settings_section_language">Idioma</string>
+    <string name="settings_language_es">Español</string>
+    <string name="settings_language_eu">Euskara</string>
+    <string name="settings_section_notifications">Notificaciones</string>
+    <string name="settings_notifications_on">Activadas</string>
+    <string name="settings_notifications_off">Desactivadas</string>
+    <string name="settings_notifications_off_hint">Sin notificaciones, los avisos no sonarán.</string>
+    <string name="settings_open_system">Ajustes del sistema</string>
+    <string name="settings_section_background">Avisos en segundo plano</string>
+    <string name="settings_exact_alarms">Alarmas exactas</string>
+    <string name="settings_exact_on">Permitidas</string>
+    <string name="settings_exact_off">No permitidas: los avisos recurrentes pueden llegar tarde.</string>
+    <string name="settings_exact_grant">Permitir alarmas exactas</string>
+    <string name="settings_battery">Optimización de batería</string>
+    <string name="settings_battery_ok">Sin restricciones</string>
+    <string name="settings_battery_restricted">Optimizada: los avisos pueden retrasarse</string>
+    <string name="settings_battery_change">Cambiar optimización</string>
+    <string name="settings_section_data">Datos</string>
+    <string name="settings_counts_join">%1$s · %2$s</string>
+    <string name="settings_catalog_date">Catálogo offline generado el</string>
+    <string name="settings_live_last">Última consulta en vivo</string>
+    <string name="settings_live_never">Aún no se ha consultado ninguna parada</string>
+    <string name="settings_section_about">Acerca de</string>
+    <string name="settings_version">Versión</string>
+    <string name="settings_credit_times">Tiempos: servicio de la app de Dbus (no oficial, sin afiliación)</string>
+    <string name="settings_credit_osm">Coordenadas de paradas © OpenStreetMap (ODbL)</string>
+    <string name="settings_credit_fonts">Fuentes tipográficas: Plus Jakarta Sans y JetBrains Mono (SIL Open Font License 1.1)</string>
+
+    <!-- A08 · Onboarding -->
+    <string name="onboarding_bullet_live">Llegadas reales de Dbus y paradas cercanas</string>
+    <string name="onboarding_bullet_alerts">Avisos los minutos que elijas antes de que llegue tu bus</string>
+    <string name="onboarding_bullet_free">Sin anuncios, en castellano y euskera</string>
+    <string name="onboarding_privacy">Sin cuenta ni servidor propio: tus favoritos y avisos se quedan en este móvil.</string>
+    <string name="onboarding_allow">Permitir notificaciones y empezar</string>
+    <string name="onboarding_skip">Empezar sin notificaciones</string>
+</resources>

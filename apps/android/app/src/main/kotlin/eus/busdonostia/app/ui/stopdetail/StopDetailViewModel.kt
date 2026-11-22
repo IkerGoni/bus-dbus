@@ -3,7 +3,6 @@ package eus.busdonostia.app.ui.stopdetail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import eus.busdonostia.app.AppContainer
-import eus.busdonostia.app.data.db.lineColors
 import eus.busdonostia.app.data.db.toggle
 import eus.busdonostia.app.domain.ArrivalsView
 import eus.busdonostia.app.domain.FavoriteType
@@ -115,12 +114,9 @@ class StopDetailViewModel(
     private suspend fun fetch() = fetchLock.withLock {
         refreshing.value = true
         try {
-            val feed = container.dbusClient.tiemposParada(stopId, container.apiLanguage())
+            val feed = container.fetchStop(stopId)
             latest.value = feed
             if (feed.status != StopFeedStatus.API_ERROR) lastValid.value = feed
-            if (feed.status == StopFeedStatus.OK) {
-                container.appScope.launch { container.database.lineColors().upsertAll(feed.lineColors()) }
-            }
         } finally {
             refreshing.value = false
         }
