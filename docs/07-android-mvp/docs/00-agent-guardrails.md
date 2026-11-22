@@ -6,9 +6,11 @@ como completada sin cumplir estas reglas.
 ## 1. Alcance estricto de v1 (Sin mapa embebido)
 - **PROHIBIDO** añadir SDKs de mapas embebidos (MapLibre, Google Maps SDK,
   OSMDroid) en la v1. El mapa interactivo se difiere explícitamente a v2.
-- **Cercanía offline:** empaquetar un catálogo estático JSON en assets con las
-  ~548 paradas (`stopId`, `name`, `lat`, `lon`), las 39 líneas (con color oficial
-  Dbus) y los 127 itinerarios. Las distancias se calculan en local con Haversine
+- **Cercanía offline:** empaquetar en `assets/` el catálogo generado desde
+  `apps/bot/data/dbus-catalog.json` + `dbus-stop-coordinates.json`: 548 paradas
+  (514 con `lat/lon` de OpenStreetMap, ODbL), 39 líneas (color `linea.color` de
+  Dbus cuando el catálogo lo incluya; si no, color neutro) y 127 itinerarios.
+  Nunca editarlo a mano. Las distancias se calculan en local con Haversine
   en milisegundos, sin red.
 - **Atajo externo de mapa:** en Detalle de parada (`A05`), si la parada tiene
   `lat/lon`, mostrar botón `Cómo llegar` que lance un intent nativo
@@ -28,8 +30,9 @@ como completada sin cumplir estas reglas.
   local o navegar con parámetros reales (`stopId`, `lineId`).
 - Favoritos (3 tipos: `STOP`, `STOP_LINE`, `LINE`) y Alertas persisten en DB local
   real con dedup determinista.
-- La cuenta atrás se recalcula cada segundo contra un reloj reactivo (`now`) y se
-  resincroniza con red cada 30 s en primer plano.
+- Los minutos restantes se recalculan contra un reloj reactivo de 1 s (`now`) a
+  partir de `minutos` + `fetchedAtMs`, **sin mostrar segundos** (la API no da esa
+  precisión), y se resincronizan con red cada 30 s en primer plano.
 - `Inicio`, `Mis avisos`, badge de navegación y worker de notificaciones DEBEN
   consumir la misma función pura `computeAlertStatus(alert, now, nextArrival)` de
   `02-domain-contracts.md`.
@@ -47,6 +50,15 @@ como completada sin cumplir estas reglas.
 - Toda pantalla con datos implementa y testea: `loading` (skeleton), `empty`
   (con CTA útil), `live`, `degraded` (`HORARIO` / `NO_SERVICE` / banner offline
   no bloqueante) y `error` (con botón `Reintentar`).
-- Cero strings hardcodeados: todas las claves existen en `es` y `eu` (verificado en CI).
+- Cero strings hardcodeados: `res/values/strings.xml` (es) y `res/values-eu/strings.xml`
+  con las mismas claves; lint `MissingTranslation` y `HardcodedText` como error.
 - Contraste **≥ 4.5:1**, `tabular-nums` en cifras, **edge-to-edge** (`WindowInsets`)
   y **Predictive Back**.
+
+## 6. Stack y verificación (ADR 009)
+- Kotlin + Jetpack Compose + Material 3 en `apps/android/` (lane `android`).
+  Room, OkHttp + kotlinx.serialization, Navigation Compose. Sin DI framework.
+- No tocar `apps/bot/**` ni `apps/mobile/**`. `packages/**` solo de forma aditiva
+  (fixtures de paridad en `packages/contracts/fixtures/`).
+- Nada está hecho sin `cd apps/android && ./gradlew check` en verde (build +
+  lint + tests JVM). Los tests de red real se marcan y, si Dbus cae, se dice.

@@ -31,9 +31,9 @@
 ### A02 · Paradas (`dbus://stops`)
 - **Referencia visual:** `stitch-references/paradas/code.html`.
 - **Cabecera (56 dp):** título `Paradas` + botón refrescar ubicación (`48×48dp`). Sin barra superior duplicada ni avatar.
-- **Buscador persistente:** filtra offline las ~548 paradas por código (`340`) o calle (`Boulevard`, `Pío Baroja`).
+- **Buscador persistente:** filtra offline las 548 paradas por código (`340`) o calle (`Boulevard`, `Pío Baroja`).
 - **Filtros:** `Cercanas` (por defecto) · `Favoritas ★` · `Recientes`.
-- **Modo `Cercanas`:** con GPS ordena top 20 por `haversineMeters` mostrando `140 m · 2 min`, badges de líneas Dbus y estrella ★ (`48×48dp`, persiste `STOP`). Sin permiso GPS muestra tarjeta discreta para activarlo + `Recientes` y buscador (nunca bloquea).
+- **Modo `Cercanas`:** con GPS ordena (solo paradas con coordenadas: 514 de 548) top 20 por `haversineMeters` mostrando `140 m · 2 min`, badges de líneas Dbus y estrella ★ (`48×48dp`, persiste `STOP`). Sin permiso GPS muestra tarjeta discreta para activarlo + `Recientes` y buscador (nunca bloquea).
 - **Modo `Favoritas ★`:** listado persistente real desde DB (cierra B12).
 - **Modo `Recientes`:** últimas 10 paradas abiertas localmente.
 - Tap en cualquier tarjeta → `A05`.
@@ -45,30 +45,31 @@
 ### A04 · Mis Avisos (`dbus://alerts`)
 - **Cabecera:** `Mis avisos` + Ajustes. FAB inferior derecho: `+ Nuevo aviso` → `A06`.
 - **Agrupación:** `ACTIVOS` (`TRIGGERED`, `ACTIVE`, `SNOOZED`) y `SILENCIADOS Y PAUSADOS` (`SILENCED`, `INACTIVE`).
-- **Tarjeta:** badge Dbus + línea/destino + minutos actuales, subtítulo `{stopName} ({stopId}) · Aviso {min}' · {frecuencia}`, estado (`⚡ Llegando`, `● Activa`, `⏱ Pospuesta`, `🌙 Silenciada`, `Pausada`), switch `active`, Editar (`A06`) y Eliminar (con `Deshacer`).
+- **Tarjeta:** badge Dbus + línea/destino + minutos actuales, subtítulo `{stopName} ({stopId}) · Aviso {min}' · {frecuencia}`, estado (`⚡ Llegando`, `● Activa`, `⏱ Pospuesta`, `🌙 Fuera de franja` / `✓ Avisado hoy`, `Pausada`); la frecuencia muestra la franja (`L–V 07:45–08:30`), switch `active`, Editar (`A06`) y Eliminar (con `Deshacer`).
 - **Estado vacío:** explicación breve + CTA `Elegir parada y crear aviso` → `A02`.
 
 ### A05 · Detalle de parada (`dbus://stop/{stopId}`)
-- **Cabecera sticky:** volver, `{stopName}` + pill `{stopId}`, botón `Cómo llegar` (intent `geo:lat,lon` si tiene coordenadas) y estrella ★ persistente (`STOP`).
+- **Cabecera sticky:** volver, `{stopName}` + pill `{stopId}`, botón `Cómo llegar` (intent `geo:lat,lon`; oculto si la parada no tiene coordenadas) y estrella ★ persistente (`STOP`).
 - **Filtro de líneas:** chips `Todas` + líneas reales de la parada con color oficial Dbus.
 - **Próximas llegadas (auto-refresco 30 s + botón refrescar):**
   - Cada fila: badge Dbus + destino + hora estimada + `● X min` / reloj `X min` + **botón campana 🔔 (`48×48dp`)** que abre `A06` con `stopId`, `lineId` y `destination` precargados.
-  - Estados degradados: `NO_SERVICE` (`🌙 Sin servicio en este momento`), `EMPTY` (`📭 No hay llegadas próximas`), `API_ERROR` (`⚠️ Error al consultar Dbus` + `Reintentar`).
+  - Estados degradados: `NO_SERVICE` (`🌙 Sin servicio en este momento` + texto real de `avisos` de Dbus si llega), `EMPTY` (`📭 No hay llegadas próximas`), `API_ERROR` (`⚠️ Error al consultar Dbus` + `Reintentar`).
 - **Pie fijo:** botón primary full-width `🔔 Crear aviso en esta parada` → `A06?stopId={stopId}`.
 - **Prohibido:** saldo Mugi y ocupación ficticia.
 
 ### A06 · Configurar Aviso (`dbus://alert/new?stopId=&lineId=` · `dbus://alert/{id}/edit`)
 - **Paso 1 — Parada y Línea:** tarjeta de parada (precargada + `Cambiar`) + chips solo de las líneas reales de esa parada (más selector de destino si hay varios).
 - **Paso 2 — Antelación:** display grande `{n} min antes`, 6 chips rápidos (`2'`, `3'`, `5'`, `8'`, `10'`, `15'`) sincronizados con slider `1–30 min`.
-- **Paso 3 — Frecuencia:** segmented button `Solo esta vez` (`ONCE`, por defecto al entrar desde 🔔 en una llegada) vs `Recurrente` (`RECURRING`, despliega chips `L M X J V S D`, presets `Laborables / Diario / Fines` y toggle `Silencio nocturno 23:00–07:00`).
-- **Vista previa en vivo:** tarjeta simulando la notificación Android (`L5 → Amara llega en 5 min`, `Posponer 5'`, `Descartar`).
+- **Paso 3 — Frecuencia:** segmented button `Solo esta vez` (`ONCE`, por defecto al entrar desde 🔔 en una llegada; vigila desde ya, caduca a los 7 días) vs `Recurrente` (`RECURRING`, despliega chips `L M X J V S D`, presets `Laborables / Diario / Fines` y **franja obligatoria `Desde–Hasta`** con time pickers, máx. 3 h; avisa una vez por franja). Si falta `SCHEDULE_EXACT_ALARM`, explicar y enlazar a ajustes.
+- **Vista previa:** tarjeta con el texto que tendrá la notificación construido con los valores elegidos (`L5 → Amara en 5 min`, `Posponer 5'`, `Descartar`); etiquetada como vista previa.
 - **Guardar:** dedup por `(stopId, lineId)` (ofrecer actualizar si ya existe), solicitar `POST_NOTIFICATIONS` si falta permiso y persistir en DB.
 
 ### A07 · Ajustes (`dbus://settings`)
 - Apariencia (`Sistema / Claro / Oscuro`), Idioma (`Español / Euskara` al 100%).
 - Notificaciones: estado real leído de Android + `Ajustes del sistema` (`ACTION_APP_NOTIFICATION_SETTINGS`).
-- Datos y caché reales: conteo del catálogo offline (`548 paradas · 39 líneas`), timestamp real de última consulta en vivo y tamaño real de caché + botón `Limpiar` con confirmación.
-- Acerca de: versión de build, licencia MIT, fuente de datos (Dbus / Open Data Euskadi).
+- Datos: conteo real del catálogo offline (leído del asset, hoy `548 paradas · 39 líneas`), fecha `generatedAt` del catálogo y hora real de la última consulta en vivo. Sin «tamaño de caché» en v1 (no hay caché que medir).
+- Avisos: estado real de `SCHEDULE_EXACT_ALARM` y de optimización de batería, con enlace a ajustes.
+- Acerca de: versión de build (`BuildConfig.VERSION_NAME`), licencia MIT, fuentes: «Tiempos: servicio de la app de Dbus (no oficial, sin afiliación)» y «Coordenadas de paradas © OpenStreetMap (ODbL)».
 
 ### A08 · Onboarding ligero (primera apertura)
 - Pantalla única (sin carrusel): icono + 3 bullets (llegadas reales y paradas cercanas · avisos `X min antes` · sin anuncios ES/EU).

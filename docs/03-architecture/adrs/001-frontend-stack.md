@@ -1,7 +1,7 @@
 # ADR 001: Frontend Stack: Vite 6 + React 19 + TypeScript 5.7 + Tailwind 4
 
 ## Status
-Accepted
+Accepted — Superseded por ADR 009 para el cliente móvil (2026-11-22)
 
 ## Context
 Need a modern, fast, minimal bundle frontend stack for a PWA targeting mobile web. Requirements: HMR for dev speed, tree-shaking for bundle size, PWA plugin ecosystem, TypeScript strict mode, CSS-in-JS alternative with zero runtime, React 19 compiler optimizations.

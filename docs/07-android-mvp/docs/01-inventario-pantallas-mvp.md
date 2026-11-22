@@ -9,7 +9,8 @@ en vivo, 39 líneas y avisos «X min antes»).
 | Superficie | Paquete | Estado | Tipo de UI |
 |---|---|---|---|
 | Bot de Telegram | `@dbus/bot` (`apps/bot/`) | Activo, datos reales | Mensajes Markdown + inline keyboards (sin cambios) |
-| App Android (MVP v1) | `@dbus/mobile` / Android | Especificación ejecutiva | Material 3 · 4 pestañas fijas + Push nativo |
+| App Android (MVP v1) | `apps/android/` (Gradle, Kotlin + Compose, ADR 009) | Especificación ejecutiva | Material 3 · 4 pestañas fijas + Push nativo |
+| PWA | `@dbus/mobile` (`apps/mobile/`) | Congelada (ADR 009) | — |
 
 ## 2. Mapa de pantallas Android MVP v1
 
@@ -27,7 +28,7 @@ bus-dbus (Android MVP v1)
 │   ├── A07 · Ajustes (dbus://settings) — Tema · ES/EU · Notificaciones · Caché real
 │   └── A08 · Onboarding ligero (primera apertura) — 1 pantalla + POST_NOTIFICATIONS
 ├── Superficie de sistema
-│   └── Push Android nativa (dbus_arrivals_high) — Acciones [Posponer 5'] y [Descartar]
+│   └── Push Android local (dbus_arrivals_high) — Acciones [Posponer 5'] y [Descartar]
 └── Diferido explícitamente (fuera de v1)
     ├── v1.1: Widget Jetpack Glance (2×1 / 4×1) + Lectura por voz (TTS)
     └── v2.0: Mapa vectorial interactivo (MapLibre) dentro de A02
@@ -41,5 +42,5 @@ bus-dbus (Android MVP v1)
    `Solo esta vez` o `Recurrente`) → `Guardar aviso`.
 3. **Explorar línea y guardar parada:** `A03 Líneas` → elegir línea con color Dbus
    → `A03b Itinerario` → elegir sentido → tocar parada → `A05` (★ favorita o 🔔 aviso).
-4. **Aviso disparado (Push):** scheduler dispara cuando `eta <= minutesAhead` →
+4. **Aviso disparado (Push):** el Foreground Service local dispara cuando `remainingMinutes <= minutesAhead` →
    notificación Android con `[Posponer 5']` y `[Descartar]` sin abrir la app.

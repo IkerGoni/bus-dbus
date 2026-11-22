@@ -49,7 +49,7 @@ Exact vertical structure:
 5. Section label "FRECUENCIA" inside a white 16dp card:
    - Two-option segmented control: "[ Solo esta vez ]" | "[ Recurrente (active) ]".
    - Row of 7 circular day chips: "L M X J V" (solid #005BB5, white text) and "S D" (soft #F1F5F9).
-   - Hairline divider + row: moon icon + "Silencio nocturno" + "23:00 – 07:00" + Material 3 switch ON.
+   - Hairline divider + row: clock icon + "Franja" + two time fields "07:45" – "08:30".
 6. Section label "ASÍ VERÁS LA NOTIFICACIÓN": compact Android notification preview card on #F1F5F9 surface:
    - Bus icon + "Dbus · ahora"
    - Bold "L5 → Amara llega en 5 min"
@@ -119,7 +119,7 @@ Exact vertical structure:
    - Card 1 (Triggered, subtle emerald accent): Green square "5" + bold "Benta Berri → Amara" | bold emerald "● 3 min". Subtitle: "Pío Baroja 10 (340) · Aviso 5' · Solo esta vez". Bottom row: emerald "⚡ Llegando" on left; switch ON, edit pencil, trash icon on right.
    - Card 2 (Active): Blue square "28" + bold "Amara → Ospitaleak" | bold #005BB5 "11 min". Subtitle: "Boulevard 15 (1) · Aviso 8' · L–V". Bottom row: muted "● Activa" on left; switch ON, edit icon, trash icon on right.
 3. Section label "SILENCIADOS Y PAUSADOS (2)":
-   - Card 3 (Silenced): Red square "13" + bold "Altza". Subtitle: "Gros (412) · Aviso 5' · Diario". Bottom row: amber "🌙 Silenciada 23:00–07:00" on left; switch ON, edit, trash on right.
+   - Card 3 (Silenced): Red square "13" + bold "Altza". Subtitle: "Gros (412) · Aviso 5' · Diario". Bottom row: amber "🌙 Fuera de franja · 07:45–08:30" on left; switch ON, edit, trash on right.
    - Card 4 (Paused, muted opacity): Cyan square "17" + "Miramón". Subtitle: "Loiola (1281) · Aviso 5'". Bottom row: gray "Pausada" on left; switch OFF on right.
 4. Floating Action Button bottom-right above nav bar: rounded #005BB5 pill "+ Nuevo aviso" with white bold text.
 5. Fixed Material 3 bottom navigation bar: Inicio, Paradas, Líneas, Avisos (active #EFF6FF pill around icon).
@@ -137,8 +137,8 @@ Exact vertical structure:
 1. Compact top bar (56dp): Back arrow + bold "Ajustes".
 2. Card "PREFERENCIAS": Apariencia segmented "[ Sistema* | Claro | Oscuro ]" + Idioma segmented "[ Español* | Euskara ]".
 3. Card "NOTIFICACIONES": Bell icon + "Permiso en Android" + emerald "● Activadas" + right button "Ajustes del sistema".
-4. Card "DATOS Y CACHÉ": "Catálogo offline" ("548 paradas · 39 líneas"), "Última consulta en vivo" ("Hace 18 s"), "Caché local" ("420 KB" + outlined button "Limpiar").
-5. Card "ACERCA DE": "Versión" ("1.0.0"), "Fuente de datos" ("Dbus / Open Data Euskadi"), "Licencia" ("MIT"). No bottom nav bar.
+4. Card "DATOS": "Catálogo offline" ("548 paradas · 39 líneas"), "Última consulta en vivo" ("Hace 18 s").
+5. Card "ACERCA DE": "Versión" ("1.0.0"), "Fuentes" ("Tiempos: app de Dbus (no oficial) · Coordenadas © OpenStreetMap"), "Licencia" ("MIT"). No bottom nav bar.
 ```
 
 ```text
