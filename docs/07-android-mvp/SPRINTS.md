@@ -8,7 +8,7 @@ build debug). Estado de cada sprint: `ESTADO.md`.
 | Sprint | Objetivo | Cierra brechas | Estado |
 |---|---|---|---|
 | 0 | Esqueleto verde | B4, B8, B14 (base) | hecho 2026-11-22 |
-| 1 | Datos y dominio | B1, B3, B12, B15, B16 | pendiente |
+| 1 | Datos y dominio | B1, B3, B12, B15, B16 | hecho 2026-11-22 |
 | 2 | Consulta: Paradas, Detalle, Líneas | B1, B2, B9, B11 | pendiente |
 | 3 | Inicio, Avisos, Ajustes, Onboarding | B5, B10, B13 | pendiente |
 | 4 | Motor de avisos y notificaciones | B6 | pendiente |
@@ -44,6 +44,10 @@ build debug). Estado de cada sprint: `ESTADO.md`.
 - Reloj reactivo de 1 s.
 - **DoD:** tests de dominio y parser verdes; paridad con `@dbus/core` en los
   fixtures compartidos.
+- **Resultado (2026-11-22):** 66 tests JVM verdes (avisos §5 13, dominio 8, Room 12, config 11,
+  parser 8, cliente 5, catálogo 4, i18n 2, reloj 3 — por variante). Fixtures
+  reales nuevos en `packages/contracts/fixtures/` (ver su `README.md`); `DATOS`
+  vacío aún sin capturar. Sin UI nueva.
 
 ## Sprint 2 · Consulta
 - A02 Paradas: buscador offline, Cercanas (GPS coarse, top 20 Haversine),
