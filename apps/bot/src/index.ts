@@ -27,16 +27,70 @@ bot.use(session());
 setBotReference(bot);
 setupBot(bot);
 
-/** Refresca las paradas en caché y las de los avisos activos. */
+// Telegraf no convierte un throw en un error manejado: sin esto, un fallo de
+// red o de parseo queda como unhandled rejection y puede tumbar el proceso.
+bot.catch((error, ctx) => {
+  const detail =
+    error instanceof Error ? (error.stack ?? error.message) : String(error);
+  console.error(
+    `❌ Unhandled handler error (update ${ctx.update.update_id}): ${detail}`
+  );
+  void ctx
+    .reply(
+      '⚠️ Ha ocurrido un error al procesar tu solicitud. Inténtalo de nuevo.'
+    )
+    .catch(() => {
+      // El chat puede estar bloqueado: el log ya dejó constancia.
+    });
+});
+
+const REFRESH_CONCURRENCY = 6;
+const MAX_REFRESH_STOPS = 80;
+
+/**
+ * Refresca las paradas en caché y las de los avisos activos.
+ *
+ * Concurrencia acotada y guard anti-solapamiento: un ciclo secuencial de hasta
+ * 200 paradas × 2 intentos × 10 s desborda los 30 s del intervalo y los
+ * `setInterval` se pisaban. Las paradas con aviso van primero.
+ */
 function startLiveRefresh(intervalMs: number): () => void {
-  const timer = setInterval(async () => {
-    const codes = new Set<string>([
-      ...getCachedStopCodes(),
-      ...getActiveAlerts().map((alert) => alert.stopId),
-    ]);
-    for (const code of codes) {
-      await fetchStopTimes(code, true);
+  let running = false;
+
+  async function refreshOnce(): Promise<void> {
+    if (running) return;
+    running = true;
+    try {
+      const alertStops = getActiveAlerts().map((alert) => alert.stopId);
+      const recentCached = getCachedStopCodes().reverse();
+      const codes = [...new Set([...alertStops, ...recentCached])].slice(
+        0,
+        MAX_REFRESH_STOPS
+      );
+      let cursor = 0;
+      const workers = Array.from(
+        { length: Math.min(REFRESH_CONCURRENCY, codes.length) },
+        async () => {
+          while (cursor < codes.length) {
+            const code = codes[cursor++];
+            try {
+              await fetchStopTimes(code, true);
+            } catch (error) {
+              console.error(
+                `[Refresh] ${code}: ${error instanceof Error ? error.message : String(error)}`
+              );
+            }
+          }
+        }
+      );
+      await Promise.all(workers);
+    } finally {
+      running = false;
     }
+  }
+
+  const timer = setInterval(() => {
+    void refreshOnce();
   }, intervalMs);
   timer.unref();
   return () => clearInterval(timer);

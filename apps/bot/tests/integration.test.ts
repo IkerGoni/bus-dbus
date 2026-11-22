@@ -15,6 +15,7 @@ import {
   findFavorite,
   findFavoriteLine,
   getActiveAlerts,
+  getAlertById,
   getAlertsByChat,
   getFavoriteLines,
   getFavorites,
@@ -28,8 +29,9 @@ import {
   getStopName,
 } from '../src/dbus-client.js';
 
-// Parada pública real: 1 = Boulevard 9, San Sebastián.
-const STOP = '1';
+// Parada pública real con servicio: 2 = Urbieta 12, San Sebastián.
+// (1 = Boulevard 9 está suprimida por Dbus desde 2026-11-22.)
+const STOP = '2';
 
 describe('Dbus live data', () => {
   it('returns real arrival data for a known stop', async () => {
@@ -39,7 +41,7 @@ describe('Dbus live data', () => {
 
     if (times!.estado === 'DATOS') {
       expect(times!.parada?.cod).toBe(STOP);
-      expect(times!.parada?.desc).toContain('Boulevard');
+      expect(times!.parada?.desc).toContain('Urbieta');
       expect(times!.tiempos.length).toBeGreaterThan(0);
       const first = times!.tiempos[0];
       expect(first.itinerario.linea.cod).toBeTruthy();
@@ -98,7 +100,7 @@ describe('Arrival logic (live)', () => {
     if (!arrivals.length) return;
     expect(formatArrival(arrivals[0])).toContain('L');
     expect(formatArrival(arrivals[0])).toMatch(/min|ahora/);
-    expect(formatArrivalsList('Boulevard 9', arrivals)).toContain('Boulevard');
+    expect(formatArrivalsList('Urbieta 12', arrivals)).toContain('Urbieta');
   });
 });
 
@@ -112,7 +114,7 @@ describe('Database - Alerts', () => {
     const alert = createAlert({
       chatId: testChatId,
       stopId: STOP,
-      stopName: 'Boulevard 9',
+      stopName: 'Urbieta 12',
       lineId: '28',
       lineName: 'L28',
       destination: 'Ospitaleak',
@@ -139,7 +141,7 @@ describe('Database - Alerts', () => {
     const alert = createAlert({
       chatId,
       stopId: STOP,
-      stopName: 'Boulevard 9',
+      stopName: 'Urbieta 12',
       lineId: '28',
       lineName: 'L28',
       destination: 'Ospitaleak',
@@ -163,7 +165,7 @@ describe('Database - Favorites', () => {
     const fav = addFavorite({
       chatId: testChatId,
       stopId: STOP,
-      stopName: 'Boulevard 9',
+      stopName: 'Urbieta 12',
       lineId: '28',
       lineName: 'L28',
       destination: 'Ospitaleak',
@@ -185,7 +187,7 @@ describe('Database - Favorites', () => {
     const fav = addFavorite({
       chatId,
       stopId: STOP,
-      stopName: 'Boulevard 9',
+      stopName: 'Urbieta 12',
       lineId: '28',
       lineName: 'L28',
       destination: 'Ospitaleak',
@@ -202,7 +204,7 @@ describe('Database - Favorites', () => {
     const fav = addFavorite({
       chatId,
       stopId: STOP,
-      stopName: 'Boulevard 9',
+      stopName: 'Urbieta 12',
       lineId: '',
       lineName: 'Todas',
       destination: 'Todas las líneas',
@@ -211,6 +213,49 @@ describe('Database - Favorites', () => {
     expect(findFavorite(chatId, STOP, '')?.id).toBe(fav.id);
     expect(findFavorite(chatId, STOP, '28')).toBeNull();
     removeFavorite(fav.id);
+  });
+});
+
+describe('Database - resistencia de avisos', () => {
+  const chatId = 222222222;
+
+  function newAlert() {
+    return createAlert({
+      chatId,
+      stopId: STOP,
+      stopName: 'Urbieta 12',
+      lineId: '28',
+      lineName: 'L28',
+      destination: 'Ospitaleak',
+      minutesAhead: 5,
+      active: true,
+    });
+  }
+
+  it('persiste los fallos de envío y permite desactivar el aviso', () => {
+    for (const alert of getAlertsByChat(chatId)) deleteAlert(alert.id);
+    const alert = newAlert();
+    try {
+      expect(alert.sendFailures).toBe(0);
+      expect(updateAlert(alert.id, { sendFailures: 2 })).toBe(true);
+      expect(getAlertById(alert.id)?.sendFailures).toBe(2);
+      expect(updateAlert(alert.id, { active: false, sendFailures: 3 })).toBe(
+        true
+      );
+      expect(getAlertById(alert.id)?.active).toBe(false);
+    } finally {
+      deleteAlert(alert.id);
+    }
+  });
+
+  it('updateAlert ignora columnas no permitidas', () => {
+    const alert = newAlert();
+    try {
+      expect(updateAlert(alert.id, { bogus: 1 } as never)).toBe(false);
+      expect(getAlertById(alert.id)?.destination).toBe('Ospitaleak');
+    } finally {
+      deleteAlert(alert.id);
+    }
   });
 });
 

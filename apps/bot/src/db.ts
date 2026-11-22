@@ -9,7 +9,11 @@ const __dirname = path.dirname(__filename);
 
 // `src/` y `dist/` cuelgan de `apps/bot/`: un solo nivel arriba da el mismo
 // fichero en desarrollo (tsx) y en producción (node dist/index.js).
-const dbPath = path.resolve(__dirname, '../', config.dbPath);
+// `DB_PATH=:memory:` lo usan los tests: nunca comparten BD con producción.
+const dbPath =
+  config.dbPath === ':memory:'
+    ? ':memory:'
+    : path.resolve(__dirname, '../', config.dbPath);
 const db = new Database(dbPath);
 
 // Inicializar esquema
@@ -60,7 +64,36 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_fav_lines_chat ON user_favorite_lines(chat_id);
   CREATE INDEX IF NOT EXISTS idx_fav_lines_dedup
     ON user_favorite_lines(chat_id, line_id);
+
+  CREATE TABLE IF NOT EXISTS schema_version (
+    version INTEGER PRIMARY KEY
+  );
 `);
+
+/**
+ * Migraciones aditivas. `CREATE TABLE IF NOT EXISTS` no añade columnas a una
+ * BD ya creada, así que cada versión se aplica una sola vez y se registra.
+ */
+function migrate(): void {
+  const current = db
+    .prepare('SELECT MAX(version) AS version FROM schema_version')
+    .get() as { version: number | null };
+  let version = current.version ?? 0;
+
+  if (version < 2) {
+    const columns = db.prepare('PRAGMA table_info(user_alerts)').all() as {
+      name: string;
+    }[];
+    if (!columns.some((column) => column.name === 'send_failures')) {
+      db.exec(
+        'ALTER TABLE user_alerts ADD COLUMN send_failures INTEGER NOT NULL DEFAULT 0'
+      );
+    }
+    db.prepare('INSERT INTO schema_version (version) VALUES (2)').run();
+    version = 2;
+  }
+}
+migrate();
 
 // Tipos de filas de SQLite (snake_case -> tipos estrictos, sin `any`)
 interface AlertRow {
@@ -73,6 +106,7 @@ interface AlertRow {
   destination: string;
   minutes_ahead: number;
   active: number;
+  send_failures: number;
   created_at: number;
   updated_at: number;
 }
@@ -105,17 +139,18 @@ function rowToAlert(row: AlertRow): UserAlert {
     destination: row.destination,
     minutesAhead: row.minutes_ahead,
     active: Boolean(row.active),
+    sendFailures: row.send_failures ?? 0,
     createdAt: row.created_at,
   };
 }
 
 export function createAlert(
-  alert: Omit<UserAlert, 'id' | 'createdAt'>
+  alert: Omit<UserAlert, 'id' | 'createdAt' | 'sendFailures'>
 ): UserAlert {
   const now = Date.now();
   const stmt = db.prepare(`
-    INSERT INTO user_alerts (chat_id, stop_id, stop_name, line_id, line_name, destination, minutes_ahead, active, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO user_alerts (chat_id, stop_id, stop_name, line_id, line_name, destination, minutes_ahead, active, send_failures, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
   `);
   const result = stmt.run(
     alert.chatId,
@@ -129,7 +164,12 @@ export function createAlert(
     now,
     now
   );
-  return { ...alert, id: result.lastInsertRowid as number, createdAt: now };
+  return {
+    ...alert,
+    id: result.lastInsertRowid as number,
+    createdAt: now,
+    sendFailures: 0,
+  };
 }
 
 export function getAlertsByChat(chatId: number): UserAlert[] {
@@ -165,19 +205,30 @@ export function getAlertById(id: number): UserAlert | null {
   return row ? rowToAlert(row as AlertRow) : null;
 }
 
-export function updateAlert(
-  id: number,
-  updates: Partial<Omit<UserAlert, 'id' | 'chatId' | 'createdAt'>>
-): boolean {
-  const fields = Object.keys(updates).filter(
-    (k) => k !== 'id' && k !== 'chatId' && k !== 'createdAt'
+type AlertUpdate = Partial<Omit<UserAlert, 'id' | 'chatId' | 'createdAt'>>;
+
+/** Whitelist: nunca se interpola una clave arbitraria en SQL. */
+const ALERT_COLUMNS: Record<keyof AlertUpdate, string> = {
+  stopId: 'stop_id',
+  stopName: 'stop_name',
+  lineId: 'line_id',
+  lineName: 'line_name',
+  destination: 'destination',
+  minutesAhead: 'minutes_ahead',
+  active: 'active',
+  sendFailures: 'send_failures',
+};
+
+export function updateAlert(id: number, updates: AlertUpdate): boolean {
+  const fields = (Object.keys(updates) as (keyof AlertUpdate)[]).filter(
+    (key) => key in ALERT_COLUMNS
   );
   if (!fields.length) return false;
 
-  const setClause = fields.map((f) => `${f} = ?`).join(', ');
+  const setClause = fields.map((key) => `${ALERT_COLUMNS[key]} = ?`).join(', ');
   // better-sqlite3 no acepta booleanos: SQLite los guarda como 0/1.
-  const values = fields.map((f) => {
-    const value = updates[f as keyof typeof updates];
+  const values = fields.map((key) => {
+    const value = updates[key];
     return typeof value === 'boolean' ? (value ? 1 : 0) : value;
   });
   values.push(Date.now(), id);

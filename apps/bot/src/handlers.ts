@@ -1405,7 +1405,7 @@ export function setupBot(bot: Telegraf<Context>): void {
   bot.on('text', handleText);
 
   startAlertScheduler();
-  void fetchStopTimes('1'); // precargar conexión con datos reales
+  void fetchStopTimes('2'); // precargar conexión con una parada con servicio
 
   console.log('🤖 Bot handlers registered');
   console.log(`📡 Data source: ${getDataSource()}`);

@@ -18,6 +18,7 @@ import {
   searchLines,
   searchStops,
 } from '../src/catalog.js';
+import { config } from '../src/config.js';
 import { evictOldestEntries } from '../src/dbus-client.js';
 import { getSessionCount, pruneSessions } from '../src/handlers.js';
 import {
@@ -157,6 +158,12 @@ describe('catálogo de búsqueda (datos reales de Dbus)', () => {
     const meta = getCatalogMeta();
     expect(meta.lines).toBeGreaterThan(30);
     expect(meta.stops).toBeGreaterThan(500);
+  });
+});
+
+describe('aislamiento de BD en tests', () => {
+  it('usa una BD en memoria, nunca apps/bot/bot.db', () => {
+    expect(config.dbPath).toBe(':memory:');
   });
 });
 

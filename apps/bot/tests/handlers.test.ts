@@ -131,15 +131,15 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
   });
 
   it('a stop code returns live arrivals', async () => {
-    await bot.handleUpdate(messageUpdate('1', 3) as never);
+    await bot.handleUpdate(messageUpdate('2', 3) as never);
     const output = texts();
-    expect(output).toContain('Boulevard 9');
+    expect(output).toContain('Urbieta 12');
     expect(output).toMatch(/L\d+/);
   });
 
   it('/lineas lists real lines at the stop', async () => {
-    await bot.handleUpdate(messageUpdate('/lineas 1', 4) as never);
-    expect(texts()).toMatch(/Líneas en .*Boulevard/);
+    await bot.handleUpdate(messageUpdate('/lineas 2', 4) as never);
+    expect(texts()).toMatch(/Líneas en .*Urbieta/);
   });
 
   it('callback answers are sent', () => {
@@ -150,10 +150,10 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
 
   it('accepts the internal Dbus line id as an alias for the public code', async () => {
     const start = sent.length;
-    await bot.handleUpdate(messageUpdate('/parada 1 32', 5) as never);
+    await bot.handleUpdate(messageUpdate('/parada 2 32', 5) as never);
     const output = textsSince(start);
     expect(output).not.toContain('no pasa por la parada');
-    expect(output).toContain('Boulevard 9');
+    expect(output).toContain('Urbieta 12');
   });
 
   it('creates an alert with the public line and offers a delete button', async () => {
@@ -162,7 +162,7 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
     try {
       let start = sent.length;
       await bot.handleUpdate(
-        messageUpdate('/aviso 1 32 5', 6, target) as never
+        messageUpdate('/aviso 2 32 5', 6, target) as never
       );
       const created = textsSince(start);
       expect(created).toContain('Aviso creado');
@@ -202,11 +202,11 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
     for (const alert of getAlertsByChat(target.id)) deleteAlert(alert.id);
     try {
       await bot.handleUpdate(
-        messageUpdate('/aviso 1 32 5', 20, target) as never
+        messageUpdate('/aviso 2 32 5', 20, target) as never
       );
       const start = sent.length;
       await bot.handleUpdate(
-        messageUpdate('/aviso 1 32 5', 21, target) as never
+        messageUpdate('/aviso 2 32 5', 21, target) as never
       );
       expect(textsSince(start)).toContain('Ya tienes un aviso activo');
     } finally {
@@ -221,7 +221,7 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
       let start = sent.length;
       await bot.handleUpdate(messageUpdate('/start', 22, target) as never);
       await bot.handleUpdate(callbackUpdate('menu_alert', 23, target) as never);
-      await bot.handleUpdate(messageUpdate('1', 24, target) as never);
+      await bot.handleUpdate(messageUpdate('2', 24, target) as never);
       await bot.handleUpdate(callbackUpdate('aline_28', 25, target) as never);
       await bot.handleUpdate(callbackUpdate('minutes_5', 26, target) as never);
       const first = textsSince(start);
@@ -230,7 +230,7 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
 
       start = sent.length;
       await bot.handleUpdate(callbackUpdate('menu_alert', 27, target) as never);
-      await bot.handleUpdate(messageUpdate('1', 28, target) as never);
+      await bot.handleUpdate(messageUpdate('2', 28, target) as never);
       await bot.handleUpdate(callbackUpdate('aline_28', 29, target) as never);
       await bot.handleUpdate(callbackUpdate('minutes_5', 30, target) as never);
       expect(textsSince(start)).toContain('Ya tienes un aviso activo');
@@ -269,7 +269,7 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
     for (const fav of getFavorites(target.id)) removeFavorite(fav.id);
     try {
       const start = sent.length;
-      await bot.handleUpdate(messageUpdate('/fav add 1', 43, target) as never);
+      await bot.handleUpdate(messageUpdate('/fav add 2', 43, target) as never);
       expect(textsSince(start)).toContain('Favorito guardado');
       expect(getFavorites(target.id)[0]?.lineId).toBe('');
     } finally {
@@ -319,7 +319,7 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
     await bot.handleUpdate(callbackUpdate('la_28', 63, target) as never);
     const output = textsSince(start);
     expect(output).toContain('todas las paradas');
-    expect(output).toContain('ls_1_28');
+    expect(output).toContain('ls_2_28');
     expect(output).toContain('lapages_28_1');
 
     start = sent.length;
@@ -327,8 +327,8 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
     expect(textsSince(start)).toContain('Página 2/3');
 
     start = sent.length;
-    await bot.handleUpdate(callbackUpdate('ls_1_28', 65, target) as never);
-    expect(textsSince(start)).toContain('favstop_1');
+    await bot.handleUpdate(callbackUpdate('ls_2_28', 65, target) as never);
+    expect(textsSince(start)).toContain('favstop_2');
   });
 
   it('/estado muestra diagnóstico sin secretos', async () => {

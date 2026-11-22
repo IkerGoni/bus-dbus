@@ -10,6 +10,8 @@ import { getActiveAlerts, updateAlert } from './db.js';
 import type { UserAlert } from './types.js';
 
 const MAX_ALERT_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+/** Un chat que bloquea al bot deja de generar reintentos cada minuto. */
+const MAX_SEND_FAILURES = 3;
 let scheduledTask: cron.ScheduledTask | null = null;
 let botInstance: Telegraf<Context> | null = null;
 let checking = false;
@@ -88,14 +90,22 @@ async function checkAlertsUnsafe(): Promise<void> {
           await botInstance.telegram.sendMessage(alert.chatId, msg, {
             parse_mode: 'Markdown',
           });
-          updateAlert(alert.id, { active: false });
+          updateAlert(alert.id, { active: false, sendFailures: 0 });
           console.log(
             `✅ Alert ${alert.id} triggered for chat ${alert.chatId}`
           );
         } catch (error) {
-          // Un chat bloqueado no debe impedir avisar al resto.
+          // Un chat bloqueado no debe impedir avisar al resto ni repetir
+          // el mismo fallo cada minuto hasta la caducidad del aviso.
+          const failures = alert.sendFailures + 1;
+          updateAlert(alert.id, {
+            sendFailures: failures,
+            active: failures < MAX_SEND_FAILURES,
+          });
           console.error(
-            `[Alerts] Send failed for chat ${alert.chatId}: ${error instanceof Error ? error.message : String(error)}`
+            `[Alerts] Send failed for chat ${alert.chatId} ` +
+              `(${failures}/${MAX_SEND_FAILURES}): ` +
+              `${error instanceof Error ? error.message : String(error)}`
           );
         }
       }

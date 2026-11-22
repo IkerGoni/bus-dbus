@@ -41,5 +41,7 @@ export interface UserAlert {
   destination: string;
   minutesAhead: number;
   active: boolean;
+  /** Envíos consecutivos fallidos: tras N se desactiva el aviso. */
+  sendFailures: number;
   createdAt: number;
 }
