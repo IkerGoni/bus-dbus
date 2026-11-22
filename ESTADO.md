@@ -1,122 +1,98 @@
 # Estado — bus-dbus
-Actualizado: 2026-11-22 06:47 · Última sesión: buscador real, favoritos libres y UX de parada/línea
 
-## Objetivo actual
-PWA de llegadas de Dbus (San Sebastián) + bot de Telegram con avisos.
-El bot ya opera con datos reales de la API oficial; la PWA sigue bloqueada
-en el Sprint 3 por errores preexistentes de TypeScript/lint.
+Actualizado: 2026-11-22 07:00 · Última sesión: auditoría y refinado de documentación
 
-## Hecho en la última sesión
-- Auditoría del aviso `❌ No hay paradas configuradas para L32`: solo existía
-  en commits antiguos (`f86b23a` y anteriores), nunca en el código/dist actual.
-  Causa: `AVAILABLE_LINES` incluía `32` pero `STOPS_BY_LINE` solo tenía 12/17/18.
-- Alias de línea: Dbus usa id interno `32` = código público `28`. Se aceptan
-  ambos (`28`, `L28`, `32`) y siempre se guarda/muestra el código público.
-- Bug real corregido: `updateAlert()` enlazaba booleanos y SQLite fallaba
-  (`SQLite3 can only bind numbers...`) — rompía la desactivación de avisos,
-  incluido el caducado automático. Ahora convierte `true/false` a `1/0`.
-- Avisos: dedup por `(chat, parada, línea)`, caducidad a 7 días, filtro por
-  destino tolerante (contención) y por GPS/horario, guard de reentrada del
-  scheduler, aislamiento de fallos de envío por chat.
-- Favoritos deduplicados; `/lista` con botones `adel_` para borrar cada aviso;
-  `/actualizar` recarga catálogo completo; `stop_refresh` invalida solo una
-  parada; sesiones con TTL de 10 min y poda; `safeEdit` tolera mensajes
-  anticuados/"not modified" y responde como mensaje nuevo cuando hace falta.
-- Arranque: lock de instancia única (PID, tolera locks caducados) y retry de
-  conflictos 409 con 12 intentos y backoff hasta 30 s.
-- Sin mocks en producción: eliminado `FALLBACK_STOPS`; catálogo vacío = error
-  explícito. `getJson` reintenta una vez con 300 ms.
-- 27 tests en verde (10 unit + 10 integración + 7 E2E); `tsc`, `biome check
-  src/` y `build` del bot sin errores. README actualizado.
-- Migración previa: GTFS-RT/protobuf (`.pb` con 403 desde S3) → API JSON real
-  de Dbus `SSIIMovilWSv2/ws/cons/tiemposParada` (HTTP, sin auth).
-- Consolidación: `validateLineAtStop` y `CATALOG_ERROR` unifican la validación
-  de línea y el error de catálogo en `handlers.ts`; `findRow<T>` agrupa los
-  finders de `db.ts`; `normalizeLine` se usa también en `/aviso` (acepta `L28`,
-  `028`). Sin cambios de comportamiento: 27/27 tests siguen en verde.
-- Eliminados `gtfs-client.ts`, `src/proto/` y la dependencia `protobufjs` del bot.
-- Bot reconstruido y arrancado con `BOT_TOKEN` del entorno: `node dist/index.js`
-  en PID 1054, sin conflictos 409, scheduler y refresco de 30 s activos.
-  `f1ed9a0` ya pusheado a `origin/main`.
+> **`AGENTS.md` es la fuente de verdad.** Este archivo es el estado de sesión;
+> si algo aquí contradice a `AGENTS.md`, manda `AGENTS.md`.
 
-## Hecho en esta sesión (análisis + mejoras del bot)
-- Optimización: `fetchPopularStops` pide los 3 itinerarios semilla en paralelo
-  (`Promise.all`) en vez de en serie: carga en frío de ~3 latencias a 1.
-- Optimización: caché de paradas limitada a 200 entradas; `evictOldestEntries<T>`
-  elimina las más antiguas (por inserción) tras cada consulta. Evita que el
-  refresco de 30 s visite un mapa que crece sin límite.
-- QoL/correctitud: `createAndConfirmAlert` devuelve `created | duplicate |
-  no-chat`; `handleMinutesCallback` ya no responde "✅ Aviso creado" cuando el
-  aviso fue rechazado por duplicado. El mensaje emergente distingue ambos casos.
-- QoL: la confirmación de aviso incluye la ETA de la próxima llegada
-  (`min`/`ahora` + 📡/🕒), con fallback determinista sin servicio.
-- QoL: comando `/estado` (diagnóstico: fuente, cachés, avisos activos, uptime,
-  sin secretos) documentado en `/help` y README.
-- Tests: 31/31 en verde (11 unit + 10 integración + 10 E2E). `tsc`, `biome
-  check src/ tests/` y `build` sin errores. **Cambios aún no commiteados ni
-  desplegados** (el bot en PID 1054 sigue con el build anterior).
+## Resumen actual
 
-## Hecho en esta sesión (búsqueda y favoritos)
-- Descartado el prototipo GPS: la API de Dbus no expone coordenadas y los
-  datos generados quedaron solo en TMPDIR (nada en el repo).
-- Eliminado "paradas populares" de menú, `/help` y comandos: era una lista
-  arbitraria de 24 paradas de 3 itinerarios semilla. `fetchPopularStops`
-  sigue solo como caché interna de nombres para `/actualizar`.
-- Catálogo real generado desde la API: `bot/data/dbus-catalog.json` con
-  39 líneas, 127 itinerarios y 548 paradas. Refrescable con
-  `npm run build:catalog` (`bot/scripts/build-catalog.mjs`). Es índice de
-  descubrimiento; las llegadas siguen siendo 100 % en vivo.
-- `bot/src/catalog.ts`: búsqueda por código/nombre sin acentos y por línea
-  (código público, id interno o destino); `getLineByCode` prioriza el código
-  público porque el id interno 28 es la pública 26.
-- UX: `/buscar` y botón 🔎 (acepta `1`, `Boulevard`, `28`, `Ospitaleak`);
-  `/linea 28` → destinos → paradas de ese destino → llegadas. Botones
-  `srch_s_`, `srch_l_`, `ld_`, `ls_` son stateless (codifican el dato).
-- Favoritos libres: parada completa (`line_id=''`, todas las líneas),
-  parada+línea y línea favorita (nueva tabla `user_favorite_lines`).
-  `/fav add <parada> [linea]` y `/fav linea <linea>`; botones "Guardar
-  parada"/"Guardar línea" y borrado desde `/fav`.
-- Aceptadas líneas alfanuméricas (`B4`, `B9`): antes `/aviso` y los callbacks
-  exigían solo dígitos.
-- Tests: 40/40 (14 unit + 12 integración + 14 E2E). `tsc`, `biome check
-  src/ tests/` y `build` sin errores. Catálogo y docs actualizados.
+| Área | Estado |
+|------|--------|
+| Bot de Telegram | ✅ Activo con datos reales, commit `8445239`, PID `51205`, `node dist/index.js`, lock y log verificados |
+| Calidad del bot | ✅ 40/40 tests · `tsc` 0 errores · `biome check src/ tests/` limpio · `build` OK |
+| Descubrimiento | ✅ `/buscar` + `/linea` sobre catálogo real (39 líneas, 127 itinerarios, 548 paradas) |
+| Favoritos | ✅ parada completa, parada+línea y línea favorita |
+| PWA (Sprint 3) | 🔧 Bloqueada: 30 errores TS y 233 de lint en `src/` (preexistente) |
+| Docs | ✅ `README.md` y `AGENTS.md` refinados; ADR 005 y planning avisan de que los `.pb` dan 403 |
+| Seguridad | ⚠️ Token compartido en texto plano: pendiente de rotación por Iker |
+
+## Objetivo
+
+PWA de llegadas Dbus (San Sebastián) + bot de Telegram con avisos. Hoy solo
+el bot está operativo y desplegado. La PWA sigue fuera del alcance salvo
+petición explícita.
+
+## Historial (comprimido)
+
+### Datos reales y endurecimiento (`f1ed9a0`)
+- Migración de GTFS-RT/protobuf (`.pb` → S3 con 403) a la API JSON de Dbus
+  `SSIIMovilWSv2/ws/cons/tiemposParada` (HTTP, sin auth). Sin mocks.
+- Alias de línea: id interno `32` = código público `28`; se acepta como entrada,
+  se persiste el código público.
+- Bug real: `updateAlert()` enlazaba booleanos y SQLite fallaba; ahora `1/0`.
+  Esto rompía desactivación y caducidad de avisos.
+- Avisos: dedup por `(chat, parada, línea)`, 7 días, preferencia GPS, filtro de
+  destino, guard de reentrada y aislamiento de envíos por chat.
+- Arranque: lock PID + retry de 409 (12 intentos, hasta 30 s). Sin `tsx watch`.
+
+### Consolidación y QoL (`65d2b08`, `e10eb3c`)
+- `validateLineAtStop`/`CATALOG_ERROR`, `findRow<T>` y `normalizeLine`
+  centralizados. Sin cambios de comportamiento.
+- Catálogo en paralelo, caché limitada a 200 entradas con evicción, ETA en la
+  confirmación de avisos, feedback correcto ante duplicados y `/estado`.
+
+### Búsqueda y favoritos libres (`8445239`)
+- Eliminadas "paradas populares": lista arbitraria de 3 itinerarios semilla.
+- `bot/data/dbus-catalog.json` generado por `npm run build:catalog`: índice de
+  descubrimiento, **no** fuente de llegadas (estas siguen en vivo).
+- `/buscar` (código, nombre, línea o destino) y `/linea 28` → destinos →
+  paradas → llegadas. Callbacks stateless.
+- Favoritos: parada completa (`line_id=''`), parada+línea y línea
+  (`user_favorite_lines`). Aceptadas líneas alfanuméricas (`B4`, `B9`).
+- GPS descartado: la API de Dbus no devuelve coordenadas; datos de prueba
+  quedaron solo en TMPDIR, nunca en el repo.
+
+### Documentación (sesión actual)
+- `AGENTS.md` nuevo con reglas, verificación y despliegue.
+- `README.md`: recuento de tests 40/40, rutas de lint correctas, secretos por
+  entorno (sin `.env`), identidad de línea, semántica real de favoritos y
+  estado de GTFS-RT.
+- `ESTADO.md`: reescrito como estado actual + historial comprimido.
+- ADR 005 y `04-planning/mvp-scope.md`: aviso de que el diseño `.pb` no aplica
+  al bot porque los feeds devuelven 403.
 
 ## Pendiente (por prioridad)
-- [ ] PWA Shell (Sprint 3): 30 errores TS y 233 errores de lint en `src/`
-      (bloqueo preexistente; tareas en el kanban `dbus-app`).
-- [ ] Validar una conversación real: enviar `/start` a `@dbus_alarm_bot`.
-- [ ] Comprobar disparo de avisos con buses en servicio (tipo=1, GPS).
+
+- [ ] Rotar el token de Telegram y reiniciar con el nuevo valor por entorno.
+- [ ] Validar conversación real: enviar `/start` a `@dbus_alarm_bot`.
+- [ ] Comprobar disparo de aviso con bus en servicio (`tipo=1`, GPS).
+- [ ] PWA Sprint 3: 30 errores TS y 233 de lint (tareas en kanban `dbus-app`).
 - [ ] M4/M5: notificaciones push y beta con testers.
 
 ## Decisiones tomadas (no reabrir)
-- 2026-11-22 · Fuente del bot = API JSON de Dbus sobre HTTP
-  (`http://app.dbus.eus/SSIIMovilWSv2/ws/cons`) · Los feeds GTFS-RT redirigen
-  a S3 y dan 403; esta API es la que usa la app oficial y no necesita auth.
-- 2026-11-22 · `codParada` = código público de la marquesina, no id interno ·
-  Es lo que espera `tiemposParada`.
-- 2026-11-22 · Sin fallback a datos mock en producción · Evita avisos falsos.
-- 2026-11-22 · Ejecutar el bot con `npm run start`, no `npm run dev` ·
-  Los reinicios de `tsx watch` provocaban 409; además existe retry automático.
-- 2026-11-22 · Línea = código público (`28`), nunca el id interno (`32`) ·
-  Se acepta el id como alias de entrada por compatibilidad, pero no se
-  persiste: evita avisos duplicados para la misma línea con dos identificadores.
 
-## Esperando a Iker
-- Enviar `/start` a `@dbus_alarm_bot` para confirmar el round-trip real.
+- Fuente del bot = API JSON de Dbus sobre HTTP; los feeds `.pb` redirigen a S3
+  y dan 403. Sin fallback a mocks en producción.
+- `codParada` = código visible en marquesina, no id interno.
+- Producción con `npm run start`, nunca `tsx watch`; un solo proceso/polling.
+- Línea = código público; id interno solo alias de entrada. En búsquedas gana
+  el código público porque `32` también es una línea pública.
+- El catálogo JSON es índice de descubrimiento regenerable; las llegadas
+  siempre se consultan en vivo.
+- Sin "paradas populares": `/buscar` y `/linea` son la UX de descubrimiento.
+- Docs: `AGENTS.md` manda; `README.md` es uso; ADRs son decisiones históricas.
 
 ## Git
-`8ce2694` → `f1ed9a0` (mejoras del bot) → `65d2b08` (consolidación + docs),
-ambos ya pusheados. Los cambios de mejoras/QoL de esta sesión están en el
-working tree, **sin commitear ni pushear** a la espera de revisión. Ramas
-abiertas: ninguna.
-El token solo se pasa por entorno a `npm run start`; nunca en archivos ni en
-commits. Recomendación de seguridad: rotar el token porque se compartió en
-texto plano en el chat.
+
+`8ce2694` → `f1ed9a0` → `65d2b08` → `e10eb3c` → `8445239`, todos pusheados.
+Esta sesión añade cambios de documentación pendientes de commit/push.
+Ramas abiertas: ninguna. El token solo se pasa por entorno; nunca en archivos
+ni commits.
 
 ## Siguiente sesión
-- Leer primero: `ESTADO.md`, `README.md`, `bot/src/dbus-client.ts`,
-  `bot/src/handlers.ts`.
-- Empezar por: arreglar los 30 errores TS de `src/` (Sprint 3) o validar el
-  bot con un mensaje real desde Telegram.
-- Reglas específicas: el bot nunca usa mocks en producción; el token solo se
-  pasa por la variable de entorno `BOT_TOKEN`, nunca se commitea.
+
+- Leer primero: `AGENTS.md`, `README.md`, `ESTADO.md`.
+- Empezar por: rotar el token y validar el round-trip real en Telegram.
+- No reabrir: mocks, `.pb`, `tsx watch` en producción, listas de paradas
+  "populares", ni escribir el token en archivos.

@@ -3,6 +3,11 @@
 ## Versión
 v0.1 — Sprint 0 output | 2026-11-22
 
+> **Nota 2026-11-22:** F4 y la sección *Data Sources* describen el diseño
+> original de la PWA, pero los feeds `.pb` redirigen a S3 y devuelven 403.
+> El bot ya no los usa: consulta la API JSON de Dbus. Revisar la fuente antes
+> de ejecutar M3. Ver `AGENTS.md` y `README.md`.
+
 ---
 
 ## 1. Problem Statement

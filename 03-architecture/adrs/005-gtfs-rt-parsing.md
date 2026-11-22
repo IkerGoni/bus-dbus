@@ -1,7 +1,12 @@
 # ADR 005: GTFS-RT Parsing: Web Worker + protobufjs
 
+> **Nota 2026-11-22:** los feeds `.pb` de `opendata.euskadi.eus` redirigen a S3
+> y devuelven `403 AccessDenied`. El diseño de esta ADR queda como referencia
+> histórica de la PWA (Sprint 3, bloqueado); **no aplica al bot**, que usa la
+> API JSON de Dbus. Ver `README.md` y `AGENTS.md`.
+
 ## Status
-Accepted
+Accepted (histórico; fuente no disponible — revisar antes de implementar M3)
 
 ## Context
 Parse 3 GTFS-RT feeds (mdb-3066 TripUpdates, mdb-3065 VehiclePositions, mdb-3064 Alerts) every 30s. Protobuf binary format. Must not block main thread >100ms. Feed schema may drift. Need validation and fallback to scheduled data.
