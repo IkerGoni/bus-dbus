@@ -121,6 +121,27 @@ class AlertEngineTest {
     }
 
     @Test
+    fun unFalloInesperadoCuentaComoProblemaYAcabaParando() {
+        // Primera vuelta fallida: empieza la cuenta y se sigue.
+        val first = failedTick(null, now)
+        assertEquals(now, first.troubleSinceMs)
+        assertEquals(EngineAction.CONTINUE, first.action)
+        // Si ya había problemas, la cuenta no se reinicia.
+        assertEquals(now - 1_000, failedTick(now - 1_000, now).troubleSinceMs)
+        // Fallando seguido (Room roto) llega a NO_SERVICE_STOP_MS y se para: no sondea para siempre.
+        assertEquals(EngineAction.CONTINUE, failedTick(now, now + NO_SERVICE_STOP_MS - 1).action)
+        assertEquals(EngineAction.STOP_NO_SERVICE, failedTick(now, now + NO_SERVICE_STOP_MS).action)
+    }
+
+    @Test
+    fun sinPermisoDeNotificacionesNoSeBorraElAviso() {
+        val firings = evaluateTick(listOf(once("a")), mapOf("340" to live(arrival("5", 4))), now, null).firings
+        assertEquals(listOf("a"), firingsToDelete(firings, canNotify = true).map { it.rule.id })
+        // El usuario no lo vería: se queda en Mis avisos (A04 ya avisa de que faltan permisos).
+        assertTrue(firingsToDelete(firings, canNotify = false).isEmpty())
+    }
+
+    @Test
     fun destinoDelTitulo() {
         assertEquals("Amara", firingDestination(once("a"), arrival("5", 3)))
         assertEquals("Ospitaleak", firingDestination(once("a").copy(destination = "Ospitaleak"), arrival("5", 3, destination = " ")))

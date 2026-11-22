@@ -45,8 +45,11 @@ class ConfigTest {
     private var now = 1_700_000_000_000L
     private val cacheFile get() = tmp.root.resolve("api-config.json")
 
+    /** Avisos que el repositorio manda a logcat (en JVM no hay `android.util.Log`). */
+    private val warnings = mutableListOf<String>()
+
     private fun repo(http: OkHttpClient = OkHttpClient()) =
-        ConfigRepository(bundled, cacheFile, server.url("/config.json"), http, nowMs = { now })
+        ConfigRepository(bundled, cacheFile, server.url("/config.json"), http, nowMs = { now }, warn = { msg, _ -> warnings += msg })
 
     // ── Validación ──
 
@@ -132,6 +135,7 @@ class ConfigTest {
         val elapsedSec = (System.nanoTime() - started) / 1e9
         assertTrue("timeout tardó $elapsedSec s", elapsedSec in 4.5..8.0)
         assertEquals(bundled, r.config.value)
+        assertEquals(1, warnings.size) // el timeout no es mudo (H5)
     }
 
     @Test
@@ -153,5 +157,6 @@ class ConfigTest {
     fun cacheCorruptaEnDiscoSeIgnora() {
         cacheFile.writeText("basura")
         assertEquals(bundled, repo().config.value)
+        assertEquals(1, warnings.size) // corrupta: se avisa (H5); ausente es lo normal y no
     }
 }

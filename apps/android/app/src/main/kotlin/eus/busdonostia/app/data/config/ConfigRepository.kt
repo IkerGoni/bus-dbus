@@ -1,7 +1,9 @@
 package eus.busdonostia.app.data.config
 
 import android.content.res.AssetManager
+import eus.busdonostia.app.data.Warn
 import eus.busdonostia.app.data.await
+import eus.busdonostia.app.data.logcatWarn
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,6 +32,7 @@ class ConfigRepository(
     private val remoteUrl: HttpUrl?,
     http: OkHttpClient,
     private val nowMs: () -> Long = System::currentTimeMillis,
+    private val warn: Warn = logcatWarn("ConfigRepository"),
 ) {
     private val http = http.newBuilder().callTimeout(TIMEOUT_SEC, TimeUnit.SECONDS).build()
     private var cache: Cached? = if (remoteUrl == null) null else readCache()
@@ -48,7 +51,8 @@ class ConfigRepository(
                 http.newCall(Request.Builder().url(url).build()).await().use { response ->
                     if (response.isSuccessful) response.body?.string()?.let(ApiConfig::parse) else null
                 }
-            } catch (_: IOException) {
+            } catch (e: IOException) {
+                warn("config remota: sin respuesta", e)
                 null
             }
         }
@@ -63,11 +67,16 @@ class ConfigRepository(
     @Serializable
     private data class Cached(val lastAttemptMs: Long, val config: ApiConfig?)
 
-    private fun readCache(): Cached? = try {
-        json.decodeFromString(Cached.serializer(), cacheFile.readText())
-            .let { it.copy(config = it.config?.takeIf { c -> c.validate().isEmpty() }) }
-    } catch (_: Exception) {
-        null // Ausente o corrupta: como si no hubiera.
+    private fun readCache(): Cached? = if (!cacheFile.exists()) {
+        null // Primera vez: lo normal, no se avisa.
+    } else {
+        try {
+            json.decodeFromString(Cached.serializer(), cacheFile.readText())
+                .let { it.copy(config = it.config?.takeIf { c -> c.validate().isEmpty() }) }
+        } catch (e: Exception) {
+            warn("caché de config ilegible: se ignora", e)
+            null // Corrupta: como si no hubiera.
+        }
     }
 
     private fun writeCache(value: Cached) {
@@ -75,7 +84,8 @@ class ConfigRepository(
             val tmp = File(cacheFile.path + ".tmp")
             tmp.writeText(json.encodeToString(Cached.serializer(), value))
             if (!tmp.renameTo(cacheFile)) tmp.delete()
-        } catch (_: IOException) {
+        } catch (e: IOException) {
+            warn("no se pudo guardar la caché de config", e)
             // Sin caché en disco solo se pierde el intervalo de 12 h; nunca bloquea.
         }
     }

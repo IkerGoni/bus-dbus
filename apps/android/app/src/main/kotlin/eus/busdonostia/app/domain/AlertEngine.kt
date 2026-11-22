@@ -102,3 +102,23 @@ private fun isTrouble(view: ArrivalsView): Boolean =
 fun firingDestination(rule: AlertRule, arrival: Arrival): String? =
     arrival.destination.trim().ifEmpty { null }
         ?: rule.destination?.trim()?.takeIf { it.isNotEmpty() && !destinationsMatch(it, UNKNOWN_DESTINATION) }
+
+/** Vuelta que ha fallado por algo inesperado (BD, bug): cuenta como problema, igual que sin servicio. */
+data class FailedTick(val troubleSinceMs: Long, val action: EngineAction)
+
+/**
+ * Un fallo inesperado no tumba la vigilancia, pero tampoco la deja sondeando para siempre:
+ * suma al tiempo seguido con problemas y, a los [NO_SERVICE_STOP_MS], el motor se para y lo notifica.
+ */
+fun failedTick(troubleSinceMs: Long?, nowMs: Long): FailedTick {
+    val since = troubleSinceMs ?: nowMs
+    val action = if (nowMs - since >= NO_SERVICE_STOP_MS) EngineAction.STOP_NO_SERVICE else EngineAction.CONTINUE
+    return FailedTick(since, action)
+}
+
+/**
+ * Avisos disparados que se pueden borrar ya notificados. Si el usuario no puede ver la
+ * notificación ([canNotify] false: permiso denegado o canal bloqueado), no se consume el aviso.
+ */
+fun firingsToDelete(firings: List<Firing>, canNotify: Boolean): List<Firing> = if (canNotify) firings else emptyList()
+

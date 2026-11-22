@@ -28,7 +28,10 @@ class DbusClientTest {
             headers = headers,
         )
 
-    private fun client(cfg: ApiConfig = config()) = DbusClient(http, { cfg }, nowMs = { 42L })
+    /** Avisos que el cliente manda a logcat (en JVM no hay `android.util.Log`). */
+    private val warnings = mutableListOf<String>()
+
+    private fun client(cfg: ApiConfig = config()) = DbusClient(http, { cfg }, nowMs = { 42L }, warn = { msg, _ -> warnings += msg })
 
     @Test
     fun llamaConLosParametrosDeLaConfig() = runTest {
@@ -65,5 +68,6 @@ class DbusClientTest {
     fun sinRedEsErrorDeApi() = runTest {
         server.enqueue(MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AT_START))
         assertEquals(StopFeedStatus.API_ERROR, client().tiemposParada("50", "es").status)
+        assertEquals(1, warnings.size) // el fallo de red no es mudo (H5)
     }
 }

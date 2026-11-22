@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import eus.busdonostia.app.AppContainer
@@ -15,9 +16,12 @@ import eus.busdonostia.app.data.live.feedView
 import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.EngineAction
 import eus.busdonostia.app.domain.evaluateTick
+import eus.busdonostia.app.domain.failedTick
+import eus.busdonostia.app.domain.firingsToDelete
 import eus.busdonostia.app.domain.isFetchDue
 import eus.busdonostia.app.domain.isWatching
 import eus.busdonostia.app.domain.nextPollDelayMs
+import eus.busdonostia.app.domain.pollDelayMs
 import eus.busdonostia.app.domain.stopsToPoll
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -36,8 +40,8 @@ import kotlinx.coroutines.withTimeoutOrNull
  * mientras haya avisos en vigilancia, consulta sus paradas (cada `pollIntervalSec`,
  * o más espaciado si el bus aún está lejos: [nextPollDelayMs])
  * (una petición por parada, por `AppContainer.fetchStop`) y dispara lo que esté
- * `TRIGGERED`: notifica y borra el aviso (un solo uso). La decisión es [evaluateTick];
- * aquí solo se consulta, borra y notifica.
+ * `TRIGGERED`: notifica y, si el usuario puede verlo, borra el aviso (un solo uso).
+ * La decisión es [evaluateTick]; aquí solo se consulta, notifica y borra.
  */
 class AlertMonitorService : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -124,9 +128,14 @@ class AlertMonitorService : Service() {
                 result.action
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
-                // Un fallo inesperado (BD, red) no debe tumbar la vigilancia: se reintenta en la siguiente vuelta.
-                EngineAction.CONTINUE
+            } catch (e: Exception) {
+                // Un fallo inesperado (BD, bug) no tumba la vigilancia, pero cuenta como problema:
+                // si sigue NO_SERVICE_STOP_MS, el motor se para y lo notifica.
+                Log.w(TAG, "vuelta del motor fallida", e)
+                val failed = failedTick(troubleSinceMs, System.currentTimeMillis())
+                troubleSinceMs = failed.troubleSinceMs
+                delayMs = pollDelayMs(null, baseMs)
+                failed.action
             }
             if (action != EngineAction.CONTINUE) return action
             withTimeoutOrNull(delayMs) { wake.receive() }
@@ -145,10 +154,9 @@ class AlertMonitorService : Service() {
         val feeds = container.liveFeeds.feeds.value
         val views = stopsToPoll(rules, now).associateWith { feedView(feeds, it, now) }
         val tick = evaluateTick(rules, views, now, troubleSinceMs)
-        tick.firings.forEach { firing ->
-            container.database.alerts().delete(firing.rule.id)
-            notifyArrival(this, firing, now)
-        }
+        // Primero se notifica; solo se borra (un solo uso) si el usuario puede ver la notificación.
+        tick.firings.forEach { notifyArrival(this, it, now) }
+        firingsToDelete(tick.firings, canNotifyArrivals(this)).forEach { container.database.alerts().delete(it.rule.id) }
         // Sondeo adaptativo: más espaciado cuanto más lejos está el bus de la antelación.
         val delayMs = nextPollDelayMs(tick.watching, views, now, baseMs)
         if (tick.action == EngineAction.CONTINUE) updateMonitoringNotification(this, tick.watching, (delayMs / 1_000).toInt())
@@ -156,6 +164,8 @@ class AlertMonitorService : Service() {
     }
 
     companion object {
+        private const val TAG = "AlertMonitorService"
+
         /** El servicio está vivo (o arrancando): no hace falta volver a arrancarlo. */
         @Volatile
         var running = false
