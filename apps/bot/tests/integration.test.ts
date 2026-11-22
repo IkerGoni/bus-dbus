@@ -48,9 +48,9 @@ describe('Dbus live data', () => {
       expect(first.itinerario.linea.cod).toBeTruthy();
       expect(first.itinerario.destino).toBeTruthy();
       expect(first.minutos).toBeGreaterThanOrEqual(0);
-      // tipo=1 GPS; 2 (y desde 2026-11-22 también 0) = sin GPS. Ver
-      // docs/auditoria/2026-11-arquitectura.md (hallazgo de contrato).
-      expect([0, 1, 2]).toContain(first.tipo);
+      // tipo=1 GPS; cualquier otro valor es horario (Dbus da 2 y, desde el
+      // 2026-11-22, 0). AGENTS.md: ningún test asume un conjunto cerrado.
+      expect(Number.isInteger(first.tipo)).toBe(true);
     }
   });
 
