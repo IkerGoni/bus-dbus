@@ -5,7 +5,7 @@ import androidx.compose.ui.res.stringResource
 import eus.busdonostia.app.R
 import eus.busdonostia.app.ui.Destination
 
-// Sprint 0: cada pestaña muestra su estado `empty`. El contenido real llega en Sprints 2–3.
+// Inicio y Avisos muestran su estado `empty` hasta el Sprint 3. Paradas y Líneas: `ui/stops`, `ui/lines`.
 
 @Composable
 fun HomeScreen(onNavigate: (Destination) -> Unit) {
@@ -21,16 +21,6 @@ fun HomeScreen(onNavigate: (Destination) -> Unit) {
             },
         ),
     )
-}
-
-@Composable
-fun StopsScreen() {
-    EmptyState(stringResource(R.string.stops_empty_title), stringResource(R.string.stops_empty_body))
-}
-
-@Composable
-fun LinesScreen() {
-    EmptyState(stringResource(R.string.lines_empty_title), stringResource(R.string.lines_empty_body))
 }
 
 @Composable
