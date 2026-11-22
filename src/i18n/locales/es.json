@@ -1,0 +1,138 @@
+{
+  "app": {
+    "name": "Dbus Donostia",
+    "tagline": "Llega a tu parada sin esperar"
+  },
+  "onboarding": {
+    "title": "Dbus Donostia",
+    "subtitle": "Notificaciones push de llegada a parada",
+    "features": [
+      "Configura minutos de antelación",
+      "Elige días de la semana",
+      "Silencio nocturno automático",
+      "Funciona sin conexión",
+      "Sin publicidad"
+    ],
+    "cta": "Activar alertas",
+    "permissionPrompt": "Para recibir alertas en pantalla bloqueada, necesitamos tu permiso",
+    "installPrompt": "Instala la app para alertas en pantalla de bloqueo"
+  },
+  "home": {
+    "emptyTitle": "No tienes alertas configuradas",
+    "emptyAction": "Crear mi primera alerta",
+    "nextArrival": "Próxima llegada",
+    "arrivingIn": "Llega en {{minutes}} min",
+    "live": "EN VIVO",
+    "scheduled": "HORARIO",
+    "stale": "DATOS ANTIGUOS",
+    "actions": {
+      "viewDetail": "Ver detalle",
+      "snooze": "Posponer 5'",
+      "disable": "Desactivar"
+    }
+  },
+  "stopSelector": {
+    "title": "Seleccionar parada",
+    "nearby": "Paradas cerca de ti",
+    "searchPlaceholder": "Buscar parada...",
+    "favorites": "Favoritas",
+    "loading": "Cargando paradas...",
+    "useLocation": "Usar mi ubicación"
+  },
+  "stopDetail": {
+    "lines": "Líneas que pasan",
+    "nextArrivals": "Próximas llegadas",
+    "occupancy": "Ocupación",
+    "mugiBalance": "Saldo Mugi estimado",
+    "createAlert": "Crear alerta para esta parada",
+    "addFavorite": "Añadir a favoritas"
+  },
+  "alertConfig": {
+    "title": "Configurar alerta",
+    "line": "Línea",
+    "minutesAhead": "Minutos de antelación",
+    "days": "Días de la semana",
+    "recurrence": "Recurrencia",
+    "recurrenceOptions": {
+      "daily": "Diario",
+      "weekdays": "Laborables",
+      "weekends": "Fines de semana"
+    },
+    "silence": "Silencio nocturno",
+    "silenceFrom": "Desde",
+    "silenceTo": "Hasta",
+    "preview": "Vista previa de la notificación",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar"
+  },
+  "alertsList": {
+    "title": "Mis alertas",
+    "empty": "No hay alertas activas",
+    "addNew": "Nueva alerta",
+    "status": {
+      "active": "ACTIVA",
+      "silenced": "SILENCIADA",
+      "triggered": "DISPARADA",
+      "inactive": "INACTIVA"
+    }
+  },
+  "settings": {
+    "title": "Ajustes",
+    "appearance": "Apariencia",
+    "theme": {
+      "system": "Sistema",
+      "light": "Claro",
+      "dark": "Oscuro"
+    },
+    "language": "Idioma",
+    "notifications": "Notificaciones",
+    "notificationsEnabled": "Activadas",
+    "permissionGranted": "Permiso concedido",
+    "permissionDenied": "Permiso denegado",
+    "data": "Datos",
+    "cacheSize": "Caché: {{size}} MB",
+    "clearCache": "Limpiar caché",
+    "lastUpdate": "Última actualización: {{time}}",
+    "about": "Sobre la app",
+    "version": "Versión {{version}}",
+    "license": "Licencia MIT",
+    "dataSource": "Datos: Open Data Euskadi / Moveuskadi",
+    "donate": "Comprar café al desarrollador"
+  },
+  "push": {
+    "title": "{{line}} → {{destination}}",
+    "body": "Llega en {{minutes}} min a {{stop}}",
+    "actions": {
+      "open": "Abrir",
+      "snooze": "Posponer 5'",
+      "dismiss": "Descartar"
+    }
+  },
+  "offline": {
+    "noConnection": "Sin conexión",
+    "noCache": "No hay datos en caché",
+    "retry": "Reintentar cuando haya conexión",
+    "staleData": "Datos de hace {{time}}",
+    "staleWarning": "Datos antiguos — toque para actualizar",
+    "rtUnavailable": "Tiempo real no disponible",
+    "scheduledOnly": "Mostrando horario planificado",
+    "permissionDenied": "Notificaciones desactivadas",
+    "openSettings": "Abrir ajustes del sistema"
+  },
+  "common": {
+    "minutes": "{{count}} minuto {{count_plural}}",
+    "minutes_short": "{{count}} min",
+    "seconds": "{{count}} segundo {{count_plural}}",
+    "now": "Ahora",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "close": "Cerrar",
+    "retry": "Reintentar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito"
+  }
+}

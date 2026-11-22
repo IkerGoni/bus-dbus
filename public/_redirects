@@ -1,0 +1,2 @@
+/alert/:id  /?alert=:id  302
+/stop/:id  /stop/:id  200

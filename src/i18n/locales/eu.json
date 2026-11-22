@@ -1,0 +1,138 @@
+{
+  "app": {
+    "name": "Dbus Donostia",
+    "tagline": "Geltokian iritsi gabe Gertatu"
+  },
+  "onboarding": {
+    "title": "Dbus Donostia",
+    "subtitle": "Geltokian iritsiko den push jakinarazpenak",
+    "features": [
+      "Aurretik minutuak konfiguratu",
+      "Astean egunak aukeratu",
+      "Gauaren isilpe automatikoa",
+      "Konexiorik gabe lan egiten du",
+      "Publikidadorik gabe"
+    ],
+    "cta": "Aktibatu abisua",
+    "permissionPrompt": "Blokeo-pantailan jakinarazpenak jasotzeko baimena beharko dugu",
+    "installPrompt": "Aplikazioa instalatu blokeo-pantailako jakinarazpenak izateko"
+  },
+  "home": {
+    "emptyTitle": "Ez daukazu abisurik konfiguratuta",
+    "emptyAction": "Gure lehen abisua sortu",
+    "nextArrival": "Hurrengo irteera",
+    "arrivingIn": "{{minutes}} minetan iritsiko da",
+    "live": "DIREKTO",
+    "scheduled": "ORDUTEGIA",
+    "stale": "DATU ZAHARRAK",
+    "actions": {
+      "viewDetail": "Xehetasunak ikusi",
+      "snooze": "5' atzeratu",
+      "disable": "Desaktibatu"
+    }
+  },
+  "stopSelector": {
+    "title": "Geltoki aukeratu",
+    "nearby": "Zure gertuko geltokiak",
+    "searchPlaceholder": "Bilatu geltoki...",
+    "favorites": "Gogokoak",
+    "loading": "Geltokiak kargatzen...",
+    "useLocation": "Nire kokapena erabili"
+  },
+  "stopDetail": {
+    "lines": "Hemen pasatzen diren lerroak",
+    "nextArrivals": "Hurrengo irteerak",
+    "occupancy": "Betetasun maila",
+    "mugiBalance": "Mugi diru-balioa estimatua",
+    "createAlert": "Abisua sortu geltoki honentzat",
+    "addFavorite": "Gogokoetan gehitu"
+  },
+  "alertConfig": {
+    "title": "Abisua konfiguratu",
+    "line": "Lerroa",
+    "minutesAhead": "Aurretik minutuak",
+    "days": "Astean egunak",
+    "recurrence": "Errepikapena",
+    "recurrenceOptions": {
+      "daily": "Egunero",
+      "weekdays": "Lan egunetan",
+      "weekends": "Asteartean"
+    },
+    "silence": "Gaueko isilpe",
+    "silenceFrom": "Hainbat",
+    "silenceTo": "Hainbat",
+    "preview": "Jakinarazpenaren aurrebista",
+    "save": "Gorde",
+    "cancel": "Ezeztatu",
+    "delete": "Ezabatu"
+  },
+  "alertsList": {
+    "title": "Nire abisuak",
+    "empty": "Ez dago abisu aktiborik",
+    "addNew": "Abisu berria",
+    "status": {
+      "active": "AKTIBOA",
+      "silenced": "ISILTZA",
+      "triggered": "DISPARATUTA",
+      "inactive": "DESAKTIBATUTA"
+    }
+  },
+  "settings": {
+    "title": "Ezarpenak",
+    "appearance": "Itxura",
+    "theme": {
+      "system": "Sistema",
+      "light": "Argia",
+      "dark": "Iluna"
+    },
+    "language": "Hizkuntza",
+    "notifications": "Jakinarazpenak",
+    "notificationsEnabled": "Aktibatuta",
+    "permissionGranted": "Baimena eman da",
+    "permissionDenied": "Baimena ukatu da",
+    "data": "Datuak",
+    "cacheSize": "Kaxea: {{size}} MB",
+    "clearCache": "Kaxea garbitu",
+    "lastUpdate": "Azken eguneraketa: {{time}}",
+    "about": "Aplikazioari buruz",
+    "version": "Bertsioa {{version}}",
+    "license": "MIT lizentzia",
+    "dataSource": "Datuak: Open Data Euskadi / Moveuskadi",
+    "donate": "Kafe bat ema garaiarentzat"
+  },
+  "push": {
+    "title": "{{line}} → {{destination}}",
+    "body": "{{minutes}} minetan iritsiko da {{stop}}",
+    "actions": {
+      "open": "Ireki",
+      "snooze": "5' atzeratu",
+      "dismiss": "Baztertu"
+    }
+  },
+  "offline": {
+    "noConnection": "Konexiorik gabe",
+    "noCache": "Ez dago kaxerik",
+    "retry": "Konexioa dagoenean berriro saiatu",
+    "staleData": "Datuak {{time}} duela",
+    "staleWarning": "Datu zaharrak — eguneratu klik egin",
+    "rtUnavailable": "Denbora realeko daturik ez",
+    "scheduledOnly": "Ordutegia planoa erakusten",
+    "permissionDenied": "Jakinarazpenak desaktibatuta",
+    "openSettings": "Sistemaren ezarpenak ireki"
+  },
+  "common": {
+    "minutes": "{{count}} minutu",
+    "minutes_short": "{{count}} min",
+    "seconds": "{{count}} segundo",
+    "now": "Orain",
+    "save": "Gorde",
+    "cancel": "Ezeztatu",
+    "delete": "Ezabatu",
+    "edit": "Aldatu",
+    "close": "Itxi",
+    "retry": "Berriro saiatu",
+    "loading": "Kargatzen...",
+    "error": "Errorea",
+    "success": "Arrakasta"
+  }
+}

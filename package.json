@@ -1,0 +1,47 @@
+{
+  "name": "dbus-donostia",
+  "version": "0.1.0-beta",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "BOT_TOKEN=vitest_test_token vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "preview": "vite preview",
+    "vapid:rotate": "node scripts/generate-vapid.js"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "wouter": "^3.3.0",
+    "i18next": "^23.0.0",
+    "react-i18next": "^14.0.0",
+    "date-fns": "^3.0.0",
+    "date-fns-tz": "^3.0.0",
+    "zod": "^3.22.0",
+    "idb": "^8.0.0",
+    "@preact/signals-react": "^2.0.0",
+    "web-push": "^3.6.0",
+    "lucide-react": "^0.400.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "typescript": "^5.7.0",
+    "tailwindcss": "^4.0.0",
+    "@tailwindcss/vite": "^4.0.0",
+    "vite-plugin-pwa": "^0.21.0",
+    "workbox-window": "^7.1.0",
+    "@biomejs/biome": "^1.9.0",
+    "vitest": "^2.0.0",
+    "@playwright/test": "^1.45.0",
+    "protobufjs": "^7.3.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0"
+  }
+}
