@@ -12,6 +12,7 @@ import {
 } from '../src/arrival.js';
 import {
   getAllStopsForLine,
+  getCatalogCoverage,
   getCatalogLinesForStop,
   getCatalogMeta,
   getLineByCode,
@@ -218,6 +219,15 @@ describe('stop cache eviction', () => {
     expect([...cache.keys()]).toEqual(['4', '5']);
     expect(evictOldestEntries(cache, 2)).toBe(0);
     expect([...cache.keys()]).toEqual(['4', '5']);
+  });
+});
+
+describe('cobertura del índice regenerado', () => {
+  it('registra el rango sondeado, sin techo hardcodeado', () => {
+    const coverage = getCatalogCoverage();
+    expect(coverage.lineIdsScanned).toBeGreaterThanOrEqual(120);
+    expect(coverage.lastLineIdWithData).toBeGreaterThan(0);
+    expect(coverage.emptyTail).toBeGreaterThan(0);
   });
 });
 

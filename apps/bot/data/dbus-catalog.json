@@ -1,7 +1,12 @@
 {
-  "generatedAt": "2026-11-22T05:37:37.451Z",
+  "generatedAt": "2026-11-22T07:12:21.656Z",
   "source": "http://app.dbus.eus/SSIIMovilWSv2/ws/cons",
   "attribution": "Datos de paradas: Dbus Donostia (API pública SSIIMovilWSv2)",
+  "coverage": {
+    "lineIdsScanned": 120,
+    "lastLineIdWithData": 88,
+    "emptyTail": 30
+  },
   "lines": [
     {
       "id": "1",

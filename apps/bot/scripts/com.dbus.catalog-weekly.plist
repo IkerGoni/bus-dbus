@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.dbus.catalog-weekly</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>/Users/dev/Workspace/projects/bus-dbus/apps/bot/scripts/refresh-catalog-weekly.sh</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Weekday</key><integer>0</integer>
+    <key>Hour</key><integer>3</integer>
+    <key>Minute</key><integer>0</integer>
+  </dict>
+  <key>RunAtLoad</key>
+  <false/>
+  <key>StandardOutPath</key>
+  <string>/private/var/folders/l9/wn3qv1050bxcsk3_wk79d8h00000gn/T/dbus-catalog-refresh.log</string>
+  <key>StandardErrorPath</key>
+  <string>/private/var/folders/l9/wn3qv1050bxcsk3_wk79d8h00000gn/T/dbus-catalog-refresh.log</string>
+</dict>
+</plist>

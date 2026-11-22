@@ -100,6 +100,29 @@ export function getCatalogMeta() {
   return catalogMeta(data);
 }
 
+/** Rango de ids sondeado por build-catalog (sin hardcode). */
+export function getCatalogCoverage(): {
+  lineIdsScanned: number;
+  lastLineIdWithData: number;
+  emptyTail: number;
+} {
+  type WithCoverage = {
+    coverage?: {
+      lineIdsScanned: number;
+      lastLineIdWithData: number;
+      emptyTail: number;
+    };
+  };
+  const coverage = (data as unknown as WithCoverage).coverage;
+  return (
+    coverage ?? {
+      lineIdsScanned: 0,
+      lastLineIdWithData: 0,
+      emptyTail: 0,
+    }
+  );
+}
+
 /** Todas las líneas públicas, ordenadas por código (5, 8, ..., B9). */
 export function listAllLines() {
   return [...data.lines].sort((a, b) =>

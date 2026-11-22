@@ -8,6 +8,7 @@ import {
   normalizeLine,
 } from './arrival.js';
 import {
+  getCatalogCoverage,
   getCatalogMeta,
   getLineByCode,
   searchLines,
@@ -298,6 +299,7 @@ export async function handleActualizar(ctx: Context): Promise<void> {
 export async function handleEstado(ctx: Context): Promise<void> {
   const stats = getCacheStats();
   const catalog = getCatalogMeta();
+  const coverage = getCatalogCoverage();
   const ageDays = Math.max(
     0,
     Math.floor(
@@ -311,7 +313,8 @@ export async function handleEstado(ctx: Context): Promise<void> {
  📚 Índice: ${catalog.lines} líneas · ${catalog.stops} paradas · ${ageDays} d${
    ageDays > 7 ? ' ⚠️ regenerar con `npm run build:catalog`' : ''
  }
- 🔔 Avisos activos: ${getActiveAlerts().length} · enviados: ${alertsStats.sent} · fallidos: ${alertsStats.failed}
+  🔎 Rango sondeado: ids 1..${coverage.lineIdsScanned} · último con datos: ${coverage.lastLineIdWithData}
+  🔔 Avisos activos: ${getActiveAlerts().length} · enviados: ${alertsStats.sent} · fallidos: ${alertsStats.failed}
  ⏱ Proceso activo: ${Math.floor(process.uptime())} s`;
   await ctx.reply(msg, { parse_mode: 'Markdown' });
 }
