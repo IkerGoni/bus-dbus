@@ -11,6 +11,7 @@ import eus.busdonostia.app.AppContainer
 import eus.busdonostia.app.BusDonostiaApp
 import eus.busdonostia.app.R
 import eus.busdonostia.app.data.db.toDomain
+import eus.busdonostia.app.data.live.feedView
 import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.EngineAction
 import eus.busdonostia.app.domain.evaluateTick
@@ -18,8 +19,6 @@ import eus.busdonostia.app.domain.isFetchDue
 import eus.busdonostia.app.domain.isWatching
 import eus.busdonostia.app.domain.nextPollDelayMs
 import eus.busdonostia.app.domain.stopsToPoll
-import eus.busdonostia.app.ui.alerts.feedView
-import eus.busdonostia.app.ui.alerts.fetchStops
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

@@ -3,6 +3,7 @@ package eus.busdonostia.app.ui.alerts
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import eus.busdonostia.app.AppContainer
+import eus.busdonostia.app.data.live.feedView
 import eus.busdonostia.app.domain.AlertItem
 import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.ArrivalsView

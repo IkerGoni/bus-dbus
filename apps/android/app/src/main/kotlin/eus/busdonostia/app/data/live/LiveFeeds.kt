@@ -1,7 +1,9 @@
 package eus.busdonostia.app.data.live
 
+import eus.busdonostia.app.domain.ArrivalsView
 import eus.busdonostia.app.domain.StopFeed
 import eus.busdonostia.app.domain.StopFeedStatus
+import eus.busdonostia.app.domain.stopArrivalsView
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,4 +28,10 @@ class LiveFeeds {
             all + (stopId to StopFeeds(feed, valid))
         }
     }
+}
+
+/** Vista de 5 estados de una parada a partir de lo consultado en esta sesión (null = aún nada). */
+fun feedView(feeds: Map<String, StopFeeds>, stopId: String, nowMs: Long): ArrivalsView {
+    val entry = feeds[stopId] ?: return ArrivalsView.Loading
+    return stopArrivalsView(entry.latest, entry.lastValid, nowMs)
 }

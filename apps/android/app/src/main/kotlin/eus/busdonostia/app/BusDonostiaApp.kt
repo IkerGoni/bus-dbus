@@ -24,6 +24,9 @@ import eus.busdonostia.app.engine.ensureMonitoring
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
@@ -99,6 +102,11 @@ class AppContainer(private val app: Application) {
         if (feed.status != StopFeedStatus.API_ERROR) settings.recordLiveFetch(feed.fetchedAtMs)
         if (feed.status == StopFeedStatus.OK) appScope.launch { database.lineColors().upsertAll(feed.lineColors()) }
         return feed
+    }
+
+    /** Consulta todas las [stops] en paralelo (una petición por parada, como el bot). */
+    suspend fun fetchStops(stops: Set<String>) = coroutineScope {
+        stops.map { async { fetchStop(it) } }.awaitAll()
     }
 
     val ticker = Ticker(appScope)

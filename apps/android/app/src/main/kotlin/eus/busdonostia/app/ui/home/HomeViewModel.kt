@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import eus.busdonostia.app.AppContainer
 import eus.busdonostia.app.data.db.toggle
 import eus.busdonostia.app.data.live.StopFeeds
+import eus.busdonostia.app.data.live.feedView
 import eus.busdonostia.app.domain.AlertItem
 import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.Arrival
@@ -21,8 +22,6 @@ import eus.busdonostia.app.domain.searchLines
 import eus.busdonostia.app.domain.searchStops
 import eus.busdonostia.app.domain.usableArrivals
 import eus.busdonostia.app.ui.alerts.alertItems
-import eus.busdonostia.app.ui.alerts.feedView
-import eus.busdonostia.app.ui.alerts.fetchStops
 import eus.busdonostia.app.ui.alerts.pollStops
 import eus.busdonostia.app.ui.alerts.setAlertActive
 import eus.busdonostia.app.ui.alerts.stopsToWatch
