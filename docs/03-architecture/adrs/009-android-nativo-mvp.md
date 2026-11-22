@@ -34,13 +34,41 @@ móvil. La PWA de `apps/mobile/` queda congelada (no se borra).
    `computeFreshness`, `haversineMeters`, matching de llegada). La paridad con
    `@dbus/core` se garantiza con **fixtures JSON compartidos** en
    `packages/contracts/fixtures/` que ejecutan tanto vitest como JUnit.
-5. **Catálogo offline:** se empaqueta en `assets/` a partir de
+5. **Sin backend.** La app funciona completa sin ningún servidor nuestro:
+   catálogo empaquetado, tiempo real directo a Dbus desde el dispositivo,
+   DB local, avisos locales. Lo único externo opcional es un **archivo de
+   configuración remota estático** (ver abajo); si no se puede descargar, la
+   app usa la copia empaquetada y sigue igual.
+6. **Catálogo offline:** se empaqueta en `assets/` a partir de
    `apps/bot/data/dbus-catalog.json` + `dbus-stop-coordinates.json` mediante una
    tarea Gradle de copia/fusión. No se edita a mano.
 
+## Configuración remota (estática, opcional)
+Mitigación de `docs/06-api-externa/01-endpoints-y-riesgo.md` §8: si Dbus
+cambia la base URL, un path, el nombre de un parámetro o exige una cabecera,
+se arregla editando un JSON, no publicando una versión en la tienda.
+
+- **Qué es:** un `config.json` en hosting estático HTTPS (GitHub Pages de un
+  repo público mínimo, o Cloudflare Pages). Sin código de servidor, sin base
+  de datos, sin cuentas de usuario, sin telemetría: el servidor no sabe nada
+  del usuario salvo la IP de la descarga.
+- **Contenido (`schemaVersion` 1):** `apiBaseUrl`, paths de endpoints, nombres
+  de parámetros, cabeceras extra, `pollIntervalSec` (mín. 20), `minAppVersion`
+  y un `notice` opcional (`es`/`eu`) para avisar de incidencias.
+- **Cliente:** una copia por defecto va empaquetada en `assets/`. Descarga como
+  mucho cada 12 h al abrir la app, timeout 5 s, valida esquema y rangos; si
+  falla cualquier cosa, se queda con la última válida o la empaquetada. Nunca
+  bloquea el arranque.
+- **Seguridad:** solo HTTPS; un `apiBaseUrl` nuevo solo puede ser HTTPS (el
+  cleartext sigue limitado a `app.dbus.eus`). Los avisos y favoritos nunca
+  dependen de este archivo.
+- **No cubre:** Play Integrity / attestation ni la vía legal; para eso no hay
+  arreglo de configuración.
+
 ## Consequences
 ### Positive
-- Cero backend nuevo; tráfico distribuido por usuario.
+- Cero backend nuevo; tráfico distribuido por usuario. Coste de hosting de la
+  config: 0 €.
 - La spec del paquete (dp, `NavigationBar`, `BroadcastReceiver`, canales) se
   implementa tal cual, sin capa de emulación.
 

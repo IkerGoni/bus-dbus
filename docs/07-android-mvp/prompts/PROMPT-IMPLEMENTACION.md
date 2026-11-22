@@ -29,6 +29,9 @@ repo `bus-dbus` y solo en el lane `android` (`apps/android/**`).
   (548 paradas, 514 con coordenadas, 39 líneas, 127 itinerarios). Tiempo real
   solo de `http://app.dbus.eus/SSIIMovilWSv2/ws/cons/tiemposParada`, con
   cleartext permitido solo para ese dominio. Prohibido `.pb`, mocks y fallbacks.
+- **Sin backend:** nada de servidores propios. Única excepción: un
+  `config.json` estático opcional (ADR 009 § Configuración remota) con copia
+  empaquetada; si no se descarga, todo funciona igual.
 - **Avisos:** motor 100 % local (Foreground Service `dataSync` + alarmas
   exactas para recurrentes). Sin FCM.
 - **Dominio:** `remainingMinutes`, `computeAlertStatus`, `computeFreshness`,
@@ -59,7 +62,11 @@ repo `bus-dbus` y solo en el lane `android` (`apps/android/**`).
 
 **Fase 1 · Datos y dominio**
 - Tarea Gradle de catálogo + parser + test de conteos (548/514/39/127).
-- Cliente `tiemposParada` → `StopFeed` (`OK`, `NO_SERVICE` con `avisos`,
+- `ApiConfig`: `assets/config.json` + descarga remota opcional (máx. cada 12 h,
+  timeout 5 s, validación de esquema, fallback a última válida/empaquetada).
+  Tests: config rota, timeout, `apiBaseUrl` HTTP rechazado. La URL remota la
+  da Iker; hasta entonces, solo la empaquetada.
+- Cliente `tiemposParada` (lee endpoints de `ApiConfig`) → `StopFeed` (`OK`, `NO_SERVICE` con `avisos`,
   `EMPTY`, `API_ERROR`). Tests contra los fixtures de
   `packages/contracts/fixtures/` (añadir los que falten capturando respuestas
   reales: `DATOS`, `SIN_SERVICIO`, `NO DESC`; no inventarlos).
@@ -81,6 +88,8 @@ link `dbus://stop/{stopId}`.
 
 ## Definition of Done (de todo el MVP)
 - `./gradlew check` verde y tests de dominio pasando.
+- La app hace el flujo completo en modo avión salvo las llegadas en vivo, y
+  sin acceso a la config remota.
 - Cero datos inventados visibles (revisión con `grep` de literales).
 - Flujo probado en emulador o dispositivo real, con capturas: parada cercana
   → A05 → 🔔 → guardar aviso ONCE → notificación real → `Posponer 5'` →

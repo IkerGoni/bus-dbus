@@ -70,7 +70,9 @@ Las reglas 1 (datos reales), 2 (llegadas en vivo), 5 (identidad de línea),
 6 (favoritos) y 7 (dedup, caducidad 7 días, preferencia GPS, filtro de
 destino) del bot aplican igual. Además:
 
-- Sin SDK de mapas, sin Firebase/FCM y sin servidor propio en v1.
+- Sin SDK de mapas, sin Firebase/FCM y sin servidor propio. Único elemento
+  remoto nuestro permitido: un `config.json` estático opcional con copia
+  empaquetada (ADR 009); la app nunca depende de él para arrancar.
 - Cleartext HTTP solo para `app.dbus.eus` (network security config).
 - Nunca mostrar segundos: la API da `minutos` enteros.
 - El catálogo empaquetado se genera desde `apps/bot/data/*.json`; no se edita.

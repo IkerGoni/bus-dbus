@@ -8,7 +8,10 @@ Decisión de arquitectura: ADR 009 (`docs/03-architecture/adrs/009-android-nativ
   (`<domain-config cleartextTrafficPermitted="true">`). Nada de
   `usesCleartextTraffic="true"` global.
 - Timeout 8 s, sin reintentos automáticos en primer plano (el usuario tiene
-  `Reintentar`). Base URL en una sola constante.
+  `Reintentar`).
+- Base URL, paths, parámetros y cabeceras salen de `ApiConfig`: copia
+  empaquetada en `assets/config.json` + config remota estática opcional (ADR 009
+  § Configuración remota). La app funciona igual sin ella.
 
 ## 1. Motor de avisos «X min antes» (100 % local, sin FCM en v1)
 `WorkManager` tiene intervalo mínimo de 15 min: no sirve para avisos de 2–10 min.
@@ -60,5 +63,5 @@ Decisión de arquitectura: ADR 009 (`docs/03-architecture/adrs/009-android-nativ
 
 ## 5. Roadmap diferido (fuera de MVP v1)
 - **v1.1:** Widget Jetpack Glance (`2×1`, `4×1`, deep link `dbus://stop/{stopId}`)
-  + TTS en A05 + configuración remota de endpoints (`docs/06-api-externa/` §8).
+  + TTS en A05 + catálogo actualizable por el mismo hosting estático.
 - **v2.0:** mapa vectorial (MapLibre) en A02 · FCM si hace falta.
