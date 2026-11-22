@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "apiBaseUrl": "http://app.dbus.eus/SSIIMovilWSv2/ws/cons",
+  "endpoints": {
+    "tiemposParada": "/tiemposParada"
+  },
+  "params": {
+    "stopCode": "codParada",
+    "language": "idioma"
+  },
+  "headers": {},
+  "pollIntervalSec": 30,
+  "minAppVersion": 1,
+  "notice": null
+}

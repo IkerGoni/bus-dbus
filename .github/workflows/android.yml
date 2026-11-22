@@ -3,10 +3,10 @@ name: Android
 on:
   push:
     branches: [main]
-    paths: ['apps/android/**', 'apps/bot/data/**', '.github/workflows/android.yml']
+    paths: ['apps/android/**', 'apps/bot/data/**', 'packages/contracts/fixtures/**', '.github/workflows/android.yml']
   pull_request:
     branches: [main]
-    paths: ['apps/android/**', 'apps/bot/data/**', '.github/workflows/android.yml']
+    paths: ['apps/android/**', 'apps/bot/data/**', 'packages/contracts/fixtures/**', '.github/workflows/android.yml']
 
 jobs:
   check:

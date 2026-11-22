@@ -50,7 +50,7 @@ export interface Arrival {
 
 /** Minutos restantes para pintar. Nunca segundos: la API no da esa precisión. */
 export function remainingMinutes(a: Arrival, nowMs: number): number {
-  const elapsedMin = Math.floor((nowMs - a.fetchedAtMs) / 60_000);
+  const elapsedMin = Math.max(0, Math.floor((nowMs - a.fetchedAtMs) / 60_000)); // reloj atrasado: no sube
   return Math.max(0, a.minutesAtFetch - elapsedMin);
 }
 
@@ -107,6 +107,11 @@ Reglas:
 `nextArrival` = primera llegada de `lineId` (y `destination` si está fijado)
 con `remainingMinutes <= minutesAhead`, **prefiriendo `LIVE` sobre
 `SCHEDULED`** cuando ambas cumplen (regla 7 de `AGENTS.md`).
+
+`lineId` llega ya resuelto a código público (`toPublicLineId`, con la parada
+como contexto: en la parada `1` `32` → `28`). El matching compara solo el código
+público; a diferencia de `matchesLine` de `@dbus/core`, no acepta el id interno,
+para que un aviso de la línea pública `32` nunca case con la `28`.
 
 ## 3. Máquina de estados única de Alertas (cierra B10 y B16)
 
