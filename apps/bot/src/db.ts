@@ -144,32 +144,53 @@ function rowToAlert(row: AlertRow): UserAlert {
   };
 }
 
+/** Lanzada cuando ya existe un aviso activo para la misma (chat, parada, línea). */
+export class DuplicateAlertError extends Error {
+  constructor(readonly alert: UserAlert) {
+    super('Ya existe un aviso activo para esta parada y línea');
+    this.name = 'DuplicateAlertError';
+  }
+}
+
+const insertAlertStmt = db.prepare(`
+  INSERT INTO user_alerts (chat_id, stop_id, stop_name, line_id, line_name, destination, minutes_ahead, active, send_failures, created_at, updated_at)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
+`);
+
+// findActiveAlert() + INSERT en dos statements dejaba una ventana de carrera:
+// dos comandos rápidos podían crear el mismo aviso dos veces. La transacción
+// serializa comprobación e inserción en la misma conexión SQLite.
+const createAlertTx = db.transaction(
+  (alert: Omit<UserAlert, 'id' | 'createdAt' | 'sendFailures'>): UserAlert => {
+    const existing = findActiveAlert(alert.chatId, alert.stopId, alert.lineId);
+    if (existing) throw new DuplicateAlertError(existing);
+
+    const now = Date.now();
+    const result = insertAlertStmt.run(
+      alert.chatId,
+      alert.stopId,
+      alert.stopName,
+      alert.lineId,
+      alert.lineName,
+      alert.destination,
+      alert.minutesAhead,
+      alert.active ? 1 : 0,
+      now,
+      now
+    );
+    return {
+      ...alert,
+      id: result.lastInsertRowid as number,
+      createdAt: now,
+      sendFailures: 0,
+    };
+  }
+);
+
 export function createAlert(
   alert: Omit<UserAlert, 'id' | 'createdAt' | 'sendFailures'>
 ): UserAlert {
-  const now = Date.now();
-  const stmt = db.prepare(`
-    INSERT INTO user_alerts (chat_id, stop_id, stop_name, line_id, line_name, destination, minutes_ahead, active, send_failures, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
-  `);
-  const result = stmt.run(
-    alert.chatId,
-    alert.stopId,
-    alert.stopName,
-    alert.lineId,
-    alert.lineName,
-    alert.destination,
-    alert.minutesAhead,
-    alert.active ? 1 : 0,
-    now,
-    now
-  );
-  return {
-    ...alert,
-    id: result.lastInsertRowid as number,
-    createdAt: now,
-    sendFailures: 0,
-  };
+  return createAlertTx(alert);
 }
 
 export function getAlertsByChat(chatId: number): UserAlert[] {

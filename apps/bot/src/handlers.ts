@@ -23,6 +23,7 @@ import {
 } from './catalog.js';
 import { config } from './config.js';
 import {
+  DuplicateAlertError,
   addFavorite,
   addFavoriteLine,
   createAlert,
@@ -642,6 +643,17 @@ function buildAlertsText(alerts: UserAlert[]): string {
 
 type AlertCreationResult = 'created' | 'duplicate' | 'no-chat';
 
+function duplicateAlertText(
+  stopName: string,
+  lineId: string,
+  id: number
+): string {
+  return (
+    `⚠️ Ya tienes un aviso activo para **${escapeMd(stopName)} · L${escapeMd(lineId)}** ` +
+    `(ID: \`${id}\`). Bórralo con \`/borrar ${id}\` antes de crear otro.`
+  );
+}
+
 async function createAndConfirmAlert(
   ctx: Context,
   stopId: string,
@@ -660,24 +672,34 @@ async function createAndConfirmAlert(
   const existing = findActiveAlert(chatId, stopId, publicLineId);
   if (existing) {
     clearSession(chatId);
-    const text =
-      `⚠️ Ya tienes un aviso activo para **${escapeMd(stopName)} · L${escapeMd(publicLineId)}** ` +
-      `(ID: \`${existing.id}\`). Bórralo con \`/borrar ${existing.id}\` antes de crear otro.`;
+    const text = duplicateAlertText(stopName, publicLineId, existing.id);
     if (asEdit) await safeEdit(ctx, text, { parse_mode: 'Markdown' });
     else await ctx.reply(text, { parse_mode: 'Markdown' });
     return 'duplicate';
   }
 
-  const alert = createAlert({
-    chatId,
-    stopId,
-    stopName,
-    lineId: publicLineId,
-    lineName: `L${publicLineId}`,
-    destination: arrival?.destination || UNKNOWN_DESTINATION,
-    minutesAhead,
-    active: true,
-  });
+  let alert: UserAlert;
+  try {
+    alert = createAlert({
+      chatId,
+      stopId,
+      stopName,
+      lineId: publicLineId,
+      lineName: `L${publicLineId}`,
+      destination: arrival?.destination || UNKNOWN_DESTINATION,
+      minutesAhead,
+      active: true,
+    });
+  } catch (error) {
+    // Carrera entre dos comandos: el guard rápido de arriba no la ve, pero la
+    // transacción en db.ts sí. El usuario recibe el mismo mensaje.
+    if (!(error instanceof DuplicateAlertError)) throw error;
+    clearSession(chatId);
+    const text = duplicateAlertText(stopName, publicLineId, error.alert.id);
+    if (asEdit) await safeEdit(ctx, text, { parse_mode: 'Markdown' });
+    else await ctx.reply(text, { parse_mode: 'Markdown' });
+    return 'duplicate';
+  }
 
   // Contexto útil al crear el aviso: cuándo llega el próximo bus. Con sin
   // servicio no hay estimación, pero el mensaje sigue siendo informativo.

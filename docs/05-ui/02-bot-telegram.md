@@ -366,10 +366,23 @@ minuto, con guard de reentrada).
 ```
 
 Envío directo por `bot.telegram.sendMessage()` al `chatId`; al enviar con éxito
-el aviso pasa a inactivo. Los avisos con más de 7 días se desactivan solos.
-Los fallos de envío (chat bloqueado) se aislan por chat.
+el aviso pasa a inactivo y se reinicia su contador de fallos. Los avisos con más
+de 7 días se desactivan solos. Los fallos de envío (chat bloqueado) se aislan
+por chat y se acumulan: tras 3 fallos consecutivos el aviso se desactiva para no
+repetir el mismo error cada minuto.
 
-### S22 · Validación y errores
+### S22 · Error no manejado (global)
+
+`bot.catch()` en `index.ts` responde a cualquier excepción de handler con:
+
+```text
+⚠️ Ha ocurrido un error al procesar tu solicitud. Inténtalo de nuevo.
+```
+
+El detalle (stack) solo va al log; no se muestra al usuario. Es un mensaje nuevo,
+sin teclado, y no altera la sesión.
+
+### S23 · Validación y errores
 
 | Situación | Texto |
 |---|---|

@@ -7,6 +7,7 @@ import {
   getStopLines,
 } from '../src/arrival.js';
 import {
+  DuplicateAlertError,
   addFavorite,
   addFavoriteLine,
   createAlert,
@@ -245,6 +246,20 @@ describe('Database - resistencia de avisos', () => {
       expect(getAlertById(alert.id)?.active).toBe(false);
     } finally {
       deleteAlert(alert.id);
+    }
+  });
+
+  it('el guard de duplicados es atómico', () => {
+    for (const alert of getAlertsByChat(chatId)) deleteAlert(alert.id);
+    const alert = newAlert();
+    try {
+      expect(() => newAlert()).toThrow(DuplicateAlertError);
+      expect(getAlertsByChat(chatId)).toHaveLength(1);
+
+      deleteAlert(alert.id);
+      expect(() => newAlert()).not.toThrow();
+    } finally {
+      for (const current of getAlertsByChat(chatId)) deleteAlert(current.id);
     }
   });
 

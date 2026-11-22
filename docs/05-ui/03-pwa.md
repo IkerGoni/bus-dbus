@@ -211,6 +211,7 @@ memoria. Wireframes: `09-offline-empty.excalidraw`, `01-home.excalidraw`.
 | Feedback | `ToastContainer` | Todas |
 | Sin red | Overlay `Offline` | Global |
 
+<a id="5-pantallas-solo-diseñadas"></a>
 ## 5. Pantallas solo diseñadas
 
 Existen en `docs/02-wireframes/` pero **no** en el código de `apps/mobile/`:
