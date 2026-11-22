@@ -1,6 +1,6 @@
 # Estado — bus-dbus
 
-Actualizado: 2026-11-22 11:55 · Última sesión: remediación de auditoría (código listo, SIN desplegar)
+Actualizado: 2026-11-22 12:02 · Última sesión: remediación consolidada en main (sin desplegar)
 
 > **`AGENTS.md` es la fuente de verdad.** Este archivo es el estado de sesión;
 > si algo aquí contradice a `AGENTS.md`, manda `AGENTS.md`.
@@ -135,8 +135,8 @@ R6 (token en claro en `.env`, gitignored) sigue pendiente de rotación.
 
 ## Git
 
-`main = origin/main` ✓ (hash en `git log -1`: commit de remediación) · rama
-local: solo `main` · worktrees: 1 (raíz) · stash: vacío · **árbol limpio**:
+`main = origin/main = 484f42b` ✓ · rama local: solo `main` · worktrees: 1 (raíz) ·
+stash: vacío · **árbol limpio**:
 remediación de auditoría commiteada y pusheada (24 ficheros modificados + 5
 nuevos, incluye 2 docs). El commit externo `fbcb70e` añadió
 `docs/06-api-externa/**` y no solapó estos cambios. El bot en
