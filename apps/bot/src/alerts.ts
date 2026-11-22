@@ -108,9 +108,8 @@ async function checkAlertsUnsafe(): Promise<void> {
           });
           updateAlert(alert.id, { active: false, sendFailures: 0 });
           sentCount++;
-          logger.info(
-            `✅ Alert ${alert.id} triggered for chat ${alert.chatId}`
-          );
+          // Sin chat_id en claro (H19): el id del aviso basta para seguirlo.
+          logger.info(`✅ Alert ${alert.id} triggered`);
         } catch (error) {
           // Un chat bloqueado no debe impedir avisar al resto ni repetir
           // el mismo fallo cada minuto hasta la caducidad del aviso.
@@ -121,7 +120,7 @@ async function checkAlertsUnsafe(): Promise<void> {
             active: failures < MAX_SEND_FAILURES,
           });
           logger.error(
-            `[Alerts] Send failed for chat ${alert.chatId} ` +
+            `[Alerts] Send failed for alert ${alert.id} ` +
               `(${failures}/${MAX_SEND_FAILURES}): ` +
               `${error instanceof Error ? error.message : String(error)}`
           );

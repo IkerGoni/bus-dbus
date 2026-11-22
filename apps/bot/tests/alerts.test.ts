@@ -15,6 +15,7 @@ import {
   getAlertById,
   getAlertsByChat,
 } from '../src/db.js';
+import { logger } from '../src/logger.js';
 import type { NextArrivalResult } from '../src/types.js';
 
 const CHAT = 111111111;
@@ -135,5 +136,26 @@ describe('scheduler de avisos (garantías de AGENTS.md:45-47)', () => {
     expect(message).toContain('L28');
     expect(message).toContain('tiempo real');
     expect(getAlertById(alert.id)?.active).toBe(false);
+  });
+
+  it('no escribe el chat_id en claro en los logs (H19)', async () => {
+    newAlert();
+    mocks.getNextArrivals.mockResolvedValue([ARRIVAL]);
+    const lines: string[] = [];
+    vi.spyOn(logger, 'info').mockImplementation((...args) => {
+      lines.push(args.join(' '));
+    });
+    vi.spyOn(logger, 'error').mockImplementation((...args) => {
+      lines.push(args.join(' '));
+    });
+
+    setBotInstance(fakeBot(vi.fn().mockResolvedValue({})));
+    await triggerAlertCheck(); // envío correcto: el aviso queda inactivo
+    newAlert();
+    setBotInstance(fakeBot(vi.fn().mockRejectedValue(new Error('x'))));
+    await triggerAlertCheck(); // envío fallido
+
+    expect(lines.length).toBeGreaterThanOrEqual(2);
+    for (const line of lines) expect(line).not.toContain(String(CHAT));
   });
 });
