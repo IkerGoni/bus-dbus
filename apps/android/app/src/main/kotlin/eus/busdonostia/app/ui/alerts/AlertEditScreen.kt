@@ -46,6 +46,7 @@ import eus.busdonostia.app.R
 import eus.busdonostia.app.domain.DraftError
 import eus.busdonostia.app.domain.MINUTES_RANGE
 import eus.busdonostia.app.domain.QUICK_MINUTES
+import eus.busdonostia.app.domain.destinationChoices
 import eus.busdonostia.app.ui.appViewModel
 import eus.busdonostia.app.ui.components.BorderedCard
 import eus.busdonostia.app.ui.components.LineBadge
@@ -58,7 +59,6 @@ import eus.busdonostia.app.ui.screens.EmptyAction
 import eus.busdonostia.app.ui.screens.EmptyState
 import eus.busdonostia.app.ui.system.needsNotificationPermission
 import eus.busdonostia.app.ui.theme.MonoFamily
-import java.util.Locale
 
 /** A06 · Configurar aviso. [alertId] null = nuevo (con parada, línea y destino precargados si llegan). */
 @Composable
@@ -252,7 +252,7 @@ private fun StopAndLine(state: AlertEditUiState, vm: AlertEditViewModel) {
                 label = { Text(stringResource(R.string.alert_any_destination), maxLines = 1) },
                 modifier = Modifier.heightIn(min = 48.dp),
             )
-            (destinations + listOfNotNull(chosen)).distinctBy { it.lowercase(Locale.ROOT) }.forEach { dest ->
+            destinationChoices(destinations, chosen).forEach { dest ->
                 FilterChip(
                     selected = chosen.equals(dest, ignoreCase = true),
                     onClick = { vm.selectDestination(dest) },

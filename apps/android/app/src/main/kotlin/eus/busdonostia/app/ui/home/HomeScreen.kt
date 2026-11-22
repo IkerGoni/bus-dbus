@@ -47,6 +47,8 @@ import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.ArrivalSource
 import eus.busdonostia.app.domain.ArrivalsView
 import eus.busdonostia.app.domain.DegradedReason
+import eus.busdonostia.app.domain.NextAlertSource
+import eus.busdonostia.app.domain.nextAlertSource
 import eus.busdonostia.app.domain.remainingMinutes
 import eus.busdonostia.app.ui.Destination
 import eus.busdonostia.app.ui.alerts.AlertStatusLabel
@@ -267,17 +269,16 @@ private fun NextAlertCard(
 @Composable
 private fun nextAlertSourceText(item: AlertItem, view: ArrivalsView?): String {
     val ahead = stringResource(R.string.alert_ahead_short, item.rule.minutesAhead)
-    val arrival = item.nextArrival
-    return when {
-        arrival != null -> stringResource(
+    return when (val source = nextAlertSource(item, view)) {
+        is NextAlertSource.Known -> stringResource(
             R.string.home_next_source,
-            stringResource(if (arrival.source == ArrivalSource.LIVE) R.string.source_live else R.string.source_scheduled),
+            stringResource(if (source.source == ArrivalSource.LIVE) R.string.source_live else R.string.source_scheduled),
             ahead,
         )
-        view == null || view == ArrivalsView.Loading -> ahead
-        view == ArrivalsView.Error -> stringResource(R.string.alert_feed_error)
-        view is ArrivalsView.Degraded && view.reason == DegradedReason.NO_SERVICE -> stringResource(R.string.alert_feed_no_service)
-        else -> stringResource(R.string.home_next_no_arrivals, ahead)
+        NextAlertSource.Waiting -> ahead
+        NextAlertSource.FeedError -> stringResource(R.string.alert_feed_error)
+        NextAlertSource.NoService -> stringResource(R.string.alert_feed_no_service)
+        NextAlertSource.NoArrivals -> stringResource(R.string.home_next_no_arrivals, ahead)
     }
 }
 

@@ -18,6 +18,14 @@ class AlertDraftTest {
     }
 
     @Test
+    fun destinosSinDuplicadosYConElElegido() {
+        assertEquals(listOf("Amara", "Ospitaleak"), destinationChoices(listOf("Amara", "Ospitaleak"), null))
+        assertEquals(listOf("Amara", "Ospitaleak"), destinationChoices(listOf("Amara", "Ospitaleak"), "AMARA"))
+        // El precargado desde una llegada que hoy no sale en vivo sigue siendo elegible.
+        assertEquals(listOf("Amara", "Igara"), destinationChoices(listOf("Amara", "amara"), "Igara"))
+    }
+
+    @Test
     fun guardarArmaElAviso() {
         val rule = base.copy(lineId = " b4 ").toRule("id", 1_000)
         assertEquals("B4", rule.lineId)
