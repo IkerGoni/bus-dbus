@@ -66,6 +66,15 @@ async function initBrowser() {
 
   page = await context.newPage()
 
+  // Enable response interception to capture protobuf data
+  await context.route('**/*.pb', async route => {
+    const response = await route.fetch()
+    const body = await response.body()
+    // Store response for later retrieval
+    ;(route.request() as any)._responseBody = body
+    await route.fulfill({ response })
+  })
+
   // Initial navigation to establish session
   await warmupSession()
 }
@@ -74,7 +83,7 @@ async function warmupSession() {
   if (!page) return
 
   console.log('🔐 Establishing session with opendata.euskadi.eus...')
-  
+
   try {
     // Visit main page first to get cookies
     await page.goto('https://opendata.euskadi.eus/contenidos/datos_abiertos/transporte/moveuskadi/dbus.html', {
@@ -84,6 +93,41 @@ async function warmupSession() {
     console.log('✅ Session established')
   } catch (e) {
     console.warn('⚠️ Warmup navigation failed:', e instanceof Error ? e.message : e)
+  }
+}
+
+async function fetchFeed(url: string): Promise<Uint8Array | null> {
+  if (!page) return null
+
+  try {
+    console.log(`📡 Fetching ${url}...`)
+    
+    // Navigate directly to the .pb URL and capture response
+    const response = await page.goto(url, {
+      waitUntil: 'networkidle',
+      timeout: 30000
+    })
+
+    if (!response || !response.ok()) {
+      const status = response?.status() || 'no response'
+      const body = response ? await response.text().catch(() => '') : ''
+      console.error(`❌ HTTP ${status}: ${body.substring(0, 200)}`)
+      return null
+    }
+
+    const buffer = await response.body()
+    
+    if (!buffer || buffer.length < 100) {
+      console.error(`❌ Empty or too small response: ${buffer?.length || 0} bytes`)
+      return null
+    }
+
+    console.log(`✅ ${buffer.length} bytes`)
+    return buffer
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error(`❌ ${msg}`)
+    return null
   }
 }
 
@@ -97,53 +141,13 @@ async function fetchAllFeeds(): Promise<FeedData> {
   const errors: string[] = []
   const results: Partial<Record<keyof typeof FEED_URLS, Uint8Array>> = {}
 
-  // First, get cookies from browser context
-  const cookies = await context!.cookies()
-  const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ')
-  console.log(`🍪 Cookies: ${cookies.length} cookies`)
-
-  // Fetch each feed using browser's fetch API with cookies
+  // Fetch each feed by navigating to the URL
   for (const [key, url] of Object.entries(FEED_URLS)) {
-    try {
-      console.log(`📡 Fetching ${key}...`)
-      
-      // Use page.evaluate to fetch with browser's credentials
-      const result = await page.evaluate(async ({ url, cookieHeader }) => {
-        try {
-          const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/x-protobuf, application/octet-stream, */*',
-              'Accept-Language': 'es-ES,es;q=0.9',
-              'Cookie': cookieHeader
-            },
-            credentials: 'include',
-            redirect: 'follow'
-          })
-          
-          if (response.ok) {
-            const arrayBuffer = await response.arrayBuffer()
-            return { success: true, data: Array.from(new Uint8Array(arrayBuffer)), status: response.status }
-          } else {
-            const text = await response.text()
-            return { success: false, error: `HTTP ${response.status}: ${text.substring(0, 200)}`, status: response.status }
-          }
-        } catch (e) {
-          return { success: false, error: e instanceof Error ? e.message : String(e) }
-        }
-      }, { url, cookieHeader })
-
-      if (result.success && result.data && result.data.length > 100) {
-        results[key as keyof typeof FEED_URLS] = new Uint8Array(result.data)
-        console.log(`✅ ${key}: ${result.data.length} bytes`)
-      } else {
-        errors.push(`${key}: ${result.error || 'Empty response'}`)
-        console.error(`❌ ${key}: ${result.error || 'Empty response'}`)
-      }
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e)
-      errors.push(`${key}: ${msg}`)
-      console.error(`❌ ${key}: ${msg}`)
+    const data = await fetchFeed(url)
+    if (data) {
+      results[key as keyof typeof FEED_URLS] = data
+    } else {
+      errors.push(`${key}: Failed to fetch`)
     }
 
     // Small delay between fetches
@@ -166,7 +170,7 @@ async function startPeriodicFetch() {
   if (fetchInterval) return
 
   console.log(`⏱️ Starting periodic fetch every ${FETCH_INTERVAL_MS / 1000}s`)
-  
+
   // Initial fetch
   await fetchAllFeeds().catch(console.error)
 
@@ -206,20 +210,20 @@ server.get('/health', async () => {
 })
 
 server.get('/feed/:type', async (request, reply) => {
-  const type = request.params.type as keyof typeof FEED_URLS
-  
+  const type = (request.params as { type: string }).type as keyof typeof FEED_URLS
+
   if (!FEED_URLS[type as keyof typeof FEED_URLS]) {
     return reply.code(404).send({ error: 'Invalid feed type' })
   }
 
   const feed = cachedFeed
   const data = feed[type]
-  
+
   if (!data) {
-    return reply.code(503).send({ 
-      error: 'Feed not available', 
+    return reply.code(503).send({
+      error: 'Feed not available',
       lastFetch: feed.timestamp,
-      errors: feed.fetchErrors 
+      errors: feed.fetchErrors
     })
   }
 
@@ -239,10 +243,10 @@ server.get('/feeds/all', async () => {
   }
 })
 
-async function startServer(port = 3001) {
+async function startServer(port = 3002) {
   await initBrowser()
   await startPeriodicFetch()
-  
+
   await server.listen({ port, host: '0.0.0.0' })
   console.log(`🚀 Fetcher API running on http://localhost:${port}`)
   console.log(`   GET /feed/tripUpdates`)
