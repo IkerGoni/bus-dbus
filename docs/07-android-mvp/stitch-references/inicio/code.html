@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Dbus Donostia — Inicio (Referencia unificada)</title>
+  <title>Bus Donostia — Inicio (Referencia unificada)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -46,7 +46,7 @@
 <body class="bg-bg text-slate-900 min-h-screen flex flex-col justify-between antialiased select-none">
   <header class="sticky top-0 z-40 bg-bg/95 backdrop-blur-md pt-safe">
     <div class="h-14 px-4 max-w-md mx-auto flex items-center justify-between">
-      <h1 class="text-2xl font-bold tracking-tight text-slate-950 whitespace-nowrap">Dbus</h1>
+      <h1 class="text-2xl font-bold tracking-tight text-slate-950 whitespace-nowrap">Bus Donostia</h1>
       <button aria-label="Ajustes" class="w-12 h-12 -mr-2 flex items-center justify-center rounded-full text-slate-700 active:bg-slate-200/70 transition-colors">
         <span class="material-symbols-outlined text-[24px] icon-outline">settings</span>
       </button>
@@ -56,7 +56,7 @@
   <main class="flex-1 w-full max-w-md mx-auto px-4 space-y-4 pb-24">
     <div class="flex items-center w-full h-12 px-4 rounded-full bg-surface border border-border text-slate-800 transition-colors focus-within:border-primary">
       <span class="material-symbols-outlined text-[20px] text-slate-400 mr-2.5 shrink-0 icon-outline">search</span>
-      <input type="text" placeholder="Buscar parada, calle o línea" class="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-400 border-0 outline-none focus:outline-none focus:ring-0 p-0">
+      <input type="text" placeholder="Parada, calle, línea o destino" class="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-400 border-0 outline-none focus:outline-none focus:ring-0 p-0">
     </div>
 
     <section aria-label="Tu próximo aviso">
@@ -64,14 +64,14 @@
       <article class="bg-surface rounded-2xl border border-border p-4 flex flex-col">
         <div class="flex items-center justify-between gap-3">
           <div class="flex items-center gap-3 min-w-0">
-            <div class="w-9 h-9 rounded-xl bg-[#52A535] text-white font-mono font-bold flex items-center justify-center text-base shrink-0 tnum whitespace-nowrap">5</div>
-            <span class="text-slate-900 font-bold text-base truncate">Benta Berri → Amara</span>
+            <div class="w-9 h-9 rounded-xl bg-[#52A535] text-white font-mono font-bold flex items-center justify-center text-base shrink-0 tnum whitespace-nowrap">16</div>
+            <span class="text-slate-900 font-bold text-base truncate">Igeldo</span>
           </div>
-          <span class="font-mono text-[28px] font-extrabold text-primary tnum tracking-tight leading-none shrink-0 whitespace-nowrap">3 min</span>
+          <span class="font-mono text-[28px] font-extrabold text-primary tnum tracking-tight leading-none shrink-0 whitespace-nowrap">8 min</span>
         </div>
 
         <div class="flex items-center justify-between text-xs pt-2.5 gap-2">
-          <span class="text-slate-500 truncate">Pío Baroja 10 <span class="font-mono tnum whitespace-nowrap">(340)</span></span>
+          <span class="text-slate-500 truncate">Pio Baroja 15 <span class="font-mono tnum whitespace-nowrap">(344)</span></span>
           <div class="flex items-center gap-1.5 text-live font-semibold shrink-0 whitespace-nowrap">
             <span class="w-1.5 h-1.5 rounded-full bg-live inline-block shrink-0" aria-hidden="true"></span>
             <span class="whitespace-nowrap">En vivo · Aviso 5'</span>
@@ -79,9 +79,6 @@
         </div>
 
         <div class="flex items-center gap-2.5 pt-3.5">
-          <button class="bg-surface-variant active:bg-slate-200 text-slate-800 font-semibold min-h-[48px] px-3 rounded-xl flex-1 text-sm text-center whitespace-nowrap transition-colors">
-            Posponer 5'
-          </button>
           <button class="bg-surface-variant active:bg-slate-200 text-slate-800 font-semibold min-h-[48px] px-3 rounded-xl flex-1 text-sm text-center whitespace-nowrap transition-colors">
             Pausar
           </button>
@@ -95,32 +92,32 @@
         <article class="bg-surface rounded-2xl border border-border p-4">
           <div class="flex items-center justify-between pb-2.5 gap-2">
             <div class="flex items-center gap-2 min-w-0">
-              <span class="font-bold text-slate-900 text-sm truncate">Boulevard 15</span>
+              <span class="font-bold text-slate-900 text-sm truncate">Boulevard 9</span>
               <span class="bg-surface-variant text-slate-600 font-mono text-xs px-2 py-0.5 rounded-md font-semibold tnum shrink-0 whitespace-nowrap">1</span>
             </div>
-            <button aria-label="Quitar Boulevard 15 de favoritos" class="w-12 h-12 -my-3 -mr-3 flex items-center justify-center rounded-full shrink-0 active:bg-slate-100">
+            <button aria-label="Quitar Boulevard 9 de favoritos" class="w-12 h-12 -my-3 -mr-3 flex items-center justify-center rounded-full shrink-0 active:bg-slate-100">
               <span class="material-symbols-outlined text-[20px] text-favorite icon-fill">star</span>
             </button>
           </div>
           <div class="space-y-2.5">
             <div class="flex items-center justify-between gap-2">
               <div class="flex items-center gap-2.5 min-w-0">
-                <div class="w-7 h-7 rounded-lg bg-[#D9001B] text-white font-mono font-bold flex items-center justify-center text-xs shrink-0 tnum whitespace-nowrap">13</div>
-                <span class="text-sm font-semibold text-slate-800 truncate">Altza</span>
+                <div class="w-7 h-7 rounded-lg bg-[#005BB5] text-white font-mono font-bold flex items-center justify-center text-xs shrink-0 tnum whitespace-nowrap">28</div>
+                <span class="text-sm font-semibold text-slate-800 truncate">Amara - Ospitaleak - Miramon</span>
               </div>
               <div class="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
                 <span class="w-1.5 h-1.5 rounded-full bg-live inline-block shrink-0" aria-hidden="true"></span>
-                <span class="font-mono text-base font-bold text-live tnum whitespace-nowrap">2 min</span>
+                <span class="font-mono text-base font-bold text-live tnum whitespace-nowrap">6 min</span>
               </div>
             </div>
             <div class="flex items-center justify-between gap-2">
               <div class="flex items-center gap-2.5 min-w-0">
                 <div class="w-7 h-7 rounded-lg bg-[#005BB5] text-white font-mono font-bold flex items-center justify-center text-xs shrink-0 tnum whitespace-nowrap">28</div>
-                <span class="text-sm font-semibold text-slate-800 truncate">Ospitaleak</span>
+                <span class="text-sm font-semibold text-slate-800 truncate">Amara - Ospitaleak</span>
               </div>
               <div class="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
                 <span class="w-1.5 h-1.5 rounded-full bg-live inline-block shrink-0" aria-hidden="true"></span>
-                <span class="font-mono text-base font-bold text-live tnum whitespace-nowrap">6 min</span>
+                <span class="font-mono text-base font-bold text-live tnum whitespace-nowrap">15 min</span>
               </div>
             </div>
           </div>
@@ -129,21 +126,21 @@
         <article class="bg-surface rounded-2xl border border-border p-4">
           <div class="flex items-center justify-between pb-2.5 gap-2">
             <div class="flex items-center gap-2 min-w-0">
-              <span class="font-bold text-slate-900 text-sm truncate">Loiola</span>
-              <span class="bg-surface-variant text-slate-600 font-mono text-xs px-2 py-0.5 rounded-md font-semibold tnum shrink-0 whitespace-nowrap">1281</span>
+              <span class="font-bold text-slate-900 text-sm truncate">Pío Baroja 10</span>
+              <span class="bg-surface-variant text-slate-600 font-mono text-xs px-2 py-0.5 rounded-md font-semibold tnum shrink-0 whitespace-nowrap">340</span>
             </div>
-            <button aria-label="Quitar Loiola de favoritos" class="w-12 h-12 -my-3 -mr-3 flex items-center justify-center rounded-full shrink-0 active:bg-slate-100">
+            <button aria-label="Quitar Pío Baroja 10 de favoritos" class="w-12 h-12 -my-3 -mr-3 flex items-center justify-center rounded-full shrink-0 active:bg-slate-100">
               <span class="material-symbols-outlined text-[20px] text-favorite icon-fill">star</span>
             </button>
           </div>
           <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-2.5 min-w-0">
-              <div class="w-7 h-7 rounded-lg bg-[#008BBF] text-white font-mono font-bold flex items-center justify-center text-xs shrink-0 tnum whitespace-nowrap">17</div>
-              <span class="text-sm font-semibold text-slate-800 truncate">Miramón</span>
+              <div class="w-7 h-7 rounded-lg bg-[#334155] text-white font-mono font-bold flex items-center justify-center text-xs shrink-0 tnum whitespace-nowrap">35</div>
+              <span class="text-sm font-semibold text-slate-800 truncate">Antiguo-Aiete-Ospitaleak</span>
             </div>
             <div class="flex items-center gap-1.5 shrink-0 whitespace-nowrap">
               <span class="material-symbols-outlined text-[16px] text-slate-400 icon-outline shrink-0" aria-hidden="true">schedule</span>
-              <span class="font-mono text-base font-semibold text-slate-500 tnum whitespace-nowrap">9 min</span>
+              <span class="font-mono text-base font-semibold text-slate-500 tnum whitespace-nowrap">4 min</span>
             </div>
           </div>
         </article>
@@ -178,7 +175,7 @@
       <a class="flex flex-col items-center justify-center flex-1 min-h-[48px] h-full py-1 text-slate-500 hover:text-slate-800 transition-colors" href="#avisos">
         <div class="relative w-12 h-7 rounded-full  flex items-center justify-center mb-0.5">
           <span class="material-symbols-outlined text-[22px] icon-outline">notifications</span>
-          <span class="absolute top-0.5 right-2 min-w-[16px] h-4 px-1 rounded-full bg-danger text-white font-mono text-[10px] font-bold leading-none flex items-center justify-center whitespace-nowrap">2</span>
+          <span class="absolute top-0.5 right-2 min-w-[16px] h-4 px-1 rounded-full bg-danger text-white font-mono text-[10px] font-bold leading-none flex items-center justify-center whitespace-nowrap">1</span>
         </div>
         <span class="text-[11px] font-sans font-medium whitespace-nowrap">Avisos</span>
       </a>

@@ -9,11 +9,12 @@
 > [`prompts/SPRINT-5.md`](prompts/SPRINT-5.md).
 > Si algo aquí contradice a `AGENTS.md`, manda `AGENTS.md`.
 >
-> **Avisos de un solo uso (2026-11-22):** los wireframes `.excalidraw`, las
-> `stitch-references/` y `prompts/STITCH-REMAINING-SCREENS-PROMPTS.md` aún
-> muestran avisos recurrentes y los botones «Posponer 5'» / «Descartar». Son
-> diseño anterior: manda [`docs/03-android-screens.md`](docs/03-android-screens.md).
-> Para corregirlos: [`prompts/WIREFRAMES.md`](prompts/WIREFRAMES.md).
+> **Avisos de un solo uso (2026-11-22):** `prompts/STITCH-REMAINING-SCREENS-PROMPTS.md`
+> es histórico y aún muestra avisos recurrentes y los botones «Posponer 5'» /
+> «Descartar»: manda [`docs/03-android-screens.md`](docs/03-android-screens.md).
+> Los wireframes y `stitch-references/inicio/` están al día con `main`
+> (2026-11-22); `stitch-references/paradas/` conserva datos de ejemplo sin
+> revisar contra el catálogo.
 
 Paquete definitivo y unificado para que los agentes de desarrollo implementen la
 aplicación Android **Dbus Donostia (MVP v1)**, cerrando todas las brechas
@@ -64,13 +65,15 @@ docs/07-android-mvp/
 │   └── 05-migration-from-brechas.md        # Checklist trazable de cierre B1–B16
 ├── wireframes/
 │   ├── 01-user-flows/                      # 2 flujos actualizados al MVP Android
-│   ├── 02-android-mvp/                     # 9 wireframes Excalidraw válidos y corregidos
-│   └── components/component-library.excalidraw
+│   ├── 02-android-mvp/                     # 9 wireframes Excalidraw al día con main (2026-11-22)
+│   ├── components/component-library.excalidraw
+│   ├── capturas/                           # PNG renderizados de A04, A05 y A06
+│   └── verificar.py                        # JSON, ids y ejemplos contra el catálogo
 └── prompts/
     ├── PROMPT-IMPLEMENTACION.md                # Histórico: prompt general previo a los sprints
     ├── SPRINT-1.md … SPRINT-4.md               # Histórico: prompts ejecutados
     ├── SPRINT-5.md                             # Pendiente: publicación
-    ├── WIREFRAMES.md                           # Pendiente: rehacer wireframes y stitch-references
+    ├── WIREFRAMES.md                           # Histórico: prompt ejecutado (wireframes al día)
     └── STITCH-REMAINING-SCREENS-PROMPTS.md     # Histórico: prompts de diseño para Stitch AI
 ```
 
