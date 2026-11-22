@@ -29,13 +29,13 @@ fun stopsToWatch(rules: List<AlertRule>): Set<String> = rules.filter { it.active
 /**
  * Sondea las paradas de [stops] cada `pollIntervalSec` mientras se colecta (la UI lo
  * lanza con `repeatOnLifecycle(STARTED)`). Si cambia el conjunto, consulta ya el nuevo.
- * Lo que el motor acaba de consultar no se vuelve a pedir ([AppContainer.pollStop]).
+ * Lo que el motor acaba de consultar no se vuelve a pedir (`LiveRepository.pollStop`).
  */
 suspend fun AppContainer.pollStops(stops: Flow<Set<String>>) {
     stops.distinctUntilChanged().collectLatest { set ->
         if (set.isEmpty()) return@collectLatest
         while (true) {
-            coroutineScope { set.map { async { pollStop(it) } }.awaitAll() }
+            coroutineScope { set.map { async { live.pollStop(it) } }.awaitAll() }
             delay(configRepository.config.value.pollIntervalSec * 1_000L)
         }
     }

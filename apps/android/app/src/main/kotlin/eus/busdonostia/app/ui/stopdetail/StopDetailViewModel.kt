@@ -129,7 +129,7 @@ class StopDetailViewModel(
     private suspend fun fetch(reuseRecent: Boolean = false) = fetchLock.withLock {
         refreshing.value = true
         try {
-            val feed = if (reuseRecent) container.pollStop(stopId) else container.fetchStop(stopId)
+            val feed = if (reuseRecent) container.live.pollStop(stopId) else container.live.fetchStop(stopId)
             latest.value = feed
             if (feed.status != StopFeedStatus.API_ERROR) lastValid.value = feed
         } finally {

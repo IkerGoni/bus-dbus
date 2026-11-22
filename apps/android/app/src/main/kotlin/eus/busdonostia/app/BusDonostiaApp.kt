@@ -7,31 +7,22 @@ import eus.busdonostia.app.data.api.DbusClient
 import eus.busdonostia.app.data.catalog.loadCatalog
 import eus.busdonostia.app.data.config.ConfigRepository
 import eus.busdonostia.app.data.db.AppDatabase
-import eus.busdonostia.app.data.db.lineColors
 import eus.busdonostia.app.data.db.toDomain
-import eus.busdonostia.app.data.live.InFlight
-import eus.busdonostia.app.data.live.LiveFeeds
+import eus.busdonostia.app.data.live.LiveRepository
 import eus.busdonostia.app.data.location.LocationProvider
 import eus.busdonostia.app.data.settings.SettingsStore
 import eus.busdonostia.app.data.settings.currentAppLanguage
 import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.Catalog
 import eus.busdonostia.app.domain.Favorite
-import eus.busdonostia.app.domain.StopFeed
-import eus.busdonostia.app.domain.StopFeedStatus
 import eus.busdonostia.app.domain.Ticker
-import eus.busdonostia.app.domain.reusableFeed
+import eus.busdonostia.app.engine.MonitoringStarter
 import eus.busdonostia.app.engine.createNotificationChannels
-import eus.busdonostia.app.engine.ensureMonitoring
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -87,57 +78,29 @@ class AppContainer(private val app: Application) {
 
     val settings = SettingsStore(app.getSharedPreferences("settings", Context.MODE_PRIVATE))
 
-    /** Respuestas en vivo de esta sesión por parada (A01, A04, A06 y badge). */
-    val liveFeeds = LiveFeeds()
-
     /** Idioma de la app para `tiemposParada` (`es` | `eu`): el elegido en A07 o el del sistema. */
     private val resources = app.resources
 
     fun apiLanguage(): String = currentAppLanguage(resources.configuration.locales[0].language).tag
 
-    /** Una sola petición por parada a la vez, la pida la UI o el motor (H16). */
-    private val inFlight = InFlight<String, StopFeed>(appScope)
-
-    /**
-     * Única puerta a `tiemposParada` para la UI: guarda el resultado en [liveFeeds],
-     * la hora de la última respuesta real (A07) y los colores de línea vistos en vivo.
-     */
-    suspend fun fetchStop(stopId: String): StopFeed = inFlight.run(stopId) {
-        val feed = dbusClient.tiemposParada(stopId, apiLanguage())
-        liveFeeds.record(stopId, feed)
-        if (feed.status != StopFeedStatus.API_ERROR) settings.recordLiveFetch(feed.fetchedAtMs)
-        if (feed.status == StopFeedStatus.OK) appScope.launch { database.lineColors().upsertAll(feed.lineColors()) }
-        feed
-    }
-
-    /**
-     * Sondeo periódico de la UI: si alguien (el motor) consultó la parada hace menos de
-     * un intervalo (− 5 s de margen), reutiliza esa respuesta en vez de pedir otra (H16).
-     */
-    suspend fun pollStop(stopId: String): StopFeed {
-        val intervalMs = configRepository.config.value.pollIntervalSec * 1_000L
-        return reusableFeed(liveFeeds.feeds.value[stopId]?.latest, System.currentTimeMillis(), intervalMs) ?: fetchStop(stopId)
-    }
-
-    /** Consulta todas las [stops] en paralelo (una petición por parada, como el bot). */
-    suspend fun fetchStops(stops: Set<String>) = coroutineScope {
-        stops.map { async { fetchStop(it) } }.awaitAll()
-    }
+    /** Llegadas en vivo: única puerta a `tiemposParada` (UI y motor). */
+    val live = LiveRepository(
+        client = dbusClient,
+        language = ::apiLanguage,
+        pollIntervalMs = { configRepository.config.value.pollIntervalSec * 1_000L },
+        onLiveFetch = settings::recordLiveFetch,
+        onLineColors = { database.lineColors().upsertAll(it) },
+        scope = appScope,
+    )
 
     val ticker = Ticker(appScope)
 
-    /** Arranca el motor de avisos si hace falta (al abrir la app; los cambios de avisos ya lo hacen solos). */
-    fun ensureMonitoring() {
-        alerts.value?.let { ensureMonitoring(app, it, System.currentTimeMillis()) }
-    }
+    /** Arranca el motor de avisos con cada cambio de avisos y al abrir la app. */
+    val monitoring = MonitoringStarter(app, alerts, appScope)
 
     init {
         // Sin bloquear el arranque: si no hay remota o falla, sigue la empaquetada.
         appScope.launch { configRepository.refreshIfDue() }
-        // Cada cambio de avisos (guardar, switch, Deshacer): si algo queda en vigilancia, arranca el servicio.
-        appScope.launch {
-            alerts.filterNotNull().collect { rules -> ensureMonitoring(app, rules, System.currentTimeMillis()) }
-        }
     }
 }
 

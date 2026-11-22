@@ -40,7 +40,7 @@ import kotlinx.coroutines.withTimeoutOrNull
  * Motor de avisos (04-android-platform.md §1): Foreground Service `dataSync` que,
  * mientras haya avisos en vigilancia, consulta sus paradas (cada `pollIntervalSec`,
  * o más espaciado si el bus aún está lejos: [nextPollDelayMs])
- * (una petición por parada, por `AppContainer.fetchStop`) y dispara lo que esté
+ * (una petición por parada, por `LiveRepository.fetchStop`) y dispara lo que esté
  * `TRIGGERED`: notifica y, si el usuario puede verlo, borra el aviso (un solo uso).
  * La decisión es [evaluateTick]; aquí solo se consulta, notifica y borra.
  */
@@ -161,12 +161,12 @@ class AlertMonitorService : Service() {
 
     private suspend fun tick(rules: List<AlertRule>, baseMs: Long, troubleSinceMs: Long?): TickResult {
         val startMs = System.currentTimeMillis()
-        val known = container.liveFeeds.feeds.value
-        container.fetchStops(
+        val known = container.live.feeds.value
+        container.live.fetchStops(
             stopsToPoll(rules, startMs).filterTo(sortedSetOf()) { isFetchDue(known[it]?.latest?.fetchedAtMs, startMs, baseMs) },
         )
         val now = System.currentTimeMillis()
-        val feeds = container.liveFeeds.feeds.value
+        val feeds = container.live.feeds.value
         val views = stopsToPoll(rules, now).associateWith { feedView(feeds, it, now) }
         val tick = evaluateTick(rules, views, now, troubleSinceMs)
         // Primero se notifica; solo se borra (un solo uso) si el usuario puede ver la notificación.
