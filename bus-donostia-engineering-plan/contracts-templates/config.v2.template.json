@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 2,
+  "api": {
+    "apiBaseUrl": "http://app.dbus.eus",
+    "endpoints": {
+      "tiemposParada": "/SSIIMovilWSv2/ws/cons"
+    },
+    "connectTimeoutSec": 10,
+    "callTimeoutSec": 15,
+    "remoteConfigCacheHours": 12,
+    "remoteConfigTimeoutSec": 5
+  },
+  "polling": {
+    "uiTickerSec": 30,
+    "foregroundVisibleSec": 30,
+    "baseBackgroundSec": 30,
+    "noServiceOrErrorMultiplier": 2,
+    "adaptiveTiers": [
+      {
+        "minGapMin": 31,
+        "delaySec": 600
+      },
+      {
+        "minGapMin": 15,
+        "delaySec": 240
+      },
+      {
+        "minGapMin": 8,
+        "delaySec": 60
+      },
+      {
+        "minGapMin": 0,
+        "delaySec": 30
+      }
+    ]
+  },
+  "freshness": {
+    "freshMaxSec": 30,
+    "staleMaxSec": 300,
+    "liveFeedHistorySize": 3
+  },
+  "alerts": {
+    "triggerBufferSec": 30,
+    "expirationDays": 7,
+    "minMinutesAhead": 1,
+    "maxMinutesAhead": 30,
+    "maxBadgeCount": 9,
+    "recurringWakeupBeforeMin": 25,
+    "recurringExpiryAfterMin": 25,
+    "recurringWindowToleranceMin": 5
+  },
+  "geo": {
+    "walkingSpeedKmh": 5.0
+  },
+  "uiLimits": {
+    "homeFavoriteMaxArrivals": 3
+  },
+  "minAppVersion": 1,
+  "notice": null
+}

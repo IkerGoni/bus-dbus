@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "comment": "Fuente unica de verdad en packages/contracts/design-tokens.json para generar MotionTokens/DesignTokens en Kotlin (.kt) y Swift (.swift) en build-time.",
+  "motion": {
+    "maxBlockingDurationMs": 350,
+    "navigation": {
+      "bottomTabFadeInMs": 150,
+      "bottomTabFadeOutMs": 100,
+      "detailSlideInMs": 260,
+      "detailFadeInMs": 220,
+      "detailSlideOutMs": 220,
+      "detailFadeOutMs": 180,
+      "detailSlideFraction": 0.166
+    },
+    "transitions": {
+      "arrivalsStateFadeInMs": 220,
+      "arrivalsStateFadeOutMs": 150,
+      "minutesSlideInMs": 200,
+      "minutesSlideOutMs": 160,
+      "searchClearButtonMs": 160,
+      "infoBannerMs": 200,
+      "lineDirectionCrossfadeMs": 200,
+      "wizardStepSlideMs": 240
+    },
+    "microInteractions": {
+      "pressScaleFactor": 0.97,
+      "favoriteStarMinScale": 0.8,
+      "favoriteStarPeakScale": 1.15,
+      "favoriteStarRotationDeg": 72.0,
+      "springNoBounceDamping": 1.0,
+      "springMediumBounceDamping": 0.5,
+      "springMediumStiffness": 1500.0
+    },
+    "livePulse": {
+      "durationMs": 1100,
+      "minAlpha": 0.3,
+      "maxAlpha": 1.0
+    },
+    "stagger": {
+      "itemDelayMs": 35,
+      "maxAnimatedIndex": 8
+    },
+    "celebration": {
+      "particlesDurationMs": 800
+    }
+  },
+  "style": {
+    "spacingDp": {
+      "xs": 4,
+      "sm": 8,
+      "md": 12,
+      "lg": 16,
+      "xl": 24
+    },
+    "cornerRadiusDp": {
+      "chip": 8,
+      "card": 16,
+      "pill": 999
+    },
+    "componentsDp": {
+      "timelineTerminalNode": 8,
+      "timelineIntermediateNode": 6,
+      "liveSignalDot": 8,
+      "lineBadgeMinWidth": 36
+    }
+  }
+}
