@@ -148,8 +148,16 @@ fun AlertRule.withActive(value: Boolean, nowMs: Long): AlertRule = when {
     else -> copy(active = true)
 }
 
-/** Posponer 5': `snoozedUntilMs = now + 300_000` y sigue activo. */
-fun AlertRule.snoozed(nowMs: Long): AlertRule = copy(active = true, snoozedUntilMs = nowMs + SNOOZE_MS)
+/**
+ * Posponer 5': `snoozedUntilMs = now + 300_000` y sigue activo: vuelve a avisar pasado
+ * ese tiempo. En RECURRING se olvida el disparo de esta franja; si no, quedaría `SILENCED`
+ * y no volvería a avisar hasta la franja siguiente.
+ */
+fun AlertRule.snoozed(nowMs: Long): AlertRule = copy(
+    active = true,
+    snoozedUntilMs = nowMs + SNOOZE_MS,
+    lastTriggeredAtMs = if (frequency == AlertFrequency.RECURRING) null else lastTriggeredAtMs,
+)
 
 /**
  * Destinos reales de [lineId] en [stopId]: los de los itinerarios del catálogo que pasan

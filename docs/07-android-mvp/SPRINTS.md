@@ -91,12 +91,30 @@ build debug). Estado de cada sprint: `ESTADO.md`.
 - `POST_NOTIFICATIONS` con fallback a ajustes; deep link `dbus://stop/{stopId}`.
 - **DoD:** flujo completo en emulador: cercana → A05 → 🔔 → guardar ONCE →
   notificación real → `Posponer 5'` → segunda notificación.
+- **Resultado (2026-11-22):** decisión pura en `domain/AlertEngine.kt`
+  (`evaluateTick`: disparar / seguir / parar, 60 min sin servicio, `nextAlarmAtMs`
+  con DST y cruce de medianoche). `engine/`: `AlertMonitorService` (FGS
+  `dataSync`, una petición por parada vía `fetchStop`, sin repetir lo que la UI
+  acaba de consultar), canales `dbus_monitoring` / `dbus_arrivals_high`,
+  `AlertActionReceiver` (Posponer / Descartar), una sola alarma exacta en el
+  próximo `windowFrom` (`AlertAlarmReceiver`) y reprogramación en boot, hora, TZ,
+  actualización y permiso de alarmas. `AppContainer` reprograma y arranca el
+  motor en cada cambio de avisos y al abrir la app. Deep link
+  `dbus://stop/{stopId}?highlightLine={lineId}`. A04 avisa si faltan
+  notificaciones o alarmas exactas. Posponer en RECURRING olvida el disparo de la
+  franja para volver a avisar. 11 tests JVM nuevos por variante (106). Probado en
+  el AVD `dbus36` contra la API real con la app en segundo plano: ONCE en 344 →
+  «Vigilando L35» → notificación → `Posponer 5'` → segunda notificación;
+  RECURRING 16:10–16:40 con el proceso matado → alarma exacta → servicio →
+  notificación; reinicio → alarma reprogramada; sin permiso, alarma inexacta.
+  15 capturas en `capturas/sprint-4/`.
 
 ## Sprint 5 · Publicación
 - Auditar el historial de git en busca de secretos **antes** de hacer público
   el repo (token del bot: nunca commiteado según `ESTADO.md`; verificarlo).
-- Repo público: publicar `config.json` (GitHub Pages o raw) y fijar su URL en
-  `ApiConfig`.
+- **Repo privado hasta que Iker decida** (2026-11-22); licencia también
+  pendiente. El `config.json` remoto no puede salir de un repo privado: su URL se
+  queda vacía (solo la copia empaquetada) hasta que Iker elija hosting.
 - Nombre/icono no oficiales, firma de release, ficha de Play (FGS `dataSync`,
   ubicación), pista de pruebas internas.
 - **DoD:** APK release firmado instalado en un móvil real; config remota

@@ -24,4 +24,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    override fun onStart() {
+        super.onStart()
+        // App visible: arranque permitido. Retoma la vigilancia si se paró (sin servicio, reinicio, límite de Android).
+        (application as BusDonostiaApp).container.ensureMonitoring()
+    }
 }

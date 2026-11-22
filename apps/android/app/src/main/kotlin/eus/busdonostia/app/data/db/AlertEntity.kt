@@ -85,5 +85,8 @@ interface AlertDao {
     suspend fun delete(id: String)
 
     @Query("SELECT * FROM alerts ORDER BY createdAtMs")
+    suspend fun getAll(): List<AlertEntity>
+
+    @Query("SELECT * FROM alerts ORDER BY createdAtMs")
     fun observeAll(): Flow<List<AlertEntity>>
 }

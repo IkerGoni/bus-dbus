@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Abisuen motorra (4. sprinta): kanalak, jakinarazpenak eta A04 -->
+    <string name="channel_monitoring_name">Abisuen zaintza</string>
+    <string name="channel_monitoring_description">Jakinarazpen isila, aplikazioak zure abisuetarako Dbus kontsultatzen duen bitartean.</string>
+    <string name="channel_arrivals_name">Zure abisuen iritsierak</string>
+    <string name="channel_arrivals_description">Zure autobusa aukeratutako minutuetara dagoenean abisatzen du.</string>
+
+    <string name="notif_monitoring_one">L%1$s zaintzen, %2$s geltokian</string>
+    <plurals name="notif_monitoring_many">
+        <item quantity="one">Abisu %1$d zaintzen</item>
+        <item quantity="other">%1$d abisu zaintzen</item>
+    </plurals>
+    <string name="notif_monitoring_body">Dbus %1$d s-ro kontsultatzen du autobusa iritsi arte.</string>
+    <string name="notif_body">%1$s (%2$s) · %3$s</string>
+
+    <string name="notif_stopped_title">Abisuak zaindu gabe</string>
+    <string name="notif_stopped_no_service">Dbusek 60 min daramatza zerbitzurik gabe edo erantzun gabe. Ireki aplikazioa berriro zaintzeko.</string>
+    <string name="notif_stopped_time_limit">Androidek mugatu egin du atzeko planoko zaintza-denbora. Ireki aplikazioa berriro zaintzeko.</string>
+    <string name="notif_start_blocked">Ezin izan da zure abisu errepikakorra zaintzen hasi. Sakatu aplikazioa irekitzeko.</string>
+
+    <string name="alerts_notifications_off">Jakinarazpenak desaktibatuta: zure abisuek ez dute joko.</string>
+    <string name="alerts_notifications_enable">Aktibatu</string>
+</resources>

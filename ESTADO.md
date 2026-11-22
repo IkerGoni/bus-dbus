@@ -1,6 +1,6 @@
 # Estado — bus-dbus
 
-Actualizado: 2026-11-22 15:40 · Última sesión: Android Sprint 3 (Inicio, Avisos, Ajustes, Onboarding)
+Actualizado: 2026-11-22 16:40 · Última sesión: Android Sprint 4 (motor de avisos)
 
 > **`AGENTS.md` es la fuente de verdad.** Este archivo es el estado de sesión;
 > si algo aquí contradice a `AGENTS.md`, manda `AGENTS.md`.
@@ -8,41 +8,49 @@ Actualizado: 2026-11-22 15:40 · Última sesión: Android Sprint 3 (Inicio, Avis
 ## Objetivo actual
 
 MVP Android nativo sin backend (ADR 009). Plan en
-`docs/07-android-mvp/SPRINTS.md`. **Sprints 0–3 hechos e integrados en `main`; siguiente: Sprint 4 (motor de
-avisos).**
+`docs/07-android-mvp/SPRINTS.md`. **Sprints 0–3 en `main`; Sprint 4 (motor de
+avisos) hecho en la rama `android/sprint-4`, pendiente de merge; siguiente: Sprint 5
+(publicación).**
 El bot sigue en producción sin cambios (PID `80402`).
 
 ## Hecho en la última sesión
 
-- **Sprint 3** en `apps/android/`: A06 Configurar aviso (líneas y destinos
-  reales de la parada, antelación con chips + slider, ONCE / RECURRING con
-  días, presets y franja obligatoria ≤ 3 h, vista previa, dedup con
-  «Actualizar», `POST_NOTIFICATIONS` al guardar). A05 con 🔔 por llegada y pie
-  `Crear aviso en esta parada`. A04 Mis avisos (grupos, 5 estados + «Caducada»,
-  switch, editar, borrar con Deshacer). A01 Inicio (próximo aviso con Posponer
-  5' y Pausar + Deshacer, favoritas con 3 llegadas en vivo, pull-to-refresh,
-  búsqueda universal de paradas y líneas). Badge `ACTIVE | TRIGGERED` (`9+`).
-  A07 Ajustes y A08 Onboarding. Lógica en `domain/AlertDraft.kt` y
-  `domain/AlertList.kt`.
-- `./gradlew check assembleDebug` verde: 95 tests JVM por variante (190), 0
-  errores de lint. Probado en el AVD `dbus36` contra la API real (340 en vivo,
-  parada 1 `SIN_SERVICIO`, modo avión). 31 capturas en
-  `docs/07-android-mvp/capturas/sprint-3/`. `grep` de literales limpio.
-- Prompt del Sprint 4 en `docs/07-android-mvp/prompts/SPRINT-4.md`.
+- **Sprint 4** en `apps/android/` (rama `android/sprint-4`): decisión pura en
+  `domain/AlertEngine.kt` (`evaluateTick`, `stopsToPoll`, `isFetchDue`,
+  `nextAlarmAtMs`, `firingDestination`); `engine/AlertMonitorService` (FGS
+  `dataSync`, sondeo cada `pollIntervalSec` agrupado por parada, se para sin
+  avisos en vigilancia o tras 60 min sin servicio y lo notifica, `onTimeout` de
+  Android 15); canales `dbus_monitoring` (LOW) y `dbus_arrivals_high` (HIGH);
+  `AlertActionReceiver` (Posponer 5' / Descartar sin abrir la app); una alarma
+  exacta en el próximo `windowFrom` (inexacta sin permiso) reprogramada en boot,
+  hora, TZ, actualización y cambio de permiso; deep link
+  `dbus://stop/{stopId}?highlightLine={lineId}`; A04 avisa si faltan
+  notificaciones o alarmas exactas.
+- `./gradlew check assembleDebug` verde: 106 tests JVM por variante (212), 0
+  errores de lint. Probado en el AVD `dbus36` contra la API real con la app en
+  segundo plano: ONCE → «Vigilando L35» → notificación → Posponer → segunda
+  notificación → tap abre A05 con la línea; RECURRING 16:10–16:40 con el proceso
+  matado → alarma exacta → notificación; reinicio → alarma reprogramada.
+  15 capturas en `docs/07-android-mvp/capturas/sprint-4/`.
+- Prompt del Sprint 5 en `docs/07-android-mvp/prompts/SPRINT-5.md` (con repo
+  privado y licencia pendiente).
 
 ## Pendiente (por prioridad)
 
-- [ ] **Sprint 4** (prompt `docs/07-android-mvp/prompts/SPRINT-4.md`).
-- [ ] Licencia del repo: la spec pide «licencia MIT» en A07, pero no hay
-      `LICENSE`. A07 no muestra licencia de la app hasta que Iker decida.
+- [ ] Merge de `android/sprint-4` a `main` + push + borrar rama (falta la orden de Iker).
+- [ ] **Sprint 5** (prompt `docs/07-android-mvp/prompts/SPRINT-5.md`).
+- [ ] Licencia y repo público: los decide Iker más adelante (repo privado hasta entonces).
+- [ ] Probar en móvil real el motor con Doze y fabricantes agresivos con la batería;
+      Android 14+ niega `SCHEDULE_EXACT_ALARM` por defecto: sin él, el RECURRING
+      no puede arrancar el servicio en segundo plano y avisa para abrir la app.
 - [ ] Revisar en móvil real Cercanas con ubicación aproximada (en Android 12+
       se difumina ~2 km) y el tiempo hasta la primera posición.
 - [ ] Fixture real de `DATOS` con `tiempos` vacío: no observado aún (las
       paradas sin buses dan `SIN_SERVICIO`); capturarlo si aparece.
 - [ ] Propuesta a Iker: guardar `linea.color` en `build:catalog` (lane bot);
       hoy la app usa el último color visto en vivo.
-- [ ] Sprint 5: antes de hacer público el repo, auditar el historial en busca
-      de secretos; publicar ahí `config.json`.
+- [ ] Sprint 5: auditar el historial en busca de secretos (aunque siga privado);
+      `config.json` remoto sin hosting mientras el repo sea privado.
 - [ ] Bot: validación conversacional con PID `80402`; rotar token de Telegram
       (R6, `.env` raíz, gitignored).
 - [ ] Bot (opcional): residuales menores de la auditoría; 15 tests de
@@ -51,6 +59,17 @@ El bot sigue en producción sin cambios (PID `80402`).
 - [ ] Catálogo duplicado: `packages/contracts/data/` vs `apps/bot/data/`.
 
 ## Decisiones tomadas (no reabrir)
+
+- 2026-11-22 · Iker: **licencia se decide más tarde; repo privado hasta que él
+  decida.** Sin `LICENSE` ni `config.json` remoto publicado mientras tanto.
+- 2026-11-22 · Android Sprint 4: una sola alarma (la del próximo inicio de franja
+  de todos los RECURRING), no una por aviso. `Posponer 5'` en RECURRING borra
+  `lastTriggeredAtMs` para volver a avisar en la misma franja. El motor arranca
+  desde un observador de `alerts` en `AppContainer` (cubre guardar, switch,
+  Posponer y Deshacer) y al abrir la app; tras un reinicio solo se reprograma la
+  alarma (Android 15 no deja arrancar `dataSync` desde `BOOT_COMPLETED`): un ONCE
+  activo se retoma al abrir la app. El servicio no repite una consulta que la UI
+  hizo hace < 25 s.
 
 - 2026-11-22 · Android Sprint 3: `MainActivity` pasa a `AppCompatActivity`
   (appcompat 1.7.1) para idioma por app y tema también en Android < 13; tema en
@@ -108,9 +127,9 @@ El bot sigue en producción sin cambios (PID `80402`).
 
 ## Git
 
-Rama `android/sprint-3` integrada en `main` (`eebee12`), pusheada y borrada
-(autorizado por Iker).
+Rama `android/sprint-4` con el Sprint 4, **sin integrar** en `main` (falta la
+orden de Iker). Ver `git log --oneline main..android/sprint-4`.
 
 ## Siguiente sesión
 
-- Prompt: `docs/07-android-mvp/prompts/SPRINT-4.md`.
+- Integrar `android/sprint-4` si Iker lo autoriza; luego prompt `docs/07-android-mvp/prompts/SPRINT-5.md`.

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Motor de avisos (Sprint 4): canales, notificaciones y A04 -->
+    <string name="channel_monitoring_name">Vigilancia de avisos</string>
+    <string name="channel_monitoring_description">Notificación silenciosa mientras la app consulta Dbus para tus avisos.</string>
+    <string name="channel_arrivals_name">Llegadas de tus avisos</string>
+    <string name="channel_arrivals_description">Avisa cuando tu bus está a los minutos que elegiste.</string>
+
+    <string name="notif_monitoring_one">Vigilando L%1$s en %2$s</string>
+    <plurals name="notif_monitoring_many">
+        <item quantity="one">Vigilando %1$d aviso</item>
+        <item quantity="other">Vigilando %1$d avisos</item>
+    </plurals>
+    <string name="notif_monitoring_body">Consulta Dbus cada %1$d s hasta que llegue el bus.</string>
+    <string name="notif_body">%1$s (%2$s) · %3$s</string>
+
+    <string name="notif_stopped_title">Avisos sin vigilar</string>
+    <string name="notif_stopped_no_service">Dbus lleva 60 min sin servicio o sin responder. Abre la app para volver a vigilar.</string>
+    <string name="notif_stopped_time_limit">Android ha limitado el tiempo de vigilancia en segundo plano. Abre la app para volver a vigilar.</string>
+    <string name="notif_start_blocked">No se pudo empezar a vigilar tu aviso recurrente. Toca para abrir la app.</string>
+
+    <string name="alerts_notifications_off">Notificaciones desactivadas: tus avisos no sonarán.</string>
+    <string name="alerts_notifications_enable">Activar</string>
+</resources>
