@@ -47,7 +47,6 @@ import eus.busdonostia.app.ui.components.ScreenHeader
 import eus.busdonostia.app.ui.components.SectionLabel
 import eus.busdonostia.app.ui.components.SkeletonList
 import eus.busdonostia.app.ui.system.batterySettingsIntent
-import eus.busdonostia.app.ui.system.exactAlarmSettingsIntent
 import eus.busdonostia.app.ui.system.notificationSettingsIntent
 import eus.busdonostia.app.ui.system.openSettings
 import eus.busdonostia.app.ui.system.readSystemStatus
@@ -130,22 +129,7 @@ fun SettingsScreen(onBack: () -> Unit) {
         SectionLabel(stringResource(R.string.settings_section_background))
         BorderedCard(Modifier.padding(horizontal = 16.dp)) {
             CardColumn {
-                Text(stringResource(R.string.settings_exact_alarms), style = MaterialTheme.typography.titleMedium)
-                if (status.exactAlarms) {
-                    Hint(stringResource(R.string.settings_exact_on))
-                } else {
-                    Hint(stringResource(R.string.settings_exact_off))
-                    if (exactAlarmSettingsIntent(context) != null) {
-                        ActionButton(stringResource(R.string.settings_exact_grant)) {
-                            context.openSettings(exactAlarmSettingsIntent(context))
-                        }
-                    }
-                }
-                Text(
-                    stringResource(R.string.settings_battery),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(top = 4.dp),
-                )
+                Text(stringResource(R.string.settings_battery), style = MaterialTheme.typography.titleMedium)
                 if (status.batteryUnrestricted) {
                     Hint(stringResource(R.string.settings_battery_ok))
                 } else {

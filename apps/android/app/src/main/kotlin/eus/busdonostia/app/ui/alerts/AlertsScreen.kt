@@ -30,16 +30,20 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -58,6 +62,9 @@ import eus.busdonostia.app.ui.components.SectionLabel
 import eus.busdonostia.app.ui.components.SkeletonList
 import eus.busdonostia.app.ui.screens.EmptyAction
 import eus.busdonostia.app.ui.screens.EmptyState
+import eus.busdonostia.app.ui.system.notificationSettingsIntent
+import eus.busdonostia.app.ui.system.openSettings
+import eus.busdonostia.app.ui.system.readSystemStatus
 import kotlinx.coroutines.launch
 
 /** A04 · Mis avisos. */
@@ -76,6 +83,13 @@ fun AlertsScreen(
     }
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    // Permiso real, releído al volver de Ajustes: sin notificaciones el motor no puede avisar.
+    val context = LocalContext.current
+    var system by remember { mutableStateOf(readSystemStatus(context)) }
+    LifecycleResumeEffect(Unit) {
+        system = readSystemStatus(context)
+        onPauseOrDispose { }
+    }
     val deletedText = stringResource(R.string.alert_deleted)
     val undoText = stringResource(R.string.undo)
     val onDelete: (AlertRule) -> Unit = { rule ->
@@ -106,6 +120,16 @@ fun AlertsScreen(
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 96.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
+                    if (!system.notificationsEnabled) {
+                        item {
+                            InfoBanner(stringResource(R.string.alerts_notifications_off), warning = true) {
+                                TextButton(
+                                    onClick = { context.openSettings(notificationSettingsIntent(context)) },
+                                    modifier = Modifier.heightIn(min = 48.dp),
+                                ) { Text(stringResource(R.string.alerts_notifications_enable)) }
+                            }
+                        }
+                    }
                     if (state.anyError) {
                         item {
                             InfoBanner(stringResource(R.string.alerts_error_banner), warning = true) {
@@ -116,7 +140,7 @@ fun AlertsScreen(
                         }
                     }
                     group(R.string.alerts_section_active, state.active, state, vm, onEditAlert, onDelete)
-                    group(R.string.alerts_section_silenced, state.silenced, state, vm, onEditAlert, onDelete)
+                    group(R.string.alerts_section_paused, state.silenced, state, vm, onEditAlert, onDelete)
                 }
             }
         }
@@ -183,7 +207,7 @@ private fun AlertCard(
                 }
             }
             Text(
-                stringResource(R.string.alert_subtitle, rule.stopName, rule.stopId, rule.minutesAhead, frequencyText(rule)),
+                stringResource(R.string.alert_subtitle, rule.stopName, rule.stopId, rule.minutesAhead),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,

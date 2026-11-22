@@ -2,12 +2,18 @@ package eus.busdonostia.app.data.db
 
 import android.database.sqlite.SQLiteConstraintException
 import androidx.room.Room
+import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.db.SupportSQLiteOpenHelper
+import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.core.app.ApplicationProvider
-import eus.busdonostia.app.domain.AlertFrequency
 import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.Favorite
 import eus.busdonostia.app.domain.FavoriteType
 import kotlinx.coroutines.flow.first
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -20,6 +26,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
@@ -85,34 +92,68 @@ class AppDatabaseTest {
         stopName = "Easo",
         lineId = line,
         minutesAhead = 5,
-        frequency = AlertFrequency.ONCE,
         createdAtMs = 10,
     )
 
     @Test
-    fun `avisos - regla RECURRING hace ida y vuelta`() = runTest {
-        val r = rule("a1").copy(
-            destination = "Intxaurrondo",
-            frequency = AlertFrequency.RECURRING,
-            daysOfWeek = setOf(5, 1, 3),
-            windowFrom = "07:45",
-            windowTo = "08:30",
-            snoozedUntilMs = 123,
-        )
+    fun `avisos - regla hace ida y vuelta`() = runTest {
+        val r = rule("a1").copy(destination = "Intxaurrondo")
         db.alerts().insert(r.toEntity())
-        val e = db.alerts().findById("a1")!!
-        assertEquals("1,3,5", e.daysOfWeek)
-        assertEquals(r, e.toDomain())
+        assertEquals(r, db.alerts().findById("a1")!!.toDomain())
     }
 
     @Test
-    fun `avisos - campos nulos y dias vacios hacen ida y vuelta`() = runTest {
+    fun `avisos - campos nulos hacen ida y vuelta`() = runTest {
         val r = rule("a1")
         db.alerts().insert(r.toEntity())
         val e = db.alerts().findById("a1")!!
-        assertEquals("", e.daysOfWeek)
         assertEquals(r, e.toDomain())
         assertNull(e.destination)
+    }
+
+    @Test
+    fun `migracion 1 a 2 - borra recurrentes y disparados y conserva el resto`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val name = "migration-test.db"
+        context.deleteDatabase(name)
+        // Esquema v1 exacto, del JSON que Room exportó (los tests corren con cwd = módulo `app`).
+        val schema = Json.parseToJsonElement(File("schemas/eus.busdonostia.app.data.db.AppDatabase/1.json").readText())
+        val entities = schema.jsonObject["database"]!!.jsonObject["entities"]!!.jsonArray.map { it.jsonObject }
+        val v1 = FrameworkSQLiteOpenHelperFactory().create(
+            SupportSQLiteOpenHelper.Configuration.builder(context).name(name).callback(
+                object : SupportSQLiteOpenHelper.Callback(1) {
+                    override fun onCreate(db: SupportSQLiteDatabase) {
+                        entities.forEach { entity ->
+                            val table = entity["tableName"]!!.jsonPrimitive.content
+                            val sqls = listOf(entity["createSql"]!!) + entity["indices"]?.jsonArray.orEmpty().map { it.jsonObject["createSql"]!! }
+                            sqls.forEach { db.execSQL(it.jsonPrimitive.content.replace("\${TABLE_NAME}", table)) }
+                        }
+                    }
+
+                    override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) = Unit
+                },
+            ).build(),
+        )
+        v1.writableDatabase.apply {
+            execSQL("INSERT INTO alerts VALUES ('once', '340', 'Easo', '28', 'Amara', 5, 'ONCE', '', NULL, NULL, 1, 10, 20, NULL)")
+            execSQL("INSERT INTO alerts VALUES ('paused', '1', 'Boulevard', '5', NULL, 3, 'ONCE', '', NULL, NULL, 0, 10, NULL, NULL)")
+            execSQL("INSERT INTO alerts VALUES ('fired', '2', 'Urbieta', '21', NULL, 5, 'ONCE', '', NULL, NULL, 0, 10, NULL, 99)")
+            execSQL("INSERT INTO alerts VALUES ('rec', '3', 'Urbieta', '35', NULL, 5, 'RECURRING', '1,2', '07:45', '08:30', 1, 10, NULL, NULL)")
+        }
+        v1.close()
+        // Room aplica la migración y valida el esquema v2 al abrir.
+        val migrated = Room.databaseBuilder(context, AppDatabase::class.java, name)
+            .addMigrations(MIGRATION_1_2)
+            .allowMainThreadQueries()
+            .build()
+        val rules = migrated.alerts().getAll().map { it.toDomain() }
+        assertEquals(listOf("once", "paused"), rules.map { it.id }.sorted())
+        assertEquals(
+            AlertRule("once", "340", "Easo", "28", "Amara", 5, active = true, createdAtMs = 10),
+            rules.first { it.id == "once" },
+        )
+        migrated.close()
+        context.deleteDatabase(name)
     }
 
     @Test

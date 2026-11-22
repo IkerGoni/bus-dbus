@@ -19,11 +19,14 @@ import eus.busdonostia.app.domain.Favorite
 import eus.busdonostia.app.domain.StopFeed
 import eus.busdonostia.app.domain.StopFeedStatus
 import eus.busdonostia.app.domain.Ticker
+import eus.busdonostia.app.engine.createNotificationChannels
+import eus.busdonostia.app.engine.ensureMonitoring
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -34,7 +37,7 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 /** Contenedor de dependencias sin framework de DI (ADR 009). Uno por proceso. */
-class AppContainer(app: Application) {
+class AppContainer(private val app: Application) {
     /** Vive lo que el proceso: carga del catálogo, config remota y escrituras que no deben cancelarse. */
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -100,9 +103,18 @@ class AppContainer(app: Application) {
 
     val ticker = Ticker(appScope)
 
+    /** Arranca el motor de avisos si hace falta (al abrir la app; los cambios de avisos ya lo hacen solos). */
+    fun ensureMonitoring() {
+        alerts.value?.let { ensureMonitoring(app, it, System.currentTimeMillis()) }
+    }
+
     init {
         // Sin bloquear el arranque: si no hay remota o falla, sigue la empaquetada.
         appScope.launch { configRepository.refreshIfDue() }
+        // Cada cambio de avisos (guardar, switch, Deshacer): si algo queda en vigilancia, arranca el servicio.
+        appScope.launch {
+            alerts.filterNotNull().collect { rules -> ensureMonitoring(app, rules, System.currentTimeMillis()) }
+        }
     }
 }
 
@@ -112,6 +124,7 @@ class BusDonostiaApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        createNotificationChannels(this)
         container = AppContainer(this)
         // Apariencia elegida en A07 (AppCompat no la guarda): antes de crear ninguna actividad.
         AppCompatDelegate.setDefaultNightMode(container.settings.theme.value.nightMode)

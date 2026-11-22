@@ -32,6 +32,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import eus.busdonostia.app.ui.lines.LineDetailScreen
 import eus.busdonostia.app.ui.lines.LinesScreen
 import eus.busdonostia.app.R
@@ -50,6 +51,9 @@ object DetailRoutes {
     const val ALERT_NEW = "alert/new?stopId={stopId}&lineId={lineId}&destination={destination}"
     const val ALERT_EDIT = "alert/{id}/edit"
     const val SETTINGS = "settings"
+
+    /** Tap en la notificación de un aviso (manifest: scheme `dbus`, host `stop`). */
+    const val STOP_DEEP_LINK = "dbus://stop/{stopId}?highlightLine={line}"
 
     fun alertNew(stopId: String? = null, lineId: String? = null, destination: String? = null): String =
         "alert/new?" + listOfNotNull(
@@ -195,6 +199,7 @@ fun AppShell(navController: NavHostController = rememberNavController()) {
                         defaultValue = null
                     },
                 ),
+                deepLinks = listOf(navDeepLink { uriPattern = DetailRoutes.STOP_DEEP_LINK }),
             ) { entry ->
                 val args = checkNotNull(entry.arguments)
                 StopDetailScreen(

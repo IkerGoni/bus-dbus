@@ -10,11 +10,12 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZonedDateTime
 
 /** A01, A04 y badge: todos pasan por `computeAlertStatus` (guardrails §3) y el orden de §3. */
 class AlertListTest {
-    private fun madrid(iso: String): Long = ZonedDateTime.of(LocalDateTime.parse(iso), MADRID).toInstant().toEpochMilli()
+    private fun madrid(iso: String): Long = ZonedDateTime.of(LocalDateTime.parse(iso), ZoneId.of("Europe/Madrid")).toInstant().toEpochMilli()
 
     private val now = madrid("2026-11-23T08:00") // lunes
 
@@ -23,12 +24,7 @@ class AlertListTest {
 
     private fun rule(id: String, line: String, minutesAhead: Int = 5, stop: String = "340") = AlertRule(
         id = id, stopId = stop, stopName = "Pío Baroja 10", lineId = line, minutesAhead = minutesAhead,
-        frequency = AlertFrequency.ONCE, createdAtMs = now - 1_000,
-    )
-
-    private fun recurring(id: String, from: String, to: String, lastTriggeredAtMs: Long? = null) = rule(id, "5").copy(
-        frequency = AlertFrequency.RECURRING, daysOfWeek = DaysPreset.WEEKDAYS.days, windowFrom = from, windowTo = to,
-        lastTriggeredAtMs = lastTriggeredAtMs,
+        createdAtMs = now - 1_000,
     )
 
     @Test
@@ -40,9 +36,6 @@ class AlertListTest {
         assertEquals(12, active.remainingMin) // minutos actuales aunque no esté dentro de la antelación
         assertEquals(AlertDetail.PAUSED, alertItem(rule("p", "5").copy(active = false), arrivals, now).detail)
         assertEquals(AlertDetail.EXPIRED, alertItem(rule("e", "5").copy(createdAtMs = now - ONCE_TTL_MS - 1), arrivals, now).detail)
-        assertEquals(AlertDetail.OUT_OF_WINDOW, alertItem(recurring("o", "18:00", "19:00"), arrivals, now).detail)
-        val notified = alertItem(recurring("n", "07:45", "08:30", lastTriggeredAtMs = madrid("2026-11-23T07:50")), arrivals, now)
-        assertEquals(ComputedAlertStatus.SILENCED to AlertDetail.NOTIFIED_IN_WINDOW, notified.status to notified.detail)
         assertNull(alertItem(rule("x", "13"), arrivals, now).nextArrival)
     }
 
@@ -51,20 +44,19 @@ class AlertListTest {
         val arrivals = listOf(arrival("5", 3), arrival("28", 12), arrival("27", 7))
         val items = listOf(
             alertItem(rule("inactive", "5").copy(active = false), arrivals, now),
-            alertItem(recurring("silenced", "18:00", "19:00"), arrivals, now),
-            alertItem(rule("snoozed", "5").copy(snoozedUntilMs = now + SNOOZE_MS), arrivals, now),
+            alertItem(rule("expired", "5").copy(createdAtMs = now - ONCE_TTL_MS - 1), arrivals, now),
             alertItem(rule("noArrival", "13"), arrivals, now),
             alertItem(rule("active12", "28"), arrivals, now),
             alertItem(rule("active7", "27"), arrivals, now),
             alertItem(rule("triggered", "5", stop = "1"), arrivals, now),
         )
         assertEquals(
-            listOf("triggered", "active7", "active12", "noArrival", "snoozed", "silenced", "inactive"),
+            listOf("triggered", "active7", "active12", "noArrival", "expired", "inactive"),
             sortAlerts(items).map { it.rule.id },
         )
-        val (activeGroup, silencedGroup) = groupAlerts(items)
-        assertEquals(listOf("triggered", "active7", "active12", "noArrival", "snoozed"), activeGroup.map { it.rule.id })
-        assertEquals(listOf("silenced", "inactive"), silencedGroup.map { it.rule.id })
+        val (activeGroup, pausedGroup) = groupAlerts(items)
+        assertEquals(listOf("triggered", "active7", "active12", "noArrival"), activeGroup.map { it.rule.id })
+        assertEquals(listOf("expired", "inactive"), pausedGroup.map { it.rule.id })
         assertEquals("triggered", nextAlert(items)?.rule?.id)
         assertEquals(4, alertBadgeCount(items)) // ACTIVE | TRIGGERED
         assertEquals(listOf(null, "1", "9", "9+"), listOf(0, 1, 9, 10).map(::badgeText))

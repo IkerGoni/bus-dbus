@@ -71,8 +71,7 @@ export interface Favorite {
   createdAtMs: number;
 }
 
-export type AlertFrequency = 'ONCE' | 'RECURRING';
-
+/** Aviso de un solo uso (decisión de Iker, 2026-11-22): avisa una vez y se borra. */
 export interface AlertRule {
   id: string;
   stopId: string;
@@ -80,27 +79,19 @@ export interface AlertRule {
   lineId: string;          // Siempre código público
   destination?: string;    // Filtro de destino (paridad con el bot)
   minutesAhead: number;    // Entero 1..30
-  frequency: AlertFrequency;
-  // Solo RECURRING:
-  daysOfWeek: number[];    // ISO 1=Lun .. 7=Dom
-  windowFrom?: string;     // "HH:mm" inicio de la franja en la que vigilar (ej. "07:45")
-  windowTo?: string;       // "HH:mm" fin de la franja (ej. "08:30"); máx. 3 h
-  active: boolean;
-  createdAtMs: number;     // ONCE caduca a los 7 días (paridad regla 7 del bot)
-  snoozedUntilMs?: number; // now + 300_000 al pulsar «Posponer 5'»
-  lastTriggeredAtMs?: number;
+  active: boolean;         // false = pausado por el usuario
+  createdAtMs: number;     // Caduca a los 7 días si no avisa (paridad regla 7 del bot)
 }
 ```
 
 Reglas:
 
-- **Zona horaria:** días y franjas se evalúan siempre en `Europe/Madrid`.
 - **Dedup** por `(stopId, lineId)`: si existe, A06 ofrece actualizarlo.
-- **ONCE**: vigila desde que se guarda; al disparar → `active = false`
-  (igual que el bot). Si a los 7 días no ha disparado → `active = false`.
-- **RECURRING**: vigila solo dentro de `[windowFrom, windowTo]` de los días
-  marcados y dispara **como mucho una vez por franja**. Sin franja no hay
-  aviso recurrente (si no, avisaría con cada bus del día).
+- **Un solo uso:** vigila desde que se guarda; al disparar, el motor notifica y
+  **borra** el aviso. Si a los 7 días no ha disparado queda `INACTIVE`
+  («Caducada») hasta que el usuario lo reactive o lo borre.
+- **Sin avisos recurrentes** (días, franja, alarmas) **ni Posponer**: se
+  quitaron el 2026-11-22. Room v2 borra los que hubiera (`MIGRATION_1_2`).
 
 ## 2. Matching de llegada (paridad con `findMatchingArrival` del bot)
 
@@ -117,9 +108,7 @@ para que un aviso de la línea pública `32` nunca case con la `28`.
 
 ```ts
 export type ComputedAlertStatus =
-  | 'INACTIVE'   // Pausada, disparada (ONCE) o caducada
-  | 'SNOOZED'    // now < snoozedUntilMs
-  | 'SILENCED'   // RECURRING fuera de día/franja, o ya disparó en esta franja
+  | 'INACTIVE'   // Pausada o caducada (la disparada ya no existe: se borra)
   | 'TRIGGERED'  // Hay nextArrival dentro de minutesAhead y no se ha avisado aún
   | 'ACTIVE';    // Vigilando
 
@@ -129,17 +118,7 @@ export function computeAlertStatus(
   nextArrival?: Arrival,
 ): ComputedAlertStatus {
   if (!alert.active) return 'INACTIVE';
-  if (alert.frequency === 'ONCE' && nowMs - alert.createdAtMs > 7 * 86_400_000) {
-    return 'INACTIVE';
-  }
-  if (alert.snoozedUntilMs !== undefined && nowMs < alert.snoozedUntilMs) return 'SNOOZED';
-  if (alert.frequency === 'RECURRING') {
-    const win = currentWindow(alert, nowMs);      // null si hoy no toca o fuera de franja
-    if (win === null) return 'SILENCED';
-    if (alert.lastTriggeredAtMs !== undefined && alert.lastTriggeredAtMs >= win.startMs) {
-      return 'SILENCED';                          // ya avisado en esta franja
-    }
-  }
+  if (nowMs - alert.createdAtMs > 7 * 86_400_000) return 'INACTIVE';
   if (nextArrival !== undefined && remainingMinutes(nextArrival, nowMs) <= alert.minutesAhead) {
     return 'TRIGGERED';
   }
@@ -147,19 +126,13 @@ export function computeAlertStatus(
 }
 ```
 
-`currentWindow` admite franjas que cruzan medianoche (`23:30–00:30`): la
-franja pertenece al día en que empieza. Tests obligatorios: cambio de hora
-(DST) de marzo y octubre, cruce de medianoche, domingo = 7.
-
-El motor de avisos dispara cuando el estado pasa a `TRIGGERED`, escribe
-`lastTriggeredAtMs = now` y, si es `ONCE`, `active = false`.
+El motor de avisos dispara cuando el estado pasa a `TRIGGERED`: notifica y
+borra el aviso.
 
 ### Prioridad de ordenación en `Inicio` y `Mis avisos`
 1. `TRIGGERED`
 2. `ACTIVE` (menor `remainingMinutes` primero; sin llegada al final)
-3. `SNOOZED`
-4. `SILENCED`
-5. `INACTIVE`
+3. `INACTIVE`
 
 ## 4. Frescura de datos y cercanía offline (cierra B1, B2 y B11)
 
@@ -198,10 +171,8 @@ estimación en línea recta.
 | `arrivalTimeIso` | La API da `hora` `"HH:mm"`, no ISO | `clockTime` |
 | ~548 paradas con `lat/lon` | Solo 514 tienen coordenadas (OSM, ODbL) | `lat/lon` opcionales; 34 sin cercanía ni `geo:` |
 | `colorHex` «oficial» en catálogo | El catálogo no guarda color; llega en vivo como `linea.color` ARGB | `colorArgb`; ampliar `build:catalog` para guardarlo |
-| RECURRING solo con días + silencio 23–07 | Sin franja horaria avisaría con cada bus del día | `windowFrom/windowTo` obligatorios; el silencio nocturno sobra y se elimina |
-| `recentlyTriggered` 2 min → `TRIGGERED` | «Descartar» en RECURRING dejaba el aviso en `TRIGGERED` 2 min y luego volvía a disparar con el siguiente bus | Una vez por franja; tras disparar → `SILENCED` hasta la siguiente |
-| ONCE sin final | Nunca se cerraba | `active = false` al disparar o a los 7 días |
-| `daysOfWeek` 0=Dom | Ambiguo con L–D | ISO 1=Lun..7=Dom |
-| Sin zona horaria | Días/franjas dependían del TZ del móvil | `Europe/Madrid` |
+| RECURRING solo con días + silencio 23–07 | Sin franja horaria avisaría con cada bus del día | Recurrentes eliminados (2026-11-22): todo aviso es de un solo uso |
+| `recentlyTriggered` 2 min → `TRIGGERED` | Volvía a disparar con el siguiente bus | Al disparar, el aviso se borra |
+| ONCE sin final | Nunca se cerraba | Se borra al disparar; `INACTIVE` a los 7 días |
 | Sin preferencia GPS | El bot prefiere `tipo=1` | Matching prefiere `LIVE` |
 | FRESH < 30 s | Con refresco a 30 s parpadeaba a STALE | FRESH ≤ 45 s, STALE ≤ 90 s |

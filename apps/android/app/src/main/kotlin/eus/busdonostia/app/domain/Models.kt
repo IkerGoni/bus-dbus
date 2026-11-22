@@ -56,8 +56,10 @@ data class Favorite(
 fun favoriteId(type: FavoriteType, stopId: String?, lineId: String?): String =
     "${type.name}:${stopId.orEmpty()}:${lineId.orEmpty()}"
 
-enum class AlertFrequency { ONCE, RECURRING }
-
+/**
+ * Aviso de un solo uso: vigila desde que se guarda y, al avisar, se borra.
+ * Caduca a los 7 días si no llega a avisar.
+ */
 data class AlertRule(
     val id: String,
     val stopId: String,
@@ -68,18 +70,10 @@ data class AlertRule(
     val destination: String? = null,
     /** Entero 1..30. */
     val minutesAhead: Int,
-    val frequency: AlertFrequency,
-    /** Solo RECURRING. ISO 1=Lun .. 7=Dom. */
-    val daysOfWeek: Set<Int> = emptySet(),
-    /** Solo RECURRING. "HH:mm", hora de `Europe/Madrid`. */
-    val windowFrom: String? = null,
-    val windowTo: String? = null,
     val active: Boolean = true,
     val createdAtMs: Long,
-    val snoozedUntilMs: Long? = null,
-    val lastTriggeredAtMs: Long? = null,
 )
 
-enum class ComputedAlertStatus { INACTIVE, SNOOZED, SILENCED, TRIGGERED, ACTIVE }
+enum class ComputedAlertStatus { INACTIVE, TRIGGERED, ACTIVE }
 
 enum class FreshnessLevel { FRESH, STALE, EXPIRED }

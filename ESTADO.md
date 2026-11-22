@@ -1,6 +1,6 @@
 # Estado — bus-dbus
 
-Actualizado: 2026-11-22 15:40 · Última sesión: Android Sprint 3 (Inicio, Avisos, Ajustes, Onboarding)
+Actualizado: 2026-11-22 17:15 · Última sesión: Android Sprint 4 (motor de avisos, de un solo uso)
 
 > **`AGENTS.md` es la fuente de verdad.** Este archivo es el estado de sesión;
 > si algo aquí contradice a `AGENTS.md`, manda `AGENTS.md`.
@@ -8,41 +8,44 @@ Actualizado: 2026-11-22 15:40 · Última sesión: Android Sprint 3 (Inicio, Avis
 ## Objetivo actual
 
 MVP Android nativo sin backend (ADR 009). Plan en
-`docs/07-android-mvp/SPRINTS.md`. **Sprints 0–3 hechos e integrados en `main`; siguiente: Sprint 4 (motor de
-avisos).**
+`docs/07-android-mvp/SPRINTS.md`. **Sprints 0–4 hechos e integrados en `main`
+(Sprint 4: motor de avisos de un solo uso); siguiente: Sprint 5 (publicación).**
 El bot sigue en producción sin cambios (PID `80402`).
 
 ## Hecho en la última sesión
 
-- **Sprint 3** en `apps/android/`: A06 Configurar aviso (líneas y destinos
-  reales de la parada, antelación con chips + slider, ONCE / RECURRING con
-  días, presets y franja obligatoria ≤ 3 h, vista previa, dedup con
-  «Actualizar», `POST_NOTIFICATIONS` al guardar). A05 con 🔔 por llegada y pie
-  `Crear aviso en esta parada`. A04 Mis avisos (grupos, 5 estados + «Caducada»,
-  switch, editar, borrar con Deshacer). A01 Inicio (próximo aviso con Posponer
-  5' y Pausar + Deshacer, favoritas con 3 llegadas en vivo, pull-to-refresh,
-  búsqueda universal de paradas y líneas). Badge `ACTIVE | TRIGGERED` (`9+`).
-  A07 Ajustes y A08 Onboarding. Lógica en `domain/AlertDraft.kt` y
-  `domain/AlertList.kt`.
-- `./gradlew check assembleDebug` verde: 95 tests JVM por variante (190), 0
-  errores de lint. Probado en el AVD `dbus36` contra la API real (340 en vivo,
-  parada 1 `SIN_SERVICIO`, modo avión). 31 capturas en
-  `docs/07-android-mvp/capturas/sprint-3/`. `grep` de literales limpio.
-- Prompt del Sprint 4 en `docs/07-android-mvp/prompts/SPRINT-4.md`.
+- **Sprint 4** en `apps/android/` (rama `android/sprint-4`): motor de avisos
+  con FGS `dataSync` (`engine/AlertMonitorService`), decisión pura en
+  `domain/AlertEngine.kt`, canales `dbus_monitoring` y `dbus_arrivals_high`,
+  deep link `dbus://stop/{stopId}?highlightLine={lineId}` y aviso en A04 si
+  faltan notificaciones.
+- **Avisos de un solo uso** (decisión de Iker): saltan una vez y se borran.
+  Quitados los recurrentes (días, franja, alarmas exactas, receptores de
+  boot/hora, permisos `SCHEDULE_EXACT_ALARM` y `RECEIVE_BOOT_COMPLETED`) y los
+  botones de la notificación; Inicio pierde «Posponer 5'». Room v2 con `MIGRATION_1_2` (borra recurrentes y
+  ya disparados). Specs actualizadas (`02-domain-contracts.md`,
+  `03-android-screens.md`, `04-android-platform.md`).
+- `./gradlew check assembleDebug` verde: 93 tests JVM por variante, 0 errores
+  de lint. Probado en el AVD `dbus36` contra la API real con la app en segundo
+  plano: aviso L16 en 344 → «Vigilando» → notificación sin botones → el aviso
+  desaparece de A04 y el servicio se para; deep link a A05 con la línea.
+  11 capturas en `docs/07-android-mvp/capturas/sprint-4/`.
+- Prompt del Sprint 5 en `docs/07-android-mvp/prompts/SPRINT-5.md`.
 
 ## Pendiente (por prioridad)
 
-- [ ] **Sprint 4** (prompt `docs/07-android-mvp/prompts/SPRINT-4.md`).
-- [ ] Licencia del repo: la spec pide «licencia MIT» en A07, pero no hay
-      `LICENSE`. A07 no muestra licencia de la app hasta que Iker decida.
+- [ ] Iker: probar en su móvil el APK debug de `main` (`~/Downloads/bus-donostia-debug.apk`).
+- [ ] **Sprint 5** (prompt `docs/07-android-mvp/prompts/SPRINT-5.md`).
+- [ ] Licencia y repo público: los decide Iker más adelante (repo privado hasta entonces).
+- [ ] Probar en móvil real el motor con Doze y fabricantes agresivos con la batería.
 - [ ] Revisar en móvil real Cercanas con ubicación aproximada (en Android 12+
       se difumina ~2 km) y el tiempo hasta la primera posición.
 - [ ] Fixture real de `DATOS` con `tiempos` vacío: no observado aún (las
       paradas sin buses dan `SIN_SERVICIO`); capturarlo si aparece.
 - [ ] Propuesta a Iker: guardar `linea.color` en `build:catalog` (lane bot);
       hoy la app usa el último color visto en vivo.
-- [ ] Sprint 5: antes de hacer público el repo, auditar el historial en busca
-      de secretos; publicar ahí `config.json`.
+- [ ] Sprint 5: auditar el historial en busca de secretos (aunque siga privado);
+      `config.json` remoto sin hosting mientras el repo sea privado.
 - [ ] Bot: validación conversacional con PID `80402`; rotar token de Telegram
       (R6, `.env` raíz, gitignored).
 - [ ] Bot (opcional): residuales menores de la auditoría; 15 tests de
@@ -51,6 +54,17 @@ El bot sigue en producción sin cambios (PID `80402`).
 - [ ] Catálogo duplicado: `packages/contracts/data/` vs `apps/bot/data/`.
 
 ## Decisiones tomadas (no reabrir)
+
+- 2026-11-22 · Iker: **licencia se decide más tarde; repo privado hasta que él
+  decida.** Sin `LICENSE` ni `config.json` remoto publicado mientras tanto.
+- 2026-11-22 · Iker: **avisos de un solo uso**: saltan una vez a los X min y
+  desaparecen. Sin recurrentes, sin Posponer/Descartar en la notificación y
+  sin Posponer en Inicio (solo Pausar).
+- 2026-11-22 · Android Sprint 4: el motor arranca desde un observador de
+  `alerts` en `AppContainer` (guardar, switch, Deshacer) y
+  al abrir la app; tras reiniciar el móvil, un aviso activo se retoma al abrir
+  la app (Android 15 no deja arrancar `dataSync` desde `BOOT_COMPLETED`). El
+  servicio no repite una consulta que la UI hizo hace < 25 s.
 
 - 2026-11-22 · Android Sprint 3: `MainActivity` pasa a `AppCompatActivity`
   (appcompat 1.7.1) para idioma por app y tema también en Android < 13; tema en
@@ -108,9 +122,9 @@ El bot sigue en producción sin cambios (PID `80402`).
 
 ## Git
 
-Rama `android/sprint-3` integrada en `main` (`eebee12`), pusheada y borrada
-(autorizado por Iker).
+Rama `android/sprint-4` integrada en `main`, pusheada y borrada (autorizado por
+Iker).
 
 ## Siguiente sesión
 
-- Prompt: `docs/07-android-mvp/prompts/SPRINT-4.md`.
+- Prompt: `docs/07-android-mvp/prompts/SPRINT-5.md`.

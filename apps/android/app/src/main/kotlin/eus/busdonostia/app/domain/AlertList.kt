@@ -5,20 +5,14 @@ package eus.busdonostia.app.domain
  * Todos pasan por `computeAlertStatus` (00-agent-guardrails.md §3).
  */
 
-/** Por qué un aviso está `SILENCED` o `INACTIVE` (subetiqueta de A04). */
+/** Por qué un aviso está `INACTIVE` (subetiqueta de A04). */
 enum class AlertDetail {
     NONE,
-
-    /** RECURRING fuera de día o de franja. */
-    OUT_OF_WINDOW,
-
-    /** RECURRING que ya avisó en la franja actual. */
-    NOTIFIED_IN_WINDOW,
 
     /** `active = false`. */
     PAUSED,
 
-    /** ONCE activo con más de 7 días: caducado. */
+    /** Activo con más de 7 días sin avisar: caducado. */
     EXPIRED,
 }
 
@@ -61,8 +55,6 @@ fun alertItem(rule: AlertRule, arrivals: List<Arrival>, nowMs: Long): AlertItem 
     val status = computeAlertStatus(rule, nowMs, matching)
     val detail = when (status) {
         ComputedAlertStatus.INACTIVE -> if (rule.active) AlertDetail.EXPIRED else AlertDetail.PAUSED
-        ComputedAlertStatus.SILENCED ->
-            if (currentWindow(rule, nowMs) == null) AlertDetail.OUT_OF_WINDOW else AlertDetail.NOTIFIED_IN_WINDOW
         else -> AlertDetail.NONE
     }
     val next = matching ?: nextArrivalFor(arrivals, rule.lineId, rule.destination, nowMs)
@@ -72,12 +64,10 @@ fun alertItem(rule: AlertRule, arrivals: List<Arrival>, nowMs: Long): AlertItem 
 private fun ComputedAlertStatus.priority(): Int = when (this) {
     ComputedAlertStatus.TRIGGERED -> 0
     ComputedAlertStatus.ACTIVE -> 1
-    ComputedAlertStatus.SNOOZED -> 2
-    ComputedAlertStatus.SILENCED -> 3
-    ComputedAlertStatus.INACTIVE -> 4
+    ComputedAlertStatus.INACTIVE -> 2
 }
 
-/** Orden de §3: TRIGGERED, ACTIVE (menos minutos primero, sin llegada al final), SNOOZED, SILENCED, INACTIVE. */
+/** Orden de §3: TRIGGERED, ACTIVE (menos minutos primero, sin llegada al final), INACTIVE. */
 fun sortAlerts(items: List<AlertItem>): List<AlertItem> =
     items.sortedWith(
         compareBy<AlertItem> { it.status.priority() }
@@ -86,9 +76,9 @@ fun sortAlerts(items: List<AlertItem>): List<AlertItem> =
     )
 
 fun isActiveGroup(status: ComputedAlertStatus): Boolean =
-    status == ComputedAlertStatus.TRIGGERED || status == ComputedAlertStatus.ACTIVE || status == ComputedAlertStatus.SNOOZED
+    status == ComputedAlertStatus.TRIGGERED || status == ComputedAlertStatus.ACTIVE
 
-/** A04: ACTIVOS (`TRIGGERED`, `ACTIVE`, `SNOOZED`) y SILENCIADOS Y PAUSADOS (`SILENCED`, `INACTIVE`), ya ordenados. */
+/** A04: ACTIVOS (`TRIGGERED`, `ACTIVE`) y PAUSADOS (`INACTIVE`), ya ordenados. */
 fun groupAlerts(items: List<AlertItem>): Pair<List<AlertItem>, List<AlertItem>> =
     sortAlerts(items).partition { isActiveGroup(it.status) }
 

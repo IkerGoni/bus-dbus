@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,7 +46,6 @@ import eus.busdonostia.app.domain.AlertItem
 import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.ArrivalSource
 import eus.busdonostia.app.domain.ArrivalsView
-import eus.busdonostia.app.domain.ComputedAlertStatus
 import eus.busdonostia.app.domain.DegradedReason
 import eus.busdonostia.app.domain.remainingMinutes
 import eus.busdonostia.app.ui.Destination
@@ -142,7 +140,6 @@ fun HomeScreen(
                                     nowMs = state.nowMs,
                                     colorArgb = state.lineColors[next.rule.lineId],
                                     onOpen = { onOpenStop(next.rule.stopId, next.rule.lineId) },
-                                    onSnooze = { vm.snooze(next.rule) },
                                     onPause = { onPause(next.rule) },
                                 )
                             }
@@ -207,7 +204,7 @@ private fun ResultRow(onClick: () -> Unit, content: @Composable androidx.compose
     )
 }
 
-/** `TU PRÓXIMO AVISO`: badge + destino | cuenta atrás grande; parada | fuente y antelación; Posponer 5' y Pausar reales. */
+/** `TU PRÓXIMO AVISO`: badge + destino | cuenta atrás grande; parada | fuente y antelación; Pausar real. */
 @Composable
 private fun NextAlertCard(
     item: AlertItem,
@@ -215,7 +212,6 @@ private fun NextAlertCard(
     nowMs: Long,
     colorArgb: Int?,
     onOpen: () -> Unit,
-    onSnooze: () -> Unit,
     onPause: () -> Unit,
 ) {
     val rule = item.rule
@@ -260,13 +256,8 @@ private fun NextAlertCard(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = onSnooze, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
-                    Text(stringResource(R.string.notif_action_snooze), maxLines = 1)
-                }
-                OutlinedButton(onClick = onPause, modifier = Modifier.weight(1f).heightIn(min = 48.dp)) {
-                    Text(stringResource(R.string.alert_pause), maxLines = 1)
-                }
+            OutlinedButton(onClick = onPause, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+                Text(stringResource(R.string.alert_pause), maxLines = 1)
             }
         }
     }
@@ -278,7 +269,6 @@ private fun nextAlertSourceText(item: AlertItem, view: ArrivalsView?): String {
     val ahead = stringResource(R.string.alert_ahead_short, item.rule.minutesAhead)
     val arrival = item.nextArrival
     return when {
-        item.status == ComputedAlertStatus.SNOOZED -> ahead
         arrival != null -> stringResource(
             R.string.home_next_source,
             stringResource(if (arrival.source == ArrivalSource.LIVE) R.string.source_live else R.string.source_scheduled),

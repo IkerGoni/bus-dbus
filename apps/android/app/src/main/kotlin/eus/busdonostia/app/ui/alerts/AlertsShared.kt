@@ -8,7 +8,6 @@ import eus.busdonostia.app.domain.AlertItem
 import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.ArrivalsView
 import eus.busdonostia.app.domain.alertItem
-import eus.busdonostia.app.domain.snoozed
 import eus.busdonostia.app.domain.stopArrivalsView
 import eus.busdonostia.app.domain.usableArrivals
 import eus.busdonostia.app.domain.withActive
@@ -64,8 +63,6 @@ fun AppContainer.updateAlert(rule: AlertRule) {
 
 fun AppContainer.setAlertActive(rule: AlertRule, active: Boolean) =
     updateAlert(rule.withActive(active, System.currentTimeMillis()))
-
-fun AppContainer.snoozeAlert(rule: AlertRule) = updateAlert(rule.snoozed(System.currentTimeMillis()))
 
 fun AppContainer.deleteAlert(rule: AlertRule) {
     appScope.launch { database.alerts().delete(rule.id) }

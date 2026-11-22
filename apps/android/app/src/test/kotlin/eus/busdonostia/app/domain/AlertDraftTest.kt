@@ -2,16 +2,12 @@ package eus.busdonostia.app.domain
 
 import eus.busdonostia.app.TestData
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** A06: validación, presets, dedup `(stopId, lineId)` y switch/posponer. */
+/** A06: validación, dedup `(stopId, lineId)` y switch. */
 class AlertDraftTest {
     private val base = AlertDraft(stopId = "340", stopName = "Pío Baroja 10", lineId = "5", minutesAhead = 5)
-
-    private fun recurring(from: String?, to: String?, days: Set<Int> = DaysPreset.WEEKDAYS.days) =
-        base.copy(frequency = AlertFrequency.RECURRING, daysOfWeek = days, windowFrom = from, windowTo = to)
 
     @Test
     fun onceValidoYFaltaParadaLineaOAntelacion() {
@@ -22,37 +18,12 @@ class AlertDraftTest {
     }
 
     @Test
-    fun recurrenteExigeDiasYFranjaDeMaximo3Horas() {
-        assertEquals(listOf(DraftError.NO_WINDOW), validateDraft(recurring(null, "08:30")))
-        assertEquals(listOf(DraftError.NO_WINDOW), validateDraft(recurring("7:45", "08:30"))) // no es HH:mm
-        assertEquals(listOf(DraftError.EMPTY_WINDOW), validateDraft(recurring("08:00", "08:00")))
-        assertEquals(emptyList<DraftError>(), validateDraft(recurring("07:45", "08:30")))
-        assertEquals(emptyList<DraftError>(), validateDraft(recurring("07:00", "10:00"))) // 3 h justas
-        assertEquals(listOf(DraftError.WINDOW_TOO_LONG), validateDraft(recurring("07:00", "10:01")))
-        // Cruce de medianoche: 23:30–00:30 = 60 min; 22:00–01:30 = 210 min.
-        assertEquals(emptyList<DraftError>(), validateDraft(recurring("23:30", "00:30")))
-        assertEquals(listOf(DraftError.WINDOW_TOO_LONG), validateDraft(recurring("22:00", "01:30")))
-        assertEquals(listOf(DraftError.NO_DAYS), validateDraft(recurring("07:45", "08:30", emptySet())))
-    }
-
-    @Test
-    fun presetsDeDias() {
-        assertEquals(DaysPreset.WEEKDAYS, presetOf(setOf(1, 2, 3, 4, 5)))
-        assertEquals(DaysPreset.DAILY, presetOf((1..7).toSet()))
-        assertEquals(DaysPreset.WEEKEND, presetOf(setOf(6, 7)))
-        assertNull(presetOf(setOf(1, 3, 5)))
-    }
-
-    @Test
-    fun guardarArmaElAvisoYOnceNoGuardaFranja() {
-        val once = recurring("07:45", "08:30").copy(frequency = AlertFrequency.ONCE, lineId = " b4 ").toRule("id", 1_000)
-        assertEquals("B4", once.lineId)
-        assertEquals(1_000L, once.createdAtMs)
-        assertTrue(once.active && once.daysOfWeek.isEmpty() && once.windowFrom == null && once.snoozedUntilMs == null)
-        val rec = recurring("07:45", "08:30", setOf(1, 9)).toRule("id", 1_000)
-        assertEquals(setOf(1), rec.daysOfWeek)
-        assertEquals("07:45" to "08:30", rec.windowFrom to rec.windowTo)
-        assertEquals(base.copy(daysOfWeek = DaysPreset.WEEKDAYS.days), base.toRule("x", 0).toDraft())
+    fun guardarArmaElAviso() {
+        val rule = base.copy(lineId = " b4 ").toRule("id", 1_000)
+        assertEquals("B4", rule.lineId)
+        assertEquals(1_000L, rule.createdAtMs)
+        assertTrue(rule.active)
+        assertEquals(base, base.toRule("x", 0).toDraft())
     }
 
     @Test
@@ -74,15 +45,11 @@ class AlertDraftTest {
     }
 
     @Test
-    fun switchYPosponer() {
-        val fired = base.toRule("a", 0).copy(active = false, lastTriggeredAtMs = 10, snoozedUntilMs = 20)
-        val rearmed = fired.withActive(true, 99)
-        assertEquals(fired.copy(active = true, createdAtMs = 99, lastTriggeredAtMs = null, snoozedUntilMs = null), rearmed)
-        val rec = recurring("07:45", "08:30").toRule("r", 0).copy(lastTriggeredAtMs = 10)
-        assertEquals(rec.copy(active = false), rec.withActive(false, 99))
-        assertEquals(rec, rec.copy(active = false).withActive(true, 99)) // RECURRING conserva su historial
-        assertEquals(1_000L + SNOOZE_MS, rec.copy(active = false).snoozed(1_000).snoozedUntilMs)
-        assertTrue(rec.copy(active = false).snoozed(1_000).active)
+    fun switchPausaYReactiva() {
+        val paused = base.toRule("a", 0).copy(active = false)
+        // Reactivar (pausado o caducado) lo vuelve a armar desde ahora.
+        assertEquals(paused.copy(active = true, createdAtMs = 99), paused.withActive(true, 99))
+        assertEquals(paused.copy(active = false), paused.withActive(false, 99))
     }
 
     @Test

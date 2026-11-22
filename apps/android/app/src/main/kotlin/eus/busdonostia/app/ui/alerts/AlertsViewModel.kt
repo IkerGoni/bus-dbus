@@ -19,9 +19,9 @@ import kotlinx.coroutines.launch
 data class AlertsUiState(
     /** Room aún no ha respondido. */
     val loading: Boolean = true,
-    /** ACTIVOS: `TRIGGERED`, `ACTIVE`, `SNOOZED`, en el orden de §3. */
+    /** ACTIVOS: `TRIGGERED`, `ACTIVE`, en el orden de §3. */
     val active: List<AlertItem> = emptyList(),
-    /** SILENCIADOS Y PAUSADOS: `SILENCED`, `INACTIVE`. */
+    /** PAUSADOS: `INACTIVE` (pausados o caducados). */
     val silenced: List<AlertItem> = emptyList(),
     /** Vista de 5 estados de cada parada vigilada (sin servicio, error, datos viejos). */
     val stopViews: Map<String, ArrivalsView> = emptyMap(),

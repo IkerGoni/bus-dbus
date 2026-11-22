@@ -8,8 +8,9 @@
 
     <!-- Avisos: se pide solo por gesto del usuario (A08 o al guardar el primer aviso). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <!-- Avisos RECURRING (Sprint 4). A06/A07 leen su estado real y enlazan a Ajustes. -->
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <!-- Motor de avisos: Foreground Service `dataSync` (04-android-platform.md §1). -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <!-- «Cómo llegar» (A05): solo se muestra si alguna app abre `geo:`. -->
     <queries>
@@ -36,7 +37,21 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- Tap en la notificación de un aviso: dbus://stop/{stopId}?highlightLine={lineId} → A05. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="stop"
+                    android:scheme="dbus" />
+            </intent-filter>
         </activity>
+
+        <service
+            android:name=".engine.AlertMonitorService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
 
         <!-- Idioma por app (es/eu) también en Android < 13: AppCompat lo guarda y lo restaura. -->
         <service

@@ -103,22 +103,8 @@
     <!-- Comunes (Sprint 3) -->
     <string name="undo">Desegin</string>
     <string name="cancel">Utzi</string>
-    <string name="accept">Onartu</string>
     <string name="settings_open">Ezarpenak</string>
     <string name="stop_with_code">%1$s (%2$s)</string>
-    <string name="day_short_1">Al</string>
-    <string name="day_short_2">Ar</string>
-    <string name="day_short_3">Az</string>
-    <string name="day_short_4">Og</string>
-    <string name="day_short_5">Or</string>
-    <string name="day_short_6">Lr</string>
-    <string name="day_short_7">Ig</string>
-    <string name="days_summary_weekdays">Al–Or</string>
-    <string name="days_summary_daily">Egunero</string>
-    <string name="days_summary_weekend">Lr–Ig</string>
-    <string name="days_preset_weekdays">Lanegunak</string>
-    <string name="days_preset_daily">Egunero</string>
-    <string name="days_preset_weekend">Asteburuak</string>
     <plurals name="a11y_alerts_badge">
         <item quantity="one">%1$d abisu aktibo</item>
         <item quantity="other">%1$d abisu aktibo</item>
@@ -138,7 +124,7 @@
     <string name="alerts_empty_cta">Aukeratu geltokia eta sortu abisua</string>
     <string name="alerts_error_banner">Ezin izan dira zure abisuetako geltoki batzuk kontsultatu.</string>
     <string name="alerts_section_active">Aktiboak</string>
-    <string name="alerts_section_silenced">Isilaraziak eta pausatuak</string>
+    <string name="alerts_section_paused">Pausatuak</string>
     <string name="alerts_new">Abisu berria</string>
     <string name="alert_deleted">Abisua ezabatu da</string>
     <string name="alert_paused">Abisua pausatu da</string>
@@ -146,19 +132,13 @@
     <string name="alert_edit">Editatu abisua</string>
     <string name="alert_delete">Ezabatu abisua</string>
     <string name="alert_active_switch">Abisu aktiboa</string>
-    <string name="alert_subtitle">%1$s (%2$s) · %3$d\'-ko abisua · %4$s</string>
+    <string name="alert_subtitle">%1$s (%2$s) · %3$d\'-ko abisua</string>
     <string name="alert_ahead_short">%1$d\'-ko abisua</string>
     <string name="alert_feed_error">Ezin izan da Dbus kontsultatu</string>
     <string name="alert_feed_no_service">Zerbitzurik ez une honetan</string>
-    <string name="alert_once">Behin bakarrik</string>
-    <string name="alert_recurring">Errepikakorra</string>
-    <string name="alert_recurring_summary">%1$s %2$s–%3$s</string>
     <string name="alert_any_destination">Edozein helmuga</string>
     <string name="alert_status_triggered">Iristen</string>
     <string name="alert_status_active">Aktiboa</string>
-    <string name="alert_status_snoozed">%1$s arte atzeratuta</string>
-    <string name="alert_status_notified">Tarte honetan abisatuta</string>
-    <string name="alert_status_out_of_window">Tartetik kanpo</string>
     <string name="alert_status_expired">Iraungita</string>
     <string name="alert_status_paused">Pausatuta</string>
 
@@ -175,14 +155,7 @@
     <string name="alert_minutes_before_suffix">min lehenago</string>
     <string name="alert_minutes_chip">%1$d\'</string>
     <string name="alert_minutes_slider">Aurrerapen-minutuak</string>
-    <string name="alert_step_frequency">Maiztasuna</string>
-    <string name="alert_once_hint">Gordetzen duzunetik zaintzen du eta behin abisatzen du. 7 egunera iraungitzen da.</string>
-    <string name="alert_window_from">Noiztik: %1$s</string>
-    <string name="alert_window_to">Noiz arte: %1$s</string>
-    <string name="alert_window_pick">--:--</string>
-    <string name="alert_window_hint">Tarte horretan bakarrik zaintzen du (gehienez 3 h), markatutako egunetan, eta tarte bakoitzeko behin abisatzen du.</string>
-    <string name="alert_exact_alarm_missing">Alarma zehatzen baimenik gabe, abisu errepikakorra berandu iritsi daiteke.</string>
-    <string name="alert_exact_alarm_grant">Baimendu</string>
+    <string name="alert_once_hint">Gordetzen duzunetik zaintzen du, behin abisatzen du eta ezabatu egiten da. 7 egunera iraungitzen da, abisatu ez badu.</string>
     <string name="alert_preview">Jakinarazpenaren aurrebista</string>
     <string name="alert_save">Gorde abisua</string>
     <string name="alert_conflict_title">Abisu hau badaukazu</string>
@@ -191,17 +164,11 @@
     <string name="alert_error_no_stop">Aukeratu geltoki bat.</string>
     <string name="alert_error_no_line">Aukeratu linea bat.</string>
     <string name="alert_error_minutes">Aurrerapena 1 eta 30 minutu artekoa izan behar da.</string>
-    <string name="alert_error_no_days">Markatu egun bat gutxienez.</string>
-    <string name="alert_error_no_window">Aukeratu tartea: noiztik eta noiz arte.</string>
-    <string name="alert_error_empty_window">Tarteak ezin du ordu berean hasi eta amaitu.</string>
-    <string name="alert_error_window_too_long">Tarteak ezin du 3 ordu baino gehiago iraun.</string>
 
-    <!-- Jakinarazpena (benetako testua 4. sprintean; hemen A06ren aurrebistan erabiltzen da) -->
+    <!-- Iritsiera-jakinarazpena eta A06ko aurrebista -->
     <string name="notif_title">L%1$s → %2$s, %3$d min barru</string>
     <string name="notif_title_no_destination">L%1$s, %2$d min barru</string>
     <string name="notif_body_stop">%1$s (%2$s)</string>
-    <string name="notif_action_snooze">Atzeratu 5\'</string>
-    <string name="notif_action_dismiss">Baztertu</string>
 
     <!-- A05 · abisuak -->
     <string name="stop_create_alert">Sortu abisua geltoki honetan</string>
