@@ -20,9 +20,13 @@ tareas en paralelo — (A) índice local de coordenadas de paradas desde OSM y
   - SIGTERM a PID `12954`, lock liberado; arranque desde `apps/bot` con
     `npm run start` y `BOT_TOKEN` por entorno (clave literal `$BOT_TOKEN=` en
     `.env` de la raíz; parseada sin imprimirla).
-  - Proceso vivo: **PID `31382`**, un solo `node dist/index.js`, lock `31382`,
-    log con `Bot handlers registered` / `Dbus Telegram Bot started` y sin
-    errores tras el arranque.
+  - Proceso vivo tras el reinicio: PID `31382`, lock `31382`. **Al cerrarse el
+    shell de background del harness, el proceso recibió SIGTERM y murió** (el
+    arranque usaba `exec`, así que npm era el proceso del shell). Restaurado con
+    doble `fork` + `setsid` (sin `exec`) para desacoplarlo del grupo de procesos.
+  - Proceso vivo actual: **PID `60268`** (padre `60245` = npm, sin tty), un solo
+    `node dist/index.js`, lock `60268`, log con `Bot handlers registered` /
+    `Dbus Telegram Bot started` y sin errores tras el arranque.
 - **Diagnosis de `SIN_SERVICIO`**: no fuimos nosotros. Llamadas directas con
   `curl` (sin pasar por el bot) devuelven HTTP 200 y el estado literal de Dbus,
   con `avisos` reales de supresiones/traslados. `/itinerariosLinea?idLinea=28`
@@ -74,8 +78,11 @@ tareas en paralelo — (A) índice local de coordenadas de paradas desde OSM y
 
 ## Git
 
-`main a7ff1a4 = origin/main` ✓ · ramas abiertas: ninguna · worktrees: 1 (raíz)
-· stash: vacío · working tree limpio (salvo este `ESTADO.md` del cierre).
+`main 5ae2580 = origin/main` ✓ · ramas abiertas: ninguna · worktrees: 1 (raíz)
+· stash: vacío. Hay cambios de **docs ajenos a esta sesión** sin commitear
+(`AGENTS.md`, `README.md`, `docs/05-ui/**`, renames de wireframes): revisar con
+su dueño antes de integrar. `ESTADO.md` se actualizó en `5ae2580` y se corrigió
+después con el PID `60268`.
 
 ## Siguiente sesión
 
