@@ -11,7 +11,7 @@ manda aquí. `README.md` = visión y uso; `ESTADO.md` = estado de sesión;
 
 - **Bot de Telegram** (`apps/bot/`): activo, datos reales de la API JSON de
   Dbus. Paquete `@dbus/bot`. SQLite en `apps/bot/bot.db`.
-- **App Android** (`apps/android/`, por crear): MVP v1 nativo, Kotlin +
+- **App Android** (`apps/android/`): Sprint 0 hecho (esqueleto verde). MVP v1 nativo, Kotlin +
   Compose, Gradle fuera de pnpm. Spec en `docs/07-android-mvp/`, prompt en
   `docs/07-android-mvp/prompts/PROMPT-IMPLEMENTACION.md`, decisión en ADR 009.
 - **PWA** (`apps/mobile/`): **congelada** por ADR 009 (build roto, ver
@@ -83,6 +83,12 @@ destino) del bot aplican igual. Además:
 ```bash
 pnpm --filter @dbus/bot verify     # tsc -b + biome + 86 tests (BOT_TOKEN + DB_PATH=:memory:)
 pnpm --filter @dbus/bot build      # tsc -b -> apps/bot/dist
+```
+
+Android (toolchain en `apps/android/README.md`):
+
+```bash
+cd apps/android && ./gradlew check assembleDebug   # lint + tests JVM + APK debug
 ```
 
 Root: `pnpm verify` (lint + typecheck + tests de todos los paquetes). Los

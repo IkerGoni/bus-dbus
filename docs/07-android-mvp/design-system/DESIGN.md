@@ -144,22 +144,14 @@ ocupación, accesibilidad por vehículo y andenes).
 
 ## 3. Badges oficiales de líneas Dbus
 Cuadrado redondeado (`28×28dp` en listas, `36×36dp` en Hero Card, radio `8dp` /
-`12dp`), texto `#FFFFFF` en negrita tabular:
-- `5` Benta Berri: `#52A535`
-- `8` Gros-Intxaurrondo: `#9B8BBF`
-- `9` Egia-Intxaurrondo: `#6E9E93`
-- `13` Altza: `#D9001B`
-- `14` Bidebieta: `#5B7798`
-- `16` Igeldo: `#3898C4`
-- `17` Gros-Amara-Miramón: `#008BBF`
-- `18` Seminarioa: `#C2007F`
-- `19` Aiete-Bera Bera: `#7677B3`
-- `24` Altza-Gros-Antiguo-Intxaurrondo: `#5B7798`
-- `25` Benta Berri-Añorga: `#005BB5`
-- `27` Altza-Intxaurrondo-Antiguo-Gros: `#005BB5`
-- `28` Amara-Ospitaleak: `#005BB5`
-- `33` Larratxo-Intxaurrondo-Antiguo-Berio: `#008BBF`
-- Resto / líneas nocturnas (`B1`–`B10`): fallback `#334155` (o color oficial).
+`12dp`), texto en negrita tabular:
+- **Color de fondo = `linea.color` que devuelve la API de Dbus en vivo**
+  (ARGB con signo; p. ej. L27 = `-9144551` → `#747719`), guardado en local
+  la primera vez que se ve.
+- Si nunca se ha visto: fallback `#334155`.
+- La lista fija de colores del paquete original se eliminó (2026-11-22): no
+  coincidía con la API (L27 aparecía como `#005BB5`).
+- Texto blanco o `#0F172A` según contraste ≥ 4.5:1 con el fondo.
 
 ## 4. Componentes clave y accesibilidad (WCAG AA)
 - **Targets táctiles mínimos `48×48dp`:** obligatorios en estrella ★, campana 🔔,

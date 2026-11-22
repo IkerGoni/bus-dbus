@@ -63,62 +63,7 @@
       "favorite": "#FBBF24"
     },
     "dbusLines": {
-      "5": {
-        "bg": "#52A535",
-        "fg": "#FFFFFF"
-      },
-      "8": {
-        "bg": "#9B8BBF",
-        "fg": "#FFFFFF"
-      },
-      "9": {
-        "bg": "#6E9E93",
-        "fg": "#FFFFFF"
-      },
-      "13": {
-        "bg": "#D9001B",
-        "fg": "#FFFFFF"
-      },
-      "14": {
-        "bg": "#5B7798",
-        "fg": "#FFFFFF"
-      },
-      "16": {
-        "bg": "#3898C4",
-        "fg": "#FFFFFF"
-      },
-      "17": {
-        "bg": "#008BBF",
-        "fg": "#FFFFFF"
-      },
-      "18": {
-        "bg": "#C2007F",
-        "fg": "#FFFFFF"
-      },
-      "19": {
-        "bg": "#7677B3",
-        "fg": "#FFFFFF"
-      },
-      "24": {
-        "bg": "#5B7798",
-        "fg": "#FFFFFF"
-      },
-      "25": {
-        "bg": "#005BB5",
-        "fg": "#FFFFFF"
-      },
-      "27": {
-        "bg": "#005BB5",
-        "fg": "#FFFFFF"
-      },
-      "28": {
-        "bg": "#005BB5",
-        "fg": "#FFFFFF"
-      },
-      "33": {
-        "bg": "#008BBF",
-        "fg": "#FFFFFF"
-      },
+      "_comment": "Colores por línea eliminados (2026-11-22): no coincidían con la API (L27 real = #747719, aquí #005BB5). El color sale de linea.color en vivo; _default solo si nunca se ha visto.",
       "_default": {
         "bg": "#334155",
         "fg": "#FFFFFF"

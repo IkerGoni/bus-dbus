@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Bus Donostia</string>
+
+    <string name="nav_home">Hasiera</string>
+    <string name="nav_stops">Geltokiak</string>
+    <string name="nav_lines">Lineak</string>
+    <string name="nav_alerts">Abisuak</string>
+
+    <string name="home_empty_title">Oraindik ez duzu abisurik ez geltoki gogokorik</string>
+    <string name="home_empty_body">Gorde geltoki bat edo sortu abisu bat zure hurrengo autobusak hemen ikusteko.</string>
+    <string name="home_cta_nearby">Ikusi inguruko geltokiak</string>
+    <string name="home_cta_lines">Arakatu lineak</string>
+
+    <string name="stops_empty_title">Bilatu zure geltokia</string>
+    <string name="stops_empty_body">Hemen geltokiak kodearen edo kalearen arabera bilatu eta hurbilenak ikusi ahal izango dituzu.</string>
+
+    <string name="lines_empty_title">Dbus-en lineak</string>
+    <string name="lines_empty_body">Hemen linea guztiak eta haien ibilbideak ikusiko dituzu.</string>
+
+    <string name="alerts_empty_title">Ez duzu abisurik</string>
+    <string name="alerts_empty_body">Sortu abisu bat geltoki batetik eta zure autobusa iritsi baino minutu batzuk lehenago abisatuko dizugu.</string>
+</resources>

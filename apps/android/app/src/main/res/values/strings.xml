@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Bus Donostia</string>
+
+    <string name="nav_home">Inicio</string>
+    <string name="nav_stops">Paradas</string>
+    <string name="nav_lines">Líneas</string>
+    <string name="nav_alerts">Avisos</string>
+
+    <string name="home_empty_title">Aún no tienes avisos ni paradas favoritas</string>
+    <string name="home_empty_body">Guarda una parada o crea un aviso para ver aquí tus próximos autobuses.</string>
+    <string name="home_cta_nearby">Ver paradas cercanas</string>
+    <string name="home_cta_lines">Explorar líneas</string>
+
+    <string name="stops_empty_title">Busca tu parada</string>
+    <string name="stops_empty_body">Aquí podrás buscar paradas por código o calle y ver las más cercanas.</string>
+
+    <string name="lines_empty_title">Líneas de Dbus</string>
+    <string name="lines_empty_body">Aquí verás todas las líneas y sus recorridos.</string>
+
+    <string name="alerts_empty_title">No tienes avisos</string>
+    <string name="alerts_empty_body">Crea un aviso desde una parada y te avisaremos unos minutos antes de que llegue tu autobús.</string>
+</resources>
