@@ -7,8 +7,10 @@ Decisión de arquitectura: ADR 009 (`docs/03-architecture/adrs/009-android-nativ
   `app.dbus.eus` con `res/xml/network_security_config.xml`
   (`<domain-config cleartextTrafficPermitted="true">`). Nada de
   `usesCleartextTraffic="true"` global.
-- Timeout de conexión 10 s y de llamada 15 s (`BusDonostiaApp`), sin
-  reintentos automáticos en primer plano (el usuario tiene `Reintentar`).
+- Timeout de conexión y de llamada de 8 s (`BusDonostiaApp`): Dbus responde
+  en < 0,3 s y, con el motor en segundo plano, una parada colgada no debe
+  retrasar toda la vuelta. Sin reintentos automáticos en primer plano (el
+  usuario tiene `Reintentar`).
 - Base URL, paths, parámetros y cabeceras salen de `ApiConfig`: copia
   empaquetada en `assets/config.json` + config remota estática opcional (ADR 009
   § Configuración remota). La app funciona igual sin ella.

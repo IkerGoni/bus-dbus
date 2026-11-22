@@ -44,9 +44,10 @@ class AppContainer(private val app: Application) {
     /** Vive lo que el proceso: carga del catálogo, config remota y escrituras que no deben cancelarse. */
     val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
+    /** Dbus responde en < 0,3 s; con 8 s una parada colgada no retrasa toda la vuelta del motor (H7). */
     val http: OkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(10, TimeUnit.SECONDS)
-        .callTimeout(15, TimeUnit.SECONDS)
+        .connectTimeout(8, TimeUnit.SECONDS)
+        .callTimeout(8, TimeUnit.SECONDS)
         .build()
 
     val database: AppDatabase = AppDatabase.build(app)
