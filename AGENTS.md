@@ -51,9 +51,13 @@ modifica de forma aditiva. No tocar el lane ajeno salvo acuerdo explícito.
    favorita (`user_favorite_lines`). Dedup por `(chat, parada, línea)`.
 7. **Avisos.** Dedup por `(chat, parada, línea)`, caducidad a 7 días,
    preferencia GPS (`tipo=1`), filtro de destino, aislamiento de envíos y
-   guard de reentrada del scheduler. No quitar estas garantías.
+   guard de reentrada del scheduler. No quitar estas garantías. GPS es solo
+   `tipo=1`; cualquier otro valor (`2`, y `0` visto el 2026-11-22) es horario.
+   Ningún test asume un conjunto cerrado de valores de `tipo`.
 8. **UX de descubrimiento.** Sin "paradas populares": usar `/buscar`,
-   `/linea` y `/lineas` (listado completo de líneas y de sus paradas).
+   `/linea`, `/lineas` (listado completo de líneas y de sus paradas) y
+   `/ubicacion` (paradas cercanas con el índice local de OSM; la ubicación
+   se usa una vez y nunca se guarda).
    Callbacks stateless: el dato va en `data` (`srch_s_1`, `ld_1281`,
    `ls_1_28`, `aline_<parada>_<línea>`, `minutes_<parada>_<línea>_<min>`),
    no en sesiones. La única sesión efímera permitida es el texto libre de los
@@ -79,7 +83,8 @@ destino) del bot aplican igual. Además:
 - Cleartext HTTP solo para `app.dbus.eus` (network security config).
 - Nunca mostrar segundos: la API da `minutos` enteros.
 - El catálogo empaquetado se genera desde `apps/bot/data/*.json`; no se edita.
-- Textos en `strings.xml` `es` + `eu` con las mismas claves.
+- Textos en `res/values*/strings*.xml`: `es` (`values/`) y `eu`
+  (`values-eu/`) con las mismas claves (`StringsParityTest`).
 
 ## Verificación
 
@@ -94,7 +99,9 @@ Android (toolchain en `apps/android/README.md`):
 cd apps/android && ./gradlew check assembleDebug   # lint + 94 tests JVM por variante + APK debug
 ```
 
-Root: `pnpm verify` (lint + typecheck + tests de todos los paquetes). Los
+Root: `pnpm verify` (lint + typecheck + tests de `apps/bot` y `packages/**`).
+No cubre Android (se verifica con `gradlew`) ni la PWA congelada (su `test`
+pasa con 0 tests). Los
 tests E2E/integración usan la API real: si Dbus está caído, decirlo, no
 silenciarlo. No dar nada por bueno sin ejecutar la verificación.
 
@@ -111,4 +118,13 @@ PID nuevo. Un cambio solo de docs no requiere reiniciar el bot.
   en Markdown de Telegram.
 - Preferir funciones puras testeables antes que lógica dentro de handlers.
 - No persistir ubicación del usuario: efímera en sesión.
-- Tests nuevos en `apps/bot/tests/`; dominio compartido en `packages/core/`.
+- Tests nuevos: bot en `apps/bot/tests/`, Android en
+  `apps/android/app/src/test/`; dominio compartido en `packages/core/`.
+
+## Documentación
+
+- `docs/README.md` es el índice: actualizarlo al añadir, retirar o archivar
+  un doc.
+- Un doc histórico no se reescribe: lleva arriba «Histórico: ver …» con el doc
+  vigente. Los prompts ya ejecutados (`docs/07-android-mvp/prompts/SPRINT-N.md`)
+  se conservan tal cual.
