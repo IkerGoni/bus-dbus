@@ -10,6 +10,9 @@ import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.alertItem
 import eus.busdonostia.app.domain.usableArrivals
 import eus.busdonostia.app.domain.withActive
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -26,12 +29,13 @@ fun stopsToWatch(rules: List<AlertRule>): Set<String> = rules.filter { it.active
 /**
  * Sondea las paradas de [stops] cada `pollIntervalSec` mientras se colecta (la UI lo
  * lanza con `repeatOnLifecycle(STARTED)`). Si cambia el conjunto, consulta ya el nuevo.
+ * Lo que el motor acaba de consultar no se vuelve a pedir ([AppContainer.pollStop]).
  */
 suspend fun AppContainer.pollStops(stops: Flow<Set<String>>) {
     stops.distinctUntilChanged().collectLatest { set ->
         if (set.isEmpty()) return@collectLatest
         while (true) {
-            fetchStops(set)
+            coroutineScope { set.map { async { pollStop(it) } }.awaitAll() }
             delay(configRepository.config.value.pollIntervalSec * 1_000L)
         }
     }

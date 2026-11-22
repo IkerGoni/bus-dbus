@@ -99,6 +99,14 @@ class AlertEngineTest {
     }
 
     @Test
+    fun laUiReutilizaLoQueElMotorConsultoHaceMenosDe25s() {
+        val engineFeed = StopFeed(StopFeedStatus.OK, listOf(arrival("5", 4)), null, now - 10_000)
+        assertEquals(engineFeed, reusableFeed(engineFeed, now, 30_000)) // H16: no se repite la petición
+        assertNull(reusableFeed(engineFeed.copy(fetchedAtMs = now - 25_000), now, 30_000))
+        assertNull(reusableFeed(null, now, 30_000))
+    }
+
+    @Test
     fun sondeoAdaptativoSegunLoQueFaltaParaAvisar() {
         val base = 30_000L
         assertEquals(base, pollDelayMs(0, base))

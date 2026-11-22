@@ -107,7 +107,7 @@ class StopDetailViewModel(
     /** Sondeo mientras la pantalla está visible (la UI lo lanza con `repeatOnLifecycle(STARTED)`). */
     suspend fun pollWhileVisible() {
         while (true) {
-            fetch()
+            fetch(reuseRecent = true)
             delay(container.configRepository.config.value.pollIntervalSec * 1_000L)
         }
     }
@@ -116,10 +116,11 @@ class StopDetailViewModel(
         viewModelScope.launch { fetch() }
     }
 
-    private suspend fun fetch() = fetchLock.withLock {
+    /** [reuseRecent]: sondeo periódico, que reutiliza lo que el motor acaba de consultar; `Reintentar` siempre pide. */
+    private suspend fun fetch(reuseRecent: Boolean = false) = fetchLock.withLock {
         refreshing.value = true
         try {
-            val feed = container.fetchStop(stopId)
+            val feed = if (reuseRecent) container.pollStop(stopId) else container.fetchStop(stopId)
             latest.value = feed
             if (feed.status != StopFeedStatus.API_ERROR) lastValid.value = feed
         } finally {

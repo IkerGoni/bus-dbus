@@ -9,6 +9,7 @@ import eus.busdonostia.app.data.config.ConfigRepository
 import eus.busdonostia.app.data.db.AppDatabase
 import eus.busdonostia.app.data.db.lineColors
 import eus.busdonostia.app.data.db.toDomain
+import eus.busdonostia.app.data.live.InFlight
 import eus.busdonostia.app.data.live.LiveFeeds
 import eus.busdonostia.app.data.location.LocationProvider
 import eus.busdonostia.app.data.settings.SettingsStore
@@ -19,6 +20,7 @@ import eus.busdonostia.app.domain.Favorite
 import eus.busdonostia.app.domain.StopFeed
 import eus.busdonostia.app.domain.StopFeedStatus
 import eus.busdonostia.app.domain.Ticker
+import eus.busdonostia.app.domain.reusableFeed
 import eus.busdonostia.app.engine.createNotificationChannels
 import eus.busdonostia.app.engine.ensureMonitoring
 import kotlinx.coroutines.CoroutineScope
@@ -93,16 +95,28 @@ class AppContainer(private val app: Application) {
 
     fun apiLanguage(): String = currentAppLanguage(resources.configuration.locales[0].language).tag
 
+    /** Una sola petición por parada a la vez, la pida la UI o el motor (H16). */
+    private val inFlight = InFlight<String, StopFeed>(appScope)
+
     /**
      * Única puerta a `tiemposParada` para la UI: guarda el resultado en [liveFeeds],
      * la hora de la última respuesta real (A07) y los colores de línea vistos en vivo.
      */
-    suspend fun fetchStop(stopId: String): StopFeed {
+    suspend fun fetchStop(stopId: String): StopFeed = inFlight.run(stopId) {
         val feed = dbusClient.tiemposParada(stopId, apiLanguage())
         liveFeeds.record(stopId, feed)
         if (feed.status != StopFeedStatus.API_ERROR) settings.recordLiveFetch(feed.fetchedAtMs)
         if (feed.status == StopFeedStatus.OK) appScope.launch { database.lineColors().upsertAll(feed.lineColors()) }
-        return feed
+        feed
+    }
+
+    /**
+     * Sondeo periódico de la UI: si alguien (el motor) consultó la parada hace menos de
+     * un intervalo (− 5 s de margen), reutiliza esa respuesta en vez de pedir otra (H16).
+     */
+    suspend fun pollStop(stopId: String): StopFeed {
+        val intervalMs = configRepository.config.value.pollIntervalSec * 1_000L
+        return reusableFeed(liveFeeds.feeds.value[stopId]?.latest, System.currentTimeMillis(), intervalMs) ?: fetchStop(stopId)
     }
 
     /** Consulta todas las [stops] en paralelo (una petición por parada, como el bot). */

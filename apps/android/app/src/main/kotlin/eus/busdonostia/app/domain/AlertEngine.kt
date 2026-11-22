@@ -45,6 +45,13 @@ fun nextPollDelayMs(watching: List<AlertRule>, views: Map<String, ArrivalsView>,
 fun isFetchDue(lastFetchedAtMs: Long?, nowMs: Long, intervalMs: Long): Boolean =
     lastFetchedAtMs == null || nowMs - lastFetchedAtMs >= intervalMs - FETCH_SLACK_MS
 
+/**
+ * Respuesta que el sondeo de la UI puede reutilizar en vez de pedir otra (H16): la de
+ * alguien (el motor) que consultó la parada hace menos de un intervalo; null = hay que pedir.
+ */
+fun reusableFeed(known: StopFeed?, nowMs: Long, intervalMs: Long): StopFeed? =
+    known?.takeUnless { isFetchDue(it.fetchedAtMs, nowMs, intervalMs) }
+
 /** Aviso que acaba de pasar a `TRIGGERED` y la llegada que lo dispara: se notifica y se borra (un solo uso). */
 data class Firing(val rule: AlertRule, val arrival: Arrival)
 
