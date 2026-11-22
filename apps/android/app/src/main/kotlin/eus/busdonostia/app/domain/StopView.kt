@@ -75,3 +75,22 @@ fun stopLineIds(catalog: Catalog, stopId: String, arrivals: List<Arrival>): List
     val fromLive = arrivals.map { catalog.toPublicLineId(it.lineId, stopId) }
     return (fromCatalog + fromLive).distinct()
 }
+
+/** Fila de llegada de A05 lista para pintar: minutos ya calculados y clave única para `items(key = …)`. */
+data class ArrivalRow(val key: String, val arrival: Arrival, val minutes: Int)
+
+/**
+ * Filas de A05: las llegadas de la línea elegida ([filterArrivals]) con los minutos de
+ * [nowMs]. Dos llamadas dentro del mismo minuto dan filas iguales, así que el estado de
+ * A05 solo cambia cuando cambia un minuto mostrado o llega otra respuesta (H10).
+ * Clave = línea + destino + nº de aparición: única aunque Dbus repita una llegada y
+ * estable entre refrescos.
+ */
+fun arrivalRows(arrivals: List<Arrival>, lineId: String?, nowMs: Long): List<ArrivalRow> {
+    val seen = HashMap<String, Int>()
+    return filterArrivals(arrivals, lineId).map { arrival ->
+        val base = "${arrival.lineId}|${arrival.destination}"
+        val n = seen.merge(base, 1, Int::plus)!!
+        ArrivalRow("$base|$n", arrival, remainingMinutes(arrival, nowMs))
+    }
+}

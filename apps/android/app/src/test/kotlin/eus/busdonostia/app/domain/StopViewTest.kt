@@ -83,4 +83,26 @@ class StopViewTest {
         // En la parada 1 el alias interno 32 es la línea pública 28.
         assertTrue("28" in stopLineIds(TestData.catalog, "1", emptyList()))
     }
+
+    @Test
+    fun filasDeA05FiltradasConMinutosYClaveUnica() {
+        val ok = feed("tiemposParada-340-datos-avisos.json")
+        val line = ok.arrivals.first().lineId
+        val rows = arrivalRows(ok.arrivals, line, t0 + 60_000)
+        assertEquals(filterArrivals(ok.arrivals, line), rows.map { it.arrival }) // H11: el filtro sale del composable
+        assertEquals(rows.map { remainingMinutes(it.arrival, t0 + 60_000) }, rows.map { it.minutes })
+        // Dbus puede repetir línea, destino y minutos: la clave no se repite (items(key) no revienta).
+        val twin = ok.arrivals.first()
+        val keys = arrivalRows(listOf(twin, twin, twin.copy(destination = "Otro")), null, t0).map { it.key }
+        assertEquals(keys.distinct(), keys)
+    }
+
+    @Test
+    fun filasDeA05IgualesMientrasNoCambiaUnMinuto() {
+        // H10: el reloj late cada segundo, pero el estado solo cambia (y la UI solo se recompone)
+        // cuando cambia algún minuto mostrado.
+        val ok = feed("tiemposParada-340-datos-avisos.json")
+        assertEquals(arrivalRows(ok.arrivals, null, t0 + 1_000), arrivalRows(ok.arrivals, null, t0 + 59_000))
+        assertTrue(arrivalRows(ok.arrivals, null, t0 + 59_000) != arrivalRows(ok.arrivals, null, t0 + 60_000))
+    }
 }
