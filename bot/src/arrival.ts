@@ -1,117 +1,137 @@
-import { getRTCache } from './gtfs-client.js';
-import type {
-  NextArrivalResult,
-  ParsedRT,
-  StopTimeUpdate,
-  TripDescriptor,
-  VehiclePosition,
-} from './types.js';
+import { type DbusTiempo, fetchStopTimes, getStopName } from './dbus-client.js';
+import type { NextArrivalResult } from './types.js';
 
-function parseArrivalTime(time: number | string | undefined): number | null {
-  if (time === undefined) return null;
-  if (typeof time === 'number') return time * 1000; // epoch seconds to ms
-  const parsed = new Date(time).getTime();
-  return Number.isNaN(parsed) ? null : parsed;
+/** Escapa los caracteres especiales del Markdown clásico de Telegram. */
+export function escapeMd(text: string): string {
+  return text.replace(/([_*`[])/g, '\\$1');
 }
 
-export function findNextArrival(
-  rt: ParsedRT,
+function normalizeLine(lineId: string): string {
+  return lineId.trim().toUpperCase().replace(/^L/, '');
+}
+
+function toArrival(
+  tiempo: DbusTiempo,
+  stopId: string,
+  stopName: string
+): NextArrivalResult {
+  const minutes = Math.max(0, Math.round(tiempo.minutos));
+  const linea = tiempo.itinerario.linea;
+  const lineId = linea.cod || lineIdFromNombre(linea.nombre);
+
+  return {
+    arrivalTime: Date.now() + minutes * 60_000,
+    minutes,
+    lineId,
+    destination:
+      tiempo.itinerario.destino ||
+      tiempo.itinerario.nombre ||
+      'Destino desconocido',
+    stopId,
+    stopName,
+    realtime: tiempo.tipo === 1,
+    hora: tiempo.hora,
+    itineraryId: tiempo.itinerario.id,
+  };
+}
+
+function lineIdFromNombre(nombre: string): string {
+  const match = nombre.match(/\d+/);
+  return match ? match[0] : nombre;
+}
+
+/**
+ * Llegadas reales de una parada, ordenadas por proximidad.
+ * `lineId` (opcional) acepta "28" o "L28".
+ */
+export async function getNextArrivals(
+  stopId: string,
+  lineId?: string,
+  forceRefresh = false
+): Promise<NextArrivalResult[]> {
+  const times = await fetchStopTimes(stopId, forceRefresh);
+  if (!times || !times.tiempos.length) return [];
+
+  const stopName = times.parada?.desc || getStopName(stopId);
+  const wanted = lineId ? normalizeLine(lineId) : undefined;
+
+  return times.tiempos
+    .map((tiempo) => toArrival(tiempo, stopId, stopName))
+    .filter((arrival) => !wanted || arrival.lineId === wanted)
+    .sort((a, b) => a.arrivalTime - b.arrivalTime);
+}
+
+export async function getNextArrival(
   stopId: string,
   lineId: string
-): NextArrivalResult | null {
-  const relevant = rt.tripUpdates?.filter(
-    (tu) =>
-      tu.trip?.routeId === lineId &&
-      tu.stopTimeUpdate?.some((stu) => stu.stopId === stopId)
+): Promise<NextArrivalResult | null> {
+  const arrivals = await getNextArrivals(stopId, lineId);
+  return arrivals[0] ?? null;
+}
+
+export interface StopLine {
+  lineId: string;
+  destination: string;
+}
+
+/** Líneas que pasan por una parada, según los datos reales del momento. */
+export async function getStopLines(stopId: string): Promise<StopLine[]> {
+  const times = await fetchStopTimes(stopId);
+  if (!times) return [];
+
+  const lines = new Map<string, StopLine>();
+  for (const tiempo of times.tiempos) {
+    const rawId =
+      tiempo.itinerario.linea.cod ||
+      lineIdFromNombre(tiempo.itinerario.linea.nombre);
+    if (!rawId) continue;
+    if (!lines.has(rawId)) {
+      lines.set(rawId, {
+        lineId: rawId,
+        destination:
+          tiempo.itinerario.destino ||
+          tiempo.itinerario.nombre ||
+          'Destino desconocido',
+      });
+    }
+  }
+  return [...lines.values()].sort((a, b) =>
+    a.lineId.localeCompare(b.lineId, 'es', { numeric: true })
   );
-
-  if (!relevant?.length) return null;
-
-  let earliest: NextArrivalResult | null = null;
-
-  for (const tu of relevant) {
-    for (const stu of tu.stopTimeUpdate || []) {
-      if (stu.stopId === stopId) {
-        const arrivalMs = parseArrivalTime(stu.arrival?.time);
-        if (arrivalMs && arrivalMs > Date.now()) {
-          if (!earliest || arrivalMs < earliest.arrivalTime) {
-            // Buscar vehicle position para este trip
-            const vp = rt.vehiclePositions.find(
-              (v) => v.vehicle?.trip?.tripId === tu.trip?.tripId
-            );
-
-            earliest = {
-              arrivalTime: arrivalMs,
-              trip: tu.trip!,
-              stopTime: stu,
-              vehiclePosition: vp,
-            };
-          }
-        }
-      }
-    }
-  }
-
-  return earliest;
-}
-
-export function findAllNextArrivals(
-  rt: ParsedRT,
-  stopId: string
-): Map<string, NextArrivalResult> {
-  const results = new Map<string, NextArrivalResult>();
-
-  for (const tu of rt.tripUpdates || []) {
-    const lineId = tu.trip?.routeId;
-    if (!lineId) continue;
-
-    const arrival = findNextArrival(rt, stopId, lineId);
-    if (arrival) {
-      const existing = results.get(lineId);
-      if (!existing || arrival.arrivalTime < existing.arrivalTime) {
-        results.set(lineId, arrival);
-      }
-    }
-  }
-
-  return results;
-}
-
-export function getCachedArrivals(
-  stopId: string
-): Map<string, NextArrivalResult>;
-export function getCachedArrivals(
-  stopId: string,
-  lineId: string
-): NextArrivalResult | null;
-export function getCachedArrivals(
-  stopId: string,
-  lineId?: string
-): Map<string, NextArrivalResult> | NextArrivalResult | null {
-  const rt = getRTCache();
-  if (!rt) return lineId ? null : new Map();
-
-  return lineId
-    ? findNextArrival(rt, stopId, lineId)
-    : findAllNextArrivals(rt, stopId);
 }
 
 export function formatArrival(arrival: NextArrivalResult): string {
-  const mins = Math.max(
-    0,
-    Math.round((arrival.arrivalTime - Date.now()) / 1000 / 60)
-  );
-  const line = arrival.trip.routeId;
-  const destination = arrival.trip.tripId; // o trip_headsign si está disponible
-  const vehicle = arrival.vehiclePosition?.vehicle?.label || '';
-  const occupancy = arrival.vehiclePosition?.occupancyPercentage;
+  const line = escapeMd(arrival.lineId);
+  const destination = escapeMd(arrival.destination);
+  const source = arrival.realtime ? '📡 tiempo real' : '🕒 horario';
+  const hora = arrival.hora ? ` · ${escapeMd(arrival.hora)}` : '';
+  const mins = arrival.minutes === 0 ? 'ahora' : `${arrival.minutes} min`;
 
-  let msg = `🚌 **L${line}** → ${destination}`;
-  if (vehicle) msg += ` (${vehicle})`;
-  msg += `\n⏱ Llega en **${mins} min**`;
-  if (occupancy !== undefined) {
-    const occLabel = occupancy < 30 ? '🟢' : occupancy < 70 ? '🟡' : '🔴';
-    msg += ` ${occLabel} ${occupancy}%`;
+  return `🚌 **L${line}** → ${destination}\n⏱ ${mins}${hora} · ${source}`;
+}
+
+export function formatArrivalsList(
+  stopName: string,
+  arrivals: NextArrivalResult[],
+  estado?: string
+): string {
+  const header = `🚏 **${escapeMd(stopName)}** (${arrivals[0]?.stopId ?? ''})`;
+
+  if (!arrivals.length) {
+    if (estado === 'SIN_SERVICIO' || estado === 'NO DATOS') {
+      return `${header}\n\n🌙 Sin servicio en este momento.`;
+    }
+    if (estado) {
+      return `${header}\n\n📭 No hay llegadas (${escapeMd(estado)}).`;
+    }
+    return `${header}\n\n⚠️ No se pudo consultar la API de Dbus. Inténtalo de nuevo.`;
   }
-  return msg;
+
+  const shown = arrivals.slice(0, 8);
+  const body = shown.map(formatArrival).join('\n\n');
+  const more =
+    arrivals.length > shown.length
+      ? `\n\n…y ${arrivals.length - shown.length} más`
+      : '';
+  return `${header}\n\n${body}${more}`;
 }

@@ -1,88 +1,34 @@
-// Tipos GTFS-RT (compatibles con src/lib/types.ts del proyecto PWA)
+// Tipos del dominio del bot. Los datos en tiempo real vienen de la API JSON
+// de Dbus (ver dbus-client.ts), no de GTFS-RT.
 
-export interface GTFSEntity {
-  id: string;
+export type Language = 'eu' | 'es' | 'en' | 'fr';
+
+/** Parada con código público (el que aparece en la marquesina). */
+export interface StopRef {
+  cod: string;
+  desc: string;
 }
 
-export interface TripDescriptor {
-  tripId: string;
-  routeId: string;
-  directionId?: number;
-  startTime?: string;
-  startDate?: string;
-  scheduleRelationship?: number;
+/** Llegada normalizada, lista para mostrar al usuario o disparar un aviso. */
+export interface NextArrivalResult {
+  /** epoch ms calculado a partir de los minutos que devuelve Dbus. */
+  arrivalTime: number;
+  /** minutos hasta la llegada (0 = llegando). */
+  minutes: number;
+  /** código público de línea, p. ej. "28". */
+  lineId: string;
+  /** destino/headsign real devuelto por Dbus. */
+  destination: string;
+  stopId: string;
+  stopName: string;
+  /** true si la estimación viene del GPS (tipo=1), false si es horario (tipo=2). */
+  realtime: boolean;
+  /** hora absoluta prevista "HH:MM". */
+  hora: string;
+  itineraryId: string;
 }
 
-export interface StopTimeUpdate {
-  stopSequence?: number;
-  stopId?: string;
-  arrival?: Time;
-  departure?: Time;
-  scheduleRelationship?: number;
-}
-
-export interface Time {
-  delay?: number;
-  time?: number | string;
-  uncertainty?: number;
-}
-
-export interface VehicleDescriptor {
-  id?: string;
-  label?: string;
-  licensePlate?: string;
-  occupancyStatus?: number;
-  occupancyPercentage?: number;
-}
-
-export interface Position {
-  latitude?: number;
-  longitude?: number;
-  bearing?: number;
-  odometer?: number;
-  speed?: number;
-}
-
-export interface TripUpdate extends GTFSEntity {
-  trip?: TripDescriptor;
-  stopTimeUpdate?: StopTimeUpdate[];
-  vehicle?: VehicleDescriptor;
-}
-
-export interface VehiclePosition extends GTFSEntity {
-  vehicle?: VehicleDescriptor & { trip?: TripDescriptor };
-  trip?: TripDescriptor;
-  position?: Position;
-  currentStopSequence?: number;
-  stopId?: string;
-  currentStatus?: number;
-  timestamp?: number;
-  congestionLevel?: number;
-  occupancyStatus?: number;
-  occupancyPercentage?: number;
-}
-
-export interface Alert extends GTFSEntity {
-  alert?: {
-    activePeriod?: { start?: number; end?: number }[];
-    informedEntity?: { routeId?: string; stopId?: string }[];
-    cause?: number;
-    effect?: number;
-    url?: { translation: { text: string; language: string }[] };
-    headerText?: { translation: { text: string; language: string }[] };
-    descriptionText?: { translation: { text: string; language: string }[] };
-  };
-}
-
-export interface ParsedRT {
-  tripUpdates: TripUpdate[];
-  vehiclePositions: VehiclePosition[];
-  alerts: Alert[];
-  timestamp: number;
-  feedVersion: string;
-}
-
-// Tipos para alertas de usuario (bot)
+/** Aviso de usuario persistido en SQLite. */
 export interface UserAlert {
   id: number;
   chatId: number;
@@ -94,11 +40,4 @@ export interface UserAlert {
   minutesAhead: number;
   active: boolean;
   createdAt: number;
-}
-
-export interface NextArrivalResult {
-  arrivalTime: number;
-  trip: TripDescriptor;
-  stopTime: StopTimeUpdate;
-  vehiclePosition?: VehiclePosition;
 }

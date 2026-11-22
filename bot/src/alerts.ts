@@ -1,28 +1,25 @@
 import cron from 'node-cron';
 import type { Context, Telegraf } from 'telegraf';
-import { formatArrival, getCachedArrivals } from './arrival.js';
+import { escapeMd, formatArrival, getNextArrivals } from './arrival.js';
 import { getActiveAlerts, updateAlert } from './db.js';
-import type { NextArrivalResult, UserAlert } from './types.js';
+import type { UserAlert } from './types.js';
 
 let scheduledTask: cron.ScheduledTask | null = null;
 let botInstance: Telegraf<Context> | null = null;
 
-export function setBotInstance(bot: Telegraf<Context>) {
+export function setBotInstance(bot: Telegraf<Context>): void {
   botInstance = bot;
 }
 
-export function startAlertScheduler() {
+export function startAlertScheduler(): void {
   if (scheduledTask) return;
-
-  // Cada minuto comprobar alertas
-  scheduledTask = cron.schedule('* * * * *', async () => {
-    await checkAlerts();
+  scheduledTask = cron.schedule('* * * * *', () => {
+    void checkAlerts();
   });
-
   console.log('📅 Alert scheduler started (checking every minute)');
 }
 
-export function stopAlertScheduler() {
+export function stopAlertScheduler(): void {
   if (scheduledTask) {
     scheduledTask.stop();
     scheduledTask = null;
@@ -30,7 +27,7 @@ export function stopAlertScheduler() {
   }
 }
 
-async function checkAlerts() {
+async function checkAlerts(): Promise<void> {
   if (!botInstance) {
     console.warn('Bot instance not set, skipping alert check');
     return;
@@ -39,37 +36,44 @@ async function checkAlerts() {
   const alerts = getActiveAlerts();
   if (!alerts.length) return;
 
+  // Agrupar por parada para minimizar peticiones a la API.
+  const byStop = new Map<string, UserAlert[]>();
   for (const alert of alerts) {
+    const group = byStop.get(alert.stopId);
+    if (group) group.push(alert);
+    else byStop.set(alert.stopId, [alert]);
+  }
+
+  for (const [stopId, stopAlerts] of byStop) {
     try {
-      const arrivalResult = getCachedArrivals(alert.stopId, alert.lineId);
-      if (!arrivalResult) continue;
+      const arrivals = await getNextArrivals(stopId);
+      for (const alert of stopAlerts) {
+        const match = arrivals.find(
+          (arrival) =>
+            arrival.lineId === alert.lineId &&
+            arrival.minutes >= 0 &&
+            arrival.minutes <= alert.minutesAhead
+        );
+        if (!match) continue;
 
-      // getCachedArrivals con lineId devuelve NextArrivalResult | null
-      const arrival = arrivalResult as NextArrivalResult;
-
-      const minsUntilArrival = Math.round(
-        (arrival.arrivalTime - Date.now()) / 1000 / 60
-      );
-
-      // Avisar si llega en <= minutesAhead minutos
-      if (minsUntilArrival <= alert.minutesAhead && minsUntilArrival >= 0) {
-        const msg = `🔔 **Aviso: L${alert.lineId} llega en ${minsUntilArrival} min**\n${formatArrival(arrival)}`;
+        const msg =
+          `🔔 **¡Aviso! L${escapeMd(alert.lineId)} llega en ${match.minutes} min**\n` +
+          `${formatArrival(match)}`;
 
         await botInstance.telegram.sendMessage(alert.chatId, msg, {
           parse_mode: 'Markdown',
         });
-
-        // Desactivar alerta tras avisar (one-shot)
         updateAlert(alert.id, { active: false });
         console.log(`✅ Alert ${alert.id} triggered for chat ${alert.chatId}`);
       }
-    } catch (err) {
-      console.error(`Error checking alert ${alert.id}:`, err);
+    } catch (error) {
+      console.error(
+        `[Alerts] Error checking stop ${stopId}: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
   }
 }
 
-// Para testing manual
-export async function triggerAlertCheck() {
+export async function triggerAlertCheck(): Promise<void> {
   await checkAlerts();
 }
