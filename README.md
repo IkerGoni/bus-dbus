@@ -7,8 +7,9 @@ Aplicación PWA móvil para notificaciones push de llegada de autobús Dbus (San
 | Área | Estado | Evidencia |
 |------|--------|-----------|
 | **Planning (Sprints 0-2)** | ✅ Completo | 3 docs en `04-planning/`, 12 wireframes en `02-wireframes/`, 8 ADRs en `03-architecture/adrs/` |
-| **PWA Shell (Sprint 3)** | 🔧 Bloqueado | `npm run build` falla por ~26 errores TS en `src/` |
-| **Tests del bot** | ✅ 15/15 pasan | `npm run test` |
+| **PWA Shell (Sprint 3)** | 🔧 Bloqueado | `npm run typecheck`: 30 errores TS · `npm run lint`: 233 errores (preexistentes, en `src/`) |
+| **Bot: datos reales** | ✅ Activo | API JSON de Dbus (`tiemposParada`), sin mocks en producción |
+| **Tests del bot** | ✅ 13/13 pasan | `npm run test` (8 integración + 5 E2E de handlers) |
 | **TypeScript del bot** | ✅ 0 errores | `npx tsc --noEmit` en `bot/` |
 | **Lint del bot** | ✅ 0 errores | `npx biome check bot/src/` |
 | **Kanban** | `t_dbdce90c` (Sprint 3) en `ready` | `state/kanban/kanban.db` |
@@ -29,7 +30,7 @@ Aplicación PWA móvil para notificaciones push de llegada de autobús Dbus (San
 | Lint/Format | Biome |
 | Tests | Vitest + Playwright |
 | Hosting | Cloudflare Pages + Functions |
-| Bot Telegram | Telegraf + better-sqlite3 + protobufjs |
+| Bot Telegram | Telegraf + better-sqlite3 + API JSON Dbus (live) |
 
 ## Estructura del repositorio
 
@@ -38,8 +39,11 @@ Aplicación PWA móvil para notificaciones push de llegada de autobús Dbus (San
 ├── 02-wireframes/          # Wireframes Excalidraw (onboarding, home, stop, alert, settings...)
 ├── 03-architecture/        # 8 ADRs (001-frontend-stack ... 008-risk-mitigations)
 ├── 04-planning/            # mvp-scope.md, milestones.md, success-metrics.md, tech-stack-decision.md
-├── bot/                    # Telegram bot (Telegraf, SQLite, GTFS-RT)
-├── fetcher/                # Servicio fetcher GTFS-RT (pendiente)
+├── bot/                    # Telegram bot (Telegraf, SQLite, API JSON Dbus)
+│   ├── src/dbus-client.ts  # Cliente live + caché de la API de Dbus
+│   ├── src/arrival.ts      # Normalización y formato de llegadas
+│   └── tests/              # Integración + E2E de handlers
+├── fetcher/                # Servicio fetcher GTFS-RT (obsoleto: feeds 403)
 ├── functions/              # Cloudflare Functions (pendiente)
 ├── public/                 # Assets estáticos PWA
 ├── scripts/                # Scripts utilidad (VAPID, etc.)
@@ -79,21 +83,26 @@ cd bot && npm run start # node dist/index.js
 El token del bot se lee de la variable de entorno `BOT_TOKEN`. No está hardcodeado.
 
 ```bash
-# Copiar el ejemplo
-cp bot/.env.example bot/.env
-# Editar con tu token real
-BOT_TOKEN=tu_token_aqui
-
-# Ejecutar
-cd bot && npm run dev
+cd bot
+cp .env.example .env
+# Editar .env con tu token real
+npm run dev          # desarrollo (tsx watch)
+npm run build && npm run start   # producción (sin watch, evita conflictos de polling)
 ```
 
 Variables de entorno:
 - `BOT_TOKEN` — Token del bot de Telegram (requerido)
-- `FETCHER_URL` — URL del servicio fetcher GTFS-RT (default: `http://localhost:3002`)
-- `POLL_INTERVAL_MS` — Intervalo de polling GTFS-RT (default: `30000`)
+- `DBUS_BASE_URL` — API JSON de Dbus (default: `http://app.dbus.eus/SSIIMovilWSv2/ws/cons`, HTTP, sin auth)
+- `BOT_LANGUAGE` — Idioma de nombres/destinos: `eu|es|en|fr` (default: `es`)
+- `CACHE_TTL_MS` — TTL de caché de llegadas (default: `30000`)
+- `POLL_INTERVAL_MS` — Refresco en segundo plano (default: `30000`)
 - `DEFAULT_ALERT_MINUTES` — Minutos antelación por defecto (default: `5`)
 - `DB_PATH` — Ruta de la base de datos SQLite (default: `./bot.db`)
+
+Comandos del bot: `/start`, `/parada <codigo> [linea]`, `/lineas <codigo>`,
+`/aviso <parada> <linea> <minutos>`, `/lista`, `/borrar <id>`, `/fav`,
+`/populares`, `/actualizar`, `/help`. El código de parada es el número visible
+en la marquesina (p. ej. `1` = Boulevard 9).
 
 ## Roadmap (Milestones)
 
@@ -108,17 +117,20 @@ Variables de entorno:
 
 ## Bloqueos conocidos
 
-**Sprint 3 (PWA Shell):** `npm run build` falla por errores TypeScript en `src/`. Las tareas de corrección están creadas en el kanban (board `dbus-app`):
+**Sprint 3 (PWA Shell):** `npm run typecheck` falla con 30 errores TypeScript y `npm run lint` con 233 errores en `src/` (bloqueo preexistente, no relacionado con el bot). Las tareas de corrección están creadas en el kanban (board `dbus-app`):
 - `t_408a2dd2` — Imports faltantes en páginas
 - `t_06703f31` — Componentes UI (props inexistentes, duplicados)
 - `t_5e745f77` — Schema IndexedDB (índice `alerts` incompatible)
 - `t_9c098959` — Worker `postMessage` transfer list inválido
 
-## Datos GTFS-RT
+## Datos en tiempo real
 
-- Feeds: `opendata.euskadi.eus/transport/moveuskadi/dbus/mdb-{3066,3065,3064}.pb` (3 feeds, Protobuf, sin auth, ~30s)
-- GTFS Estático: `ftp.geo.euskadi.net/.../google_transit.zip`
-- El bot de Telegram usa mock data cuando el fetcher no está disponible
+- **Fuente activa del bot:** API JSON que usa la app oficial de Dbus:
+  `GET http://app.dbus.eus/SSIIMovilWSv2/ws/cons/tiemposParada?codParada={codigo}&idioma=es`
+  (HTTP, sin auth, datos reales con indicador de GPS vs. horario).
+- **Obsoleto:** los feeds `.pb` de `opendata.euskadi.eus` redirigen a S3 y
+  devuelven `403 AccessDenied`; el fetcher Playwright ya no es necesario para el bot.
+- GTFS Estático (PWA): `ftp.geo.euskadi.net/.../google_transit.zip`
 
 ## Licencia
 
