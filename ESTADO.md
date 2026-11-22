@@ -97,10 +97,9 @@ petición explícita.
 ## Git
 
 `8ce2694` → `f1ed9a0` → `65d2b08` → `e10eb3c` → `8445239` → `99621cf`
-(docs), todos pusheados. Hay un **split a workspaces sin commitear** en el
-working tree (`apps/`, `packages/`, `docs/`, pnpm): trabajo ajeno a esta
-sesión, no modificado salvo `apps/bot/package.json` (test/verify con token)
-y los docs. Ramas abiertas: ninguna. Token solo por entorno.
+(docs) → `482b53f` (split a workspaces pnpm: `apps/`, `packages/`, `docs/`),
+todo pusheado. `main = origin/main`, working tree limpio, una sola rama y un
+solo worktree. Token solo por entorno.
 
 ## Siguiente sesión
 
