@@ -45,6 +45,19 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_favorites_chat ON user_favorites(chat_id);
   CREATE INDEX IF NOT EXISTS idx_favorites_dedup
     ON user_favorites(chat_id, stop_id, line_id);
+
+  CREATE TABLE IF NOT EXISTS user_favorite_lines (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    chat_id INTEGER NOT NULL,
+    line_id TEXT NOT NULL,
+    line_name TEXT NOT NULL,
+    destination TEXT NOT NULL,
+    created_at INTEGER NOT NULL
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_fav_lines_chat ON user_favorite_lines(chat_id);
+  CREATE INDEX IF NOT EXISTS idx_fav_lines_dedup
+    ON user_favorite_lines(chat_id, line_id);
 `);
 
 // Tipos de filas de SQLite (snake_case -> tipos estrictos, sin `any`)
@@ -254,6 +267,82 @@ export function findFavorite(
 
 export function removeFavorite(id: number): boolean {
   const stmt = db.prepare('DELETE FROM user_favorites WHERE id = ?');
+  const result = stmt.run(id);
+  return result.changes > 0;
+}
+
+// Líneas favoritas (acceso directo sin elegir parada)
+
+export interface FavoriteLine {
+  id: number;
+  chatId: number;
+  lineId: string;
+  lineName: string;
+  destination: string;
+  createdAt: number;
+}
+
+interface FavoriteLineRow {
+  id: number;
+  chat_id: number;
+  line_id: string;
+  line_name: string;
+  destination: string;
+  created_at: number;
+}
+
+function rowToFavoriteLine(row: FavoriteLineRow): FavoriteLine {
+  return {
+    id: row.id,
+    chatId: row.chat_id,
+    lineId: row.line_id,
+    lineName: row.line_name,
+    destination: row.destination,
+    createdAt: row.created_at,
+  };
+}
+
+export function addFavoriteLine(
+  fav: Omit<FavoriteLine, 'id' | 'createdAt'>
+): FavoriteLine {
+  const now = Date.now();
+  const stmt = db.prepare(`
+    INSERT INTO user_favorite_lines (chat_id, line_id, line_name, destination, created_at)
+    VALUES (?, ?, ?, ?, ?)
+  `);
+  const result = stmt.run(
+    fav.chatId,
+    fav.lineId,
+    fav.lineName,
+    fav.destination,
+    now
+  );
+  return { ...fav, id: result.lastInsertRowid as number, createdAt: now };
+}
+
+export function getFavoriteLines(chatId: number): FavoriteLine[] {
+  const stmt = db.prepare(
+    'SELECT * FROM user_favorite_lines WHERE chat_id = ? ORDER BY created_at DESC'
+  );
+  return stmt
+    .all(chatId)
+    .map((row): FavoriteLine => rowToFavoriteLine(row as FavoriteLineRow));
+}
+
+export function findFavoriteLine(
+  chatId: number,
+  lineId: string
+): FavoriteLine | null {
+  const row = findRow<FavoriteLineRow>(
+    'SELECT * FROM user_favorite_lines WHERE chat_id = ? AND line_id = ? LIMIT 1',
+    chatId,
+    lineId
+  );
+  return row ? rowToFavoriteLine(row) : null;
+}
+
+export function removeFavoriteLine(id: number): boolean {
+  const stmt = db.prepare('DELETE FROM user_favorite_lines WHERE id = ?');
   const result = stmt.run(id);
   return result.changes > 0;
 }

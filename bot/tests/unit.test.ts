@@ -8,6 +8,13 @@ import {
   matchesLine,
   normalizeLine,
 } from '../src/arrival.js';
+import {
+  getCatalogMeta,
+  getLineByCode,
+  getStopsForItinerary,
+  searchLines,
+  searchStops,
+} from '../src/catalog.js';
 import { evictOldestEntries } from '../src/dbus-client.js';
 import { getSessionCount, pruneSessions } from '../src/handlers.js';
 import {
@@ -119,6 +126,34 @@ describe('session helpers', () => {
     expect(removed).toBe(0);
     expect(getSessionCount()).toBe(before);
     expect(pruneSessions(0)).toBe(0);
+  });
+});
+
+describe('catálogo de búsqueda (datos reales de Dbus)', () => {
+  it('busca paradas por código exacto y por nombre sin acentos', () => {
+    expect(searchStops('1')[0]?.cod).toBe('1');
+    expect(searchStops('boulevard').some((s) => s.desc === 'Boulevard 9')).toBe(
+      true
+    );
+    expect(searchStops('URBIETA')[0]?.desc.toLowerCase()).toContain('urbieta');
+  });
+
+  it('busca líneas por código público, id interno y destino', () => {
+    expect(searchLines('28')[0]?.cod).toBe('28');
+    // '32' es tanto una línea pública como el id interno de la 28: gana la
+    // pública, pero el alias sigue apareciendo en los resultados.
+    expect(searchLines('32')[0]?.cod).toBe('32');
+    expect(searchLines('32').some((line) => line.cod === '28')).toBe(true);
+    expect(searchLines('ospitaleak').length).toBeGreaterThan(0);
+    expect(getLineByCode('L28')?.cod).toBe('28');
+    expect(getLineByCode('32')?.cod).toBe('32');
+  });
+
+  it('devuelve paradas de un itinerario real y metadata coherente', () => {
+    expect(getStopsForItinerary('1281').length).toBeGreaterThan(5);
+    const meta = getCatalogMeta();
+    expect(meta.lines).toBeGreaterThan(30);
+    expect(meta.stops).toBeGreaterThan(500);
   });
 });
 

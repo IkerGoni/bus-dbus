@@ -8,14 +8,18 @@ import {
 } from '../src/arrival.js';
 import {
   addFavorite,
+  addFavoriteLine,
   createAlert,
   deleteAlert,
   findActiveAlert,
   findFavorite,
+  findFavoriteLine,
   getActiveAlerts,
   getAlertsByChat,
+  getFavoriteLines,
   getFavorites,
   removeFavorite,
+  removeFavoriteLine,
   updateAlert,
 } from '../src/db.js';
 import {
@@ -189,5 +193,44 @@ describe('Database - Favorites', () => {
     expect(findFavorite(chatId, STOP, '28')?.id).toBe(fav.id);
     expect(findFavorite(chatId, STOP, '21')).toBeNull();
     removeFavorite(fav.id);
+  });
+
+  it('guarda una parada completa (sin línea) como favorito', () => {
+    const chatId = 444444444;
+    for (const fav of getFavorites(chatId)) removeFavorite(fav.id);
+
+    const fav = addFavorite({
+      chatId,
+      stopId: STOP,
+      stopName: 'Boulevard 9',
+      lineId: '',
+      lineName: 'Todas',
+      destination: 'Todas las líneas',
+    });
+    expect(fav.lineId).toBe('');
+    expect(findFavorite(chatId, STOP, '')?.id).toBe(fav.id);
+    expect(findFavorite(chatId, STOP, '28')).toBeNull();
+    removeFavorite(fav.id);
+  });
+});
+
+describe('Database - Favorite lines', () => {
+  const testChatId = 333333333;
+
+  it('creates, finds and removes a favorite line', () => {
+    for (const line of getFavoriteLines(testChatId))
+      removeFavoriteLine(line.id);
+
+    const line = addFavoriteLine({
+      chatId: testChatId,
+      lineId: '28',
+      lineName: 'L28',
+      destination: 'Amara - Ospitaleak - Miramon',
+    });
+    expect(line.id).toBeDefined();
+    expect(findFavoriteLine(testChatId, '28')?.id).toBe(line.id);
+    expect(getFavoriteLines(testChatId)).toHaveLength(1);
+    expect(removeFavoriteLine(line.id)).toBe(true);
+    expect(getFavoriteLines(testChatId)).toHaveLength(0);
   });
 });

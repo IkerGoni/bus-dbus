@@ -9,7 +9,7 @@ Aplicación PWA móvil para notificaciones push de llegada de autobús Dbus (San
 | **Planning (Sprints 0-2)** | ✅ Completo | 3 docs en `04-planning/`, 12 wireframes en `02-wireframes/`, 8 ADRs en `03-architecture/adrs/` |
 | **PWA Shell (Sprint 3)** | 🔧 Bloqueado | `npm run typecheck`: 30 errores TS · `npm run lint`: 233 errores (preexistentes, en `src/`) |
 | **Bot: datos reales** | ✅ Activo | API JSON de Dbus (`tiemposParada`), sin mocks en producción |
-| **Tests del bot** | ✅ 31/31 pasan | `npm run test` (11 unit + 10 integración + 10 E2E de handlers) |
+| **Tests del bot** | ✅ 40/40 pasan | `npm run test` (14 unit + 12 integración + 14 E2E de handlers) |
 | **TypeScript del bot** | ✅ 0 errores | `npx tsc --noEmit` en `bot/` |
 | **Lint del bot** | ✅ 0 errores | `npx biome check bot/src/` |
 | **Kanban** | `t_dbdce90c` (Sprint 3) en `ready` | `state/kanban/kanban.db` |
@@ -42,7 +42,10 @@ Aplicación PWA móvil para notificaciones push de llegada de autobús Dbus (San
 ├── bot/                    # Telegram bot (Telegraf, SQLite, API JSON Dbus)
 │   ├── src/dbus-client.ts  # Cliente live + caché de la API de Dbus
 │   ├── src/arrival.ts      # Normalización y formato de llegadas
-│   └── tests/              # Integración + E2E de handlers
+│   ├── src/catalog.ts      # Índice de búsqueda (paradas/líneas)
+│   ├── data/dbus-catalog.json  # Catálogo real generado (39 líneas, 548 paradas)
+│   ├── scripts/build-catalog.mjs  # Regenera el catálogo desde la API
+│   └── tests/              # Unit + integración + E2E de handlers
 ├── fetcher/                # Servicio fetcher GTFS-RT (obsoleto: feeds 403)
 ├── functions/              # Cloudflare Functions (pendiente)
 ├── public/                 # Assets estáticos PWA
@@ -76,6 +79,7 @@ npm run test          # Vitest (tests del bot: 27/27 pasan)
 cd bot && npm run dev   # tsx watch
 cd bot && npm run build # tsc build
 cd bot && npm run start # node dist/index.js
+cd bot && npm run build:catalog  # regenerar data/dbus-catalog.json desde Dbus
 ```
 
 ## Configuración del bot de Telegram
@@ -99,11 +103,27 @@ Variables de entorno:
 - `DEFAULT_ALERT_MINUTES` — Minutos antelación por defecto (default: `5`)
 - `DB_PATH` — Ruta de la base de datos SQLite (default: `./bot.db`)
 
-Comandos del bot: `/start`, `/parada <codigo> [linea]`, `/lineas <codigo>`,
+Comandos del bot: `/start`, `/buscar <texto>`, `/linea <linea>`,
+`/parada <codigo> [linea]`, `/lineas <codigo>`,
 `/aviso <parada> <linea> <minutos>`, `/lista`, `/borrar <id>`, `/fav`,
-`/populares`, `/actualizar`, `/estado`, `/help`. El código de parada es el
+`/actualizar`, `/estado`, `/help`. El código de parada es el
 número visible en la marquesina (p. ej. `1` = Boulevard 9). `/estado` muestra
 la fuente de datos, el tamaño de las cachés y los avisos activos (sin secretos).
+
+**Cómo encontrar tu parada o línea.** No hay lista de "populares": es arbitraria
+e incompleta. El buscador (`/buscar` o el botón 🔎) acepta código (`1`), nombre
+de calle (`Boulevard`), línea (`28`, `L28`) o destino (`Ospitaleak`) y devuelve
+botones con las coincidencias reales del catálogo. `/linea 28` muestra los
+destinos de la línea y, al elegir uno, todas sus paradas. Desde cualquier vista
+de llegadas se puede guardar la **parada completa** (todas las líneas) o solo
+**una línea**; `/fav add <parada> [linea]` (línea opcional) y `/fav linea <linea>`
+permiten lo mismo por comando. Los favoritos son la pantalla de inicio: un toque
+muestra las llegadas en vivo.
+
+`data/dbus-catalog.json` es un **índice de descubrimiento** generado con
+`npm run build:catalog` desde la API real de Dbus (39 líneas, 127 itinerarios,
+548 paradas). No contiene horarios ni llegadas: esos siempre se consultan en
+vivo; regenerar el catálogo actualiza nombres/códigos cuando Dbus cambia su red.
 
 El bot acepta tanto el código público de línea (`28`, `L28`) como el id interno
 de Dbus (`32` = línea pública `28`), pero siempre guarda y muestra el código

@@ -10,18 +10,30 @@ import {
   matchesLine,
   normalizeLine,
 } from './arrival.js';
+import {
+  getItinerariesForLine,
+  getItineraryById,
+  getLineByCode,
+  getStopsForItinerary,
+  searchLines,
+  searchStops,
+} from './catalog.js';
 import { config } from './config.js';
 import {
   addFavorite,
+  addFavoriteLine,
   createAlert,
   deleteAlert,
   findActiveAlert,
   findFavorite,
+  findFavoriteLine,
   getActiveAlerts,
   getAlertById,
   getAlertsByChat,
+  getFavoriteLines,
   getFavorites,
   removeFavorite,
+  removeFavoriteLine,
 } from './db.js';
 import {
   clearCache,
@@ -37,6 +49,7 @@ import type { UserAlert } from './types.js';
 
 type Step =
   | 'idle'
+  | 'searching'
   | 'waiting_stop_arrivals'
   | 'waiting_stop_alert'
   | 'select_line_alert'
@@ -146,9 +159,6 @@ async function safeEdit(
   }
 }
 
-const CATALOG_ERROR =
-  '⚠️ No se pudo cargar el catálogo de paradas de Dbus. Prueba `/parada <codigo>`.';
-
 /**
  * Valida una línea contra los datos reales de la parada. Devuelve el mensaje
  * de error ya formateado, o null si la línea pasa (o no hay datos para juzgar).
@@ -173,7 +183,7 @@ function mainKeyboard() {
     [Markup.button.callback('🔔 Crear aviso', 'menu_alert')],
     [Markup.button.callback('⭐ Favoritos', 'menu_favorites')],
     [Markup.button.callback('📋 Mis avisos', 'menu_my_alerts')],
-    [Markup.button.callback('📍 Paradas populares', 'menu_popular')],
+    [Markup.button.callback('🔎 Buscar parada o línea', 'menu_search')],
     [
       Markup.button.callback('🔄 Actualizar', 'menu_refresh'),
       Markup.button.callback('ℹ️ Ayuda', 'menu_help'),
@@ -190,10 +200,13 @@ const HELP_TEXT =
   '`/aviso <parada> <linea> <minutos>` — avisar antes de que llegue el bus\n' +
   '`/lista` — tus avisos activos\n' +
   '`/borrar <id>` — eliminar un aviso\n' +
-  '`/fav` — tus favoritos · `/fav add <parada> <linea>` · `/fav remove <id>`\n' +
+  '`/buscar <texto>` — parada (código o nombre) o línea (número/destino)\n' +
+  '`/linea <linea>` — destinos y paradas de una línea\n' +
+  '`/fav` — tus favoritos · `/fav add <parada> [linea]` · `/fav linea <linea>`\n' +
   '`/lineas <parada>` — líneas que pasan por una parada\n' +
-  '`/populares` — paradas habituales\n' +
   '`/actualizar` — refrescar datos · `/estado` — diagnóstico\n\n' +
+  'Busca por código (`1`), nombre (`Boulevard`), línea (`28`) o destino ' +
+  '(`Ospitaleak`). Sin línea en `/fav add` guardas la parada completa.\n' +
   'También acepto el id interno de Dbus (p. ej. `32` = línea pública `28`).\n' +
   'Datos reales de la API de Dbus 📡';
 
@@ -249,51 +262,160 @@ async function askStopCode(
     {
       parse_mode: 'Markdown',
       ...Markup.inlineKeyboard([
-        [
-          Markup.button.callback(
-            '📍 Ver paradas populares',
-            `menu_popular_${mode}`
-          ),
-        ],
+        [Markup.button.callback('🔎 Buscar parada o línea', 'menu_search')],
         [Markup.button.callback('⬅️ Menú', 'menu_main')],
       ]),
     }
   );
 }
 
-async function showPopularStops(
-  ctx: Context,
-  mode: 'arrivals' | 'alert'
-): Promise<void> {
-  const stops = await fetchPopularStops();
-  if (!stops.length) {
-    await safeEdit(ctx, CATALOG_ERROR, {
+async function askSearch(ctx: Context): Promise<void> {
+  const chatId = ctx.chat?.id;
+  if (chatId) getSession(chatId).step = 'searching';
+  await safeEdit(
+    ctx,
+    '🔎 **Buscar**\n\nEscribe un código de parada, nombre de calle, línea o destino:\n' +
+      '`1` · `Boulevard` · `28` · `Ospitaleak`',
+    {
       parse_mode: 'Markdown',
       ...Markup.inlineKeyboard([
         [Markup.button.callback('⬅️ Menú', 'menu_main')],
       ]),
-    });
+    }
+  );
+}
+
+async function showSearchResults(ctx: Context, query: string): Promise<void> {
+  const chatId = ctx.chat?.id;
+  const q = query.trim();
+  if (!chatId || !q) return;
+  const stops = searchStops(q, 8);
+  const lines = searchLines(q, 5);
+  const back = [[Markup.button.callback('⬅️ Menú', 'menu_main')]];
+
+  if (!stops.length && !lines.length) {
+    await safeEdit(
+      ctx,
+      `🔎 Sin resultados para **${escapeMd(q)}**.\nPrueba un código, un nombre de calle o una línea.`,
+      { parse_mode: 'Markdown', ...Markup.inlineKeyboard(back) }
+    );
     return;
   }
-  const suffix = mode === 'alert' ? 'alert' : 'arrivals';
-  const buttons = stops
-    .slice(0, 18)
-    .map((stop) =>
-      Markup.button.callback(
-        `${stop.desc.slice(0, 28)} (${stop.cod})`,
-        `popular_${stop.cod}_${suffix}`
-      )
-    );
-  const rows: ReturnType<typeof Markup.button.callback>[][] = [];
-  for (let i = 0; i < buttons.length; i += 2) {
-    rows.push(buttons.slice(i, i + 2));
-  }
-  rows.push([Markup.button.callback('⬅️ Menú', 'menu_main')]);
 
-  await safeEdit(ctx, '📍 **Paradas populares** — selecciona una:', {
+  const rows: ReturnType<typeof Markup.button.callback>[][] = [];
+  for (const stop of stops) {
+    rows.push([
+      Markup.button.callback(
+        `🚏 ${stop.desc.slice(0, 28)} (${stop.cod})`,
+        `srch_s_${stop.cod}`
+      ),
+    ]);
+  }
+  for (const line of lines) {
+    rows.push([
+      Markup.button.callback(
+        `🚌 L${line.cod} · ${line.destinations[0]?.slice(0, 22) ?? ''}`,
+        `srch_l_${line.cod}`
+      ),
+    ]);
+  }
+  rows.push(...back);
+  await safeEdit(ctx, `🔎 Resultados para **${escapeMd(q)}**`, {
     parse_mode: 'Markdown',
     ...Markup.inlineKeyboard(rows),
   });
+}
+
+async function showLineDestinations(
+  ctx: Context,
+  lineId: string
+): Promise<void> {
+  const line = getLineByCode(lineId);
+  const itineraries = line ? getItinerariesForLine(lineId) : [];
+  const back = [[Markup.button.callback('⬅️ Menú', 'menu_main')]];
+  if (!line || !itineraries.length) {
+    await safeEdit(ctx, `❌ Línea **${escapeMd(lineId)}** no encontrada.`, {
+      parse_mode: 'Markdown',
+      ...Markup.inlineKeyboard(back),
+    });
+    return;
+  }
+  const buttons = itineraries.map((itinerario) =>
+    Markup.button.callback(
+      `🚌 ${itinerario.destination.slice(0, 34)}`,
+      `ld_${itinerario.id}`
+    )
+  );
+  await safeEdit(ctx, `🚌 **L${escapeMd(line.cod)}** — elige destino:`, {
+    parse_mode: 'Markdown',
+    ...Markup.inlineKeyboard([
+      ...buttons.map((button) => [button]),
+      [
+        Markup.button.callback(
+          '⭐ Guardar línea',
+          `favline_${normalizeLine(line.cod)}`
+        ),
+      ],
+      ...back,
+    ]),
+  });
+}
+
+async function showLineStops(ctx: Context, itineraryId: string): Promise<void> {
+  const itinerary = getItineraryById(itineraryId);
+  const stops = getStopsForItinerary(itineraryId);
+  const back = [[Markup.button.callback('⬅️ Menú', 'menu_main')]];
+  if (!itinerary || !stops.length) {
+    await safeEdit(ctx, '❌ Sin paradas para este destino.', {
+      parse_mode: 'Markdown',
+      ...Markup.inlineKeyboard(back),
+    });
+    return;
+  }
+  const buttons = stops.map((stop) =>
+    Markup.button.callback(
+      `🚏 ${stop.desc.slice(0, 26)} (${stop.cod})`,
+      `ls_${stop.cod}_${itinerary.lineCod}`
+    )
+  );
+  await safeEdit(
+    ctx,
+    `🚏 **L${escapeMd(itinerary.lineCod)}** · ${escapeMd(itinerary.destination)}\nElige tu parada:`,
+    {
+      parse_mode: 'Markdown',
+      ...Markup.inlineKeyboard([...buttons.map((button) => [button]), ...back]),
+    }
+  );
+}
+
+type LineFavoriteResult = 'added' | 'duplicate' | 'missing';
+
+function storeLineFavorite(chatId: number, lineId: string): LineFavoriteResult {
+  const line = getLineByCode(lineId);
+  if (!line) return 'missing';
+  const code = normalizeLine(line.cod);
+  if (findFavoriteLine(chatId, code)) return 'duplicate';
+  addFavoriteLine({
+    chatId,
+    lineId: code,
+    lineName: `L${code}`,
+    destination: line.destinations[0] || `L${code}`,
+  });
+  return 'added';
+}
+
+async function saveLineFavorite(ctx: Context, lineId: string): Promise<void> {
+  const chatId = ctx.chat?.id;
+  if (!chatId) return;
+  const result = storeLineFavorite(chatId, lineId);
+  await answer(
+    ctx,
+    result === 'added'
+      ? '⭐ Línea guardada'
+      : result === 'duplicate'
+        ? '⭐ Ya tenías esta línea guardada'
+        : '❌ Línea no encontrada'
+  );
 }
 
 async function showArrivalsForStop(
@@ -315,10 +437,11 @@ async function showArrivalsForStop(
     [Markup.button.callback('🔄 Refrescar', `stop_refresh_${stopId}`)],
     [Markup.button.callback('🔔 Crear aviso aquí', `stop_alert_${stopId}`)],
     [
+      Markup.button.callback('⭐ Guardar parada', `favstop_${stopId}`),
       ...(favoriteLine
         ? [
             Markup.button.callback(
-              '⭐ Guardar favorito',
+              '⭐ Guardar línea',
               `fav_add_${stopId}_${favoriteLine}`
             ),
           ]
@@ -530,17 +653,59 @@ export async function handleLineas(ctx: Context): Promise<void> {
   );
 }
 
-export async function handlePopulares(ctx: Context): Promise<void> {
-  const stops = await fetchPopularStops();
-  if (!stops.length) {
-    await ctx.reply(CATALOG_ERROR, { parse_mode: 'Markdown' });
+export async function handleBuscar(ctx: Context): Promise<void> {
+  const query = textOf(ctx).split(/\s+/).slice(1).join(' ').trim();
+  if (!query) {
+    await ctx.reply(
+      'Uso: `/buscar <texto>`\nEjemplos: `/buscar 1`, `/buscar Boulevard`, `/buscar 28`',
+      { parse_mode: 'Markdown' }
+    );
     return;
   }
-  const msg = `📍 **Paradas populares** (código entre paréntesis):\n\n${stops
-    .slice(0, 18)
-    .map((s) => `• ${escapeMd(s.desc)} — \`${s.cod}\``)
-    .join('\n')}`;
-  await ctx.reply(msg, { parse_mode: 'Markdown' });
+  const chatId = ctx.chat?.id;
+  if (chatId) clearSession(chatId);
+  const stops = searchStops(query, 8);
+  const lines = searchLines(query, 5);
+  if (!stops.length && !lines.length) {
+    await ctx.reply(`🔎 Sin resultados para **${escapeMd(query)}**.`, {
+      parse_mode: 'Markdown',
+    });
+    return;
+  }
+  const rows: ReturnType<typeof Markup.button.callback>[][] = [];
+  for (const stop of stops) {
+    rows.push([
+      Markup.button.callback(
+        `🚏 ${stop.desc.slice(0, 28)} (${stop.cod})`,
+        `srch_s_${stop.cod}`
+      ),
+    ]);
+  }
+  for (const line of lines) {
+    rows.push([
+      Markup.button.callback(
+        `🚌 L${line.cod} · ${line.destinations[0]?.slice(0, 22) ?? ''}`,
+        `srch_l_${line.cod}`
+      ),
+    ]);
+  }
+  await ctx.reply(`🔎 Resultados para **${escapeMd(query)}**:`, {
+    parse_mode: 'Markdown',
+    ...Markup.inlineKeyboard(rows),
+  });
+}
+
+export async function handleLineaCommand(ctx: Context): Promise<void> {
+  const lineId = normalizeLine(textOf(ctx).split(/\s+/)[1] || '');
+  const line = lineId ? getLineByCode(lineId) : null;
+  if (!line) {
+    await ctx.reply(
+      'Uso: `/linea <linea>`\nEjemplo: `/linea 28` (o `L28`, o el id interno `32`)',
+      { parse_mode: 'Markdown' }
+    );
+    return;
+  }
+  await showLineDestinations(ctx, line.cod);
 }
 
 export async function handleAviso(ctx: Context): Promise<void> {
@@ -549,7 +714,7 @@ export async function handleAviso(ctx: Context): Promise<void> {
   const lineId = normalizeLine(args[2] || '');
   const minutesAhead = Number.parseInt(args[3] ?? '', 10);
 
-  if (!stopId || !/^\d+$/.test(stopId) || !/^\d+$/.test(lineId)) {
+  if (!stopId || !/^\d+$/.test(stopId) || !lineId) {
     await ctx.reply(
       'Uso: `/aviso <parada> <linea> <minutos>`\nEjemplo: `/aviso 1 28 5`',
       { parse_mode: 'Markdown' }
@@ -654,11 +819,12 @@ async function showFavorites(ctx: Context): Promise<void> {
   const chatId = ctx.chat?.id;
   if (!chatId) return;
   const favs = getFavorites(chatId);
+  const lines = getFavoriteLines(chatId);
 
-  if (!favs.length) {
+  if (!favs.length && !lines.length) {
     await safeEdit(
       ctx,
-      '⭐ **No tienes favoritos**\n\nUsa "Ver llegadas" y guarda una parada.',
+      '⭐ **No tienes favoritos**\n\nUsa "🔎 Buscar" para encontrar tu parada o línea y guárdala.',
       {
         parse_mode: 'Markdown',
         ...Markup.inlineKeyboard([
@@ -669,37 +835,54 @@ async function showFavorites(ctx: Context): Promise<void> {
     return;
   }
 
-  const rows = favs.map((fav) => [
-    Markup.button.callback(
-      `🚏 ${fav.stopName.slice(0, 22)} · L${fav.lineId}`,
-      `fav_view_${fav.id}`
-    ),
-    Markup.button.callback('🗑️', `fav_remove_${fav.id}`),
-  ]);
-  rows.push([Markup.button.callback('⬅️ Menú', 'menu_main')]);
+  const rows = [
+    ...favs.map((fav) => [
+      Markup.button.callback(
+        `🚏 ${fav.stopName.slice(0, 20)} · ${fav.lineId ? `L${fav.lineId}` : 'todas'}`,
+        `fav_view_${fav.id}`
+      ),
+      Markup.button.callback('🗑️', `fav_remove_${fav.id}`),
+    ]),
+    ...lines.map((line) => [
+      Markup.button.callback(
+        `🚌 L${line.lineId}`,
+        `favline_view_${line.lineId}`
+      ),
+      Markup.button.callback('🗑️', `favlin_remove_${line.id}`),
+    ]),
+    [Markup.button.callback('⬅️ Menú', 'menu_main')],
+  ];
 
-  await safeEdit(ctx, '⭐ **Tus favoritos:**', {
-    parse_mode: 'Markdown',
-    ...Markup.inlineKeyboard(rows),
-  });
+  await safeEdit(
+    ctx,
+    `⭐ **Tus favoritos** (${favs.length} paradas · ${lines.length} líneas):`,
+    {
+      parse_mode: 'Markdown',
+      ...Markup.inlineKeyboard(rows),
+    }
+  );
 }
 
-/** Guarda un favorito evitando duplicados por (parada, línea). */
+/**
+ * Guarda un favorito evitando duplicados por (parada, línea).
+ * Con línea vacía guarda la parada completa (todas las líneas).
+ */
 async function saveFavorite(
   chatId: number,
   stopId: string,
-  rawLineId: string
+  rawLineId = ''
 ): Promise<boolean> {
   const lineId = normalizeLine(rawLineId);
   if (findFavorite(chatId, stopId, lineId)) return false;
-  const arrival = await getNextArrival(stopId, lineId);
+  const arrival = lineId ? await getNextArrival(stopId, lineId) : null;
   addFavorite({
     chatId,
     stopId,
     stopName: getStopName(stopId),
     lineId,
-    lineName: `L${lineId}`,
-    destination: arrival?.destination || `L${lineId}`,
+    lineName: lineId ? `L${lineId}` : 'Todas',
+    destination:
+      arrival?.destination || (lineId ? `L${lineId}` : 'Todas las líneas'),
   });
   return true;
 }
@@ -709,36 +892,76 @@ export async function handleFavCommand(ctx: Context): Promise<void> {
   if (!chatId) return;
   const args = textOf(ctx).split(/\s+/);
 
-  if (args[1] === 'add' && args.length >= 4 && /^\d+$/.test(args[2])) {
-    const added = await saveFavorite(chatId, args[2], args[3]);
+  // Sin línea se guarda la parada completa; con línea, solo esa línea.
+  if (args[1] === 'add' && args.length >= 3 && /^\d+$/.test(args[2])) {
+    const added = await saveFavorite(chatId, args[2], args[3] ?? '');
     await ctx.reply(
       added ? '⭐ Favorito guardado' : '⭐ Ya tenías este favorito guardado'
+    );
+    return;
+  }
+  if (args[1] === 'linea' && args[2]) {
+    const result = storeLineFavorite(chatId, args[2]);
+    await ctx.reply(
+      result === 'added'
+        ? '⭐ Línea guardada'
+        : result === 'duplicate'
+          ? '⭐ Ya tenías esta línea guardada'
+          : '❌ Línea no encontrada'
     );
     return;
   }
   if (args[1] === 'remove') {
     const id = Number.parseInt(args[2] ?? '', 10);
     if (!Number.isNaN(id)) {
-      const fav = getFavorites(chatId).find((f) => f.id === id);
-      if (fav) {
+      if (getFavorites(chatId).some((fav) => fav.id === id)) {
         removeFavorite(id);
         await ctx.reply('🗑️ Favorito eliminado');
         return;
       }
+      if (getFavoriteLines(chatId).some((line) => line.id === id)) {
+        removeFavoriteLine(id);
+        await ctx.reply('🗑️ Línea eliminada');
+        return;
+      }
     }
   }
+
   const favs = getFavorites(chatId);
-  await ctx.reply(
-    favs.length
-      ? `⭐ **Tus favoritos:**\n\n${favs
-          .map(
-            (f) =>
-              `• ${escapeMd(f.stopName)} · L${escapeMd(f.lineId)} (#${f.id})`
-          )
-          .join('\n')}`
-      : '⭐ No tienes favoritos.',
-    { parse_mode: 'Markdown' }
-  );
+  const lines = getFavoriteLines(chatId);
+  if (!favs.length && !lines.length) {
+    await ctx.reply(
+      '⭐ No tienes favoritos. Usa `/buscar` para encontrar uno.',
+      {
+        parse_mode: 'Markdown',
+      }
+    );
+    return;
+  }
+  const parts: string[] = [];
+  if (favs.length) {
+    parts.push(
+      `**Paradas:**\n${favs
+        .map(
+          (f) =>
+            `• ${escapeMd(f.stopName)} (${f.stopId}) · ${f.lineId ? `L${escapeMd(f.lineId)}` : 'todas'} (#${f.id})`
+        )
+        .join('\n')}`
+    );
+  }
+  if (lines.length) {
+    parts.push(
+      `**Líneas:**\n${lines
+        .map(
+          (l) =>
+            `• L${escapeMd(l.lineId)} · ${escapeMd(l.destination)} (#${l.id})`
+        )
+        .join('\n')}`
+    );
+  }
+  await ctx.reply(`⭐ **Tus favoritos:**\n\n${parts.join('\n\n')}`, {
+    parse_mode: 'Markdown',
+  });
 }
 
 // --- Texto libre (flujo interactivo) ---
@@ -749,6 +972,11 @@ async function handleText(ctx: Context): Promise<void> {
   if (!chatId || !text || text.startsWith('/')) return;
 
   const session = getSession(chatId);
+  if (session.step === 'searching') {
+    clearSession(chatId);
+    await showSearchResults(ctx, text);
+    return;
+  }
   if (
     session.step !== 'waiting_stop_arrivals' &&
     session.step !== 'waiting_stop_alert'
@@ -757,12 +985,9 @@ async function handleText(ctx: Context): Promise<void> {
   }
 
   if (!/^\d+$/.test(text)) {
-    await ctx.reply(
-      '❌ Escribe solo el código numérico de la parada (p. ej. `1`).',
-      {
-        parse_mode: 'Markdown',
-      }
-    );
+    // En el flujo de parada también aceptamos nombres: derivamos al buscador.
+    session.step = 'searching';
+    await showSearchResults(ctx, text);
     return;
   }
 
@@ -778,7 +1003,6 @@ async function handleText(ctx: Context): Promise<void> {
 
 async function handleMenuCallback(ctx: Context): Promise<void> {
   const data = callbackData(ctx);
-  const modeMatch = data.match(/^menu_popular_(arrivals|alert)$/);
 
   switch (data) {
     case 'menu_main':
@@ -790,8 +1014,8 @@ async function handleMenuCallback(ctx: Context): Promise<void> {
     case 'menu_alert':
       await askStopCode(ctx, 'alert');
       break;
-    case 'menu_popular':
-      await showPopularStops(ctx, 'arrivals');
+    case 'menu_search':
+      await askSearch(ctx);
       break;
     case 'menu_favorites':
       await showFavorites(ctx);
@@ -809,20 +1033,75 @@ async function handleMenuCallback(ctx: Context): Promise<void> {
       await showMainMenu(ctx);
       break;
     default:
-      if (modeMatch)
-        await showPopularStops(ctx, modeMatch[1] as 'arrivals' | 'alert');
-      else return;
+      return;
   }
   await answer(ctx);
 }
 
-async function handlePopularCallback(ctx: Context): Promise<void> {
-  const match = callbackData(ctx).match(/^popular_(\d+)_(arrivals|alert)$/);
+async function handleSearchStopCallback(ctx: Context): Promise<void> {
+  const match = callbackData(ctx).match(/^srch_s_(\d+)$/);
   if (!match) return;
-  const [, stopId, mode] = match;
-  if (mode === 'alert') await showStopLines(ctx, stopId);
-  else await showArrivalsForStop(ctx, stopId);
+  await showArrivalsForStop(ctx, match[1]);
   await answer(ctx);
+}
+
+async function handleSearchLineCallback(ctx: Context): Promise<void> {
+  const match = callbackData(ctx).match(/^srch_l_(.+)$/);
+  if (!match) return;
+  await showLineDestinations(ctx, match[1]);
+  await answer(ctx);
+}
+
+async function handleLineDestCallback(ctx: Context): Promise<void> {
+  const match = callbackData(ctx).match(/^ld_(\d+)$/);
+  if (!match) return;
+  await showLineStops(ctx, match[1]);
+  await answer(ctx);
+}
+
+async function handleLineStopCallback(ctx: Context): Promise<void> {
+  const match = callbackData(ctx).match(/^ls_(\d+)_(.+)$/);
+  if (!match) return;
+  await showArrivalsForStop(ctx, match[1], match[2]);
+  await answer(ctx);
+}
+
+async function handleFavLineSaveCallback(ctx: Context): Promise<void> {
+  const match = callbackData(ctx).match(/^favline_([^_]+)$/);
+  if (!match) return;
+  await saveLineFavorite(ctx, match[1]);
+}
+
+async function handleFavLineViewCallback(ctx: Context): Promise<void> {
+  const match = callbackData(ctx).match(/^favline_view_(.+)$/);
+  if (!match) return;
+  await showLineDestinations(ctx, match[1]);
+  await answer(ctx);
+}
+
+async function handleFavLineRemoveCallback(ctx: Context): Promise<void> {
+  const match = callbackData(ctx).match(/^favlin_remove_(\d+)$/);
+  const chatId = ctx.chat?.id;
+  if (!match || !chatId) return;
+  const id = Number.parseInt(match[1], 10);
+  if (!getFavoriteLines(chatId).some((line) => line.id === id)) {
+    await answer(ctx, '❌ Línea no encontrada');
+    return;
+  }
+  removeFavoriteLine(id);
+  await answer(ctx, '🗑️ Línea eliminada');
+  await showFavorites(ctx);
+}
+
+async function handleSaveStopFavorite(ctx: Context): Promise<void> {
+  const match = callbackData(ctx).match(/^favstop_(\d+)$/);
+  const chatId = ctx.chat?.id;
+  if (!match || !chatId) return;
+  const added = await saveFavorite(chatId, match[1]);
+  await answer(
+    ctx,
+    added ? '⭐ Parada guardada' : '⭐ Ya tenías esta parada guardada'
+  );
 }
 
 async function handleStopRefresh(ctx: Context): Promise<void> {
@@ -844,7 +1123,7 @@ async function handleStopAlert(ctx: Context): Promise<void> {
 }
 
 async function handleLineCallback(ctx: Context): Promise<void> {
-  const match = callbackData(ctx).match(/^aline_(\d+)$/);
+  const match = callbackData(ctx).match(/^aline_([^_]+)$/);
   const chatId = ctx.chat?.id;
   if (!match || !chatId) return;
   const session = getSession(chatId);
@@ -897,7 +1176,7 @@ async function handleMinutesCallback(ctx: Context): Promise<void> {
 }
 
 async function handleFavAdd(ctx: Context): Promise<void> {
-  const match = callbackData(ctx).match(/^fav_add_(\d+)_(\d+)$/);
+  const match = callbackData(ctx).match(/^fav_add_(\d+)_([^_]+)$/);
   const chatId = ctx.chat?.id;
   if (!match || !chatId) return;
   const [, stopId, lineId] = match;
@@ -917,7 +1196,7 @@ async function handleFavView(ctx: Context): Promise<void> {
     await answer(ctx, '❌ Favorito no encontrado');
     return;
   }
-  await showArrivalsForStop(ctx, fav.stopId, fav.lineId);
+  await showArrivalsForStop(ctx, fav.stopId, fav.lineId || undefined);
   await answer(ctx);
 }
 
@@ -958,7 +1237,8 @@ export function setupBot(bot: Telegraf<Context>): void {
   bot.command('help', handleHelp);
   bot.command('parada', handleParada);
   bot.command('lineas', handleLineas);
-  bot.command('populares', handlePopulares);
+  bot.command('buscar', handleBuscar);
+  bot.command('linea', handleLineaCommand);
   bot.command('aviso', handleAviso);
   bot.command('lista', handleLista);
   bot.command('borrar', handleBorrar);
@@ -968,12 +1248,19 @@ export function setupBot(bot: Telegraf<Context>): void {
 
   // Menú y flujos
   bot.action(/^menu_.*/, handleMenuCallback);
-  bot.action(/^popular_\d+_(arrivals|alert)$/, handlePopularCallback);
+  bot.action(/^srch_s_\d+$/, handleSearchStopCallback);
+  bot.action(/^srch_l_(.+)$/, handleSearchLineCallback);
+  bot.action(/^ld_\d+$/, handleLineDestCallback);
+  bot.action(/^ls_\d+_.+$/, handleLineStopCallback);
+  bot.action(/^favline_view_(.+)$/, handleFavLineViewCallback);
+  bot.action(/^favlin_remove_\d+$/, handleFavLineRemoveCallback);
+  bot.action(/^favline_([^_]+)$/, handleFavLineSaveCallback);
+  bot.action(/^favstop_\d+$/, handleSaveStopFavorite);
   bot.action(/^stop_refresh_\d+$/, handleStopRefresh);
   bot.action(/^stop_alert_\d+$/, handleStopAlert);
-  bot.action(/^aline_\d+$/, handleLineCallback);
+  bot.action(/^aline_([^_]+)$/, handleLineCallback);
   bot.action(/^minutes_\d+$/, handleMinutesCallback);
-  bot.action(/^fav_add_\d+_\d+$/, handleFavAdd);
+  bot.action(/^fav_add_\d+_([^_]+)$/, handleFavAdd);
   bot.action(/^fav_view_\d+$/, handleFavView);
   bot.action(/^fav_remove_\d+$/, handleFavRemove);
   bot.action(/^adel_\d+$/, handleAlertDelete);

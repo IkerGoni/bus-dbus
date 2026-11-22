@@ -1,5 +1,5 @@
 # Estado — bus-dbus
-Actualizado: 2026-11-22 06:20 · Última sesión: análisis de features del bot, optimizaciones y QoL
+Actualizado: 2026-11-22 06:47 · Última sesión: buscador real, favoritos libres y UX de parada/línea
 
 ## Objetivo actual
 PWA de llegadas de Dbus (San Sebastián) + bot de Telegram con avisos.
@@ -55,6 +55,31 @@ en el Sprint 3 por errores preexistentes de TypeScript/lint.
 - Tests: 31/31 en verde (11 unit + 10 integración + 10 E2E). `tsc`, `biome
   check src/ tests/` y `build` sin errores. **Cambios aún no commiteados ni
   desplegados** (el bot en PID 1054 sigue con el build anterior).
+
+## Hecho en esta sesión (búsqueda y favoritos)
+- Descartado el prototipo GPS: la API de Dbus no expone coordenadas y los
+  datos generados quedaron solo en TMPDIR (nada en el repo).
+- Eliminado "paradas populares" de menú, `/help` y comandos: era una lista
+  arbitraria de 24 paradas de 3 itinerarios semilla. `fetchPopularStops`
+  sigue solo como caché interna de nombres para `/actualizar`.
+- Catálogo real generado desde la API: `bot/data/dbus-catalog.json` con
+  39 líneas, 127 itinerarios y 548 paradas. Refrescable con
+  `npm run build:catalog` (`bot/scripts/build-catalog.mjs`). Es índice de
+  descubrimiento; las llegadas siguen siendo 100 % en vivo.
+- `bot/src/catalog.ts`: búsqueda por código/nombre sin acentos y por línea
+  (código público, id interno o destino); `getLineByCode` prioriza el código
+  público porque el id interno 28 es la pública 26.
+- UX: `/buscar` y botón 🔎 (acepta `1`, `Boulevard`, `28`, `Ospitaleak`);
+  `/linea 28` → destinos → paradas de ese destino → llegadas. Botones
+  `srch_s_`, `srch_l_`, `ld_`, `ls_` son stateless (codifican el dato).
+- Favoritos libres: parada completa (`line_id=''`, todas las líneas),
+  parada+línea y línea favorita (nueva tabla `user_favorite_lines`).
+  `/fav add <parada> [linea]` y `/fav linea <linea>`; botones "Guardar
+  parada"/"Guardar línea" y borrado desde `/fav`.
+- Aceptadas líneas alfanuméricas (`B4`, `B9`): antes `/aviso` y los callbacks
+  exigían solo dígitos.
+- Tests: 40/40 (14 unit + 12 integración + 14 E2E). `tsc`, `biome check
+  src/ tests/` y `build` sin errores. Catálogo y docs actualizados.
 
 ## Pendiente (por prioridad)
 - [ ] PWA Shell (Sprint 3): 30 errores TS y 233 errores de lint en `src/`

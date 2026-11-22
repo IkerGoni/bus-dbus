@@ -1,7 +1,14 @@
 import { Telegraf, Telegram } from 'telegraf';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { stopAlertScheduler } from '../src/alerts.js';
-import { deleteAlert, getAlertsByChat } from '../src/db.js';
+import {
+  deleteAlert,
+  getAlertsByChat,
+  getFavoriteLines,
+  getFavorites,
+  removeFavorite,
+  removeFavoriteLine,
+} from '../src/db.js';
 import { setupBot } from '../src/handlers.js';
 
 interface SentCall {
@@ -236,6 +243,53 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
       );
     } finally {
       for (const alert of getAlertsByChat(target.id)) deleteAlert(alert.id);
+    }
+  });
+
+  it('/buscar devuelve paradas y líneas del catálogo real', async () => {
+    let start = sent.length;
+    await bot.handleUpdate(messageUpdate('/buscar Boulevard', 40) as never);
+    expect(textsSince(start)).toContain('srch_s_1');
+
+    start = sent.length;
+    await bot.handleUpdate(messageUpdate('/buscar 28', 41) as never);
+    expect(textsSince(start)).toContain('srch_l_28');
+  });
+
+  it('/linea muestra destinos reales de la línea', async () => {
+    const start = sent.length;
+    await bot.handleUpdate(messageUpdate('/linea 28', 42) as never);
+    const output = textsSince(start);
+    expect(output).toContain('ld_');
+    expect(output).toContain('L28');
+  });
+
+  it('/fav add sin línea guarda la parada completa', async () => {
+    const target = { ...chat, id: 555555558 };
+    for (const fav of getFavorites(target.id)) removeFavorite(fav.id);
+    try {
+      const start = sent.length;
+      await bot.handleUpdate(messageUpdate('/fav add 1', 43, target) as never);
+      expect(textsSince(start)).toContain('Favorito guardado');
+      expect(getFavorites(target.id)[0]?.lineId).toBe('');
+    } finally {
+      for (const fav of getFavorites(target.id)) removeFavorite(fav.id);
+    }
+  });
+
+  it('/fav linea guarda una línea favorita', async () => {
+    const target = { ...chat, id: 555555559 };
+    for (const line of getFavoriteLines(target.id)) removeFavoriteLine(line.id);
+    try {
+      const start = sent.length;
+      await bot.handleUpdate(
+        messageUpdate('/fav linea 28', 44, target) as never
+      );
+      expect(textsSince(start)).toContain('Línea guardada');
+      expect(getFavoriteLines(target.id)[0]?.lineId).toBe('28');
+    } finally {
+      for (const line of getFavoriteLines(target.id))
+        removeFavoriteLine(line.id);
     }
   });
 
