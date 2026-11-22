@@ -56,7 +56,7 @@ export interface DbusStopTimes {
   creacion: string | null;
 }
 
-interface CacheEntry<T> {
+export interface CacheEntry<T> {
   data: T;
   ts: number;
 }
@@ -69,6 +69,26 @@ const POPULAR_TTL_MS = 12 * 60 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 10_000;
 const RETRY_DELAY_MS = 300;
 const SEED_ITINERARIES = ['1280', '1281', '450'];
+const MAX_CACHED_STOPS = 200;
+
+/**
+ * Evicta las entradas más antiguas (orden de inserción) cuando la caché
+ * supera el límite. El refresco en segundo plano visita todas las paradas
+ * vistas, así que sin tope el mapa crece sin control en sesiones largas.
+ */
+export function evictOldestEntries<T>(
+  cache: Map<string, CacheEntry<T>>,
+  maxEntries: number
+): number {
+  let removed = 0;
+  while (cache.size > maxEntries) {
+    const oldest = cache.keys().next().value;
+    if (oldest === undefined) break;
+    cache.delete(oldest);
+    removed++;
+  }
+  return removed;
+}
 
 // --- normalizadores tolerantes a que la API devuelva null en cualquier campo ---
 
@@ -207,6 +227,7 @@ export async function fetchStopTimes(
     const parsed = normalizeStopTimes(raw);
     if (parsed) {
       stopCache.set(code, { data: parsed, ts: Date.now() });
+      evictOldestEntries(stopCache, MAX_CACHED_STOPS);
     }
     return parsed;
   })();
@@ -228,14 +249,17 @@ export async function fetchPopularStops(): Promise<DbusParada[]> {
     return popularCache.data;
   }
 
+  // Los tres itinerarios semilla son independientes: pedirlos en paralelo
+  // reduce la carga en frío de ~3 latencias a 1.
+  const responses = await Promise.all(
+    SEED_ITINERARIES.map((itinerarioId) =>
+      getJson(`/paradasItinerario?idItinerario=${itinerarioId}`)
+    )
+  );
   const collected = new Map<string, DbusParada>();
-  for (const itinerarioId of SEED_ITINERARIES) {
-    const raw = await getJson(
-      `/paradasItinerario?idItinerario=${itinerarioId}`
-    );
+  for (const raw of responses) {
     if (raw == null) continue;
-    const rawObj = obj(raw);
-    for (const item of arr(rawObj.lista)) {
+    for (const item of arr(obj(raw).lista)) {
       const parada = normalizeParada(item);
       if (parada) collected.set(parada.cod, parada);
     }
@@ -273,4 +297,12 @@ export function clearCache(): void {
 /** Útil para diagnóstico: estado de la conexión con la API de Dbus. */
 export function getDataSource(): string {
   return config.dbusBaseUrl;
+}
+
+/** Diagnóstico: tamaño de las cachés en memoria. */
+export function getCacheStats(): { stops: number; popularStops: number } {
+  return {
+    stops: stopCache.size,
+    popularStops: popularCache?.data.length ?? 0,
+  };
 }

@@ -1,5 +1,5 @@
 # Estado — bus-dbus
-Actualizado: 2026-11-22 06:13 · Última sesión: consolidación, docs y despliegue del bot
+Actualizado: 2026-11-22 06:20 · Última sesión: análisis de features del bot, optimizaciones y QoL
 
 ## Objetivo actual
 PWA de llegadas de Dbus (San Sebastián) + bot de Telegram con avisos.
@@ -39,6 +39,23 @@ en el Sprint 3 por errores preexistentes de TypeScript/lint.
   en PID 1054, sin conflictos 409, scheduler y refresco de 30 s activos.
   `f1ed9a0` ya pusheado a `origin/main`.
 
+## Hecho en esta sesión (análisis + mejoras del bot)
+- Optimización: `fetchPopularStops` pide los 3 itinerarios semilla en paralelo
+  (`Promise.all`) en vez de en serie: carga en frío de ~3 latencias a 1.
+- Optimización: caché de paradas limitada a 200 entradas; `evictOldestEntries<T>`
+  elimina las más antiguas (por inserción) tras cada consulta. Evita que el
+  refresco de 30 s visite un mapa que crece sin límite.
+- QoL/correctitud: `createAndConfirmAlert` devuelve `created | duplicate |
+  no-chat`; `handleMinutesCallback` ya no responde "✅ Aviso creado" cuando el
+  aviso fue rechazado por duplicado. El mensaje emergente distingue ambos casos.
+- QoL: la confirmación de aviso incluye la ETA de la próxima llegada
+  (`min`/`ahora` + 📡/🕒), con fallback determinista sin servicio.
+- QoL: comando `/estado` (diagnóstico: fuente, cachés, avisos activos, uptime,
+  sin secretos) documentado en `/help` y README.
+- Tests: 31/31 en verde (11 unit + 10 integración + 10 E2E). `tsc`, `biome
+  check src/ tests/` y `build` sin errores. **Cambios aún no commiteados ni
+  desplegados** (el bot en PID 1054 sigue con el build anterior).
+
 ## Pendiente (por prioridad)
 - [ ] PWA Shell (Sprint 3): 30 errores TS y 233 errores de lint en `src/`
       (bloqueo preexistente; tareas en el kanban `dbus-app`).
@@ -63,8 +80,10 @@ en el Sprint 3 por errores preexistentes de TypeScript/lint.
 - Enviar `/start` a `@dbus_alarm_bot` para confirmar el round-trip real.
 
 ## Git
-`8ce2694` → `f1ed9a0` (mejoras del bot, ya pusheado) → consolidación + docs
-de esta sesión (pusheado con este cambio). Ramas abiertas: ninguna.
+`8ce2694` → `f1ed9a0` (mejoras del bot) → `65d2b08` (consolidación + docs),
+ambos ya pusheados. Los cambios de mejoras/QoL de esta sesión están en el
+working tree, **sin commitear ni pushear** a la espera de revisión. Ramas
+abiertas: ninguna.
 El token solo se pasa por entorno a `npm run start`; nunca en archivos ni en
 commits. Recomendación de seguridad: rotar el token porque se compartió en
 texto plano en el chat.

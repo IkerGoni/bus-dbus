@@ -1,5 +1,5 @@
+import { Telegraf, Telegram } from 'telegraf';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { Telegram, Telegraf } from 'telegraf';
 import { stopAlertScheduler } from '../src/alerts.js';
 import { deleteAlert, getAlertsByChat } from '../src/db.js';
 import { setupBot } from '../src/handlers.js';
@@ -90,7 +90,10 @@ function callbackUpdate(
 function textsSince(start = 0): string {
   return sent
     .slice(start)
-    .filter((call) => call.method === 'sendMessage' || call.method === 'editMessageText')
+    .filter(
+      (call) =>
+        call.method === 'sendMessage' || call.method === 'editMessageText'
+    )
     .map((call) => JSON.stringify(call.payload))
     .join('\n');
 }
@@ -133,7 +136,9 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
   });
 
   it('callback answers are sent', () => {
-    expect(sent.some((call) => call.method === 'answerCallbackQuery')).toBe(true);
+    expect(sent.some((call) => call.method === 'answerCallbackQuery')).toBe(
+      true
+    );
   });
 
   it('accepts the internal Dbus line id as an alias for the public code', async () => {
@@ -149,7 +154,9 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
     for (const alert of getAlertsByChat(target.id)) deleteAlert(alert.id);
     try {
       let start = sent.length;
-      await bot.handleUpdate(messageUpdate('/aviso 1 32 5', 6, target) as never);
+      await bot.handleUpdate(
+        messageUpdate('/aviso 1 32 5', 6, target) as never
+      );
       const created = textsSince(start);
       expect(created).toContain('Aviso creado');
       expect(created).toContain('L28');
@@ -181,5 +188,63 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
     } finally {
       for (const alert of getAlertsByChat(target.id)) deleteAlert(alert.id);
     }
+  });
+
+  it('rechaza un aviso duplicado por comando', async () => {
+    const target = { ...chat, id: 555555556 };
+    for (const alert of getAlertsByChat(target.id)) deleteAlert(alert.id);
+    try {
+      await bot.handleUpdate(
+        messageUpdate('/aviso 1 32 5', 20, target) as never
+      );
+      const start = sent.length;
+      await bot.handleUpdate(
+        messageUpdate('/aviso 1 32 5', 21, target) as never
+      );
+      expect(textsSince(start)).toContain('Ya tienes un aviso activo');
+    } finally {
+      for (const alert of getAlertsByChat(target.id)) deleteAlert(alert.id);
+    }
+  });
+
+  it('el flujo interactivo informa del duplicado y muestra la ETA', async () => {
+    const target = { ...chat, id: 555555557 };
+    for (const alert of getAlertsByChat(target.id)) deleteAlert(alert.id);
+    try {
+      let start = sent.length;
+      await bot.handleUpdate(messageUpdate('/start', 22, target) as never);
+      await bot.handleUpdate(callbackUpdate('menu_alert', 23, target) as never);
+      await bot.handleUpdate(messageUpdate('1', 24, target) as never);
+      await bot.handleUpdate(callbackUpdate('aline_28', 25, target) as never);
+      await bot.handleUpdate(callbackUpdate('minutes_5', 26, target) as never);
+      const first = textsSince(start);
+      expect(first).toContain('Aviso creado');
+      expect(first).toContain('Próxima llegada');
+
+      start = sent.length;
+      await bot.handleUpdate(callbackUpdate('menu_alert', 27, target) as never);
+      await bot.handleUpdate(messageUpdate('1', 28, target) as never);
+      await bot.handleUpdate(callbackUpdate('aline_28', 29, target) as never);
+      await bot.handleUpdate(callbackUpdate('minutes_5', 30, target) as never);
+      expect(textsSince(start)).toContain('Ya tienes un aviso activo');
+      const answers = sent
+        .slice(start)
+        .filter((call) => call.method === 'answerCallbackQuery')
+        .map((call) => String(call.payload.text ?? ''));
+      expect(answers.some((text) => text.includes('Ya tenías un aviso'))).toBe(
+        true
+      );
+    } finally {
+      for (const alert of getAlertsByChat(target.id)) deleteAlert(alert.id);
+    }
+  });
+
+  it('/estado muestra diagnóstico sin secretos', async () => {
+    const start = sent.length;
+    await bot.handleUpdate(messageUpdate('/estado', 31) as never);
+    const output = textsSince(start);
+    expect(output).toContain('Estado del bot');
+    expect(output).toContain('Paradas en caché');
+    expect(output).not.toContain('BOT_TOKEN');
   });
 });

@@ -18,7 +18,11 @@ import {
   removeFavorite,
   updateAlert,
 } from '../src/db.js';
-import { fetchPopularStops, fetchStopTimes, getStopName } from '../src/dbus-client.js';
+import {
+  fetchPopularStops,
+  fetchStopTimes,
+  getStopName,
+} from '../src/dbus-client.js';
 
 // Parada pública real: 1 = Boulevard 9, San Sebastián.
 const STOP = '1';
@@ -62,7 +66,9 @@ describe('Arrival logic (live)', () => {
       expect(arrival.stopId).toBe(STOP);
     }
     for (let i = 1; i < arrivals.length; i++) {
-      expect(arrivals[i].arrivalTime).toBeGreaterThanOrEqual(arrivals[i - 1].arrivalTime);
+      expect(arrivals[i].arrivalTime).toBeGreaterThanOrEqual(
+        arrivals[i - 1].arrivalTime
+      );
     }
   });
 
@@ -117,7 +123,9 @@ describe('Database - Alerts', () => {
     expect(getAlertsByChat(testChatId).length).toBeGreaterThan(0);
     expect(getActiveAlerts().some((a) => a.id === alert.id)).toBe(true);
     expect(deleteAlert(alert.id)).toBe(true);
-    expect(getAlertsByChat(testChatId).find((a) => a.id === alert.id)).toBeUndefined();
+    expect(
+      getAlertsByChat(testChatId).find((a) => a.id === alert.id)
+    ).toBeUndefined();
   });
 
   it('finds an active alert for dedup and ignores inactive ones', () => {
@@ -161,7 +169,9 @@ describe('Database - Favorites', () => {
     expect(fav.chatId).toBe(testChatId);
     expect(getFavorites(testChatId).length).toBeGreaterThan(0);
     expect(removeFavorite(fav.id)).toBe(true);
-    expect(getFavorites(testChatId).find((f) => f.id === fav.id)).toBeUndefined();
+    expect(
+      getFavorites(testChatId).find((f) => f.id === fav.id)
+    ).toBeUndefined();
   });
 
   it('finds a favorite for dedup', () => {

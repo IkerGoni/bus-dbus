@@ -3,11 +3,12 @@ import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
+  UNKNOWN_DESTINATION,
   findMatchingArrival,
   matchesLine,
   normalizeLine,
-  UNKNOWN_DESTINATION,
 } from '../src/arrival.js';
+import { evictOldestEntries } from '../src/dbus-client.js';
 import { getSessionCount, pruneSessions } from '../src/handlers.js';
 import {
   acquireInstanceLock,
@@ -15,7 +16,9 @@ import {
 } from '../src/single-instance.js';
 import type { NextArrivalResult } from '../src/types.js';
 
-function arrival(overrides: Partial<NextArrivalResult> = {}): NextArrivalResult {
+function arrival(
+  overrides: Partial<NextArrivalResult> = {}
+): NextArrivalResult {
   return {
     arrivalTime: Date.now() + 4 * 60_000,
     minutes: 4,
@@ -61,13 +64,15 @@ describe('findMatchingArrival', () => {
 
   it('picks the soonest within the window and ignores the rest', () => {
     const result = findMatchingArrival(
-      [arrival({ minutes: 1 }), arrival({ minutes: 3 }), arrival({ minutes: 9 })],
+      [
+        arrival({ minutes: 1 }),
+        arrival({ minutes: 3 }),
+        arrival({ minutes: 9 }),
+      ],
       base
     );
     expect(result?.minutes).toBe(1);
-    expect(
-      findMatchingArrival([arrival({ minutes: 9 })], base)
-    ).toBeNull();
+    expect(findMatchingArrival([arrival({ minutes: 9 })], base)).toBeNull();
   });
 
   it('accepts the internal id as the alert line', () => {
@@ -114,6 +119,19 @@ describe('session helpers', () => {
     expect(removed).toBe(0);
     expect(getSessionCount()).toBe(before);
     expect(pruneSessions(0)).toBe(0);
+  });
+});
+
+describe('stop cache eviction', () => {
+  it('evicts the oldest entries and keeps the newest ones', () => {
+    const cache = new Map<string, { data: number; ts: number }>();
+    for (const code of ['1', '2', '3', '4', '5']) {
+      cache.set(code, { data: Number(code), ts: Number(code) });
+    }
+    expect(evictOldestEntries(cache, 2)).toBe(3);
+    expect([...cache.keys()]).toEqual(['4', '5']);
+    expect(evictOldestEntries(cache, 2)).toBe(0);
+    expect([...cache.keys()]).toEqual(['4', '5']);
   });
 });
 

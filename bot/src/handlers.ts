@@ -17,6 +17,7 @@ import {
   deleteAlert,
   findActiveAlert,
   findFavorite,
+  getActiveAlerts,
   getAlertById,
   getAlertsByChat,
   getFavorites,
@@ -26,6 +27,7 @@ import {
   clearCache,
   fetchPopularStops,
   fetchStopTimes,
+  getCacheStats,
   getCachedStopCodes,
   getDataSource,
   getStopName,
@@ -191,7 +193,7 @@ const HELP_TEXT =
   '`/fav` — tus favoritos · `/fav add <parada> <linea>` · `/fav remove <id>`\n' +
   '`/lineas <parada>` — líneas que pasan por una parada\n' +
   '`/populares` — paradas habituales\n' +
-  '`/actualizar` — refrescar datos\n\n' +
+  '`/actualizar` — refrescar datos · `/estado` — diagnóstico\n\n' +
   'También acepto el id interno de Dbus (p. ej. `32` = línea pública `28`).\n' +
   'Datos reales de la API de Dbus 📡';
 
@@ -413,15 +415,17 @@ function buildAlertsText(alerts: UserAlert[]): string {
   return msg;
 }
 
+type AlertCreationResult = 'created' | 'duplicate' | 'no-chat';
+
 async function createAndConfirmAlert(
   ctx: Context,
   stopId: string,
   lineId: string,
   minutesAhead: number,
   asEdit: boolean
-): Promise<void> {
+): Promise<AlertCreationResult> {
   const chatId = ctx.chat?.id;
-  if (!chatId) return;
+  if (!chatId) return 'no-chat';
 
   const arrival = await getNextArrival(stopId, lineId);
   // El usuario puede escribir el id interno (32); guardamos siempre el
@@ -436,7 +440,7 @@ async function createAndConfirmAlert(
       `(ID: \`${existing.id}\`). Bórralo con \`/borrar ${existing.id}\` antes de crear otro.`;
     if (asEdit) await safeEdit(ctx, text, { parse_mode: 'Markdown' });
     else await ctx.reply(text, { parse_mode: 'Markdown' });
-    return;
+    return 'duplicate';
   }
 
   const alert = createAlert({
@@ -450,11 +454,17 @@ async function createAndConfirmAlert(
     active: true,
   });
 
-  const msg =
-    `✅ **Aviso creado** (ID: \`${alert.id}\`)\n` +
-    `🚏 ${escapeMd(stopName)} (${escapeMd(stopId)})\n` +
-    `🚌 **L${escapeMd(publicLineId)}** → ${escapeMd(alert.destination)}\n` +
-    `🔔 Te avisaré **${minutesAhead} min** antes`;
+  // Contexto útil al crear el aviso: cuándo llega el próximo bus. Con sin
+  // servicio no hay estimación, pero el mensaje sigue siendo informativo.
+  const eta = arrival
+    ? `🔎 Próxima llegada: **${arrival.minutes === 0 ? 'ahora' : `${arrival.minutes} min`}** ` +
+      `(${arrival.realtime ? '📡 tiempo real' : '🕒 horario'})`
+    : '🔎 Próxima llegada: sin estimación ahora mismo';
+  const msg = `✅ **Aviso creado** (ID: \`${alert.id}\`)
+🚏 ${escapeMd(stopName)} (${escapeMd(stopId)})
+🚌 **L${escapeMd(publicLineId)}** → ${escapeMd(alert.destination)}
+🔔 Te avisaré **${minutesAhead} min** antes
+${eta}`;
 
   clearSession(chatId);
   if (asEdit) {
@@ -467,6 +477,7 @@ async function createAndConfirmAlert(
   } else {
     await ctx.reply(msg, { parse_mode: 'Markdown' });
   }
+  return 'created';
 }
 
 // --- Comandos ---
@@ -626,6 +637,17 @@ export async function handleActualizar(ctx: Context): Promise<void> {
   } else {
     await ctx.reply(msg, { parse_mode: 'Markdown' });
   }
+}
+
+/** Diagnóstico rápido del estado en memoria y de la fuente de datos. */
+export async function handleEstado(ctx: Context): Promise<void> {
+  const stats = getCacheStats();
+  const msg = `🟢 **Estado del bot**
+📡 Fuente: ${escapeMd(getDataSource())}
+🚏 Paradas en caché: ${stats.stops} · catálogo: ${stats.popularStops}
+🔔 Avisos activos: ${getActiveAlerts().length}
+⏱ Proceso activo: ${Math.floor(process.uptime())} s`;
+  await ctx.reply(msg, { parse_mode: 'Markdown' });
 }
 
 async function showFavorites(ctx: Context): Promise<void> {
@@ -857,14 +879,21 @@ async function handleMinutesCallback(ctx: Context): Promise<void> {
     await answer(ctx, '❌ Minutos fuera de rango');
     return;
   }
-  await createAndConfirmAlert(
+  const result = await createAndConfirmAlert(
     ctx,
     session.stopId,
     session.lineId,
     minutes,
     true
   );
-  await answer(ctx, '✅ Aviso creado');
+  await answer(
+    ctx,
+    result === 'created'
+      ? '✅ Aviso creado'
+      : result === 'duplicate'
+        ? '⚠️ Ya tenías un aviso para esta línea'
+        : '❌ No se pudo crear el aviso'
+  );
 }
 
 async function handleFavAdd(ctx: Context): Promise<void> {
@@ -934,6 +963,7 @@ export function setupBot(bot: Telegraf<Context>): void {
   bot.command('lista', handleLista);
   bot.command('borrar', handleBorrar);
   bot.command('actualizar', handleActualizar);
+  bot.command('estado', handleEstado);
   bot.command('fav', handleFavCommand);
 
   // Menú y flujos

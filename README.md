@@ -9,7 +9,7 @@ Aplicación PWA móvil para notificaciones push de llegada de autobús Dbus (San
 | **Planning (Sprints 0-2)** | ✅ Completo | 3 docs en `04-planning/`, 12 wireframes en `02-wireframes/`, 8 ADRs en `03-architecture/adrs/` |
 | **PWA Shell (Sprint 3)** | 🔧 Bloqueado | `npm run typecheck`: 30 errores TS · `npm run lint`: 233 errores (preexistentes, en `src/`) |
 | **Bot: datos reales** | ✅ Activo | API JSON de Dbus (`tiemposParada`), sin mocks en producción |
-| **Tests del bot** | ✅ 27/27 pasan | `npm run test` (10 unit + 10 integración + 7 E2E de handlers) |
+| **Tests del bot** | ✅ 31/31 pasan | `npm run test` (11 unit + 10 integración + 10 E2E de handlers) |
 | **TypeScript del bot** | ✅ 0 errores | `npx tsc --noEmit` en `bot/` |
 | **Lint del bot** | ✅ 0 errores | `npx biome check bot/src/` |
 | **Kanban** | `t_dbdce90c` (Sprint 3) en `ready` | `state/kanban/kanban.db` |
@@ -101,8 +101,9 @@ Variables de entorno:
 
 Comandos del bot: `/start`, `/parada <codigo> [linea]`, `/lineas <codigo>`,
 `/aviso <parada> <linea> <minutos>`, `/lista`, `/borrar <id>`, `/fav`,
-`/populares`, `/actualizar`, `/help`. El código de parada es el número visible
-en la marquesina (p. ej. `1` = Boulevard 9).
+`/populares`, `/actualizar`, `/estado`, `/help`. El código de parada es el
+número visible en la marquesina (p. ej. `1` = Boulevard 9). `/estado` muestra
+la fuente de datos, el tamaño de las cachés y los avisos activos (sin secretos).
 
 El bot acepta tanto el código público de línea (`28`, `L28`) como el id interno
 de Dbus (`32` = línea pública `28`), pero siempre guarda y muestra el código
@@ -111,6 +112,13 @@ caducan a los 7 días. `/lista` incluye botones para borrar cada aviso;
 `/actualizar` recarga el catálogo completo y `stop_refresh` solo invalida la
 parada consultada. El arranque tiene lock de instancia única y reintenta los
 conflictos `409` de Telegram con backoff (12 intentos, hasta 30 s).
+
+Optimizaciones y calidad de vida: el catálogo de paradas populares se consulta
+en paralelo (3 itinerarios semilla) en lugar de en serie; la caché de paradas
+está limitada a 200 entradas con evicción de las más antiguas para que el
+refresco periódico no crezca sin control; la confirmación de un aviso incluye
+la próxima llegada estimada; y el flujo interactivo distingue un aviso creado
+de uno duplicado en el mensaje emergente (antes siempre decía "creado").
 
 ## Roadmap (Milestones)
 
