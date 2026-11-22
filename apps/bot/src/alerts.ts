@@ -7,6 +7,7 @@ import {
   getNextArrivals,
 } from './arrival.js';
 import { getActiveAlerts, updateAlert } from './db.js';
+import { logger } from './logger.js';
 import type { UserAlert } from './types.js';
 
 const MAX_ALERT_AGE_MS = 7 * 24 * 60 * 60 * 1000;
@@ -33,14 +34,14 @@ export function startAlertScheduler(): void {
   scheduledTask = cron.schedule('* * * * *', () => {
     void checkAlerts();
   });
-  console.log('📅 Alert scheduler started (checking every minute)');
+  logger.info('📅 Alert scheduler started (checking every minute)');
 }
 
 export function stopAlertScheduler(): void {
   if (scheduledTask) {
     scheduledTask.stop();
     scheduledTask = null;
-    console.log('📅 Alert scheduler stopped');
+    logger.info('📅 Alert scheduler stopped');
   }
 }
 
@@ -58,7 +59,7 @@ async function checkAlerts(): Promise<void> {
 
 async function checkAlertsUnsafe(): Promise<void> {
   if (!botInstance) {
-    console.warn('Bot instance not set, skipping alert check');
+    logger.warn('Bot instance not set, skipping alert check');
     return;
   }
 
@@ -66,7 +67,7 @@ async function checkAlertsUnsafe(): Promise<void> {
   const alerts = getActiveAlerts().filter((alert) => {
     if (now - alert.createdAt <= MAX_ALERT_AGE_MS) return true;
     updateAlert(alert.id, { active: false });
-    console.log(`🧹 Alert ${alert.id} expired (older than 7 days)`);
+    logger.info(`🧹 Alert ${alert.id} expired (older than 7 days)`);
     return false;
   });
   if (!alerts.length) return;
@@ -100,7 +101,7 @@ async function checkAlertsUnsafe(): Promise<void> {
           });
           updateAlert(alert.id, { active: false, sendFailures: 0 });
           sentCount++;
-          console.log(
+          logger.info(
             `✅ Alert ${alert.id} triggered for chat ${alert.chatId}`
           );
         } catch (error) {
@@ -112,7 +113,7 @@ async function checkAlertsUnsafe(): Promise<void> {
             sendFailures: failures,
             active: failures < MAX_SEND_FAILURES,
           });
-          console.error(
+          logger.error(
             `[Alerts] Send failed for chat ${alert.chatId} ` +
               `(${failures}/${MAX_SEND_FAILURES}): ` +
               `${error instanceof Error ? error.message : String(error)}`
@@ -120,7 +121,7 @@ async function checkAlertsUnsafe(): Promise<void> {
         }
       }
     } catch (error) {
-      console.error(
+      logger.error(
         `[Alerts] Error checking stop ${stopId}: ${error instanceof Error ? error.message : String(error)}`
       );
     }

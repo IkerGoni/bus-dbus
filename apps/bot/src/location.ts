@@ -7,6 +7,7 @@
  */
 import { type Context, Markup } from 'telegraf';
 import { config } from './config.js';
+import { logger } from './logger.js';
 import {
   NEARBY_DISABLED_TEXT,
   NEARBY_UNAVAILABLE_TEXT,
@@ -79,7 +80,7 @@ export async function handleLocation(ctx: Context): Promise<void> {
   } catch (error) {
     // Nunca se rellena con paradas inventadas: si falla la fuente, se dice.
     if (!(error instanceof NearbyUnavailableError)) throw error;
-    console.error('[nearby] Overpass no disponible');
+    logger.error('[nearby] Overpass no disponible');
     await ctx.reply(NEARBY_UNAVAILABLE_TEXT);
   }
 }

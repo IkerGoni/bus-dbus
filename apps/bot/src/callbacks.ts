@@ -60,9 +60,6 @@ export async function handleMenuCallback(ctx: Context): Promise<void> {
     case 'menu_help':
       await handleHelp(ctx);
       return;
-    case 'menu_cancel':
-      await showMainMenu(ctx);
-      break;
     default:
       return;
   }

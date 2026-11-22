@@ -25,6 +25,7 @@ import {
 import { config } from '../src/config.js';
 import { evictOldestEntries } from '../src/dbus-client.js';
 import { getSessionCount, pruneSessions } from '../src/handlers.js';
+import { logger } from '../src/logger.js';
 import {
   buildOverpassQuery,
   haversineMeters,
@@ -285,6 +286,28 @@ describe('paradas cercanas (OSM + catálogo)', () => {
     expect(ranked[0].cod).toBe('39');
     expect(ranked[0].desc).toBe('Zubieta plaza');
     expect(ranked[0].distanceM).toBeLessThan(1);
+  });
+});
+
+describe('logger con niveles', () => {
+  it('filtra por LOG_LEVEL sin alterar el texto de los mensajes', () => {
+    const rank = { debug: 10, info: 20, warn: 30, error: 40, silent: 100 };
+    const seen: string[] = [];
+    const originalLog = console.log;
+    const originalError = console.error;
+    console.log = (...args: unknown[]) => seen.push(args.join(' '));
+    console.error = (...args: unknown[]) => seen.push(args.join(' '));
+    try {
+      logger.debug('msg-debug');
+      logger.info('msg-info');
+      logger.error('msg-error');
+    } finally {
+      console.log = originalLog;
+      console.error = originalError;
+    }
+    expect(seen.includes('msg-debug')).toBe(rank.debug >= rank[logger.level]);
+    expect(seen.includes('msg-info')).toBe(rank.info >= rank[logger.level]);
+    expect(seen.includes('msg-error')).toBe(rank.error >= rank[logger.level]);
   });
 });
 

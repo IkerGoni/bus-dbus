@@ -8,10 +8,11 @@ import {
   getDataSource,
 } from './dbus-client.js';
 import { setupBot } from './handlers.js';
+import { logger } from './logger.js';
 import { acquireInstanceLock, releaseInstanceLock } from './single-instance.js';
 
 if (!acquireInstanceLock()) {
-  console.error(
+  logger.error(
     '❌ Ya hay otra instancia del bot en ejecución. ' +
       'Detenla antes de arrancar otra (Telegram solo permite un getUpdates).'
   );
@@ -30,7 +31,7 @@ setupBot(bot);
 bot.catch((error, ctx) => {
   const detail =
     error instanceof Error ? (error.stack ?? error.message) : String(error);
-  console.error(
+  logger.error(
     `❌ Unhandled handler error (update ${ctx.update.update_id}): ${detail}`
   );
   void ctx
@@ -74,7 +75,7 @@ function startLiveRefresh(intervalMs: number): () => void {
             try {
               await fetchStopTimes(code, true);
             } catch (error) {
-              console.error(
+              logger.error(
                 `[Refresh] ${code}: ${error instanceof Error ? error.message : String(error)}`
               );
             }
@@ -99,9 +100,9 @@ const stopRefresh = startLiveRefresh(config.pollIntervalMs);
 function onLaunched(): void {
   // El callback se dispara tras getMe; launch().then() no llega hasta que
   // termina el long-polling, así que el log debe ir aquí.
-  console.log('🤖 Dbus Telegram Bot started');
-  console.log(`📡 Live data: ${getDataSource()}`);
-  console.log(`🔄 Refreshing every ${config.pollIntervalMs / 1000}s`);
+  logger.info('🤖 Dbus Telegram Bot started');
+  logger.info(`📡 Live data: ${getDataSource()}`);
+  logger.info(`🔄 Refreshing every ${config.pollIntervalMs / 1000}s`);
 }
 
 /**
@@ -120,7 +121,7 @@ async function launchWithRetry(maxAttempts = 12): Promise<void> {
         message.includes('409') || message.includes('Conflict');
       if (!isConflict || attempt === maxAttempts) throw error;
       const delay = Math.min(2000 * 2 ** (attempt - 1), 30_000);
-      console.warn(
+      logger.warn(
         `[Telegram] Polling conflict (attempt ${attempt}/${maxAttempts}); retrying in ${delay / 1000}s`
       );
       await new Promise((resolve) => setTimeout(resolve, delay));
@@ -129,7 +130,7 @@ async function launchWithRetry(maxAttempts = 12): Promise<void> {
 }
 
 void launchWithRetry().catch((error: unknown) => {
-  console.error(
+  logger.error(
     'Failed to start bot:',
     error instanceof Error ? error.message : String(error)
   );
@@ -137,7 +138,7 @@ void launchWithRetry().catch((error: unknown) => {
 });
 
 function shutdown(signal: string): void {
-  console.log(`\n🛑 ${signal} — stopping bot`);
+  logger.info(`\n🛑 ${signal} — stopping bot`);
   stopRefresh();
   stopAlertScheduler();
   bot.stop(signal);
