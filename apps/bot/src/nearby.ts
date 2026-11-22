@@ -1,52 +1,41 @@
-import { getStopByCode } from './catalog.js';
 /**
- * Paradas cercanas con coordenadas efímeras.
+ * Paradas cercanas sobre el índice local de coordenadas: sin Overpass en
+ * caliente y sin circuit breaker de red. Fuentes reales y read-only:
+ *  - índice local de coordenadas OSM (generado por `apps/bot/scripts/`):
+ *    posición y `cod` de la parada;
+ *  - catálogo Dbus: código y nombre canónicos de la parada.
+ * El `cod` se cruza con el catálogo para no inventar paradas. Las coordenadas
+ * del usuario se usan en memoria durante la petición y NO se guardan en
+ * SQLite, sesión, ni logs.
  *
- * Fuentes reales y read-only:
- *  - OpenStreetMap / Overpass: posición de las paradas y su `ref`.
- *  - Catálogo Dbus: código y nombre canónicos de la parada.
- * El ref de OSM se cruza con el catálogo para no inventar paradas. Las
- * coordenadas del usuario se usan en memoria durante la petición y NO se
- * guardan en SQLite, sesión, ni logs.
- *
- * Si Overpass falla, el feature se desactiva temporalmente (circuit breaker) y
- * se dice al usuario; nunca se devuelven paradas de relleno.
+ * Si el índice falta o está corrupto, se dice al usuario; nunca se devuelven
+ * paradas de relleno.
  */
+import { getStopByCode } from './catalog.js';
 import { config } from './config.js';
-
-const DISABLE_AFTER_FAILURES = 2;
-const DISABLE_MINUTES = 15;
+import {
+  type StopCoordinates,
+  StopCoordinatesError,
+  loadStopCoordinates,
+} from './stop-coordinates.js';
 
 export const NEARBY_DISABLED_TEXT =
-  '⚠️ El servicio de paradas cercanas está desactivado temporalmente ' +
-  '(OpenStreetMap/Overpass no responde). Vuelve a intentarlo más tarde; ' +
-  'mientras tanto usa /buscar.';
+  '⚠️ El servicio de paradas cercanas está desactivado. ' +
+  'Vuelve a intentarlo más tarde; mientras tanto usa /buscar.';
 
 export const NEARBY_UNAVAILABLE_TEXT =
-  '⚠️ Ahora mismo no puedo consultar paradas cercanas ' +
-  '(OpenStreetMap/Overpass no disponible). No muestro paradas inventadas. ' +
+  '⚠️ Ahora mismo no puedo consultar el índice de paradas cercanas. ' +
+  'No muestro paradas inventadas. ' +
   'Prueba de nuevo en unos minutos o usa /buscar.';
 
-let consecutiveFailures = 0;
-let disabledUntil = 0;
-
 export function isNearbyDisabled(): boolean {
-  return !config.nearbyEnabled || Date.now() < disabledUntil;
+  return !config.nearbyEnabled;
 }
 
-function noteSuccess(): void {
-  consecutiveFailures = 0;
-}
-
-function noteFailure(): void {
-  consecutiveFailures++;
-  if (consecutiveFailures >= DISABLE_AFTER_FAILURES) {
-    disabledUntil = Date.now() + DISABLE_MINUTES * 60_000;
-    consecutiveFailures = 0;
-  }
-}
-
-/** Consulta QL sobre paradas con `ref` alrededor del punto. */
+/**
+ * Consulta QL sobre paradas con `ref` alrededor del punto.
+ * Helper puro conservado por compatibilidad; la ruta /ubicacion ya no lo usa.
+ */
 export function buildOverpassQuery(
   latitude: number,
   longitude: number,
@@ -106,8 +95,9 @@ export function haversineMeters(
 }
 
 /**
- * Cruza elementos de Overpass con el índice real de Dbus. El nombre mostrado
- * es el del catálogo Dbus; la distancia se calcula de la geometría de OSM.
+ * Cruza elementos con el índice real de Dbus. El nombre mostrado es el del
+ * catálogo; la distancia se calcula de la geometría de la fuente de
+ * coordenadas. Dedup por código y orden por distancia.
  */
 export function rankNearbyStops(
   elements: OverpassElement[],
@@ -147,53 +137,44 @@ export function rankNearbyStops(
 
 export class NearbyUnavailableError extends Error {}
 
-/** Consulta Overpass y devuelve paradas Dbus cercanas, ordenadas por distancia. */
+/**
+ * Filtra el índice local por distancia y devuelve paradas Dbus cercanas,
+ * ordenadas por distancia. Sin fetch: el único error posible es que el
+ * índice no se pueda cargar.
+ */
 export async function getNearbyStops(
   latitude: number,
   longitude: number
 ): Promise<NearbyStop[]> {
   if (isNearbyDisabled()) throw new NearbyUnavailableError('disabled');
-  const query = buildOverpassQuery(latitude, longitude, config.nearbyRadiusM);
-  const url = `${config.overpassUrl}?${new URLSearchParams({ data: query })}`;
-  let response: Response;
+
+  let coordinates: StopCoordinates;
   try {
-    response = await fetch(url, {
-      headers: {
-        Accept: 'application/json',
-        'User-Agent': 'dbus-telegram-bot/nearby (read-only)',
-      },
-      signal: AbortSignal.timeout(config.nearbyTimeoutMs),
-    });
+    coordinates = loadStopCoordinates();
   } catch (error) {
-    noteFailure();
-    // No incluir la URL: lleva las coordenadas del usuario.
-    throw new NearbyUnavailableError(
-      error instanceof Error ? error.name : 'unknown'
-    );
+    if (error instanceof StopCoordinatesError) {
+      throw new NearbyUnavailableError(error.message);
+    }
+    throw error;
   }
-  if (!response.ok) {
-    noteFailure();
-    throw new NearbyUnavailableError(`HTTP ${response.status}`);
-  }
-  let body: unknown;
-  try {
-    body = await response.json();
-  } catch (error) {
-    noteFailure();
-    throw new NearbyUnavailableError(
-      `JSON: ${error instanceof Error ? error.name : 'unknown'}`
-    );
-  }
-  const elements = (body as { elements?: unknown })?.elements;
-  if (!Array.isArray(elements)) {
-    noteFailure();
-    throw new NearbyUnavailableError('respuesta sin elements');
-  }
-  noteSuccess();
-  return rankNearbyStops(
-    elements as OverpassElement[],
-    latitude,
-    longitude,
-    (cod) => getStopByCode(cod)
+
+  const radiusM = config.nearbyRadiusM;
+  // Adaptación al helper puro: cada fila del índice se presenta como un
+  // elemento con `ref` para reutilizar parseStopRefs + rankNearbyStops.
+  const elements: OverpassElement[] = coordinates.stops
+    .filter(
+      (stop) =>
+        haversineMeters(latitude, longitude, stop.lat, stop.lon) <= radiusM
+    )
+    .map((stop) => ({
+      type: 'node',
+      id: 0,
+      lat: stop.lat,
+      lon: stop.lon,
+      tags: { ref: stop.cod },
+    }));
+
+  return rankNearbyStops(elements, latitude, longitude, (cod) =>
+    getStopByCode(cod)
   );
 }

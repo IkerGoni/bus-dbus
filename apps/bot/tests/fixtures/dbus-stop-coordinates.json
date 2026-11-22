@@ -1,0 +1,17 @@
+{
+  "generatedAt": "2026-11-22T00:00:00.000Z",
+  "source": "fixture de tests (sin red)",
+  "attribution": "© OpenStreetMap contributors (ODbL)",
+  "coverage": {
+    "catalogStops": 548,
+    "withCoordinates": 4,
+    "withoutCoordinates": 544
+  },
+  "stops": [
+    { "cod": "1", "lat": 43.3205, "lon": -1.981 },
+    { "cod": "2", "lat": 43.319, "lon": -1.983 },
+    { "cod": "39", "lat": 43.316, "lon": -1.982 },
+    { "cod": "340", "lat": 43.31, "lon": -1.975 },
+    { "cod": "99999", "lat": 43.3201, "lon": -1.9821 }
+  ]
+}
