@@ -15,10 +15,6 @@
     <string name="settings_notifications_off_hint">Sin notificaciones, los avisos no sonarán.</string>
     <string name="settings_open_system">Ajustes del sistema</string>
     <string name="settings_section_background">Avisos en segundo plano</string>
-    <string name="settings_exact_alarms">Alarmas exactas</string>
-    <string name="settings_exact_on">Permitidas</string>
-    <string name="settings_exact_off">No permitidas: los avisos recurrentes pueden llegar tarde.</string>
-    <string name="settings_exact_grant">Permitir alarmas exactas</string>
     <string name="settings_battery">Optimización de batería</string>
     <string name="settings_battery_ok">Sin restricciones</string>
     <string name="settings_battery_restricted">Optimizada: los avisos pueden retrasarse</string>

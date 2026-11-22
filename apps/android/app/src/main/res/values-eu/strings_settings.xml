@@ -15,10 +15,6 @@
     <string name="settings_notifications_off_hint">Jakinarazpenik gabe, abisuek ez dute joko.</string>
     <string name="settings_open_system">Sistemaren ezarpenak</string>
     <string name="settings_section_background">Atzeko planoko abisuak</string>
-    <string name="settings_exact_alarms">Alarma zehatzak</string>
-    <string name="settings_exact_on">Baimenduta</string>
-    <string name="settings_exact_off">Ez daude baimenduta: errepikatzen diren abisuak berandu iritsi daitezke.</string>
-    <string name="settings_exact_grant">Baimendu alarma zehatzak</string>
     <string name="settings_battery">Bateriaren optimizazioa</string>
     <string name="settings_battery_ok">Murrizketarik gabe</string>
     <string name="settings_battery_restricted">Optimizatuta: abisuak berandu iritsi daitezke</string>

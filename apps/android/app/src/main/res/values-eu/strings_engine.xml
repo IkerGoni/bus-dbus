@@ -17,7 +17,6 @@
     <string name="notif_stopped_title">Abisuak zaindu gabe</string>
     <string name="notif_stopped_no_service">Dbusek 60 min daramatza zerbitzurik gabe edo erantzun gabe. Ireki aplikazioa berriro zaintzeko.</string>
     <string name="notif_stopped_time_limit">Androidek mugatu egin du atzeko planoko zaintza-denbora. Ireki aplikazioa berriro zaintzeko.</string>
-    <string name="notif_start_blocked">Ezin izan da zure abisu errepikakorra zaintzen hasi. Sakatu aplikazioa irekitzeko.</string>
 
     <string name="alerts_notifications_off">Jakinarazpenak desaktibatuta: zure abisuek ez dute joko.</string>
     <string name="alerts_notifications_enable">Aktibatu</string>

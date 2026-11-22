@@ -102,22 +102,8 @@
     <!-- Comunes (Sprint 3) -->
     <string name="undo">Deshacer</string>
     <string name="cancel">Cancelar</string>
-    <string name="accept">Aceptar</string>
     <string name="settings_open">Ajustes</string>
     <string name="stop_with_code">%1$s (%2$s)</string>
-    <string name="day_short_1">L</string>
-    <string name="day_short_2">M</string>
-    <string name="day_short_3">X</string>
-    <string name="day_short_4">J</string>
-    <string name="day_short_5">V</string>
-    <string name="day_short_6">S</string>
-    <string name="day_short_7">D</string>
-    <string name="days_summary_weekdays">L–V</string>
-    <string name="days_summary_daily">Diario</string>
-    <string name="days_summary_weekend">S–D</string>
-    <string name="days_preset_weekdays">Laborables</string>
-    <string name="days_preset_daily">Diario</string>
-    <string name="days_preset_weekend">Fines de semana</string>
     <plurals name="a11y_alerts_badge">
         <item quantity="one">%1$d aviso activo</item>
         <item quantity="other">%1$d avisos activos</item>
@@ -137,7 +123,7 @@
     <string name="alerts_empty_cta">Elegir parada y crear aviso</string>
     <string name="alerts_error_banner">No se pudieron consultar algunas paradas de tus avisos.</string>
     <string name="alerts_section_active">Activos</string>
-    <string name="alerts_section_silenced">Silenciados y pausados</string>
+    <string name="alerts_section_paused">Pausados</string>
     <string name="alerts_new">Nuevo aviso</string>
     <string name="alert_deleted">Aviso eliminado</string>
     <string name="alert_paused">Aviso pausado</string>
@@ -145,19 +131,14 @@
     <string name="alert_edit">Editar aviso</string>
     <string name="alert_delete">Eliminar aviso</string>
     <string name="alert_active_switch">Aviso activo</string>
-    <string name="alert_subtitle">%1$s (%2$s) · Aviso %3$d\' · %4$s</string>
+    <string name="alert_subtitle">%1$s (%2$s) · Aviso %3$d\'</string>
     <string name="alert_ahead_short">Aviso %1$d\'</string>
     <string name="alert_feed_error">No se pudo consultar Dbus</string>
     <string name="alert_feed_no_service">Sin servicio en este momento</string>
-    <string name="alert_once">Solo esta vez</string>
-    <string name="alert_recurring">Recurrente</string>
-    <string name="alert_recurring_summary">%1$s %2$s–%3$s</string>
     <string name="alert_any_destination">Cualquier destino</string>
     <string name="alert_status_triggered">Llegando</string>
     <string name="alert_status_active">Activa</string>
     <string name="alert_status_snoozed">Pospuesta hasta las %1$s</string>
-    <string name="alert_status_notified">Avisado en esta franja</string>
-    <string name="alert_status_out_of_window">Fuera de franja</string>
     <string name="alert_status_expired">Caducada</string>
     <string name="alert_status_paused">Pausada</string>
 
@@ -174,14 +155,7 @@
     <string name="alert_minutes_before_suffix">min antes</string>
     <string name="alert_minutes_chip">%1$d\'</string>
     <string name="alert_minutes_slider">Minutos de antelación</string>
-    <string name="alert_step_frequency">Frecuencia</string>
-    <string name="alert_once_hint">Vigila desde que lo guardas y avisa una vez. Caduca a los 7 días.</string>
-    <string name="alert_window_from">Desde %1$s</string>
-    <string name="alert_window_to">Hasta %1$s</string>
-    <string name="alert_window_pick">--:--</string>
-    <string name="alert_window_hint">Vigila solo en esa franja (máx. 3 h) los días marcados y avisa una vez por franja.</string>
-    <string name="alert_exact_alarm_missing">Sin permiso de alarmas exactas, el aviso recurrente puede llegar tarde.</string>
-    <string name="alert_exact_alarm_grant">Permitir</string>
+    <string name="alert_once_hint">Vigila desde que lo guardas, avisa una vez y se borra. Caduca a los 7 días si no llega a avisar.</string>
     <string name="alert_preview">Vista previa de la notificación</string>
     <string name="alert_save">Guardar aviso</string>
     <string name="alert_conflict_title">Ya tienes este aviso</string>
@@ -190,17 +164,12 @@
     <string name="alert_error_no_stop">Elige una parada.</string>
     <string name="alert_error_no_line">Elige una línea.</string>
     <string name="alert_error_minutes">La antelación debe estar entre 1 y 30 minutos.</string>
-    <string name="alert_error_no_days">Marca al menos un día.</string>
-    <string name="alert_error_no_window">Elige la franja: desde y hasta.</string>
-    <string name="alert_error_empty_window">La franja no puede empezar y acabar a la misma hora.</string>
-    <string name="alert_error_window_too_long">La franja no puede durar más de 3 horas.</string>
 
-    <!-- Notificación (texto real en Sprint 4; aquí se usa en la vista previa de A06) -->
+    <!-- Notificación de llegada y su vista previa en A06; `notif_action_snooze` es el Posponer de A01 -->
     <string name="notif_title">L%1$s → %2$s en %3$d min</string>
     <string name="notif_title_no_destination">L%1$s en %2$d min</string>
     <string name="notif_body_stop">%1$s (%2$s)</string>
     <string name="notif_action_snooze">Posponer 5\'</string>
-    <string name="notif_action_dismiss">Descartar</string>
 
     <!-- A05 · avisos -->
     <string name="stop_create_alert">Crear aviso en esta parada</string>

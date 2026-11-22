@@ -8,13 +8,9 @@
 
     <!-- Avisos: se pide solo por gesto del usuario (A08 o al guardar el primer aviso). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <!-- Avisos RECURRING (Sprint 4). A06/A07 leen su estado real y enlazan a Ajustes. -->
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <!-- Motor de avisos: Foreground Service `dataSync` (04-android-platform.md §1). -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
-    <!-- Reprogramar la alarma de los avisos recurrentes tras reiniciar. -->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- «Cómo llegar» (A05): solo se muestra si alguna app abre `geo:`. -->
     <queries>
@@ -56,26 +52,6 @@
             android:name=".engine.AlertMonitorService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
-
-        <receiver
-            android:name=".engine.AlertActionReceiver"
-            android:exported="false" />
-
-        <receiver
-            android:name=".engine.AlertAlarmReceiver"
-            android:exported="false" />
-
-        <receiver
-            android:name=".engine.AlertRescheduleReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.TIME_SET" />
-                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
-            </intent-filter>
-        </receiver>
 
         <!-- Idioma por app (es/eu) también en Android < 13: AppCompat lo guarda y lo restaura. -->
         <service

@@ -7,9 +7,7 @@ import eus.busdonostia.app.AppContainer
 import eus.busdonostia.app.data.db.toDomain
 import eus.busdonostia.app.data.db.toEntity
 import eus.busdonostia.app.domain.AlertDraft
-import eus.busdonostia.app.domain.AlertFrequency
 import eus.busdonostia.app.domain.CatalogStop
-import eus.busdonostia.app.domain.DaysPreset
 import eus.busdonostia.app.domain.DraftError
 import eus.busdonostia.app.domain.MINUTES_RANGE
 import eus.busdonostia.app.domain.SavePlan
@@ -196,19 +194,6 @@ class AlertEditViewModel(
     fun selectDestination(destination: String?) = edit { it.copy(destination = destination) }
 
     fun setMinutes(minutes: Int) = edit { it.copy(minutesAhead = minutes.coerceIn(MINUTES_RANGE)) }
-
-    fun setFrequency(frequency: AlertFrequency) = edit { it.copy(frequency = frequency) }
-
-    fun toggleDay(day: Int) = edit { d ->
-        d.copy(daysOfWeek = if (day in d.daysOfWeek) d.daysOfWeek - day else d.daysOfWeek + day)
-    }
-
-    fun applyPreset(preset: DaysPreset) = edit { it.copy(daysOfWeek = preset.days) }
-
-    /** [value] en "HH:mm". */
-    fun setWindowFrom(value: String) = edit { it.copy(windowFrom = value) }
-
-    fun setWindowTo(value: String) = edit { it.copy(windowTo = value) }
 
     /** Marca los errores visibles y dice si se puede guardar (antes de pedir permisos). */
     fun validateForSave(): Boolean {

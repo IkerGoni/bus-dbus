@@ -48,7 +48,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import eus.busdonostia.app.R
-import eus.busdonostia.app.domain.AlertFrequency
 import eus.busdonostia.app.domain.AlertItem
 import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.ArrivalsView
@@ -63,7 +62,6 @@ import eus.busdonostia.app.ui.components.SectionLabel
 import eus.busdonostia.app.ui.components.SkeletonList
 import eus.busdonostia.app.ui.screens.EmptyAction
 import eus.busdonostia.app.ui.screens.EmptyState
-import eus.busdonostia.app.ui.system.exactAlarmSettingsIntent
 import eus.busdonostia.app.ui.system.notificationSettingsIntent
 import eus.busdonostia.app.ui.system.openSettings
 import eus.busdonostia.app.ui.system.readSystemStatus
@@ -85,7 +83,7 @@ fun AlertsScreen(
     }
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    // Permisos reales, releídos al volver de Ajustes: sin ellos el motor no puede avisar (o llega tarde).
+    // Permiso real, releído al volver de Ajustes: sin notificaciones el motor no puede avisar.
     val context = LocalContext.current
     var system by remember { mutableStateOf(readSystemStatus(context)) }
     LifecycleResumeEffect(Unit) {
@@ -132,17 +130,6 @@ fun AlertsScreen(
                             }
                         }
                     }
-                    val anyRecurring = (state.active + state.silenced).any { it.rule.active && it.rule.frequency == AlertFrequency.RECURRING }
-                    if (!system.exactAlarms && anyRecurring) {
-                        item {
-                            InfoBanner(stringResource(R.string.alert_exact_alarm_missing), warning = true) {
-                                TextButton(
-                                    onClick = { context.openSettings(exactAlarmSettingsIntent(context)) },
-                                    modifier = Modifier.heightIn(min = 48.dp),
-                                ) { Text(stringResource(R.string.alert_exact_alarm_grant)) }
-                            }
-                        }
-                    }
                     if (state.anyError) {
                         item {
                             InfoBanner(stringResource(R.string.alerts_error_banner), warning = true) {
@@ -153,7 +140,7 @@ fun AlertsScreen(
                         }
                     }
                     group(R.string.alerts_section_active, state.active, state, vm, onEditAlert, onDelete)
-                    group(R.string.alerts_section_silenced, state.silenced, state, vm, onEditAlert, onDelete)
+                    group(R.string.alerts_section_paused, state.silenced, state, vm, onEditAlert, onDelete)
                 }
             }
         }
@@ -220,7 +207,7 @@ private fun AlertCard(
                 }
             }
             Text(
-                stringResource(R.string.alert_subtitle, rule.stopName, rule.stopId, rule.minutesAhead, frequencyText(rule)),
+                stringResource(R.string.alert_subtitle, rule.stopName, rule.stopId, rule.minutesAhead),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,

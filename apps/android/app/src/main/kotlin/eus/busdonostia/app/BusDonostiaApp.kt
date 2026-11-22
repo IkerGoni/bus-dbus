@@ -21,7 +21,6 @@ import eus.busdonostia.app.domain.StopFeedStatus
 import eus.busdonostia.app.domain.Ticker
 import eus.busdonostia.app.engine.createNotificationChannels
 import eus.busdonostia.app.engine.ensureMonitoring
-import eus.busdonostia.app.engine.scheduleNextAlarm
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -112,14 +111,9 @@ class AppContainer(private val app: Application) {
     init {
         // Sin bloquear el arranque: si no hay remota o falla, sigue la empaquetada.
         appScope.launch { configRepository.refreshIfDue() }
-        // Cada cambio de avisos (guardar, switch, Posponer, borrar, disparo) reprograma la
-        // alarma de RECURRING y, si algo queda en vigilancia, arranca el servicio.
+        // Cada cambio de avisos (guardar, switch, Posponer, Deshacer): si algo queda en vigilancia, arranca el servicio.
         appScope.launch {
-            alerts.filterNotNull().collect { rules ->
-                val now = System.currentTimeMillis()
-                scheduleNextAlarm(app, rules, now)
-                ensureMonitoring(app, rules, now)
-            }
+            alerts.filterNotNull().collect { rules -> ensureMonitoring(app, rules, System.currentTimeMillis()) }
         }
     }
 }

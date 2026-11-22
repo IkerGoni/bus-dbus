@@ -1,7 +1,6 @@
 package eus.busdonostia.app.ui.system
 
 import android.Manifest
-import android.app.AlarmManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -20,18 +19,14 @@ import androidx.core.net.toUri
 data class SystemStatus(
     /** Notificaciones de la app activadas (permiso en 13+ y switch del sistema). */
     val notificationsEnabled: Boolean,
-    /** Alarmas exactas para RECURRING (Sprint 4). Antes de Android 12 no hace falta permiso. */
-    val exactAlarms: Boolean,
     /** La app está fuera de la optimización de batería. */
     val batteryUnrestricted: Boolean,
 )
 
 fun readSystemStatus(context: Context): SystemStatus {
-    val alarms = context.getSystemService(AlarmManager::class.java)
     val power = context.getSystemService(PowerManager::class.java)
     return SystemStatus(
         notificationsEnabled = NotificationManagerCompat.from(context).areNotificationsEnabled(),
-        exactAlarms = Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarms.canScheduleExactAlarms(),
         batteryUnrestricted = power.isIgnoringBatteryOptimizations(context.packageName),
     )
 }
@@ -44,14 +39,6 @@ fun needsNotificationPermission(context: Context): Boolean =
 /** Ajustes de notificaciones de la app. */
 fun notificationSettingsIntent(context: Context): Intent =
     Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-
-/** Pantalla del sistema para conceder alarmas exactas (12+); null antes, no hace falta. */
-fun exactAlarmSettingsIntent(context: Context): Intent? =
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, "package:${context.packageName}".toUri())
-    } else {
-        null
-    }
 
 /** Lista de optimización de batería (sin `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`: el usuario decide). */
 fun batterySettingsIntent(): Intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)

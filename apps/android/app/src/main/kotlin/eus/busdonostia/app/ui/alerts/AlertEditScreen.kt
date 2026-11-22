@@ -22,28 +22,17 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -52,19 +41,13 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eus.busdonostia.app.R
-import eus.busdonostia.app.domain.AlertFrequency
-import eus.busdonostia.app.domain.DaysPreset
 import eus.busdonostia.app.domain.DraftError
 import eus.busdonostia.app.domain.MINUTES_RANGE
 import eus.busdonostia.app.domain.QUICK_MINUTES
-import eus.busdonostia.app.domain.parseClock
-import eus.busdonostia.app.domain.presetOf
 import eus.busdonostia.app.ui.appViewModel
 import eus.busdonostia.app.ui.components.BorderedCard
-import eus.busdonostia.app.ui.components.InfoBanner
 import eus.busdonostia.app.ui.components.LineBadge
 import eus.busdonostia.app.ui.components.ScreenHeader
 import eus.busdonostia.app.ui.components.SearchPill
@@ -73,10 +56,7 @@ import eus.busdonostia.app.ui.components.SkeletonList
 import eus.busdonostia.app.ui.components.StopCodePill
 import eus.busdonostia.app.ui.screens.EmptyAction
 import eus.busdonostia.app.ui.screens.EmptyState
-import eus.busdonostia.app.ui.system.exactAlarmSettingsIntent
 import eus.busdonostia.app.ui.system.needsNotificationPermission
-import eus.busdonostia.app.ui.system.openSettings
-import eus.busdonostia.app.ui.system.readSystemStatus
 import eus.busdonostia.app.ui.theme.MonoFamily
 import java.util.Locale
 
@@ -134,7 +114,12 @@ fun AlertEditScreen(
                 ) {
                     StopAndLine(state, vm)
                     MinutesAhead(state.draft.minutesAhead, vm::setMinutes)
-                    Frequency(state, vm)
+                    // Un solo uso: avisa una vez y se borra.
+                    Text(
+                        stringResource(R.string.alert_once_hint),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                     Preview(state)
                     if (state.showErrors && state.errors.isNotEmpty()) {
                         state.errors.forEach { error ->
@@ -185,10 +170,6 @@ private fun DraftError.message(): Int = when (this) {
     DraftError.NO_STOP -> R.string.alert_error_no_stop
     DraftError.NO_LINE -> R.string.alert_error_no_line
     DraftError.MINUTES_OUT_OF_RANGE -> R.string.alert_error_minutes
-    DraftError.NO_DAYS -> R.string.alert_error_no_days
-    DraftError.NO_WINDOW -> R.string.alert_error_no_window
-    DraftError.EMPTY_WINDOW -> R.string.alert_error_empty_window
-    DraftError.WINDOW_TOO_LONG -> R.string.alert_error_window_too_long
 }
 
 /** Paso 1: parada (precargada + Cambiar) y chips solo con sus líneas reales; destino si hay varios. */
@@ -320,102 +301,6 @@ private fun MinutesAhead(minutes: Int, onChange: (Int) -> Unit) {
     )
 }
 
-/** Paso 3: Solo esta vez (ONCE) o Recurrente (días + presets + franja obligatoria ≤ 3 h). */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun Frequency(state: AlertEditUiState, vm: AlertEditViewModel) {
-    val draft = state.draft
-    SectionLabel(stringResource(R.string.alert_step_frequency), modifier = Modifier.padding(horizontal = 0.dp))
-    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-        listOf(AlertFrequency.ONCE to R.string.alert_once, AlertFrequency.RECURRING to R.string.alert_recurring)
-            .forEachIndexed { index, (frequency, label) ->
-                SegmentedButton(
-                    selected = draft.frequency == frequency,
-                    onClick = { vm.setFrequency(frequency) },
-                    shape = SegmentedButtonDefaults.itemShape(index, 2),
-                    modifier = Modifier.heightIn(min = 48.dp),
-                ) { Text(stringResource(label), maxLines = 1) }
-            }
-    }
-    if (draft.frequency == AlertFrequency.ONCE) {
-        Text(stringResource(R.string.alert_once_hint), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
-        return
-    }
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        (1..7).forEach { day ->
-            FilterChip(
-                selected = day in draft.daysOfWeek,
-                onClick = { vm.toggleDay(day) },
-                label = { Text(dayShort(day), maxLines = 1) },
-                modifier = Modifier.heightIn(min = 48.dp).widthIn(min = 48.dp),
-            )
-        }
-    }
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        listOf(
-            DaysPreset.WEEKDAYS to R.string.days_preset_weekdays,
-            DaysPreset.DAILY to R.string.days_preset_daily,
-            DaysPreset.WEEKEND to R.string.days_preset_weekend,
-        ).forEach { (preset, label) ->
-            FilterChip(
-                selected = presetOf(draft.daysOfWeek) == preset,
-                onClick = { vm.applyPreset(preset) },
-                label = { Text(stringResource(label), maxLines = 1) },
-                modifier = Modifier.heightIn(min = 48.dp),
-            )
-        }
-    }
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        TimeButton(R.string.alert_window_from, draft.windowFrom, vm::setWindowFrom, Modifier.weight(1f))
-        TimeButton(R.string.alert_window_to, draft.windowTo, vm::setWindowTo, Modifier.weight(1f))
-    }
-    Text(stringResource(R.string.alert_window_hint), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
-    // Sin alarmas exactas, el aviso recurrente puede llegar tarde (Sprint 4): explicar y enlazar.
-    val context = LocalContext.current
-    var exactAlarms by remember { mutableStateOf(true) }
-    LifecycleResumeEffect(Unit) {
-        exactAlarms = readSystemStatus(context).exactAlarms
-        onPauseOrDispose { }
-    }
-    if (!exactAlarms) {
-        InfoBanner(stringResource(R.string.alert_exact_alarm_missing), warning = true) {
-            TextButton(
-                onClick = { context.openSettings(exactAlarmSettingsIntent(context)) },
-                modifier = Modifier.heightIn(min = 48.dp),
-            ) { Text(stringResource(R.string.alert_exact_alarm_grant)) }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TimeButton(label: Int, value: String?, onPick: (String) -> Unit, modifier: Modifier = Modifier) {
-    var open by rememberSaveable { mutableStateOf(false) }
-    OutlinedButton(onClick = { open = true }, modifier = modifier.heightIn(min = 48.dp)) {
-        Text(
-            stringResource(label, value ?: stringResource(R.string.alert_window_pick)),
-            maxLines = 1,
-            fontFamily = if (value != null) MonoFamily else null,
-        )
-    }
-    if (!open) return
-    val initial = parseClock(value)
-    val picker = rememberTimePickerState(initial?.hour ?: 0, initial?.minute ?: 0, is24Hour = true)
-    AlertDialog(
-        onDismissRequest = { open = false },
-        text = { TimePicker(state = picker) },
-        confirmButton = {
-            TextButton(onClick = {
-                onPick(String.format(Locale.ROOT, "%02d:%02d", picker.hour, picker.minute))
-                open = false
-            }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.accept)) }
-        },
-        dismissButton = {
-            TextButton(onClick = { open = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.cancel)) }
-        },
-    )
-}
-
 /** Vista previa etiquetada de la notificación con los valores elegidos. No tiene botones reales: es un dibujo. */
 @Composable
 private fun Preview(state: AlertEditUiState) {
@@ -443,10 +328,6 @@ private fun Preview(state: AlertEditUiState) {
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(24.dp), modifier = Modifier.padding(top = 4.dp)) {
-                Text(stringResource(R.string.notif_action_snooze), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
-                Text(stringResource(R.string.notif_action_dismiss), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelLarge)
-            }
         }
     }
 }

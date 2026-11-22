@@ -82,7 +82,10 @@ fun updateMonitoringNotification(context: Context, watching: List<AlertRule>, po
     NotificationManagerCompat.from(context).notify(MONITORING_NOTIFICATION_ID, monitoringNotification(context, watching, pollIntervalSec))
 }
 
-/** `L5 → Amara en 4 min` · `Pío Baroja 10 (340) · En vivo`, con `Posponer 5'` y `Descartar`. Una por aviso (tag = id). */
+/**
+ * `L5 → Amara en 4 min` · `Pío Baroja 10 (340) · En vivo`. Sin botones: el aviso ya se ha
+ * borrado (un solo uso); tocarla abre A05 y deslizarla la cierra. Una por aviso (tag = id).
+ */
 @SuppressLint("MissingPermission")
 fun notifyArrival(context: Context, firing: Firing, nowMs: Long) {
     val rule = firing.rule
@@ -112,17 +115,11 @@ fun notifyArrival(context: Context, firing: Firing, nowMs: Long) {
         .setCategory(NotificationCompat.CATEGORY_REMINDER)
         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         .setWhen(nowMs)
-        .addAction(0, context.getString(R.string.notif_action_snooze), AlertActionReceiver.pendingIntent(context, ACTION_SNOOZE, rule.id))
-        .addAction(0, context.getString(R.string.notif_action_dismiss), AlertActionReceiver.pendingIntent(context, ACTION_DISMISS, rule.id))
         .build()
     NotificationManagerCompat.from(context).notify(rule.id, ARRIVAL_NOTIFICATION_ID, notification)
 }
 
-fun cancelArrival(context: Context, alertId: String) {
-    NotificationManagerCompat.from(context).cancel(alertId, ARRIVAL_NOTIFICATION_ID)
-}
-
-/** El motor se ha parado sin que el usuario lo pida (sin servicio, límite de Android o arranque bloqueado). */
+/** El motor se ha parado sin que el usuario lo pida (sin servicio o límite de Android). */
 @SuppressLint("MissingPermission")
 fun notifyStopped(context: Context, textRes: Int) {
     val text = context.getString(textRes)

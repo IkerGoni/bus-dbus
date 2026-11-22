@@ -5,10 +5,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.FiberManualRecord
 import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.outlined.Bedtime
 import androidx.compose.material.icons.outlined.EventBusy
 import androidx.compose.material.icons.outlined.Snooze
 import androidx.compose.material3.Icon
@@ -23,12 +21,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import eus.busdonostia.app.R
 import eus.busdonostia.app.domain.AlertDetail
-import eus.busdonostia.app.domain.AlertFrequency
 import eus.busdonostia.app.domain.AlertItem
 import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.ComputedAlertStatus
-import eus.busdonostia.app.domain.DaysPreset
-import eus.busdonostia.app.domain.presetOf
 import eus.busdonostia.app.ui.theme.LocalStatusColors
 import java.time.Instant
 import java.time.ZoneId
@@ -37,38 +32,6 @@ import java.time.format.DateTimeFormatter
 private val HH_MM: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
 fun clockOf(ms: Long): String = HH_MM.format(Instant.ofEpochMilli(ms).atZone(ZoneId.systemDefault()))
-
-private val DAY_SHORT = listOf(
-    R.string.day_short_1,
-    R.string.day_short_2,
-    R.string.day_short_3,
-    R.string.day_short_4,
-    R.string.day_short_5,
-    R.string.day_short_6,
-    R.string.day_short_7,
-)
-
-/** Inicial del día ISO (1=Lun .. 7=Dom) en el idioma de la app. */
-@Composable
-fun dayShort(day: Int): String = stringResource(DAY_SHORT[day - 1])
-
-/** `L–V`, `Diario`, `S–D` o los días sueltos (`L X V`). */
-@Composable
-fun daysText(days: Set<Int>): String = when (presetOf(days)) {
-    DaysPreset.WEEKDAYS -> stringResource(R.string.days_summary_weekdays)
-    DaysPreset.DAILY -> stringResource(R.string.days_summary_daily)
-    DaysPreset.WEEKEND -> stringResource(R.string.days_summary_weekend)
-    null -> days.sorted().map { dayShort(it) }.joinToString(" ")
-}
-
-/** `Solo esta vez` o `L–V 07:45–08:30`. */
-@Composable
-fun frequencyText(rule: AlertRule): String =
-    if (rule.frequency == AlertFrequency.ONCE) {
-        stringResource(R.string.alert_once)
-    } else {
-        stringResource(R.string.alert_recurring_summary, daysText(rule.daysOfWeek), rule.windowFrom.orEmpty(), rule.windowTo.orEmpty())
-    }
 
 /** Destino del aviso o `Cualquier destino`. */
 @Composable
@@ -86,12 +49,6 @@ fun AlertStatusLabel(item: AlertItem, modifier: Modifier = Modifier) {
             colors.warning,
             stringResource(R.string.alert_status_snoozed, clockOf(item.rule.snoozedUntilMs ?: 0L)),
         )
-        ComputedAlertStatus.SILENCED ->
-            if (item.detail == AlertDetail.NOTIFIED_IN_WINDOW) {
-                Triple(Icons.Filled.CheckCircle, colors.scheduled, stringResource(R.string.alert_status_notified))
-            } else {
-                Triple(Icons.Outlined.Bedtime, colors.favorite, stringResource(R.string.alert_status_out_of_window))
-            }
         ComputedAlertStatus.INACTIVE ->
             if (item.detail == AlertDetail.EXPIRED) {
                 Triple(Icons.Outlined.EventBusy, colors.scheduled, stringResource(R.string.alert_status_expired))

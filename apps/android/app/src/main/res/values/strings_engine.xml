@@ -17,7 +17,6 @@
     <string name="notif_stopped_title">Avisos sin vigilar</string>
     <string name="notif_stopped_no_service">Dbus lleva 60 min sin servicio o sin responder. Abre la app para volver a vigilar.</string>
     <string name="notif_stopped_time_limit">Android ha limitado el tiempo de vigilancia en segundo plano. Abre la app para volver a vigilar.</string>
-    <string name="notif_start_blocked">No se pudo empezar a vigilar tu aviso recurrente. Toca para abrir la app.</string>
 
     <string name="alerts_notifications_off">Notificaciones desactivadas: tus avisos no sonarán.</string>
     <string name="alerts_notifications_enable">Activar</string>

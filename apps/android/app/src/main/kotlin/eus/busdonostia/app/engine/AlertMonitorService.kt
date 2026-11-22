@@ -7,16 +7,13 @@ import android.content.pm.ServiceInfo
 import android.os.IBinder
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
-import androidx.room.withTransaction
 import eus.busdonostia.app.AppContainer
 import eus.busdonostia.app.BusDonostiaApp
 import eus.busdonostia.app.R
 import eus.busdonostia.app.data.db.toDomain
-import eus.busdonostia.app.data.db.toEntity
 import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.EngineAction
 import eus.busdonostia.app.domain.evaluateTick
-import eus.busdonostia.app.domain.fired
 import eus.busdonostia.app.domain.isFetchDue
 import eus.busdonostia.app.domain.isWatching
 import eus.busdonostia.app.domain.stopsToPoll
@@ -38,7 +35,8 @@ import kotlinx.coroutines.withTimeoutOrNull
  * Motor de avisos (04-android-platform.md §1): Foreground Service `dataSync` que,
  * mientras haya avisos en vigilancia, consulta sus paradas cada `pollIntervalSec`
  * (una petición por parada, por `AppContainer.fetchStop`) y dispara lo que esté
- * `TRIGGERED`. La decisión es [evaluateTick]; aquí solo se consulta, escribe y notifica.
+ * `TRIGGERED`: notifica y borra el aviso (un solo uso). La decisión es [evaluateTick];
+ * aquí solo se consulta, borra y notifica.
  */
 class AlertMonitorService : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -143,20 +141,11 @@ class AlertMonitorService : Service() {
         val views = stopsToPoll(rules, now).associateWith { feedView(feeds, it, now) }
         val tick = evaluateTick(rules, views, now, troubleSinceMs)
         tick.firings.forEach { firing ->
-            markFired(firing.rule.id, now)
+            container.database.alerts().delete(firing.rule.id)
             notifyArrival(this, firing, now)
         }
         if (tick.action == EngineAction.CONTINUE) updateMonitoringNotification(this, tick.watching, pollIntervalSec())
         return tick.troubleSinceMs to tick.action
-    }
-
-    /** Sobre la versión guardada: el usuario puede haber editado el aviso durante la consulta. */
-    private suspend fun markFired(id: String, nowMs: Long) {
-        val db = container.database
-        db.withTransaction {
-            val rule = db.alerts().findById(id)?.toDomain() ?: return@withTransaction
-            db.alerts().update(rule.fired(nowMs).toEntity())
-        }
     }
 
     companion object {
@@ -165,10 +154,7 @@ class AlertMonitorService : Service() {
         var running = false
             private set
 
-        /**
-         * Arranca la vigilancia. Solo funciona con la app visible, desde una acción de
-         * notificación o una alarma exacta (Android 12+); devuelve false si el sistema lo impide.
-         */
+        /** Arranca la vigilancia. En Android 12+ solo con la app visible; devuelve false si el sistema lo impide. */
         fun start(context: Context): Boolean = try {
             ContextCompat.startForegroundService(context, Intent(context, AlertMonitorService::class.java))
             true
