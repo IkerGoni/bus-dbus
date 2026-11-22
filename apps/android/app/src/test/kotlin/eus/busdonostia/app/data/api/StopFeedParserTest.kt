@@ -46,6 +46,23 @@ class StopFeedParserTest {
         assertEquals(mapOf("28" to -811520, "21" to -5897347), feed.lineColors().associate { it.lineId to it.colorArgb })
     }
 
+    /** Paridad con `packages/core/tests/tipo0.test.ts`: Dbus da `tipo=0` (sin GPS) desde el 2026-11-22. */
+    @Test
+    fun tipo0EsHorario() {
+        val feed = parseStopFeed(fixture("tiemposParada-2-datos-tipo0.json"), fetchedAt)
+        assertEquals(StopFeedStatus.OK, feed.status)
+        assertEquals(
+            listOf(
+                Triple("36", 5, ArrivalSource.SCHEDULED),
+                Triple("28", 8, ArrivalSource.LIVE),
+                Triple("46", 10, ArrivalSource.SCHEDULED),
+                Triple("28", 16, ArrivalSource.LIVE),
+                Triple("21", 17, ArrivalSource.LIVE),
+            ),
+            feed.arrivals.map { Triple(it.lineId, it.minutesAtFetch, it.source) },
+        )
+    }
+
     @Test
     fun datosConGps() {
         val feed = parseStopFeed(fixture("tiemposParada-50-datos.json"), fetchedAt)

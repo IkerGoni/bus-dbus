@@ -3,28 +3,18 @@ package eus.busdonostia.app.ui.alerts
 import androidx.room.withTransaction
 import eus.busdonostia.app.AppContainer
 import eus.busdonostia.app.data.db.toEntity
+import eus.busdonostia.app.data.live.feedView
 import eus.busdonostia.app.data.live.StopFeeds
 import eus.busdonostia.app.domain.AlertItem
 import eus.busdonostia.app.domain.AlertRule
-import eus.busdonostia.app.domain.ArrivalsView
 import eus.busdonostia.app.domain.alertItem
-import eus.busdonostia.app.domain.stopArrivalsView
 import eus.busdonostia.app.domain.usableArrivals
 import eus.busdonostia.app.domain.withActive
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
-
-/** Vista de 5 estados de una parada a partir de lo consultado en esta sesión (null = aún nada). */
-fun feedView(feeds: Map<String, StopFeeds>, stopId: String, nowMs: Long): ArrivalsView {
-    val entry = feeds[stopId] ?: return ArrivalsView.Loading
-    return stopArrivalsView(entry.latest, entry.lastValid, nowMs)
-}
 
 /** Estado calculado de cada aviso con las llegadas que haya de su parada (A01, A04 y badge). */
 fun alertItems(rules: List<AlertRule>, feeds: Map<String, StopFeeds>, nowMs: Long): List<AlertItem> =
@@ -32,11 +22,6 @@ fun alertItems(rules: List<AlertRule>, feeds: Map<String, StopFeeds>, nowMs: Lon
 
 /** Paradas que hay que sondear: las de avisos activos (los pausados no necesitan llegadas). */
 fun stopsToWatch(rules: List<AlertRule>): Set<String> = rules.filter { it.active }.mapTo(sortedSetOf()) { it.stopId }
-
-/** Consulta todas las [stops] en paralelo (una petición por parada, como el bot). */
-suspend fun AppContainer.fetchStops(stops: Set<String>) = coroutineScope {
-    stops.map { async { fetchStop(it) } }.awaitAll()
-}
 
 /**
  * Sondea las paradas de [stops] cada `pollIntervalSec` mientras se colecta (la UI lo
