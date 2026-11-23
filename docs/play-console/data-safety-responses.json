@@ -1,0 +1,72 @@
+{
+  "packageName": "eus.busdonostia.app",
+  "versionName": "1.1.0",
+  "lastUpdated": "2026-11-23",
+  "dataCollection": {
+    "collectsLocation": true,
+    "collectsDeviceId": false,
+    "collectsPersonalInfo": false,
+    "collectsAppActivity": false,
+    "collectsAppPerformance": false,
+    "collectsDiagnostics": false,
+    "collectsOther": false
+  },
+  "dataSharing": {
+    "sharesLocation": false,
+    "sharesDeviceId": false,
+    "sharesPersonalInfo": false,
+    "sharesAppActivity": false,
+    "sharesAppPerformance": false,
+    "sharesDiagnostics": false,
+    "sharesOther": false
+  },
+  "securityPractices": {
+    "encryptsInTransit": false,
+    "encryptsAtRest": true,
+    "allowsDeletion": true
+  },
+  "dataTypes": {
+    "location": {
+      "collected": true,
+      "purpose": "app_functionality",
+      "description": "Ubicación aproximada/precisa solo cuando el usuario solicita \"Cercanas\". Se usa en memoria para ordenar paradas por distancia. Nunca se persiste ni transmite.",
+      "optional": true,
+      "shared": false,
+      "sharedWith": [],
+      "sharedPurpose": []
+    },
+    "device_id": null,
+    "personal_info": null,
+    "app_activity": null,
+    "app_performance": null,
+    "diagnostics": null,
+    "other": null
+  },
+  "declaredPermissions": [
+    "android.permission.INTERNET",
+    "android.permission.ACCESS_COARSE_LOCATION",
+    "android.permission.ACCESS_FINE_LOCATION",
+    "android.permission.POST_NOTIFICATIONS",
+    "android.permission.FOREGROUND_SERVICE",
+    "android.permission.FOREGROUND_SERVICE_DATA_SYNC"
+  ],
+  "reviewerNotes": {
+    "location": "La ubicación es OPCIONAL. La app funciona完全amente sin ella (búsqueda manual, favoritos, avisos). Solo se usa para \"Cercanas\" bajo petición expresa del usuario. Nunca sale del dispositivo.",
+    "network": "La API de llegadas (http://app.dbus.eus/SSIIMovilWSv2/ws/cons/tiemposParada) responde solo por HTTP. El manifiesto declara cleartextTrafficPermitted=true EXCLUSIVAMENTE para app.dbus.eus. No hay otros endpoints. Por tanto NO se puede marcar \"cifrado en tránsito\" para toda la app.",
+    "analytics": "Sin SDKs de analítica, crash reporting, publicidad ni telemetría. Dependencias: AndroidX, Compose, Room, OkHttp, kotlinx.serialization, coroutines. Sin Firebase, sin Play Services.",
+    "storage": "Datos locales (favoritos, recientes, avisos, preferencias) en Room SQLite dentro del sandbox de la app. android:allowBackup=\"false\" → no backup automático en Google Drive. Usuario elimina todo desde la UI o desinstalando.",
+    "fgs": "Foreground Service DATA_SYNC para consultar llegadas en background mientras el usuario tiene avisos activos. Máx 3h vigilancia continua (config.maxWatchHours). Se detiene si no hay avisos. Usuario gestiona desde la app.",
+    "geo": "Intent geo: solo para \"Cómo llegar\" si hay app de mapas instalada. No es navegación propia."
+  },
+  "evidence": {
+    "manifestPath": "apps/android/app/src/main/AndroidManifest.xml",
+    "networkSecurityConfigPath": "apps/android/app/src/main/res/xml/network_security_config.xml",
+    "configPath": "apps/android/app/src/main/assets/config.json",
+    "locationProviderPath": "apps/android/app/src/main/kotlin/eus/busdonostia/app/data/location/LocationProvider.kt",
+    "roomEntities": [
+      "apps/android/app/src/main/kotlin/eus/busdonostia/app/data/db/RecentStopEntity.kt",
+      "apps/android/app/src/main/kotlin/eus/busdonostia/app/data/db/AlertEntity.kt",
+      "apps/android/app/src/main/kotlin/eus/busdonostia/app/data/db/FavoriteEntity.kt"
+    ]
+  }
+}
