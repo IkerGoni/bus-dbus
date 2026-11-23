@@ -9,12 +9,14 @@
  */
 
 import fs from 'fs';
+import os from 'node:os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '../..');
+const PACK = process.env.PLAY_PACK_DIR || path.join(os.homedir(), 'Desktop', 'badator-google-play-pack');
 const AAB_PATH = path.join(ROOT, 'apps/android/app/build/outputs/bundle/release/app-release.aab');
 const OUT_FILE = path.join(ROOT, 'docs/play-console/data-safety-responses.json');
 
@@ -208,7 +210,7 @@ function generateDataSafety(aab, source) {
 
   // Seguridad
   const encryptsInTransit = false; // API es HTTP cleartext
-  const encryptsAtRest = hasRoom; // Room SQLite (no cifrado por defecto, pero sandbox)
+  const encryptsAtRest = false; // Room SQLite no cifra por defecto; Android FBE cifra a nivel SO, no la app
   const allowsDeletion = true; // Usuario borra favoritos/avisos, desinstala app
 
   // Propósito de recogida
@@ -283,7 +285,7 @@ function generateDataSafety(aab, source) {
 
     // Notes for Play Console reviewer
     reviewerNotes: {
-      location: 'La ubicación es OPCIONAL. La app funciona完全amente sin ella (búsqueda manual, favoritos, avisos). Solo se usa para "Cercanas" bajo petición expresa del usuario. Nunca sale del dispositivo.',
+      location: 'La ubicación es OPCIONAL. La app funciona completamente sin ella (búsqueda manual, favoritos, avisos). Solo se usa para "Cercanas" bajo petición expresa del usuario. Nunca sale del dispositivo.',
       network: `La API de llegadas (${source.apiEndpoint || 'app.dbus.eus'}) responde solo por HTTP. El manifiesto declara cleartextTrafficPermitted=true EXCLUSIVAMENTE para app.dbus.eus. No hay otros endpoints. Por tanto NO se puede marcar "cifrado en tránsito" para toda la app.`,
       analytics: 'Sin SDKs de analítica, crash reporting, publicidad ni telemetría. Dependencias: AndroidX, Compose, Room, OkHttp, kotlinx.serialization, coroutines. Sin Firebase, sin Play Services.',
       storage: 'Datos locales (favoritos, recientes, avisos, preferencias) en Room SQLite dentro del sandbox de la app. android:allowBackup="false" → no backup automático en Google Drive. Usuario elimina todo desde la UI o desinstalando.',
@@ -339,7 +341,8 @@ async function main() {
   console.log('5. Usa las "Notas para revisor" en el formulario o en la ficha de la app');
 
   // Copia también al pack
-  const packFile = '/Users/dev/Desktop/badator-google-play-pack/04-console/DATA-SAFETY-RESPONSES.json';
+  const packFile = path.join(PACK, '04-console/DATA-SAFETY-RESPONSES.json');
+  fs.mkdirSync(path.dirname(packFile), { recursive: true });
   fs.writeFileSync(packFile, JSON.stringify(safety, null, 2));
   console.log(`\n📋 Copia guardada en: ${packFile}`);
 }

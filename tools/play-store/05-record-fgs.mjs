@@ -21,6 +21,7 @@
  */
 
 import fs from 'fs';
+import os from 'node:os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
@@ -28,7 +29,21 @@ import { execSync } from 'child_process';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '../..');
 const OUT_DIR = path.join(ROOT, 'build/outputs/play-store');
+const PACK = process.env.PLAY_PACK_DIR || path.join(os.homedir(), 'Desktop', 'badator-google-play-pack');
 const PACKAGE_NAME = 'eus.busdonostia.app';
+
+function resolveAdb() {
+  if (process.env.ADB) return process.env.ADB;
+  if (process.env.ANDROID_HOME) {
+    const sdkAdb = path.join(process.env.ANDROID_HOME, 'platform-tools', 'adb');
+    if (fs.existsSync(sdkAdb)) return sdkAdb;
+  }
+  const macFallback = '/opt/homebrew/share/android-commandlinetools/platform-tools/adb';
+  if (fs.existsSync(macFallback)) return macFallback;
+  return 'adb';
+}
+
+const ADB = resolveAdb();
 
 const SCRIPT = `
 # 🎬 GUION VÍDEO FGS - Badator! (para Play Console)
@@ -107,7 +122,7 @@ async function main() {
   }
   console.log('✅ ffmpeg disponible');
 
-  const devices = run('adb devices').trim().split('\n').slice(1).filter(l => l.includes('device'));
+  const devices = run(`${ADB} devices`).trim().split('\n').slice(1).filter(l => l.includes('device'));
   if (devices.length === 0) {
     console.error('❌ No hay emulador/dispositivo. Arranca: emulator -avd dbus36');
     process.exit(1);
@@ -135,10 +150,10 @@ async function main() {
   console.log('7. Sube a YouTube (no listado) y copia URL para Play Console');
 
   // Guardar también en pack
-  const packDir = '/Users/dev/Desktop/badator-google-play-pack/02-creative';
+  const packDir = path.join(PACK, '02-creative');
   fs.mkdirSync(packDir, { recursive: true });
   fs.copyFileSync(path.join(ROOT, 'build/outputs/play-store/FGS_SCRIPT.md'), path.join(packDir, 'FGS_SCRIPT.md'));
-  console.log(`\n📋 Guion copiado a badator-google-play-pack/02-creative/FGS_SCRIPT.md`);
+  console.log(`\n📋 Guion copiado a ${path.join(packDir, 'FGS_SCRIPT.md')}`);
 }
 
 main().catch(console.error);

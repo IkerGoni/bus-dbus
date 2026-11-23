@@ -14,6 +14,7 @@
  */
 
 import fs from 'fs';
+import os from 'node:os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
@@ -21,7 +22,7 @@ import { execSync } from 'child_process';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '../..');
 const OUT_DIR = path.join(ROOT, 'build/outputs/play-store');
-const PACK = '/Users/dev/Desktop/badator-google-play-pack';
+const PACK = process.env.PLAY_PACK_DIR || path.join(os.homedir(), 'Desktop', 'badator-google-play-pack');
 
 // ---- Paleta ART-DIRECTION ----
 const PALETTE = {
@@ -225,6 +226,7 @@ async function main() {
   console.log(`   feature-graphic-1024x500.png: ${(fgStat.size / 1024).toFixed(1)} KB`);
 
   // Copia al pack
+  fs.mkdirSync(path.join(PACK, '02-creative'), { recursive: true });
   fs.copyFileSync(path.join(OUT_DIR, 'icon-512.png'), path.join(PACK, '02-creative/icon-512.png'));
   fs.copyFileSync(path.join(OUT_DIR, 'feature-graphic-1024x500.png'), path.join(PACK, '02-creative/feature-graphic-1024x500.png'));
   console.log('\n📋 Copiados a badator-google-play-pack/02-creative/');

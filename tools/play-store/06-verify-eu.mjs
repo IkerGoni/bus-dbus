@@ -10,12 +10,13 @@
  */
 
 import fs from 'fs';
+import os from 'node:os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '../..');
-const PACK = '/Users/dev/Desktop/badator-google-play-pack';
+const PACK = process.env.PLAY_PACK_DIR || path.join(os.homedir(), 'Desktop', 'badator-google-play-pack');
 
 // ---- Diccionario de correcciones comunes (literalismos → nativo) ----
 const CORRECTIONS = {
@@ -65,7 +66,6 @@ const CORRECTIONS = {
   'eguneratua': 'eguneratua',       // "actualizado" → OK
 
   // Expresiones / perífrasis
-  'ez da... 머리카락': 'ez da... hair', // placeholder
   'beharrezkoa da': 'behar da',     // "es necesario" → "hace falta"
   'egin behar da': 'egina behar da', // "hay que hacer" → OK
   'aurki dezakezu': 'aurkituko duzu', // "puedes encontrar" → "encontrarás"
@@ -87,7 +87,7 @@ const CORRECTIONS = {
   'sin anuncios': 'anuntzarik gabe',
   'gratis': 'doan',
   'gratuito': 'doan',
-  'versión': 'bertzioa',
+  'versión': 'bertsioa',
   'actualización': 'eguneraketa',
   'permiso': 'baimena',
   'notificación': 'abisua',
@@ -104,11 +104,11 @@ const CORRECTIONS = {
   'directo': 'zuzenean',
   'mapa': 'mapa',
   'navegación': 'nabigazioa',
-  'transporte': 'trasporta',
+  'transporte': 'garraioa',
   'autobús': 'autobusa',
   'bus': 'bus', // préstamo aceptado
   'parada': 'geltokia',
-  'marquesina': 'markezina', // préstamo
+  'marquesina': 'markesina', // préstamo
   'andén': 'andena', // no usar
   'línea': 'linea',
   'ruta': 'ruta', // préstamo
@@ -119,7 +119,7 @@ const CORRECTIONS = {
   'segundos': 'segunduak', // evitar
   'ahora': 'orain',
   'pronto': 'laster',
-  'tarde': 'etzi',
+  'tarde': 'berandu',
   'temprano': 'goizean',
   'mañana': 'bihar',
   'hoy': 'gaur',
@@ -130,7 +130,7 @@ const CORRECTIONS = {
 };
 
 function loadListing() {
-  const listingPath = path.join('/Users/dev/Desktop/badator-google-play-pack/01-listing/eu-ES.md');
+  const listingPath = path.join(PACK, '01-listing/eu-ES.md');
   return fs.readFileSync(listingPath, 'utf-8');
 }
 
@@ -169,16 +169,35 @@ function extractStrings(xml) {
   return strings;
 }
 
+const ACTIVE_CORRECTIONS = Object.entries(CORRECTIONS)
+  .filter(([original, suggestion]) => original !== suggestion && original.length >= 3)
+  .sort(([a], [b]) => b.length - a.length);
+
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function checkText(text, source) {
   const issues = [];
-  const words = text.toLowerCase().split(/[\s\.,;:¡!¿?()\[\]{}"'-]+/);
-  
-  for (const word of words) {
-    if (word.length < 3) continue;
-    if (CORRECTIONS[word] && CORRECTIONS[word] !== word) {
-      issues.push({ original: word, suggestion: CORRECTIONS[word], context: source });
+  let normalized = text
+    .toLowerCase()
+    .replace(/\\n/g, ' ')
+    .replace(/[.,;:¡!¿?()[\]{}"'«»/]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  for (const [original, suggestion] of ACTIVE_CORRECTIONS) {
+    const escaped = escapeRegex(original);
+    const pattern = original.includes('-')
+      ? new RegExp(`(?:^|\\s)${escaped}(?=\\s|$)`, 'g')
+      : new RegExp(`(?:^|[\\s-])${escaped}(?=[\\s-]|$)`, 'g');
+
+    while (pattern.exec(normalized) !== null) {
+      issues.push({ original, suggestion, context: source });
     }
+    normalized = normalized.replace(pattern, ' ').replace(/\s+/g, ' ').trim();
   }
+
   return issues;
 }
 
@@ -220,7 +239,13 @@ function main() {
   // Verificar paridad ES/EU
   console.log('\n⚖️ Verificando paridad ES/EU (keys):');
   const stringsES = fs.readFileSync(path.join(__dirname, '../../apps/android/app/src/main/res/values/strings.xml'), 'utf-8');
-  const stringsESs = extractStrings(stringsES);
+  const stringsESSettings = fs.readFileSync(path.join(__dirname, '../../apps/android/app/src/main/res/values/strings_settings.xml'), 'utf-8');
+  const stringsESEngine = fs.readFileSync(path.join(__dirname, '../../apps/android/app/src/main/res/values/strings_engine.xml'), 'utf-8');
+  const stringsESs = {
+    ...extractStrings(stringsES),
+    ...extractStrings(stringsESSettings),
+    ...extractStrings(stringsESEngine),
+  };
   const keysES = new Set(Object.keys(stringsESs));
   const keysEU = new Set(Object.keys(allStrings));
   
@@ -259,4 +284,9 @@ function main() {
   }
 }
 
-main().catch(console.error);
+try {
+  main();
+} catch (e) {
+  console.error(e);
+  process.exit(1);
+}

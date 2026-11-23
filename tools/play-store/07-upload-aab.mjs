@@ -13,12 +13,14 @@
  */
 
 import fs from 'fs';
+import os from 'node:os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '../..');
+const PACK = process.env.PLAY_PACK_DIR || path.join(os.homedir(), 'Desktop', 'badator-google-play-pack');
 const AAB_PATH = path.join(ROOT, 'apps/android/app/build/outputs/bundle/release/app-release.aab');
 const PACKAGE_NAME = 'eus.busdonostia.app';
 
@@ -145,11 +147,13 @@ async function main() {
   console.log('\n📋 Checklist generado: build/outputs/play-store/RELEASE_CHECKLIST.md');
 
   // Copiar al pack
+  const packGatesDir = path.join(PACK, '05-release-gates');
+  fs.mkdirSync(packGatesDir, { recursive: true });
   fs.copyFileSync(
     path.join(ROOT, 'build/outputs/play-store/RELEASE_CHECKLIST.md'),
-    '/Users/dev/Desktop/badator-google-play-pack/05-release-gates/RELEASE_CHECKLIST.md'
+    path.join(packGatesDir, 'RELEASE_CHECKLIST.md')
   );
-  console.log('📋 Copiado a badator-google-play-pack/05-release-gates/');
+  console.log(`📋 Copiado a ${path.join(packGatesDir, 'RELEASE_CHECKLIST.md')}`);
 }
 
 main().catch(console.error);
