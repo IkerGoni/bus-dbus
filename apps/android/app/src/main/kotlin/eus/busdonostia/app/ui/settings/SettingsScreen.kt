@@ -176,8 +176,9 @@ fun SettingsScreen(onBack: () -> Unit) {
         BorderedCard(Modifier.padding(horizontal = 16.dp)) {
             CardColumn {
                 ValueRow(stringResource(R.string.settings_version), BuildConfig.VERSION_NAME)
+                Hint(stringResource(R.string.settings_disclaimer))
                 Hint(stringResource(R.string.settings_credit_times))
-                loaded?.getOrNull()?.let { Hint(it.attribution) }
+                Hint(stringResource(R.string.settings_credit_stops))
                 Hint(
                     loaded?.getOrNull()?.let { stringResource(R.string.osm_attribution, it.coordinates.attribution) }
                         ?: stringResource(R.string.settings_credit_osm),

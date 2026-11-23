@@ -107,14 +107,22 @@ export function linesFromStopTimes(times: DbusStopTimes | null): Line[] {
 export const UNKNOWN_DESTINATION = 'Servicio programado';
 
 function normalizeDestination(value: string): string {
-  return value.trim().toLocaleLowerCase('es').replace(/\s+/g, ' ');
+  return value
+    .trim()
+    .toLocaleLowerCase('es')
+    .replace(/\s+/g, ' ')
+    .replace(/\s*([-/])\s*/g, '$1');
 }
 
-/** Comparación tolerante: Dbus varía el texto del destino entre responses. */
+/**
+ * Igualdad tras normalizar: Dbus varía mayúsculas y espacios alrededor de `-`/`/`
+ * entre respuestas, pero un destino que contiene a otro es OTRO destino
+ * (p. ej. «Altza» no es «Buenavista-Altza»). Nada de contención (A5-02).
+ */
 function destinationsMatch(actual: string, expected: string): boolean {
   const a = normalizeDestination(actual);
   const b = normalizeDestination(expected);
-  return Boolean(a && b && (a === b || a.includes(b) || b.includes(a)));
+  return Boolean(a && b && a === b);
 }
 
 /**

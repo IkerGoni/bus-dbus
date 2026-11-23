@@ -188,7 +188,7 @@ private fun StopsContent(
             is LocationState.Located -> StopList {
                 section(R.string.stops_section_nearby, R.string.stops_by_distance)
                 rows(state.rows, state, state.tab.name, onOpenStop, onStar)
-                item(key = "nearby-footnote", contentType = "footnote") { NearbyFootnote(state.coordinatesAttribution) }
+                item(key = "nearby-footnote", contentType = "footnote") { NearbyFootnote(state.coordinatesAttribution, state.walkMetersPerMin) }
             }
             LocationState.NoPermission, LocationState.Unavailable -> StopList {
                 item(key = "nearby-location", contentType = "info_banner") {
@@ -227,7 +227,7 @@ private fun StopsContent(
             if (state.rows.isEmpty()) {
                 EmptyState(
                     stringResource(R.string.stops_recents_empty_title),
-                    stringResource(R.string.stops_recents_empty_body),
+                    stringResource(R.string.stops_recents_empty_body, state.recentStopsLimit),
                     listOf(EmptyAction(stringResource(R.string.home_cta_nearby), primary = true) { onTab(StopsTab.NEARBY) }),
                 )
             } else {
@@ -289,10 +289,10 @@ private fun LocationPrompt(onAllow: () -> Unit) {
 }
 
 @Composable
-private fun NearbyFootnote(attribution: String?) {
+private fun NearbyFootnote(attribution: String?, walkMetersPerMin: Int) {
     Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
-            stringResource(R.string.stops_walk_estimate_note),
+            stringResource(R.string.stops_walk_estimate_note, walkMetersPerMin),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

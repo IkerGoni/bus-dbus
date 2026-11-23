@@ -51,7 +51,7 @@ class AppContainer(private val app: Application) {
 
     val configRepository = ConfigRepository(
         bundled = defaultConfig,
-        cacheFile = File(app.filesDir, "remote-config.json"),
+        cacheFileProvider = { File(app.filesDir, "remote-config.json") },
         remoteUrl = ConfigRepository.remoteConfigUrl(BuildConfig.REMOTE_CONFIG_URL),
         http = http,
     )
@@ -63,7 +63,7 @@ class AppContainer(private val app: Application) {
         .flowOn(Dispatchers.IO)
         .stateIn(appScope, SharingStarted.Eagerly, null)
 
-    val location = LocationProvider(app)
+    val location = LocationProvider(app) { configRepository.config.value.geo }
 
     /** Colores de línea vistos en vivo, por código público. */
     val lineColors: StateFlow<Map<String, Int>> = database.lineColors().observeAll()
@@ -80,7 +80,7 @@ class AppContainer(private val app: Application) {
         .map { list -> list.map { it.toDomain() } }
         .stateIn(appScope, SharingStarted.Eagerly, null)
 
-    val settings = SettingsStore(app.getSharedPreferences("settings", Context.MODE_PRIVATE))
+    val settings = SettingsStore({ app.getSharedPreferences("settings", Context.MODE_PRIVATE) }, appScope)
 
     /** Idioma de la app para `tiemposParada` (`es` | `eu`): el elegido en A07 o el del sistema. */
     private val resources = app.resources
@@ -96,6 +96,7 @@ class AppContainer(private val app: Application) {
         onLineColors = { database.lineColors().upsertAll(it) },
         scope = appScope,
         historySize = { configRepository.config.value.freshness.liveFeedHistorySize },
+        pollingConfig = { configRepository.config.value.polling },
     )
 
     val ticker = Ticker(
@@ -140,7 +141,10 @@ class BusDonostiaApp : Application() {
         }
         createNotificationChannels(this)
         container = AppContainer(this)
-        // Apariencia elegida en A07 (AppCompat no la guarda): antes de crear ninguna actividad.
-        AppCompatDelegate.setDefaultNightMode(container.settings.theme.value.nightMode)
+        // Apariencia elegida en A07 (AppCompat no la guarda): se aplica en cuanto SettingsStore
+        // la lee de disco en IO (A5-13, cero I/O en Main). MainActivity espera a `settings.ready`.
+        container.appScope.launch(Dispatchers.Main) {
+            container.settings.theme.collect { AppCompatDelegate.setDefaultNightMode(it.nightMode) }
+        }
     }
 }

@@ -193,7 +193,7 @@ class AppDatabaseTest {
 
     @Test
     fun `recientes - 12 paradas dejan las 10 mas recientes`() = runTest {
-        (1..12).forEach { db.recentStops().record("s$it", it.toLong()) }
+        (1..12).forEach { db.recentStops().record("s$it", it.toLong(), MAX_RECENTS) }
         val ids = db.recentStops().observe().first().map { it.stopId }
         assertEquals(MAX_RECENTS, ids.size)
         assertEquals((12 downTo 3).map { "s$it" }, ids)
@@ -201,8 +201,8 @@ class AppDatabaseTest {
 
     @Test
     fun `recientes - repetir una parada la sube sin duplicar`() = runTest {
-        (1..3).forEach { db.recentStops().record("s$it", it.toLong()) }
-        db.recentStops().record("s1", 10)
+        (1..3).forEach { db.recentStops().record("s$it", it.toLong(), MAX_RECENTS) }
+        db.recentStops().record("s1", 10, MAX_RECENTS)
         val ids = db.recentStops().observe().first().map { it.stopId }
         assertEquals(listOf("s1", "s3", "s2"), ids)
     }

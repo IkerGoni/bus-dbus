@@ -116,4 +116,41 @@ class DomainTest {
         assertNull(findMatchingArrival(arrivals, "32", null, 10, 0))
         assertEquals("28", findMatchingArrival(arrivals, "L028", null, 10, 0)!!.lineId)
     }
+
+    // ── destinationsMatch (A5-02): igualdad tras normalizar, nunca contención ──
+
+    @Test
+    fun destinationsMatchNormalizaMayusculasYEspacios() {
+        assertTrue(destinationsMatch("Buenavista - Altza", "  BUENAVISTA-ALTZA "))
+        assertTrue(destinationsMatch("Amara / Mutualitateak", "amara/mutualitateak"))
+        assertTrue(destinationsMatch("  Ospitaleak  ", "ospitaleak"))
+        assertFalse(destinationsMatch("", "Altza"))
+        assertFalse(destinationsMatch("Altza", "   "))
+    }
+
+    @Test
+    fun destinationsMatchNoAceptaContencion() {
+        // Los 4 destinos reales de la línea 13 en la parada 103 (API real, APK release).
+        val destinos = listOf("Altza", "Buenavista - Altza", "Bidebieta - Altza", "Bidebieta - Buenavista - Altza")
+        for (expected in destinos) {
+            for (actual in destinos) {
+                assertEquals("«$actual» vs «$expected»", actual == expected, destinationsMatch(actual, expected))
+            }
+        }
+    }
+
+    @Test
+    fun matchingAltzaNoConsumeAvisoDeBuenavistaAltza() {
+        // Reproducción exacta de A5-02: el bus a «Altza» (1 min) no debe disparar
+        // un aviso de «Buenavista-Altza»; solo casa el destino idéntico normalizado.
+        val arrivals = listOf(
+            arrival("13", 1, destination = "Altza"),
+            arrival("13", 6, destination = "Bidebieta - Altza"),
+        )
+        assertNull(findMatchingArrival(arrivals, "13", "Buenavista-Altza", 15, 0))
+        val conBuenavista = arrivals + arrival("13", 12, destination = "Buenavista - Altza")
+        assertEquals(12, findMatchingArrival(conBuenavista, "13", "Buenavista-Altza", 15, 0)!!.minutesAtFetch)
+        assertEquals("Altza", findMatchingArrival(arrivals, "13", "Altza", 15, 0)!!.destination)
+        assertEquals(1, findMatchingArrival(arrivals, "13", "Altza", 15, 0)!!.minutesAtFetch)
+    }
 }

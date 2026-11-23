@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Bus Donostia</string>
+    <!-- Label del launcher y nombre en Play: la no oficialidad va en el nombre (A5-08). Dentro de la app, cabecera «Bus Donostia». -->
+    <string name="app_launcher_name">Bus Donostia (no oficial)</string>
 
     <string name="nav_home">Inicio</string>
     <string name="nav_stops">Paradas</string>
@@ -39,7 +41,7 @@
 
     <!-- A02 · Paradas -->
     <string name="stops_title">Paradas</string>
-    <string name="stops_search_hint">Código o calle</string>
+    <string name="stops_search_hint">Parada o calle</string>
     <string name="stops_refresh_location">Actualizar ubicación</string>
     <string name="stops_tab_nearby">Cercanas</string>
     <string name="stops_tab_favorites">Favoritas</string>
@@ -48,20 +50,22 @@
     <string name="stops_section_results">Resultados</string>
     <string name="stops_by_distance">Por distancia</string>
     <string name="stops_distance_walk">%1$s · %2$d min</string>
-    <string name="stops_walk_estimate_note">Distancia en línea recta. Los minutos a pie son una estimación a 80 m/min.</string>
+    <string name="stops_walk_estimate_note">Distancia en línea recta. Los minutos a pie son una estimación a %1$d m/min.</string>
     <string name="stops_location_title">Ver las paradas más cercanas</string>
     <string name="stops_location_body">Usamos tu ubicación solo en el móvil para ordenar las paradas por distancia. No se guarda ni se envía.</string>
     <string name="stops_location_allow">Permitir ubicación</string>
     <string name="stops_location_unavailable">No se pudo obtener tu ubicación. Comprueba que esté activada.</string>
     <string name="stops_no_results_title">Ninguna parada coincide con «%1$s»</string>
-    <string name="stops_no_results_body">Prueba con el código de la marquesina o con parte del nombre de la calle.</string>
+    <string name="stops_no_results_body">Prueba con parte del nombre de la parada o de la calle.</string>
     <string name="stops_favorites_empty_title">Aún no tienes paradas favoritas</string>
     <string name="stops_favorites_empty_body">Toca la estrella de una parada para tenerla siempre a mano.</string>
     <string name="stops_recents_empty_title">No has abierto ninguna parada</string>
-    <string name="stops_recents_empty_body">Las últimas 10 paradas que consultes aparecerán aquí.</string>
+    <string name="stops_recents_empty_body">Las últimas %1$d paradas que consultes aparecerán aquí.</string>
 
     <!-- A05 · Detalle de parada -->
     <string name="stop_unnamed">Parada</string>
+    <string name="stop_not_found_title">Parada no encontrada</string>
+    <string name="stop_not_found_body">El enlace no corresponde a ninguna parada del catálogo. Vuelve a Paradas y elige una.</string>
     <string name="stop_directions">Cómo llegar</string>
     <string name="stop_next_arrivals">Próximas llegadas</string>
     <string name="stop_line_star">Guardar la línea %1$s en esta parada</string>
@@ -111,7 +115,7 @@
     <!-- A01 · Inicio -->
     <string name="home_search_hint">Parada, calle, línea o destino</string>
     <string name="home_search_empty_title">Nada coincide con «%1$s»</string>
-    <string name="home_search_empty_body">Prueba con el código de la marquesina, una calle, un número de línea o un destino.</string>
+    <string name="home_search_empty_body">Prueba con una parada, una calle, un número de línea o un destino.</string>
     <string name="home_next_alert">Tu próximo aviso</string>
     <string name="home_favorites">Paradas favoritas</string>
     <string name="home_next_source">%1$s · %2$s</string>
@@ -153,7 +157,7 @@
     <string name="alert_minutes_before_suffix">min antes</string>
     <string name="alert_minutes_chip">%1$d\'</string>
     <string name="alert_minutes_slider">Minutos de antelación</string>
-    <string name="alert_once_hint">Vigila desde que lo guardas, avisa una vez y se borra. Caduca a los 7 días si no llega a avisar.</string>
+    <string name="alert_once_hint">Vigila desde que lo guardas, avisa una vez y se borra. Caduca a los %1$d días si no llega a avisar.</string>
     <string name="alert_preview">Vista previa de la notificación</string>
     <string name="alert_save">Guardar aviso</string>
     <string name="alert_conflict_title">Ya tienes este aviso</string>
@@ -161,7 +165,7 @@
     <string name="alert_conflict_update">Actualizar</string>
     <string name="alert_error_no_stop">Elige una parada.</string>
     <string name="alert_error_no_line">Elige una línea.</string>
-    <string name="alert_error_minutes">La antelación debe estar entre 1 y 30 minutos.</string>
+    <string name="alert_error_minutes">La antelación debe estar entre %1$d y %2$d minutos.</string>
 
     <!-- Notificación de llegada y su vista previa en A06 -->
     <string name="notif_title">L%1$s → %2$s en %3$d min</string>

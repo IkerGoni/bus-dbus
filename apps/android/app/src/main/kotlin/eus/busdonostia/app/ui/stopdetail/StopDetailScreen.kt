@@ -83,6 +83,8 @@ import eus.busdonostia.app.ui.components.SkeletonList
 import eus.busdonostia.app.ui.theme.DesignTokens
 import eus.busdonostia.app.ui.theme.LocalStatusColors
 import eus.busdonostia.app.ui.theme.MonoFamily
+import eus.busdonostia.app.ui.screens.EmptyAction
+import eus.busdonostia.app.ui.screens.EmptyState
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -137,49 +139,62 @@ fun StopDetailScreen(
                     Icon(Icons.Filled.Directions, contentDescription = stringResource(R.string.stop_directions))
                 }
             }
-            FavoriteStar(
-                checked = state.starred,
-                onToggle = vm::toggleStopStar,
-                description = stringResource(R.string.a11y_favorite_stop, state.name ?: stringResource(R.string.stop_unnamed)),
-            )
-        }
-        LineChips(stopId, state, highlightLine, sharedOrigin, vm::selectLine)
-        val selected = state.selectedLine
-        if (selected != null) {
-            TextButton(
-                onClick = { vm.toggleLineStar() },
-                modifier = Modifier.padding(horizontal = DesignTokens.spacingSm).heightIn(min = DesignTokens.touchTargetMin),
-            ) {
-                Icon(
-                    if (state.lineStarred) Icons.Filled.Star else Icons.Outlined.StarOutline,
-                    contentDescription = null,
-                    tint = if (state.lineStarred) LocalStatusColors.current.favorite else LocalStatusColors.current.scheduled,
-                )
-                Spacer(Modifier.width(DesignTokens.spacingSm))
-                Text(
-                    stringResource(if (state.lineStarred) R.string.stop_line_starred else R.string.stop_line_star, selected),
+            if (!state.notFound) {
+                FavoriteStar(
+                    checked = state.starred,
+                    onToggle = vm::toggleStopStar,
+                    description = stringResource(R.string.a11y_favorite_stop, state.name ?: stringResource(R.string.stop_unnamed)),
                 )
             }
         }
-        Box(Modifier.weight(1f)) {
-            Arrivals(
-                state = state,
-                onRetry = vm::refresh,
-                onStar = { vm.toggleLineStar(it.lineId) },
-            ) { arrival -> onCreateAlert(stopId, arrival.lineId, arrival.destination.ifEmpty { null }) }
-        }
-        // Pie fijo: aviso en esta parada (A06 con la parada precargada).
-        HorizontalDivider(color = LocalStatusColors.current.border)
-        Button(
-            onClick = { onCreateAlert(stopId, null, null) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = DesignTokens.spacingLg, vertical = DesignTokens.spacingSm)
-                .heightIn(min = DesignTokens.touchTargetMin),
-        ) {
-            Icon(Icons.Outlined.NotificationAdd, contentDescription = null)
-            Spacer(Modifier.width(DesignTokens.spacingSm))
-            Text(stringResource(R.string.stop_create_alert), maxLines = 1)
+        if (state.notFound) {
+            // Deep link con una parada que no existe (A5-12): estado claro, sin ★ ni crear aviso.
+            Box(Modifier.weight(1f)) {
+                EmptyState(
+                    stringResource(R.string.stop_not_found_title),
+                    stringResource(R.string.stop_not_found_body),
+                    listOf(EmptyAction(stringResource(R.string.back), primary = true, onClick = onBack)),
+                )
+            }
+        } else {
+            LineChips(stopId, state, highlightLine, sharedOrigin, vm::selectLine)
+            val selected = state.selectedLine
+            if (selected != null) {
+                TextButton(
+                    onClick = { vm.toggleLineStar() },
+                    modifier = Modifier.padding(horizontal = DesignTokens.spacingSm).heightIn(min = DesignTokens.touchTargetMin),
+                ) {
+                    Icon(
+                        if (state.lineStarred) Icons.Filled.Star else Icons.Outlined.StarOutline,
+                        contentDescription = null,
+                        tint = if (state.lineStarred) LocalStatusColors.current.favorite else LocalStatusColors.current.scheduled,
+                    )
+                    Spacer(Modifier.width(DesignTokens.spacingSm))
+                    Text(
+                        stringResource(if (state.lineStarred) R.string.stop_line_starred else R.string.stop_line_star, selected),
+                    )
+                }
+            }
+            Box(Modifier.weight(1f)) {
+                Arrivals(
+                    state = state,
+                    onRetry = vm::refresh,
+                    onStar = { vm.toggleLineStar(it.lineId) },
+                ) { arrival -> onCreateAlert(stopId, arrival.lineId, arrival.destination.ifEmpty { null }) }
+            }
+            // Pie fijo: aviso en esta parada (A06 con la parada precargada).
+            HorizontalDivider(color = LocalStatusColors.current.border)
+            Button(
+                onClick = { onCreateAlert(stopId, null, null) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = DesignTokens.spacingLg, vertical = DesignTokens.spacingSm)
+                    .heightIn(min = DesignTokens.touchTargetMin),
+            ) {
+                Icon(Icons.Outlined.NotificationAdd, contentDescription = null)
+                Spacer(Modifier.width(DesignTokens.spacingSm))
+                Text(stringResource(R.string.stop_create_alert), maxLines = 1)
+            }
         }
     }
 }

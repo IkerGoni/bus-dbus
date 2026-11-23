@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Bus Donostia</string>
+    <!-- Launcher-aren labela eta Play-ko izena: ez-ofizialtasuna izenean (A5-08). Aplikazio barruan, goiburua «Bus Donostia». -->
+    <string name="app_launcher_name">Bus Donostia (ez-ofiziala)</string>
 
     <string name="nav_home">Hasiera</string>
     <string name="nav_stops">Geltokiak</string>
@@ -39,7 +41,7 @@
 
     <!-- A02 · Geltokiak -->
     <string name="stops_title">Geltokiak</string>
-    <string name="stops_search_hint">Kodea edo kalea</string>
+    <string name="stops_search_hint">Geltokia edo kalea</string>
     <string name="stops_refresh_location">Eguneratu kokapena</string>
     <string name="stops_tab_nearby">Hurbilekoak</string>
     <string name="stops_tab_favorites">Gogokoak</string>
@@ -48,20 +50,22 @@
     <string name="stops_section_results">Emaitzak</string>
     <string name="stops_by_distance">Distantziaren arabera</string>
     <string name="stops_distance_walk">%1$s · %2$d min</string>
-    <string name="stops_walk_estimate_note">Distantzia lerro zuzenean. Oinezko minutuak 80 m/min-ko estimazioa dira.</string>
+    <string name="stops_walk_estimate_note">Distantzia lerro zuzenean. Oinezko minutuak %1$d m/min-ko estimazioa dira.</string>
     <string name="stops_location_title">Ikusi geltoki hurbilenak</string>
     <string name="stops_location_body">Zure kokapena mugikorrean bakarrik erabiltzen dugu geltokiak distantziaren arabera ordenatzeko. Ez da gordetzen ez bidaltzen.</string>
     <string name="stops_location_allow">Baimendu kokapena</string>
     <string name="stops_location_unavailable">Ezin izan da zure kokapena lortu. Egiaztatu aktibatuta dagoela.</string>
     <string name="stops_no_results_title">Ez dago «%1$s» bilaketarekin bat datorren geltokirik</string>
-    <string name="stops_no_results_body">Saiatu markesinaren kodearekin edo kalearen izenaren zati batekin.</string>
+    <string name="stops_no_results_body">Saiatu geltokiaren edo kalearen izenaren zati batekin.</string>
     <string name="stops_favorites_empty_title">Oraindik ez duzu geltoki gogokorik</string>
     <string name="stops_favorites_empty_body">Ukitu geltoki baten izarra beti eskura izateko.</string>
     <string name="stops_recents_empty_title">Ez duzu geltokirik ireki</string>
-    <string name="stops_recents_empty_body">Kontsultatzen dituzun azken 10 geltokiak hemen agertuko dira.</string>
+    <string name="stops_recents_empty_body">Kontsultatzen dituzun azken %1$d geltokiak hemen agertuko dira.</string>
 
     <!-- A05 · Geltokiaren xehetasuna -->
     <string name="stop_unnamed">Geltokia</string>
+    <string name="stop_not_found_title">Ez da geltokia aurkitu</string>
+    <string name="stop_not_found_body">Estekak ez du katalogoko geltokirik adierazten. Itzuli Geltokiak atalera eta aukeratu bat.</string>
     <string name="stop_directions">Nola iritsi</string>
     <string name="stop_next_arrivals">Hurrengo iritsierak</string>
     <string name="stop_line_star">Gorde %1$s linea geltoki honetan</string>
@@ -112,7 +116,7 @@
     <!-- A01 · Hasiera -->
     <string name="home_search_hint">Geltokia, kalea, linea edo helmuga</string>
     <string name="home_search_empty_title">Ez dago «%1$s» bilaketarekin bat datorrenik</string>
-    <string name="home_search_empty_body">Saiatu markesinaren kodearekin, kale batekin, linea-zenbaki batekin edo helmuga batekin.</string>
+    <string name="home_search_empty_body">Saiatu geltoki batekin, kale batekin, linea-zenbaki batekin edo helmuga batekin.</string>
     <string name="home_next_alert">Zure hurrengo abisua</string>
     <string name="home_favorites">Geltoki gogokoak</string>
     <string name="home_next_source">%1$s · %2$s</string>
@@ -154,7 +158,7 @@
     <string name="alert_minutes_before_suffix">min lehenago</string>
     <string name="alert_minutes_chip">%1$d\'</string>
     <string name="alert_minutes_slider">Aurrerapen-minutuak</string>
-    <string name="alert_once_hint">Gordetzen duzunetik zaintzen du, behin abisatzen du eta ezabatu egiten da. 7 egunera iraungitzen da, abisatu ez badu.</string>
+    <string name="alert_once_hint">Gordetzen duzunetik zaintzen du, behin abisatzen du eta ezabatu egiten da. %1$d egunera iraungitzen da, abisatu ez badu.</string>
     <string name="alert_preview">Jakinarazpenaren aurrebista</string>
     <string name="alert_save">Gorde abisua</string>
     <string name="alert_conflict_title">Abisu hau badaukazu</string>
@@ -162,7 +166,7 @@
     <string name="alert_conflict_update">Eguneratu</string>
     <string name="alert_error_no_stop">Aukeratu geltoki bat.</string>
     <string name="alert_error_no_line">Aukeratu linea bat.</string>
-    <string name="alert_error_minutes">Aurrerapena 1 eta 30 minutu artekoa izan behar da.</string>
+    <string name="alert_error_minutes">Aurrerapena %1$d eta %2$d minutu artekoa izan behar da.</string>
 
     <!-- Iritsiera-jakinarazpena eta A06ko aurrebista -->
     <string name="notif_title">L%1$s → %2$s, %3$d min barru</string>

@@ -98,6 +98,8 @@ data class ApiConfig(
         if (polling.foregroundVisibleSec !in 15..120) add("polling.foregroundVisibleSec fuera de rango")
         if (polling.baseBackgroundSec !in 15..120) add("polling.baseBackgroundSec fuera de rango")
         if (polling.noServiceOrErrorMultiplier !in 1..10) add("polling.noServiceOrErrorMultiplier fuera de rango")
+        if (polling.noServiceStopMin !in 5..360) add("polling.noServiceStopMin fuera de rango")
+        if (polling.fetchSlackSec !in 0..30) add("polling.fetchSlackSec fuera de rango")
         if (polling.adaptiveTiers.isEmpty()) {
             add("polling.adaptiveTiers vacío")
         } else {
@@ -123,15 +125,16 @@ data class ApiConfig(
             add("alerts rango minutesAhead inválido")
         }
         if (alerts.maxBadgeCount !in 1..99) add("alerts.maxBadgeCount fuera de rango")
-        if (alerts.recurringWakeupBeforeMin !in 5..120) add("alerts.recurringWakeupBeforeMin fuera de rango")
-        if (alerts.recurringExpiryAfterMin !in 5..120) add("alerts.recurringExpiryAfterMin fuera de rango")
-        if (alerts.recurringWindowToleranceMin !in 1..30) add("alerts.recurringWindowToleranceMin fuera de rango")
+        if (alerts.maxWatchHours !in 1..24) add("alerts.maxWatchHours fuera de rango")
 
         if (geo.walkingSpeedKmh !in 1.0..15.0) add("geo.walkingSpeedKmh fuera de rango")
+        if (geo.lastKnownMaxAgeSec !in 10..600) add("geo.lastKnownMaxAgeSec fuera de rango")
+        if (geo.locationTimeoutSec !in 1..60) add("geo.locationTimeoutSec fuera de rango")
         if (uiLimits.homeFavoriteMaxArrivals !in 1..20) add("uiLimits.homeFavoriteMaxArrivals fuera de rango")
         if (uiLimits.homeSearchLimit !in 1..50) add("uiLimits.homeSearchLimit fuera de rango")
         if (uiLimits.searchStopsLimit !in 1..200) add("uiLimits.searchStopsLimit fuera de rango")
         if (uiLimits.nearbyStopsLimit !in 1..50) add("uiLimits.nearbyStopsLimit fuera de rango")
+        if (uiLimits.recentStopsLimit !in 1..50) add("uiLimits.recentStopsLimit fuera de rango")
 
         if (minAppVersion < 1) add("minAppVersion < 1")
         if (notice != null && (notice.es.isBlank() || notice.eu.isBlank())) add("notice incompleto")

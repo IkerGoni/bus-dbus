@@ -26,7 +26,9 @@
     <string name="settings_live_never">Oraindik ez da geltokirik kontsultatu</string>
     <string name="settings_section_about">Aplikazioari buruz</string>
     <string name="settings_version">Bertsioa</string>
-    <string name="settings_credit_times">Denborak: Dbusen aplikazioaren zerbitzua (ez-ofiziala, loturarik gabe)</string>
+    <string name="settings_credit_times">Denborak: Dbusen API publikoa</string>
+    <string name="settings_disclaimer">Aplikazio ez-ofiziala: ez du loturarik Dbus-ekin ez Donostiako Udalarekin.</string>
+    <string name="settings_credit_stops">Geltokiak eta lineak: Dbus Donostia</string>
     <string name="settings_credit_osm">Geltokien koordenatuak © OpenStreetMap (ODbL)</string>
     <string name="settings_credit_fonts">Letra-tipoak: Plus Jakarta Sans eta JetBrains Mono (SIL Open Font License 1.1)</string>
 

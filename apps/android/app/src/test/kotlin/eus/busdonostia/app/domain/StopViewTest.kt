@@ -3,6 +3,7 @@ package eus.busdonostia.app.domain
 import eus.busdonostia.app.TestData
 import eus.busdonostia.app.data.api.parseStopFeed
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -104,5 +105,18 @@ class StopViewTest {
         val ok = feed("tiemposParada-340-datos-avisos.json")
         assertEquals(arrivalRows(ok.arrivals, null, t0 + 1_000), arrivalRows(ok.arrivals, null, t0 + 59_000))
         assertTrue(arrivalRows(ok.arrivals, null, t0 + 59_000) != arrivalRows(ok.arrivals, null, t0 + 60_000))
+    }
+
+    // ── A5-12: el resalte de un deep link solo vale si es una línea real de la parada ──
+
+    @Test
+    fun resalteDeDeepLinkSoloLineasReales() {
+        val lines = listOf("13", "28", "B4")
+        assertEquals("13", sanitizeHighlightLine(lines, "13"))
+        assertEquals("28", sanitizeHighlightLine(lines, " l028 "))
+        assertNull(sanitizeHighlightLine(lines, "13';--"))
+        assertNull(sanitizeHighlightLine(lines, "99"))
+        assertNull(sanitizeHighlightLine(lines, null))
+        assertNull(sanitizeHighlightLine(emptyList(), "13"))
     }
 }

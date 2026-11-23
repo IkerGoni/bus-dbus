@@ -26,7 +26,9 @@
     <string name="settings_live_never">Aún no se ha consultado ninguna parada</string>
     <string name="settings_section_about">Acerca de</string>
     <string name="settings_version">Versión</string>
-    <string name="settings_credit_times">Tiempos: servicio de la app de Dbus (no oficial, sin afiliación)</string>
+    <string name="settings_credit_times">Tiempos: API pública de Dbus</string>
+    <string name="settings_disclaimer">App no oficial, sin relación con Dbus ni con el Ayuntamiento de Donostia.</string>
+    <string name="settings_credit_stops">Paradas y líneas: Dbus Donostia</string>
     <string name="settings_credit_osm">Coordenadas de paradas © OpenStreetMap (ODbL)</string>
     <string name="settings_credit_fonts">Fuentes tipográficas: Plus Jakarta Sans y JetBrains Mono (SIL Open Font License 1.1)</string>
 

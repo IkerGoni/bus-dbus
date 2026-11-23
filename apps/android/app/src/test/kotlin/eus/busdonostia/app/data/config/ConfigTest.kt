@@ -49,7 +49,7 @@ class ConfigTest {
     private val warnings = mutableListOf<String>()
 
     private fun repo(http: OkHttpClient = OkHttpClient()) =
-        ConfigRepository(bundled, cacheFile, server.url("/config.json"), http, nowMs = { now }, warn = { msg, _ -> warnings += msg })
+        ConfigRepository(bundled, { cacheFile }, server.url("/config.json"), http, nowMs = { now }, warn = { msg, _ -> warnings += msg })
 
     // ── Validación ──
 
@@ -73,6 +73,12 @@ class ConfigTest {
         assertEquals(1, bundled.alerts.minMinutesAhead)
         assertEquals(30, bundled.alerts.maxMinutesAhead)
         assertEquals(9, bundled.alerts.maxBadgeCount)
+        assertEquals(3, bundled.alerts.maxWatchHours)
+        assertEquals(60, bundled.polling.noServiceStopMin)
+        assertEquals(5, bundled.polling.fetchSlackSec)
+        assertEquals(120, bundled.geo.lastKnownMaxAgeSec)
+        assertEquals(10, bundled.geo.locationTimeoutSec)
+        assertEquals(10, bundled.uiLimits.recentStopsLimit)
         assertEquals(4.8, bundled.geo.walkingSpeedKmh, 0.001)
         assertEquals(3, bundled.uiLimits.homeFavoriteMaxArrivals)
     }
@@ -119,6 +125,13 @@ class ConfigTest {
         assertTrue(bundled.copy(alerts = bundled.alerts.copy(minMinutesAhead = 35, maxMinutesAhead = 30)).validate().isNotEmpty())
         assertTrue(bundled.copy(geo = bundled.geo.copy(walkingSpeedKmh = 0.0)).validate().isNotEmpty())
         assertTrue(bundled.copy(uiLimits = bundled.uiLimits.copy(homeFavoriteMaxArrivals = 0)).validate().isNotEmpty())
+        assertTrue(bundled.copy(polling = bundled.polling.copy(noServiceStopMin = 0)).validate().isNotEmpty())
+        assertTrue(bundled.copy(polling = bundled.polling.copy(fetchSlackSec = 31)).validate().isNotEmpty())
+        assertTrue(bundled.copy(alerts = bundled.alerts.copy(maxWatchHours = 0)).validate().isNotEmpty())
+        assertTrue(bundled.copy(alerts = bundled.alerts.copy(maxWatchHours = 25)).validate().isNotEmpty())
+        assertTrue(bundled.copy(geo = bundled.geo.copy(lastKnownMaxAgeSec = 0)).validate().isNotEmpty())
+        assertTrue(bundled.copy(geo = bundled.geo.copy(locationTimeoutSec = 0)).validate().isNotEmpty())
+        assertTrue(bundled.copy(uiLimits = bundled.uiLimits.copy(recentStopsLimit = 0)).validate().isNotEmpty())
     }
 
     @Test
@@ -161,7 +174,7 @@ class ConfigTest {
 
     @Test
     fun sinUrlRemotaUsaLaEmpaquetadaYNoLlama() = runTest {
-        val r = ConfigRepository(bundled, cacheFile, null, OkHttpClient(), nowMs = { now })
+        val r = ConfigRepository(bundled, { cacheFile }, null, OkHttpClient(), nowMs = { now })
         assertFalse(r.refreshIfDue())
         assertEquals(bundled, r.config.value)
         assertEquals(0, server.requestCount)
@@ -193,7 +206,7 @@ class ConfigTest {
         server.enqueue(MockResponse().setBody(variantInt("pollIntervalSec", 45)))
         val r = repo()
         assertTrue(r.refreshIfDue())
-        now += ConfigRepository.REFRESH_INTERVAL_MS
+        now += bundled.remoteConfigCacheHours * 3_600_000L
         server.enqueue(MockResponse().setBody(variant("apiBaseUrl", "http://evil.example/ws")))
         assertFalse(r.refreshIfDue())
         assertEquals(45, r.config.value.pollIntervalSec) // última válida, no la empaquetada
@@ -217,7 +230,7 @@ class ConfigTest {
         server.enqueue(MockResponse().setResponseCode(503))
         val r = repo()
         assertFalse(r.refreshIfDue())
-        now += ConfigRepository.REFRESH_INTERVAL_MS - 1
+        now += bundled.remoteConfigCacheHours * 3_600_000L - 1
         assertFalse(r.refreshIfDue()) // no vuelve a pedir antes de 12 h
         assertEquals(1, server.requestCount)
         now += 1
@@ -234,5 +247,37 @@ class ConfigTest {
         r.initializeFromDisk()
         assertEquals(bundled, r.config.value)
         assertEquals(1, warnings.size) // corrupta: se avisa (H5); ausente es lo normal y no
+    }
+
+    // ── A5-16: el origen de la config es visible (un fallback silencioso a defaults se nota) ──
+
+    @Test
+    fun schemaVersionEsObligatorio() {
+        val root = Json.parseToJsonElement(TestData.bundledConfigJson).jsonObject
+        assertNull(ApiConfig.parse(JsonObject(root.filterKeys { it != "schemaVersion" }).toString()))
+    }
+
+    @Test
+    fun origenDeLaConfigVisible() = runTest {
+        val r = repo()
+        assertEquals(ConfigSource.DEFAULTS, r.configSource.value)
+        r.initializeFromDisk()
+        assertEquals(ConfigSource.BUNDLED, r.configSource.value)
+        server.enqueue(MockResponse().setBody(variantInt("pollIntervalSec", 45)))
+        assertTrue(r.refreshIfDue())
+        assertEquals(ConfigSource.REMOTE, r.configSource.value)
+        // Un arranque posterior con la caché en disco: REMOTE_CACHE, no DEFAULTS.
+        val next = repo()
+        next.initializeFromDisk()
+        assertEquals(ConfigSource.REMOTE_CACHE, next.configSource.value)
+    }
+
+    @Test
+    fun falloDeLecturaDelAssetQuedaEnDefaultsYAvisa() = runTest {
+        val r = repo()
+        r.initializeFromDisk { error("parseo roto (p. ej. por R8)") }
+        assertEquals(ConfigSource.DEFAULTS, r.configSource.value)
+        assertEquals(1, warnings.size)
+        assertEquals(bundled, r.config.value)
     }
 }

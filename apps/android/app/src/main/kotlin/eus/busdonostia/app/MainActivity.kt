@@ -18,9 +18,14 @@ class MainActivity : AppCompatActivity() {
         val settings = (application as BusDonostiaApp).container.settings
         setContent {
             BusDonostiaTheme {
-                val onboardingDone by settings.onboardingDone.collectAsStateWithLifecycle()
-                // A08 solo en la primera apertura; después, directamente Inicio.
-                if (onboardingDone) AppShell() else OnboardingScreen(onFinished = settings::setOnboardingDone)
+                // Los ajustes se leen de disco en IO (A5-13): hasta entonces, nada de decidir
+                // onboarding vs Inicio con un valor neutro (evita el flash de A08 en returning users).
+                val ready by settings.ready.collectAsStateWithLifecycle()
+                if (ready) {
+                    val onboardingDone by settings.onboardingDone.collectAsStateWithLifecycle()
+                    // A08 solo en la primera apertura; después, directamente Inicio.
+                    if (onboardingDone) AppShell() else OnboardingScreen(onFinished = settings::setOnboardingDone)
+                }
             }
         }
     }

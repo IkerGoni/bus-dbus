@@ -4,6 +4,7 @@ import eus.busdonostia.app.data.api.DbusClient
 import eus.busdonostia.app.data.db.LineColorEntity
 import eus.busdonostia.app.data.db.lineColors
 import eus.busdonostia.app.domain.FreshnessConfig
+import eus.busdonostia.app.domain.PollingConfig
 import eus.busdonostia.app.domain.StopFeed
 import eus.busdonostia.app.domain.StopFeedStatus
 import eus.busdonostia.app.domain.reusableFeed
@@ -30,6 +31,7 @@ class LiveRepository(
     private val scope: CoroutineScope,
     private val nowMs: () -> Long = System::currentTimeMillis,
     historySize: () -> Int = { FreshnessConfig().liveFeedHistorySize },
+    private val pollingConfig: () -> PollingConfig = { PollingConfig() },
 ) {
     private val live = LiveFeeds(historySize)
     private val inFlight = InFlight<String, StopFeed>(scope)
@@ -47,10 +49,10 @@ class LiveRepository(
 
     /**
      * Sondeo periódico de la UI: si alguien (el motor) consultó la parada hace menos de
-     * un intervalo (− 5 s de margen), reutiliza esa respuesta en vez de pedir otra (H16).
+     * un intervalo (− `fetchSlackSec` de margen), reutiliza esa respuesta en vez de pedir otra (H16).
      */
     suspend fun pollStop(stopId: String): StopFeed =
-        reusableFeed(feeds.value[stopId]?.latest, nowMs(), pollIntervalMs()) ?: fetchStop(stopId)
+        reusableFeed(feeds.value[stopId]?.latest, nowMs(), pollIntervalMs(), pollingConfig()) ?: fetchStop(stopId)
 
     /** Consulta todas las [stops] en paralelo (una petición por parada, como el bot). */
     suspend fun fetchStops(stops: Set<String>) = coroutineScope {

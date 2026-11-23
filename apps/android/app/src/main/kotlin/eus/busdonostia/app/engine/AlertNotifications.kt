@@ -30,6 +30,7 @@ const val CHANNEL_ARRIVALS = "dbus_arrivals_high"
 const val MONITORING_NOTIFICATION_ID = 1
 private const val STOPPED_NOTIFICATION_ID = 2
 private const val ARRIVAL_NOTIFICATION_ID = 3
+private const val WATCH_EXPIRED_NOTIFICATION_ID = 4
 
 /** Deep link de A05 con la línea resaltada (también lo declara el manifest). */
 fun stopDeepLink(stopId: String, lineId: String): String =
@@ -140,8 +141,8 @@ fun notifyArrival(
 
 /** El motor se ha parado sin que el usuario lo pida (sin servicio o límite de Android). */
 @SuppressLint("MissingPermission")
-fun notifyStopped(context: Context, textRes: Int) {
-    val text = context.getString(textRes)
+fun notifyStopped(context: Context, textRes: Int, vararg formatArgs: Any) {
+    val text = context.getString(textRes, *formatArgs)
     val notification = NotificationCompat.Builder(context, CHANNEL_MONITORING)
         .setSmallIcon(R.drawable.ic_notification)
         .setContentTitle(context.getString(R.string.notif_stopped_title))
@@ -151,6 +152,24 @@ fun notifyStopped(context: Context, textRes: Int) {
         .setAutoCancel(true)
         .build()
     NotificationManagerCompat.from(context).notify(STOPPED_NOTIFICATION_ID, notification)
+}
+
+/**
+ * Tope de vigilancia alcanzado (A5-09): `maxWatchHours` sin un bus que coincida.
+ * Una por aviso (tag = id); el servicio lo elimina si el usuario puede ver la notificación.
+ */
+@SuppressLint("MissingPermission")
+fun notifyWatchExpired(context: Context, rule: AlertRule, maxWatchHours: Int) {
+    val text = context.getString(R.string.notif_watch_expired, rule.lineId, maxWatchHours)
+    val notification = NotificationCompat.Builder(context, CHANNEL_ARRIVALS)
+        .setSmallIcon(R.drawable.ic_notification)
+        .setContentTitle(context.getString(R.string.notif_stopped_title))
+        .setContentText(text)
+        .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+        .setContentIntent(openAppIntent(context))
+        .setAutoCancel(true)
+        .build()
+    NotificationManagerCompat.from(context).notify(rule.id, WATCH_EXPIRED_NOTIFICATION_ID, notification)
 }
 
 fun cancelStopped(context: Context) {

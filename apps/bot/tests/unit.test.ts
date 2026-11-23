@@ -101,16 +101,31 @@ describe('findMatchingArrival', () => {
     ).toBe('28');
   });
 
-  it('filters by destination tolerantly', () => {
+  it('filters by destination with equality after normalization (A5-02)', () => {
     const result = findMatchingArrival(
       [
-        arrival({ destination: 'Amara - Ospitaleak - Miramon', minutes: 3 }),
-        arrival({ destination: 'Ospitaleak', minutes: 1 }),
+        // Contendría «Ospitaleak» pero es OTRO destino: no debe casar aunque llegue antes.
+        arrival({ destination: 'Amara - Ospitaleak - Miramon', minutes: 1 }),
+        arrival({ destination: 'Ospitaleak', minutes: 3 }),
       ],
       { ...base, destination: 'Ospitaleak' }
     );
-    // Ambas coinciden por contención; gana la más próxima.
-    expect(result?.minutes).toBe(1);
+    expect(result?.minutes).toBe(3);
+    expect(result?.destination).toBe('Ospitaleak');
+  });
+
+  it('normalizes case and spaces around separators, not containment', () => {
+    const result = findMatchingArrival(
+      [arrival({ destination: 'Buenavista - Altza', minutes: 4 })],
+      { ...base, destination: '  BUENAVISTA-ALTZA ' }
+    );
+    expect(result?.minutes).toBe(4);
+    expect(
+      findMatchingArrival([arrival({ destination: 'Altza', minutes: 1 })], {
+        ...base,
+        destination: 'Buenavista-Altza',
+      })
+    ).toBeNull();
   });
 
   it('does not alert for the opposite direction', () => {

@@ -3,9 +3,12 @@ package eus.busdonostia.app.data.settings
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 /** Apariencia elegida en A07. */
 enum class ThemeMode(val nightMode: Int) {
@@ -17,21 +20,45 @@ enum class ThemeMode(val nightMode: Int) {
 /**
  * Preferencias locales (A07, A08). Nada de ubicación ni datos personales.
  * El idioma no se guarda aquí: lo guarda AppCompat (`autoStoreLocales`).
+ *
+ * Cero I/O en Main Thread (A5-13): [prefsProvider] solo se evalúa en
+ * [Dispatchers.IO] dentro de [init]; hasta entonces los valores son los neutros
+ * y [ready] es false. La UI espera a [ready] antes de decidir qué pintar.
  */
-class SettingsStore(private val prefs: SharedPreferences) {
-    private val _theme = MutableStateFlow(readTheme())
+class SettingsStore(
+    prefsProvider: () -> SharedPreferences,
+    scope: CoroutineScope,
+) {
+    private val prefs: SharedPreferences by lazy(prefsProvider)
+
+    private val _theme = MutableStateFlow(ThemeMode.SYSTEM)
     val theme: StateFlow<ThemeMode> = _theme.asStateFlow()
 
-    private val _onboardingDone = MutableStateFlow(prefs.getBoolean(KEY_ONBOARDING, false))
+    private val _onboardingDone = MutableStateFlow(false)
     val onboardingDone: StateFlow<Boolean> = _onboardingDone.asStateFlow()
 
-    private val _lastLiveFetchMs = MutableStateFlow(prefs.getLong(KEY_LAST_FETCH, 0L).takeIf { it > 0 })
+    private val _lastLiveFetchMs = MutableStateFlow<Long?>(null)
 
     /** Hora de la última respuesta real de Dbus (no `API_ERROR`); null si nunca hubo. */
     val lastLiveFetchMs: StateFlow<Long?> = _lastLiveFetchMs.asStateFlow()
 
-    private fun readTheme(): ThemeMode =
-        prefs.getString(KEY_THEME, null)?.let { name -> ThemeMode.entries.firstOrNull { it.name == name } } ?: ThemeMode.SYSTEM
+    private val _ready = MutableStateFlow(false)
+
+    /** true cuando las preferencias ya se leyeron de disco (en IO). */
+    val ready: StateFlow<Boolean> = _ready.asStateFlow()
+
+    init {
+        scope.launch(Dispatchers.IO) {
+            val p = prefs
+            _theme.value = readTheme(p)
+            _onboardingDone.value = p.getBoolean(KEY_ONBOARDING, false)
+            _lastLiveFetchMs.value = p.getLong(KEY_LAST_FETCH, 0L).takeIf { it > 0 }
+            _ready.value = true
+        }
+    }
+
+    private fun readTheme(p: SharedPreferences): ThemeMode =
+        p.getString(KEY_THEME, null)?.let { name -> ThemeMode.entries.firstOrNull { it.name == name } } ?: ThemeMode.SYSTEM
 
     /** Persiste y aplica la apariencia (AppCompat recrea la actividad). */
     fun setTheme(mode: ThemeMode) {

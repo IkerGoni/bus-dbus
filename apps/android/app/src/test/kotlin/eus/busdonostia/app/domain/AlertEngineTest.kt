@@ -15,6 +15,8 @@ class AlertEngineTest {
 
     private val now = madrid("2026-11-23T08:00") // lunes
 
+    private val noServiceStopMs = PollingConfig().noServiceStopMin * 60_000L
+
     private fun arrival(line: String, minutes: Int, destination: String = "Amara", source: ArrivalSource = ArrivalSource.LIVE) =
         Arrival(line, line, destination, minutes, null, source, now, null)
 
@@ -71,12 +73,12 @@ class AlertEngineTest {
         val start = evaluateTick(rules, mapOf("340" to noService, "1" to ArrivalsView.Error), now, null)
         assertEquals(now, start.troubleSinceMs)
         assertEquals(EngineAction.CONTINUE, start.action)
-        val later = now + NO_SERVICE_STOP_MS - 1
+        val later = now + noServiceStopMs - 1
         assertEquals(EngineAction.CONTINUE, evaluateTick(rules, mapOf("340" to noService, "1" to ArrivalsView.Error), later, now).action)
-        val end = evaluateTick(rules, mapOf("340" to noService, "1" to ArrivalsView.Error), now + NO_SERVICE_STOP_MS, now)
+        val end = evaluateTick(rules, mapOf("340" to noService, "1" to ArrivalsView.Error), now + noServiceStopMs, now)
         assertEquals(EngineAction.STOP_NO_SERVICE, end.action)
         // Basta una parada que responda para reiniciar la cuenta.
-        val ok = evaluateTick(rules, mapOf("340" to noService, "1" to live(arrival("13", 20))), now + NO_SERVICE_STOP_MS, now)
+        val ok = evaluateTick(rules, mapOf("340" to noService, "1" to live(arrival("13", 20))), now + noServiceStopMs, now)
         assertNull(ok.troubleSinceMs)
         assertEquals(EngineAction.CONTINUE, ok.action)
     }
@@ -157,9 +159,9 @@ class AlertEngineTest {
         assertEquals(EngineAction.CONTINUE, first.action)
         // Si ya había problemas, la cuenta no se reinicia.
         assertEquals(now - 1_000, failedTick(now - 1_000, now).troubleSinceMs)
-        // Fallando seguido (Room roto) llega a NO_SERVICE_STOP_MS y se para: no sondea para siempre.
-        assertEquals(EngineAction.CONTINUE, failedTick(now, now + NO_SERVICE_STOP_MS - 1).action)
-        assertEquals(EngineAction.STOP_NO_SERVICE, failedTick(now, now + NO_SERVICE_STOP_MS).action)
+        // Fallando seguido (Room roto) llega a noServiceStopMs y se para: no sondea para siempre.
+        assertEquals(EngineAction.CONTINUE, failedTick(now, now + noServiceStopMs - 1).action)
+        assertEquals(EngineAction.STOP_NO_SERVICE, failedTick(now, now + noServiceStopMs).action)
     }
 
     @Test
@@ -190,5 +192,28 @@ class AlertEngineTest {
         assertEquals("Ospitaleak", firingDestination(once("a").copy(destination = "Ospitaleak"), arrival("5", 3, destination = " ")))
         assertNull(firingDestination(once("a").copy(destination = UNKNOWN_DESTINATION), arrival("5", 3, destination = "")))
         assertNull(firingDestination(once("a"), arrival("5", 3, destination = "")))
+    }
+
+    @Test
+    fun topeDeVigilanciaSinBusQueCoincida() {
+        val cfg = AlertsConfig(maxWatchHours = 3)
+        val viejo = once("a").copy(createdAtMs = now - 3 * 3_600_000L)
+        // Sin bus de la línea en la parada: deja de vigilarse, se notifica y se elimina (A5-09).
+        val tick = evaluateTick(listOf(viejo), mapOf("340" to live(arrival("28", 10))), now, null, cfg)
+        assertEquals(listOf("a"), tick.watchExpired.map { it.id })
+        assertTrue(tick.watching.isEmpty())
+        assertEquals(EngineAction.STOP_IDLE, tick.action)
+        // Con un bus de la línea (aunque lejos), el aviso es legítimo: se sigue vigilando.
+        val conBus = evaluateTick(listOf(viejo), mapOf("340" to live(arrival("5", 90))), now, null, cfg)
+        assertTrue(conBus.watchExpired.isEmpty())
+        assertEquals(listOf("a"), conBus.watching.map { it.id })
+        assertEquals(EngineAction.CONTINUE, conBus.action)
+        // Antes del tope, nada expira.
+        val joven = once("b").copy(createdAtMs = now - 3 * 3_600_000L + 1)
+        assertTrue(evaluateTick(listOf(joven), mapOf("340" to live(arrival("28", 10))), now, null, cfg).watchExpired.isEmpty())
+        // El tope sale de la config, no de una constante inline.
+        val corto = AlertsConfig(maxWatchHours = 1)
+        val unaHora = once("c").copy(createdAtMs = now - 3_600_000L)
+        assertEquals(listOf("c"), evaluateTick(listOf(unaHora), mapOf("340" to live(arrival("28", 10))), now, null, corto).watchExpired.map { it.id })
     }
 }

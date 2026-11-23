@@ -56,6 +56,8 @@ data class AlertEditUiState(
     val stopResults: List<CatalogStop> = emptyList(),
     /** Rango de antelación permitido (`alerts.minMinutesAhead..maxMinutesAhead` de la config). */
     val minutesRange: IntRange = AlertsConfig().let { it.minMinutesAhead..it.maxMinutesAhead },
+    /** Caducidad del aviso (`alerts.expirationDays`), para el texto de A06 (A5-10). */
+    val expirationDays: Int = AlertsConfig().expirationDays,
 )
 
 data class ConflictInfo(val lineId: String, val stopName: String)
@@ -142,6 +144,7 @@ class AlertEditViewModel(
             stopQuery = f.stopQuery,
             stopResults = searchStops(catalog, f.stopQuery, limit = cfg.uiLimits.searchStopsLimit),
             minutesRange = cfg.alerts.minMinutesAhead..cfg.alerts.maxMinutesAhead,
+            expirationDays = cfg.alerts.expirationDays,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), AlertEditUiState(editing = alertId != null))
 

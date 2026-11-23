@@ -9,6 +9,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
+/** Valor por defecto del límite de recientes; el efectivo viene de `uiLimits.recentStopsLimit`. */
 const val MAX_RECENTS = 10
 
 /** Parada vista recientemente. */
@@ -20,11 +21,11 @@ data class RecentStopEntity(
 
 @Dao
 abstract class RecentStopDao {
-    /** Registra la visita (upsert) y deja solo las [MAX_RECENTS] más recientes. */
+    /** Registra la visita (upsert) y deja solo las [limit] más recientes (`uiLimits.recentStopsLimit`). */
     @Transaction
-    open suspend fun record(stopId: String, nowMs: Long) {
+    open suspend fun record(stopId: String, nowMs: Long, limit: Int = MAX_RECENTS) {
         upsert(RecentStopEntity(stopId, nowMs))
-        trim()
+        trim(limit)
     }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -32,9 +33,9 @@ abstract class RecentStopDao {
 
     @Query(
         "DELETE FROM recent_stops WHERE stopId NOT IN " +
-            "(SELECT stopId FROM recent_stops ORDER BY viewedAtMs DESC LIMIT $MAX_RECENTS)",
+            "(SELECT stopId FROM recent_stops ORDER BY viewedAtMs DESC LIMIT :limit)",
     )
-    protected abstract suspend fun trim()
+    protected abstract suspend fun trim(limit: Int)
 
     @Query("SELECT * FROM recent_stops ORDER BY viewedAtMs DESC")
     abstract fun observe(): Flow<List<RecentStopEntity>>

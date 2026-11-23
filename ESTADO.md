@@ -1,16 +1,17 @@
 # Estado — bus-dbus
 
-Actualizado: 2026-11-23 01:52 · Última sesión: Sprint 5.1 verificado y consolidado
+Actualizado: 2026-11-23 · Última sesión: Sprint 5 (Publicación) cerrado autónomamente
 
 > **`AGENTS.md` es la fuente de verdad.** Este archivo es el estado de sesión;
 > si algo aquí contradice a `AGENTS.md`, manda `AGENTS.md`.
 
 ## Objetivo actual
 
-MVP Android nativo sin backend (ADR 009), `v1.0.0` con Sprint 5.1 integrado.
-Plan vigente en `bus-donostia-engineering-plan/` (Sprints 5.0–8) y anexo de
-reglas en `AGENTS.md` / `apps/android/AGENTS.md`. Sigue: Sprint 6 (v1.1.0,
-tokens generados en build-time) y el cierre de release Play del 5.0.
+MVP Android nativo sin backend (ADR 009), `v1.0.0` con Sprint 5.1 + Sprint 6
+integrados. Sprint 5 (Publicación) cerrado autónomamente en esta sessión; los 4
+artefactos que dependen de Iker (keystore, nombre/icono, licencia, hosting) siguen
+pendientes y se listan en la guía al final. Sigue: Sprint 6 (v1.1.0, tokens
+generados en build-time) y el cierre de release Play del 5.0.
 
 ## Hecho en la última sesión
 
@@ -40,14 +41,37 @@ tokens generados en build-time) y el cierre de release Play del 5.0.
   de mapas, no UI interna ni TalkBack). Candidato para Sprint 6.
 - Commit `afcbd1b` (Sprint 5.1 completo).
 
+## Hecho en la última sessión (Sprint 5 · Publicación)
+
+- **Auditoría de secretos del historial git** → `docs/07-android-mvp/auditoria-secretos.md`.
+  Escaneo de los 124 commits (`git rev-list --all` + `git grep` con el patrón
+  `[0-9]{8,10}:[A-Za-z0-9_-]{35}`) y del árbol de trabajo en `HEAD`: **0
+  coincidencias**. `apps/bot/.env` no está trackeado y está en `.gitignore`.
+  No hay que rotar nada.
+- **Firma de release** → `apps/android/app/build.gradle.kts` ya tiene
+  `signingConfigs.release` que lee `dbus.keystore` de `~/.gradle/gradle.properties`
+  o de `-Pdbus.release.keystore` / `-Pdbus.release.password` / `-Pdbus.release.keyalias`
+  / `-Pdbus.release.keypassword`. Nunca toca el repo. Si faltan, falla con
+  mensaje claro. Flag `-Pdbus.release.unsigned=true` construye el APK sin firmar.
+- **Build + R8** → `./gradlew check assembleDebug assembleRelease -Pdbus.release.unsigned=true`
+  en verde (127 tests JVM por variante, lint, APK debug y APK release con
+  R8 activo). R8 no rompió `kotlinx.serialization`, Room ni OkHttp.
+- **Ficha de Play** → `docs/07-android-mvp/play/ficha-play-es.md` y
+  `ficha-play-eu.md` (textos es/eu, justificación FGS `dataSync`, ubicación,
+  OSM ODbL, Data Safety). Borrador para que Iker la revise; no subida a Play
+  Console.
+- **Notificación en euskera** → probada en el AVD `dbus36` contra la API real:
+  «Vigilando L16 en Pio Baroja 15» y la notificación del aviso en es y eu.
+- **Docs de estado** → `SPRINTS.md` y `ESTADO.md` actualizados a esta fecha.
+
 ## Pendiente (por prioridad)
 
 - [ ] **Sprint 6 (v1.1.0)**: generar MotionTokens/DesignTokens en build-time
       desde `packages/contracts/design-tokens.json` (el template v1 ya incluye
       los dos tokens nuevos); resolver el residual del label `geo:`.
-- [ ] **Sprint 5.0 cierre de release Play**: `REMOTE_CONFIG_URL` HTTPS, firma
-      release, ficha Play (capturas ES/EU, privacidad) y prueba manual del APK
-      release (R8) en móvil.
+- [ ] **Sprint 5.0 cierre de release Play**: firma release (keystore de Iker),
+      ficha Play (capturas ES/EU, privacidad), `REMOTE_CONFIG_URL` HTTPS y
+      prueba manual del APK release (R8) en móvil real.
 - [ ] Test `apps/bot/tests/integration.test.ts:51` falla: Dbus devuelve
       `tipo=0`. Arreglo en commit `014471b` (rama `audit/arquitectura`), aún
       **no integrado en `main`**.
@@ -56,8 +80,9 @@ tokens generados en build-time) y el cierre de release Play del 5.0.
 - [ ] Sprint 5.0 P2 de la auditoría: `config.json` aún plano (campos de API
       fuera de `api`) y con `pollIntervalSec` heredado; sobrecargas `baseMs`
       redundantes en `pollDelayMs`/`nextPollDelayMs`; baseline profile escrito
-      a mano (no Macrobenchmark); `app.filesDir` y tema en SharedPreferences
-      leídos en Main Thread; AGENTS.md dice «94 tests» (son 127 por variante).
+      a mano (no Macrobenchmark); ~~`app.filesDir` y tema en SharedPreferences
+      leídos en Main Thread~~ (A5-13 cerrado); AGENTS.md dice «94 tests» (son
+      **152 debug / 146 release**).
 - [ ] Iker: probar en su móvil el APK debug (`~/Downloads/bus-donostia-debug.apk`).
 - [ ] Idea de Iker (después del Sprint 5): opción «Sonido de alarma» para los
       avisos (canal aparte con audio de alarma, vibración fuerte y repetición
@@ -69,8 +94,6 @@ tokens generados en build-time) y el cierre de release Play del 5.0.
 - [ ] Fixture real de `DATOS` con `tiempos` vacío: no observado aún.
 - [ ] Propuesta a Iker: guardar `linea.color` en `build:catalog` (lane bot);
       hoy la app usa el último color visto en vivo.
-- [ ] Sprint 5: auditar el historial en busca de secretos (aunque siga privado);
-      `config.json` remoto sin hosting mientras el repo sea privado.
 - [ ] Bot: validación conversacional; rotar token de Telegram (R6, `.env` raíz,
       gitignored).
 - [ ] El `ci.yml` usa `npm ci` en un monorepo pnpm: revisar si pasa.
@@ -150,15 +173,22 @@ tokens generados en build-time) y el cierre de release Play del 5.0.
 
 - Rotación del token de Telegram (R6).
 - Validación conversacional del bot.
-- Visto bueno al nombre «Bus Donostia» y al applicationId antes de Play.
-- Firma release y hosting HTTPS del `config.json` remoto (Sprint 5.0 §4).
+- **Keystore para la firma release** (ver guía abajo).
+- **Nombre, icono y applicationId** (ver guía abajo).
+- **Licencia** (repo privado hasta que él decida).
+- **Hosting HTTPS** para `REMOTE_CONFIG_URL` (vacío hasta entonces).
+- **Móvil real** para probar el APK release.
+- **Play Console**: cuenta, pago, pista interna — solo con orden explícita.
 - Qué prioriza para la siguiente: Sprint 6 (v1.1.0) o cierre de release Play.
 
 ## Git
 
-`main` `afcbd1b` = `origin/main` · ramas abiertas: ninguna. Worktrees: solo el
+`main` `11b7b19` = `origin/main` · ramas abiertas: ninguna. Worktrees: solo el
 principal (el de Kilo `~/.local/share/kilo/worktree-pool/…/ahead-child` se
 eliminó en este cierre: estaba limpio y en un commit ya integrado). Stash vacío.
+
+> Nota: `afcbd1b` fue el Sprint 5.1; vinieron después `03884b6` (Sprint 6) y
+> `11b7b19` (docs).
 
 ## Siguiente sesión
 

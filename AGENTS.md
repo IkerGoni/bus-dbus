@@ -96,7 +96,7 @@ pnpm --filter @dbus/bot build      # tsc -b -> apps/bot/dist
 Android (toolchain en `apps/android/README.md`):
 
 ```bash
-cd apps/android && ./gradlew check assembleDebug   # lint + 152 (debug) / 138 (release) JVM por variante + APK debug
+cd apps/android && ./gradlew check assembleDebug   # lint + 152 (debug) / 146 (release) JVM por variante + APK debug
 ```
 
 Root: `pnpm verify` (lint + typecheck + tests de `apps/bot` y `packages/**`).

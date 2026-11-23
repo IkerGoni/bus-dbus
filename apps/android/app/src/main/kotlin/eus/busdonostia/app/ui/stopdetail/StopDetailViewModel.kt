@@ -12,6 +12,7 @@ import eus.busdonostia.app.domain.StopFeed
 import eus.busdonostia.app.domain.StopFeedStatus
 import eus.busdonostia.app.domain.favoriteId
 import eus.busdonostia.app.domain.normalizeLine
+import eus.busdonostia.app.domain.sanitizeHighlightLine
 import eus.busdonostia.app.domain.stopArrivalsView
 import eus.busdonostia.app.domain.stopByCode
 import eus.busdonostia.app.domain.stopLineIds
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -32,6 +34,8 @@ data class StopDetailUiState(
     val stopId: String,
     /** Nombre del catálogo o, si no está, el que da la API; null mientras no se sepa. */
     val name: String? = null,
+    /** Catálogo cargado y la parada no existe (p. ej. deep link externo, A5-12): sin consulta ni favoritos. */
+    val notFound: Boolean = false,
     val lat: Double? = null,
     val lon: Double? = null,
     /** Líneas reales de la parada (catálogo + vistas en vivo), en código público. */
@@ -90,15 +94,21 @@ class StopDetailViewModel(
         val catalog = catalogResult?.getOrNull()
         val stop = catalog?.stopByCode(stopId)
         val valid = feed.lastValid
-        val selected = feed.selectedLine?.let { line -> catalog?.toPublicLineId(line, stopId) ?: line }
         val ids = favorites.map { it.id }.toSet()
+        val lineIds = catalog?.let { stopLineIds(it, stopId, valid?.arrivals.orEmpty()) }.orEmpty()
+        // Deep link externo (A5-12): el resalte solo vale si es una línea real de esta parada.
+        val selected = sanitizeHighlightLine(
+            lineIds,
+            feed.selectedLine?.let { line -> catalog?.toPublicLineId(line, stopId) ?: line },
+        )
         val view = stopArrivalsView(feed.latest, valid, nowMs, cfg.freshness)
         StopDetailUiState(
             stopId = stopId,
+            notFound = catalog != null && stop == null,
             name = stop?.desc ?: valid?.stopName,
             lat = stop?.lat,
             lon = stop?.lon,
-            lineIds = catalog?.let { stopLineIds(it, stopId, valid?.arrivals.orEmpty()) }.orEmpty(),
+            lineIds = lineIds,
             selectedLine = selected,
             view = view,
             rows = arrivalRows(usableArrivals(view), selected, nowMs),
@@ -114,23 +124,36 @@ class StopDetailViewModel(
     }.distinctUntilChanged().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), StopDetailUiState(stopId))
 
     init {
-        container.appScope.launch { container.database.recentStops().record(stopId, System.currentTimeMillis()) }
+        container.appScope.launch {
+            // No registrar como reciente una parada que no existe (A5-12).
+            val catalog = container.catalog.first { it != null }?.getOrNull()
+            if (catalog == null || catalog.stopByCode(stopId) != null) {
+                container.database.recentStops().record(stopId, System.currentTimeMillis(), container.configRepository.config.value.uiLimits.recentStopsLimit)
+            }
+        }
     }
 
     /** Sondeo mientras la pantalla está visible (la UI lo lanza con `repeatOnLifecycle(STARTED)`). */
     suspend fun pollWhileVisible() {
         while (true) {
+            // Parada inexistente en el catálogo (A5-12): no consultar la API ni fingir un error de conexión.
+            val catalogResult = container.catalog.value
+            if (catalogResult?.isSuccess == true && catalogResult.getOrNull()?.stopByCode(stopId) == null) return
             fetch(reuseRecent = true)
             delay(container.configRepository.pollingConfig.value.foregroundVisibleSec * 1_000L)
         }
     }
 
     fun refresh() {
+        if (state.value.notFound) return
         viewModelScope.launch { fetch() }
     }
 
     /** [reuseRecent]: sondeo periódico, que reutiliza lo que el motor acaba de consultar; `Reintentar` siempre pide. */
     private suspend fun fetch(reuseRecent: Boolean = false) = fetchLock.withLock {
+        // Parada inexistente (A5-12): nunca consultar la API por un stopId inventado en un deep link.
+        val catalogResult = container.catalog.value
+        if (catalogResult?.isSuccess == true && catalogResult.getOrNull()?.stopByCode(stopId) == null) return@withLock
         refreshing.value = true
         try {
             val feed = if (reuseRecent) container.live.pollStop(stopId) else container.live.fetchStop(stopId)

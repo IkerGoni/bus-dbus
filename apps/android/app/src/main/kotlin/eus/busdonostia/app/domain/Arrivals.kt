@@ -15,14 +15,21 @@ fun remainingMinutes(arrival: Arrival, nowMs: Long): Int {
 const val UNKNOWN_DESTINATION = "Servicio programado"
 
 private val SPACES = Regex("\\s+")
+private val SEPARATOR_SPACES = Regex("\\s*([-/])\\s*")
 
-private fun normalizeDestination(value: String) = value.trim().lowercase().replace(SPACES, " ")
+private fun normalizeDestination(value: String) =
+    value.trim().lowercase().replace(SPACES, " ").replace(SEPARATOR_SPACES, "$1")
 
-/** Comparación tolerante: Dbus varía el texto del destino entre respuestas. */
+/**
+ * Igualdad tras normalizar (paridad con `destinationsMatch` de `@dbus/core`):
+ * Dbus varía mayúsculas y espacios alrededor de `-`/`/` entre respuestas, pero
+ * un destino que contiene a otro es OTRO destino («Altza» no es «Buenavista-Altza»).
+ * Nada de contención: consumía avisos de un solo uso con el bus equivocado (A5-02).
+ */
 fun destinationsMatch(actual: String, expected: String): Boolean {
     val a = normalizeDestination(actual)
     val b = normalizeDestination(expected)
-    return a.isNotEmpty() && b.isNotEmpty() && (a == b || a.contains(b) || b.contains(a))
+    return a.isNotEmpty() && b.isNotEmpty() && a == b
 }
 
 /**

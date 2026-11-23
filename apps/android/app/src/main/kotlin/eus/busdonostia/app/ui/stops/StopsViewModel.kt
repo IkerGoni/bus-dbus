@@ -8,6 +8,8 @@ import eus.busdonostia.app.domain.Catalog
 import eus.busdonostia.app.domain.CatalogStop
 import eus.busdonostia.app.domain.Favorite
 import eus.busdonostia.app.domain.FavoriteType
+import eus.busdonostia.app.domain.GeoConfig
+import eus.busdonostia.app.domain.UiLimitsConfig
 import eus.busdonostia.app.domain.nearbyStops
 import eus.busdonostia.app.domain.searchStops
 import eus.busdonostia.app.domain.stopByCode
@@ -59,6 +61,10 @@ data class StopsUiState(
     val lineColors: Map<String, Int> = emptyMap(),
     /** `© OpenStreetMap contributors, ODbL` del catálogo, visible cuando se usan coordenadas. */
     val coordinatesAttribution: String? = null,
+    /** Metros por minuto a pie derivados de `geo.walkingSpeedKmh` (nota de estimación, A5-10). */
+    val walkMetersPerMin: Int = (GeoConfig().walkingSpeedKmh * 1_000 / 60).toInt(),
+    /** Límite de recientes de `uiLimits.recentStopsLimit` (estado vacío de Recientes, A5-10). */
+    val recentStopsLimit: Int = UiLimitsConfig().recentStopsLimit,
 )
 
 /** Límite de resultados de búsqueda en pantalla (el ranking es el de `searchStops`). */
@@ -129,6 +135,8 @@ class StopsViewModel(private val container: AppContainer) : ViewModel() {
             recentRows = recentRows,
             lineColors = colors,
             coordinatesAttribution = catalog.coordinates.attribution,
+            walkMetersPerMin = (cfg.geo.walkingSpeedKmh * 1_000 / 60).toInt(),
+            recentStopsLimit = cfg.uiLimits.recentStopsLimit,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000L), StopsUiState())
 

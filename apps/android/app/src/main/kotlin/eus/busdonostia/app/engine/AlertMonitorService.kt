@@ -82,7 +82,7 @@ class AlertMonitorService : Service() {
         return START_NOT_STICKY
     }
 
-    /** Android 15+: `dataSync` tiene 6 h cada 24 h. Con franjas ≤ 3 h no debería pasar; si pasa, se avisa. */
+    /** Android 15+: `dataSync` tiene 6 h cada 24 h. Con el tope de `maxWatchHours` (3 h por defecto) no debería pasar; si pasa, se avisa. */
     override fun onTimeout(startId: Int, fgsType: Int) {
         notifyStopped(this, R.string.notif_stopped_time_limit)
         loop?.cancel()
@@ -103,7 +103,10 @@ class AlertMonitorService : Service() {
         try {
             while (true) {
                 val action = watchUntilDone()
-                if (action == EngineAction.STOP_NO_SERVICE) notifyStopped(this, R.string.notif_stopped_no_service)
+                if (action == EngineAction.STOP_NO_SERVICE) {
+                    val stopMin = container.configRepository.config.value.polling.noServiceStopMin
+                    notifyStopped(this, R.string.notif_stopped_no_service, stopMin)
+                }
                 running = false
                 val alertsCfg = container.configRepository.config.value.alerts
                 // Un aviso guardado antes de soltar `running` no arrancó el servicio (lo veía vivo): se relee la BD.
@@ -146,9 +149,9 @@ class AlertMonitorService : Service() {
                 throw e
             } catch (e: Exception) {
                 // Un fallo inesperado (BD, bug) no tumba la vigilancia, pero cuenta como problema:
-                // si sigue NO_SERVICE_STOP_MS, el motor se para y lo notifica.
+                // si sigue noServiceStopMin, el motor se para y lo notifica.
                 Log.w(TAG, "vuelta del motor fallida", e)
-                val failed = failedTick(troubleSinceMs, System.currentTimeMillis())
+                val failed = failedTick(troubleSinceMs, System.currentTimeMillis(), pollingCfg)
                 troubleSinceMs = failed.troubleSinceMs
                 delayMs = pollDelayMs(null, baseMs, pollingCfg)
                 failed.action
@@ -169,16 +172,19 @@ class AlertMonitorService : Service() {
         val known = container.live.feeds.value
         container.live.fetchStops(
             stopsToPoll(rules, startMs, alertsCfg).filterTo(sortedSetOf()) {
-                isFetchDue(known[it]?.latest?.fetchedAtMs, startMs, baseMs)
+                isFetchDue(known[it]?.latest?.fetchedAtMs, startMs, baseMs, pollingCfg)
             },
         )
         val now = System.currentTimeMillis()
         val feeds = container.live.feeds.value
         val views = stopsToPoll(rules, now, alertsCfg).associateWith { feedView(feeds, it, now, freshnessCfg) }
-        val tick = evaluateTick(rules, views, now, troubleSinceMs, alertsCfg)
+        val tick = evaluateTick(rules, views, now, troubleSinceMs, alertsCfg, pollingCfg)
         // Primero se notifica; solo se borra (un solo uso) si el usuario puede ver la notificación.
         tick.firings.forEach { notifyArrival(this, it, now, alertsCfg) }
         firingsToDelete(tick.firings, canNotifyArrivals(this)).forEach { container.database.alerts().delete(it.rule.id) }
+        // Tope de vigilancia (A5-09): N horas sin bus que coincida → se notifica y se elimina igual que un disparo.
+        tick.watchExpired.forEach { notifyWatchExpired(this, it, alertsCfg.maxWatchHours) }
+        if (canNotifyArrivals(this)) tick.watchExpired.forEach { container.database.alerts().delete(it.id) }
         // Sondeo adaptativo: más espaciado cuanto más lejos está el bus de la antelación.
         val delayMs = nextPollDelayMs(tick.watching, views, now, baseMs, pollingCfg)
         if (tick.action == EngineAction.CONTINUE) updateMonitoringNotification(this, tick.watching, (delayMs / 1_000).toInt())

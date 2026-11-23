@@ -122,6 +122,73 @@ describe('findMatchingArrival', () => {
   });
 });
 
+describe('destinationsMatch vía findMatchingArrival (A5-02)', () => {
+  const base = mapTiemposParada(parsed, { stopCode: '1', now: NOW })[0];
+  const withDestination = (destination: string, minutes = 2) => ({
+    ...base,
+    lineId: '13',
+    internalLineId: '13',
+    destination,
+    minutes,
+  });
+
+  it('igualdad tras normalizar mayúsculas y espacios alrededor de - y /', () => {
+    expect(
+      findMatchingArrival([withDestination('Buenavista - Altza')], {
+        lineId: '13',
+        destination: '  BUENAVISTA-ALTZA ',
+        minutesAhead: 10,
+      })?.destination
+    ).toBe('Buenavista - Altza');
+    expect(
+      findMatchingArrival([withDestination('Amara / Mutualitateak')], {
+        lineId: '13',
+        destination: 'amara/mutualitateak',
+        minutesAhead: 10,
+      })?.destination
+    ).toBe('Amara / Mutualitateak');
+  });
+
+  it('un destino contenido en otro NO casa: L13 real de la parada 103', () => {
+    const destinos = [
+      'Altza',
+      'Buenavista - Altza',
+      'Bidebieta - Altza',
+      'Bidebieta - Buenavista - Altza',
+    ];
+    for (const expected of destinos) {
+      for (const [i, actual] of destinos.entries()) {
+        const found = findMatchingArrival([withDestination(actual, i + 1)], {
+          lineId: '13',
+          destination: expected,
+          minutesAhead: 30,
+        });
+        if (actual === expected) {
+          expect(
+            found?.destination,
+            `${expected} debe casar consigo mismo`
+          ).toBe(actual);
+        } else {
+          expect(
+            found,
+            `«${actual}» no debe casar con «${expected}»`
+          ).toBeNull();
+        }
+      }
+    }
+  });
+
+  it('un destino esperado vacío no casa con nada', () => {
+    expect(
+      findMatchingArrival([withDestination('Altza')], {
+        lineId: '13',
+        destination: '   ',
+        minutesAhead: 10,
+      })
+    ).toBeNull();
+  });
+});
+
 describe('createDbusClient', () => {
   it('cachea por TTL y deduplica peticiones en vuelo', async () => {
     let calls = 0;

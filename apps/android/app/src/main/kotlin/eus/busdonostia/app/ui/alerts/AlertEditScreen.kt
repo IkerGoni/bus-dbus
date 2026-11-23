@@ -114,7 +114,7 @@ fun AlertEditScreen(
                     MinutesAhead(state.draft.minutesAhead, state.minutesRange, vm::setMinutes)
                     // Un solo uso: avisa una vez y se borra.
                     Text(
-                        stringResource(R.string.alert_once_hint),
+                        stringResource(R.string.alert_once_hint, state.expirationDays),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium,
                     )
@@ -122,7 +122,11 @@ fun AlertEditScreen(
                     if (state.showErrors && state.errors.isNotEmpty()) {
                         state.errors.forEach { error ->
                             Text(
-                                stringResource(error.message()),
+                                if (error == DraftError.MINUTES_OUT_OF_RANGE) {
+                                    stringResource(error.message(), state.minutesRange.first, state.minutesRange.last)
+                                } else {
+                                    stringResource(error.message())
+                                },
                                 color = MaterialTheme.colorScheme.error,
                                 style = MaterialTheme.typography.bodyMedium,
                             )

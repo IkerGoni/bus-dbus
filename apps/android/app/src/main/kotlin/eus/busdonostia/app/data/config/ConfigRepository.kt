@@ -24,6 +24,21 @@ import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
+/** Origen de la config efectiva (A5-16): un fallback a [DEFAULTS] tras un fallo de parseo se ve aquí y en logcat. */
+enum class ConfigSource {
+    /** Defaults de Kotlin en memoria: aún no se ha leído el asset (o falló su lectura/parseo). */
+    DEFAULTS,
+
+    /** `assets/config.json` empaquetado, leído y parseado correctamente. */
+    BUNDLED,
+
+    /** Última config remota válida, desde la caché en disco. */
+    REMOTE_CACHE,
+
+    /** Config remota recién descargada y validada. */
+    REMOTE,
+}
+
 /**
  * Config efectiva: la última remota válida o, si no hay, la empaquetada. Descarga
  * como mucho cada `remoteConfigCacheHours` (cuenta el intento, salga bien o mal), timeout `remoteConfigTimeoutSec`, valida
@@ -32,18 +47,26 @@ import java.util.concurrent.TimeUnit
  */
 class ConfigRepository(
     @Volatile private var bundled: ApiConfig,
-    private val cacheFile: File,
+    /** Perezoso: `filesDir` toca disco; solo se evalúa en IO ([initializeFromDisk], A5-13). */
+    cacheFileProvider: () -> File,
     /** null = sin config remota. Ver [remoteConfigUrl]. */
     private val remoteUrl: HttpUrl?,
     private val http: OkHttpClient,
     private val nowMs: () -> Long = System::currentTimeMillis,
     private val warn: Warn = logcatWarn("ConfigRepository"),
 ) {
+    private val cacheFile: File by lazy(cacheFileProvider)
+
     @Volatile
     private var cache: Cached? = null
 
     private val state = MutableStateFlow(bundled)
     val config: StateFlow<ApiConfig> = state.asStateFlow()
+
+    private val _configSource = MutableStateFlow(ConfigSource.DEFAULTS)
+
+    /** De dónde sale la config efectiva: hace visible un fallback silencioso a los defaults de Kotlin (A5-16). */
+    val configSource: StateFlow<ConfigSource> = _configSource.asStateFlow()
 
     private val _pollingConfig = MutableStateFlow(state.value.polling)
     val pollingConfig: StateFlow<PollingConfig> = _pollingConfig.asStateFlow()
@@ -64,15 +87,21 @@ class ConfigRepository(
      * Inicializa desde disco (`assets/config.json` y `remote-config.json`) fuera del Main Thread.
      */
     fun initializeFromDisk(loadBundledFn: () -> ApiConfig = { bundled }) {
-        val loadedBundled = runCatching(loadBundledFn).getOrElse { e ->
+        val loaded = runCatching(loadBundledFn)
+        bundled = loaded.getOrElse { e ->
             warn("no se pudo leer assets/config.json", e)
             bundled
         }
-        bundled = loadedBundled
         if (remoteUrl != null) {
             cache = readCache()
         }
-        applyConfig(cache?.config ?: bundled)
+        val cached = cache?.config
+        applyConfig(cached ?: bundled)
+        _configSource.value = when {
+            cached != null -> ConfigSource.REMOTE_CACHE
+            loaded.isSuccess -> ConfigSource.BUNDLED
+            else -> ConfigSource.DEFAULTS
+        }
     }
 
     private fun applyConfig(next: ApiConfig) {
@@ -113,6 +142,7 @@ class ConfigRepository(
         }
         if (fetched == null) return false
         applyConfig(fetched)
+        _configSource.value = ConfigSource.REMOTE
         return true
     }
 
@@ -142,7 +172,6 @@ class ConfigRepository(
     }
 
     companion object {
-        const val REFRESH_INTERVAL_MS = 12 * 3_600_000L
         private val json = Json { ignoreUnknownKeys = true }
 
         /** Copia por defecto empaquetada. Si no es válida es un bug de build: falla en los tests. */

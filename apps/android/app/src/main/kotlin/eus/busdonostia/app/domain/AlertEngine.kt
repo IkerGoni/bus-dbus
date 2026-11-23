@@ -6,12 +6,6 @@ package eus.busdonostia.app.domain
  * borra lo que avisa y notifica.
  */
 
-/** Tras este tiempo seguido sin servicio o con errores en todas las paradas, el motor se para y lo notifica. */
-const val NO_SERVICE_STOP_MS = 60 * 60_000L
-
-/** Margen para no repetir una consulta que la UI acaba de hacer (sondeo de 30 s con algo de retraso). */
-const val FETCH_SLACK_MS = 5_000L
-
 /** En vigilancia: el servicio tiene que seguir vivo por este aviso (activo y sin caducar). */
 fun isWatching(
     rule: AlertRule,
@@ -96,15 +90,19 @@ fun nextPollDelayMs(
     } ?: baseMs
 
 /** Hay que consultar si nunca se ha hecho o la última respuesta tiene casi un intervalo (la UI también sondea). */
-fun isFetchDue(lastFetchedAtMs: Long?, nowMs: Long, intervalMs: Long): Boolean =
-    lastFetchedAtMs == null || nowMs - lastFetchedAtMs >= intervalMs - FETCH_SLACK_MS
+fun isFetchDue(
+    lastFetchedAtMs: Long?,
+    nowMs: Long,
+    intervalMs: Long,
+    config: PollingConfig = PollingConfig(),
+): Boolean = lastFetchedAtMs == null || nowMs - lastFetchedAtMs >= intervalMs - config.fetchSlackSec * 1_000L
 
 /**
  * Respuesta que el sondeo de la UI puede reutilizar en vez de pedir otra (H16): la de
  * alguien (el motor) que consultó la parada hace menos de un intervalo; null = hay que pedir.
  */
-fun reusableFeed(known: StopFeed?, nowMs: Long, intervalMs: Long): StopFeed? =
-    known?.takeUnless { isFetchDue(it.fetchedAtMs, nowMs, intervalMs) }
+fun reusableFeed(known: StopFeed?, nowMs: Long, intervalMs: Long, config: PollingConfig = PollingConfig()): StopFeed? =
+    known?.takeUnless { isFetchDue(it.fetchedAtMs, nowMs, intervalMs, config) }
 
 /** Aviso que acaba de pasar a `TRIGGERED` y la llegada que lo dispara: se notifica y se borra (un solo uso). */
 data class Firing(val rule: AlertRule, val arrival: Arrival)
@@ -115,7 +113,7 @@ enum class EngineAction {
     /** No queda ningún aviso en vigilancia. */
     STOP_IDLE,
 
-    /** [NO_SERVICE_STOP_MS] seguidos sin servicio ni datos: se para y se notifica. */
+    /** `polling.noServiceStopMin` seguidos sin servicio ni datos: se para y se notifica. */
     STOP_NO_SERVICE,
 }
 
@@ -126,6 +124,11 @@ data class EngineTick(
     val troubleSinceMs: Long?,
     /** Avisos en vigilancia tras esta vuelta (notificación «Vigilando …»). */
     val watching: List<AlertRule>,
+    /**
+     * Avisos que superan `alerts.maxWatchHours` sin un bus que coincida (A5-09): se deja de
+     * vigilarlos, se notifica y se eliminan. No están en [watching].
+     */
+    val watchExpired: List<AlertRule> = emptyList(),
 )
 
 /**
@@ -139,6 +142,7 @@ fun evaluateTick(
     nowMs: Long,
     troubleSinceMs: Long?,
     alertsConfig: AlertsConfig = AlertsConfig(),
+    pollingConfig: PollingConfig = PollingConfig(),
 ): EngineTick {
     val firings = rules.mapNotNull { rule ->
         val item = alertItem(rule, usableArrivals(views[rule.stopId] ?: ArrivalsView.Loading), nowMs, alertsConfig)
@@ -146,7 +150,15 @@ fun evaluateTick(
         if (item.status == ComputedAlertStatus.TRIGGERED && arrival != null) Firing(rule, arrival) else null
     }
     val fired = firings.mapTo(HashSet()) { it.rule.id }
-    val watching = rules.filter { it.id !in fired && isWatching(it, nowMs, alertsConfig) }
+    val candidates = rules.filter { it.id !in fired && isWatching(it, nowMs, alertsConfig) }
+
+    // Tope de vigilancia (A5-09): N horas desde que se guardó sin un bus que coincida ahora.
+    // Si la línea sí tiene llegadas (aunque lejos), se sigue vigilando: el aviso es legítimo.
+    val maxWatchMs = alertsConfig.maxWatchHours * 3_600_000L
+    val (watchExpired, watching) = candidates.partition { rule ->
+        nowMs - rule.createdAtMs >= maxWatchMs &&
+            nextArrivalFor(usableArrivals(views[rule.stopId] ?: ArrivalsView.Loading), rule.lineId, rule.destination, nowMs) == null
+    }
 
     val polled = stopsToPoll(rules, nowMs, alertsConfig).mapNotNull { views[it] }.filter { it != ArrivalsView.Loading }
     val trouble = when {
@@ -156,10 +168,10 @@ fun evaluateTick(
     }
     val action = when {
         watching.isEmpty() -> EngineAction.STOP_IDLE
-        trouble != null && nowMs - trouble >= NO_SERVICE_STOP_MS -> EngineAction.STOP_NO_SERVICE
+        trouble != null && nowMs - trouble >= pollingConfig.noServiceStopMin * 60_000L -> EngineAction.STOP_NO_SERVICE
         else -> EngineAction.CONTINUE
     }
-    return EngineTick(firings, action, trouble, watching)
+    return EngineTick(firings, action, trouble, watching, watchExpired)
 }
 
 private fun isTrouble(view: ArrivalsView): Boolean =
@@ -175,11 +187,15 @@ data class FailedTick(val troubleSinceMs: Long, val action: EngineAction)
 
 /**
  * Un fallo inesperado no tumba la vigilancia, pero tampoco la deja sondeando para siempre:
- * suma al tiempo seguido con problemas y, a los [NO_SERVICE_STOP_MS], el motor se para y lo notifica.
+ * suma al tiempo seguido con problemas y, a los `polling.noServiceStopMin`, el motor se para y lo notifica.
  */
-fun failedTick(troubleSinceMs: Long?, nowMs: Long): FailedTick {
+fun failedTick(
+    troubleSinceMs: Long?,
+    nowMs: Long,
+    pollingConfig: PollingConfig = PollingConfig(),
+): FailedTick {
     val since = troubleSinceMs ?: nowMs
-    val action = if (nowMs - since >= NO_SERVICE_STOP_MS) EngineAction.STOP_NO_SERVICE else EngineAction.CONTINUE
+    val action = if (nowMs - since >= pollingConfig.noServiceStopMin * 60_000L) EngineAction.STOP_NO_SERVICE else EngineAction.CONTINUE
     return FailedTick(since, action)
 }
 

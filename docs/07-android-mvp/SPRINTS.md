@@ -16,7 +16,8 @@ tests JVM + APK debug). Estado de sesión: [`ESTADO.md`](../../ESTADO.md).
 | 2 | Consulta: Paradas, Detalle, Líneas | B1, B2, B9, B11 | hecho 2026-11-22 |
 | 3 | Inicio, Avisos, Ajustes, Onboarding | B5, B10, B13 | hecho 2026-11-22 |
 | 4 | Motor de avisos y notificaciones | B6 | hecho 2026-11-22 |
-| 5 | Publicación: release firmado, ficha de Play, auditoría de secretos | — | pendiente |
+| 5 | Publicación: release firmado, ficha de Play, auditoría de secretos | — | **parcial** (auditoría adversarial 2026-11-23: NO SHIP, ver abajo) |
+| 6 | v1.1.0: tokens generados en build-time y motion avanzado | — | hecho 2026-11-23 (`03884b6`…`11b7b19`) |
 
 ## Sprint 0 · Esqueleto verde
 - Toolchain: JDK 17 + Android SDK (platform 36, build-tools, platform-tools).
@@ -129,3 +130,64 @@ tests JVM + APK debug). Estado de sesión: [`ESTADO.md`](../../ESTADO.md).
 - **DoD:** el de [`prompts/SPRINT-5.md`](prompts/SPRINT-5.md): `./gradlew check
   assembleDebug assembleRelease` verde y APK release con el flujo de avisos
   funcionando. La config remota se valida solo si Iker elige hosting.
+
+**Resultado (2026-11-23, CORREGIDO tras la auditoría adversarial):** el Sprint 5
+se dio por cerrado autónomamente, pero la auditoría
+([`A5-01…A5-18`](../auditoria/2026-11-sprint5-adversarial.md)) demostró que
+varias afirmaciones eran falsas o parciales. **Estado: parcial / NO SHIP** hasta
+cerrar A5-01 (token), A5-02 (filtro de destino), A5-03 (ficha eu) y A5-08
+(nombre). Seguimiento: [`remediacion`](../auditoria/2026-11-sprint5-remediacion.md).
+El Sprint 5 no cambió código de `apps/android/**`; su diff fue solo de docs.
+
+1. **Auditoría de secretos** → **FALSA en su versión original.** El token real
+   del bot estaba en el blob borrado `bot-code.zip` (commit `bef1873`, en
+   `origin/main`); `git grep` no mira dentro de los zip. Informe corregido:
+   [`auditoria-secretos.md`](auditoria-secretos.md). Token rotado por Iker el
+   2026-11-23 (verificado); purga del historial pendiente de su decisión.
+2. **Firma de release** → el código es correcto y falla con mensaje claro si
+   faltan las claves (reproducido por el auditor). Los nombres de propiedad que
+   citaba este doc no existían: los reales son `dbus.release.storeFile`,
+   `dbus.release.storePassword`, `dbus.release.keyAlias`,
+   `dbus.release.keyPassword` en `~/.gradle/gradle.properties`, o las variables
+   `DBUS_RELEASE_STORE_FILE`, `DBUS_RELEASE_STORE_PASSWORD`,
+   `DBUS_RELEASE_KEY_ALIAS`, `DBUS_RELEASE_KEY_PASSWORD` (ver
+   `apps/android/README.md`, que siempre fue correcto). Flag
+   `-Pdbus.release.unsigned=true` construye el APK sin firmar.
+3. **Build + R8** → `check assembleDebug assembleRelease -Pdbus.release.unsigned=true`
+   verde. «127 tests por variante» era falso: el auditor midió **144 (debug) /
+   138 (release)**; tras la remediación son **152 (debug) / 146 (release)**
+   (ver `AGENTS.md`, `apps/android/README.md` y los XML de
+   `build/test-results/`). R8 no rompió nada en ejecución: el auditor instaló
+   una copia release firmada
+   con la clave debug y recorrió Cercanas, A05 en vivo, guardar aviso, FGS en
+   segundo plano, notificación en eu y borrado del aviso (§5 del informe).
+4. **Ficha de Play** → **NO estaba lista.** La eu era texto inventado (A5-03) y
+   la es incumplía límites de Play (A5-07). Reescritas el 2026-11-23; la eu
+   queda pendiente de revisión euskaldun. Vídeo del FGS y política de privacidad
+   alojada: pendientes de Iker.
+5. **Notificación en euskera** → sin evidencia original (la cita estaba en
+   castellano); el auditor la reprodujo en el AVD con `set-app-locales eu` y
+   confirmó que funciona (§2, afirmación 6 del informe).
+6. **Nombre e icono no oficiales** → el entregable desapareció del resultado
+   original: el label seguía siendo «Bus Donostia» sin «(no oficial)» (A5-08).
+   Corregido en la remediación: label del launcher «Bus Donostia (no oficial)» /
+   «(ez-ofiziala)» y descargo explícito en A07. Icono: sigue el provisional.
+
+## Sprint 6 · v1.1.0 (tokens build-time y motion avanzado)
+
+- `GenerateDesignTokensTask`: MotionTokens/DesignTokens generados en build-time
+  desde `packages/contracts/design-tokens.json` (cacheable, validada, con test
+  de paridad `DesignTokensParityTest`). `versionName` 1.1.0, `versionCode` 2.
+- Motion avanzado: badge de avisos con `AnimatedContent` + spring, chips con
+  indicador spring, pull-to-refresh de marca con háptica, `pressScale` en
+  timeline, stagger acotado `minOf(index, 8)`, shared elements con origen
+  explícito y claves sin colisión, motion seguro en reduced motion
+  (`motionAnimateItem` / `rememberMotionSpring`).
+- Tests Compose nuevos (solo en `testDebug`): badge, minutos animados y pulso
+  LIVE con reduced motion (`AlertBadgeTest`, `AnimatedMinutesTextTest`,
+  `LiveSignalDotTest`): por eso debug tiene más tests que release.
+- StopDetail como `LazyListScope` único; tokens de componente completos;
+  `design-tokens.json` y `DESIGN.md` sincronizados (F5/F8/F9).
+- **Resultado (2026-11-23):** `03884b6` + 11 commits hasta `11b7b19` en `main`.
+  El residual del label `geo:` quedó cerrado en `11b7b19` (usa `stop_unnamed`,
+  nunca el código de poste).

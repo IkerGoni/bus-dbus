@@ -197,7 +197,7 @@
       "expectedIndex": 1
     },
     {
-      "name": "destino tolerante (contenido, sin mayúsculas)",
+      "name": "destino que contiene al esperado es OTRO destino (A5-02)",
       "arrivals": [
         {
           "lineId": "21",
@@ -209,7 +209,97 @@
       "lineId": "21",
       "destination": "  AMARA ",
       "minutesAhead": 10,
+      "expectedIndex": null
+    },
+    {
+      "name": "igualdad normalizada: mayúsculas y espacios alrededor de '-'",
+      "arrivals": [
+        {
+          "lineId": "13",
+          "destination": "Buenavista - Altza",
+          "minutes": 3,
+          "realtime": true
+        }
+      ],
+      "lineId": "13",
+      "destination": "  BUENAVISTA-ALTZA ",
+      "minutesAhead": 10,
       "expectedIndex": 0
+    },
+    {
+      "name": "L13 real (parada 103): 'Altza' no consume un aviso de 'Buenavista-Altza'",
+      "arrivals": [
+        {
+          "lineId": "13",
+          "destination": "Altza",
+          "minutes": 1,
+          "realtime": true
+        },
+        {
+          "lineId": "13",
+          "destination": "Bidebieta - Altza",
+          "minutes": 6,
+          "realtime": true
+        }
+      ],
+      "lineId": "13",
+      "destination": "Buenavista-Altza",
+      "minutesAhead": 15,
+      "expectedIndex": null
+    },
+    {
+      "name": "L13 real (parada 103): cada destino solo casa consigo mismo",
+      "arrivals": [
+        {
+          "lineId": "13",
+          "destination": "Altza",
+          "minutes": 1,
+          "realtime": true
+        },
+        {
+          "lineId": "13",
+          "destination": "Bidebieta - Altza",
+          "minutes": 4,
+          "realtime": true
+        },
+        {
+          "lineId": "13",
+          "destination": "Bidebieta - Buenavista - Altza",
+          "minutes": 9,
+          "realtime": true
+        },
+        {
+          "lineId": "13",
+          "destination": "Buenavista - Altza",
+          "minutes": 12,
+          "realtime": true
+        }
+      ],
+      "lineId": "13",
+      "destination": "Bidebieta-Buenavista-Altza",
+      "minutesAhead": 15,
+      "expectedIndex": 2
+    },
+    {
+      "name": "L13 real (parada 103): aviso de 'Altza' no casa con los compuestos",
+      "arrivals": [
+        {
+          "lineId": "13",
+          "destination": "Bidebieta - Altza",
+          "minutes": 2,
+          "realtime": true
+        },
+        {
+          "lineId": "13",
+          "destination": "Buenavista - Altza",
+          "minutes": 5,
+          "realtime": true
+        }
+      ],
+      "lineId": "13",
+      "destination": "Altza",
+      "minutesAhead": 15,
+      "expectedIndex": null
     },
     {
       "name": "'Servicio programado' no filtra",

@@ -19,6 +19,8 @@
     "foregroundVisibleSec": 30,
     "baseBackgroundSec": 30,
     "noServiceOrErrorMultiplier": 2,
+    "noServiceStopMin": 60,
+    "fetchSlackSec": 5,
     "adaptiveTiers": [
       {
         "minGapMin": 31,
@@ -49,18 +51,19 @@
     "minMinutesAhead": 1,
     "maxMinutesAhead": 30,
     "maxBadgeCount": 9,
-    "recurringWakeupBeforeMin": 25,
-    "recurringExpiryAfterMin": 25,
-    "recurringWindowToleranceMin": 5
+    "maxWatchHours": 3
   },
   "geo": {
-    "walkingSpeedKmh": 4.8
+    "walkingSpeedKmh": 4.8,
+    "lastKnownMaxAgeSec": 120,
+    "locationTimeoutSec": 10
   },
   "uiLimits": {
     "homeFavoriteMaxArrivals": 3,
     "homeSearchLimit": 6,
     "searchStopsLimit": 50,
-    "nearbyStopsLimit": 10
+    "nearbyStopsLimit": 10,
+    "recentStopsLimit": 10
   },
   "minAppVersion": 1,
   "notice": null

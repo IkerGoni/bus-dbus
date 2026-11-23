@@ -35,6 +35,13 @@ sealed interface ArrivalsView {
 }
 
 /**
+ * Resalte de deep link (A5-12): solo se acepta una línea que realmente pasa por la
+ * parada (catálogo + vivo); cualquier otra cosa se ignora, nunca se pinta texto externo.
+ */
+fun sanitizeHighlightLine(lineIds: List<String>, highlightLine: String?): String? =
+    highlightLine?.let(::normalizeLine)?.takeIf { it.isNotEmpty() && it in lineIds }
+
+/**
  * [latest] = último resultado de cualquier tipo (null: aún no ha respondido nada).
  * [lastValid] = última respuesta que no fue `API_ERROR`.
  *

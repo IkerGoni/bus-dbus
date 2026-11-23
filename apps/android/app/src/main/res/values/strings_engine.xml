@@ -15,7 +15,8 @@
     <string name="notif_body">%1$s · %2$s</string>
 
     <string name="notif_stopped_title">Avisos sin vigilar</string>
-    <string name="notif_stopped_no_service">Dbus lleva 60 min sin servicio o sin responder. Abre la app para volver a vigilar.</string>
+    <string name="notif_stopped_no_service">Dbus lleva %1$d min sin servicio o sin responder. Abre la app para volver a vigilar.</string>
+    <string name="notif_watch_expired">L%1$s: no se ha encontrado un bus que coincida en %2$d h. El aviso deja de vigilarse y se elimina; créalo de nuevo si lo necesitas.</string>
     <string name="notif_stopped_time_limit">Android ha limitado el tiempo de vigilancia en segundo plano. Abre la app para volver a vigilar.</string>
 
     <string name="alerts_notifications_off">Notificaciones desactivadas: tus avisos no sonarán.</string>
