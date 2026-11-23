@@ -44,14 +44,12 @@ import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -74,10 +72,12 @@ import eus.busdonostia.app.domain.Arrival
 import eus.busdonostia.app.domain.ArrivalsView
 import eus.busdonostia.app.domain.DegradedReason
 import eus.busdonostia.app.ui.appViewModel
+import eus.busdonostia.app.ui.components.BrandPullToRefreshBox
 import eus.busdonostia.app.ui.components.FavoriteStar
 import eus.busdonostia.app.ui.components.InfoBanner
 import eus.busdonostia.app.ui.components.LineBadge
 import eus.busdonostia.app.ui.components.MinutesLabel
+import eus.busdonostia.app.ui.components.MotionFilterChip
 import eus.busdonostia.app.ui.components.ScreenHeader
 import eus.busdonostia.app.ui.components.SectionLabel
 import eus.busdonostia.app.ui.components.SharedKeys
@@ -201,11 +201,10 @@ private fun LineChips(
             .padding(horizontal = 16.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        FilterChip(
+        MotionFilterChip(
             selected = state.selectedLine == null,
             onClick = { onSelect(null) },
             label = { Text(stringResource(R.string.filter_all), maxLines = 1, softWrap = false) },
-            modifier = Modifier.heightIn(min = 48.dp),
         )
         state.lineIds.forEach { line ->
             // Solo el chip de la línea con la que se abrió la parada lleva shared element; el resto, sin él.
@@ -214,7 +213,7 @@ private fun LineChips(
             } else {
                 null
             }
-            FilterChip(
+            MotionFilterChip(
                 selected = state.selectedLine == line,
                 onClick = { onSelect(if (state.selectedLine == line) null else line) },
                 label = {
@@ -225,7 +224,6 @@ private fun LineChips(
                         modifier = if (sharedKey != null) Modifier.optionalSharedElement(sharedKey) else Modifier,
                     )
                 },
-                modifier = Modifier.heightIn(min = 48.dp),
             )
         }
     }
@@ -237,7 +235,7 @@ private fun LineChips(
 private fun Arrivals(state: StopDetailUiState, onRetry: () -> Unit, onStar: (Arrival) -> Unit, onBell: (Arrival) -> Unit) {
     val view = state.view
     val motion = rememberEffectiveMotionTokens()
-    PullToRefreshBox(
+    BrandPullToRefreshBox(
         isRefreshing = state.refreshing,
         onRefresh = onRetry,
         modifier = Modifier.fillMaxSize(),

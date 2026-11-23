@@ -36,6 +36,8 @@ import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconToggleButton
@@ -51,6 +53,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.graphicsLayer
@@ -66,6 +72,7 @@ import androidx.compose.ui.unit.sp
 import eus.busdonostia.app.R
 import eus.busdonostia.app.domain.ArrivalSource
 import eus.busdonostia.app.ui.theme.CountdownRow
+import eus.busdonostia.app.ui.theme.DesignTokens
 import eus.busdonostia.app.ui.theme.LocalStatusColors
 import eus.busdonostia.app.ui.theme.MonoFamily
 import eus.busdonostia.app.ui.theme.MotionTokens
@@ -104,6 +111,51 @@ fun LineBadge(lineId: String, colorArgb: Int?, size: Dp = 28.dp, modifier: Modif
             softWrap = false,
         )
     }
+}
+
+/**
+ * `FilterChip` con el indicador de selección animado con física spring en la fase de dibujo.
+ * Conserva semántica, ripple, objetivo táctil de 48 dp y accesibilidad del chip de M3; solo
+ * sustituye el fondo de selección por una píldora que crece desde el centro.
+ */
+@Composable
+fun MotionFilterChip(
+    selected: Boolean,
+    onClick: () -> Unit,
+    label: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    leadingIcon: (@Composable () -> Unit)? = null,
+) {
+    val progress by animateFloatAsState(
+        targetValue = if (selected) 1f else 0f,
+        animationSpec = rememberMotionSpring(),
+        label = "chipSelection",
+    )
+    val indicator = MaterialTheme.colorScheme.secondaryContainer
+    val motion = rememberEffectiveMotionTokens()
+    val radius = DesignTokens.cornerRadiusChip
+    val visualHeight = DesignTokens.chipVisualHeight
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = label,
+        leadingIcon = leadingIcon,
+        colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color.Transparent),
+        modifier = modifier
+            .heightIn(min = 48.dp)
+            .drawBehind {
+                if (progress <= 0f) return@drawBehind
+                val start = motion.chipIndicatorStartScale
+                val width = size.width * (start + (1f - start) * progress)
+                val height = visualHeight.toPx()
+                drawRoundRect(
+                    color = indicator.copy(alpha = progress),
+                    topLeft = Offset((size.width - width) / 2f, (size.height - height) / 2f),
+                    size = Size(width, height),
+                    cornerRadius = CornerRadius(radius.toPx()),
+                )
+            },
+    )
 }
 
 /** Estrella 48×48 dp: toggle con física Spring (0.8→1.15→1), rotación 72°, color animado y háptica. */

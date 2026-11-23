@@ -25,7 +25,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,6 +46,7 @@ import eus.busdonostia.app.ui.appViewModel
 import eus.busdonostia.app.ui.components.BorderedCard
 import eus.busdonostia.app.ui.components.FavoriteStar
 import eus.busdonostia.app.ui.components.LineBadge
+import eus.busdonostia.app.ui.components.MotionFilterChip
 import eus.busdonostia.app.ui.components.ScreenHeader
 import eus.busdonostia.app.ui.components.SearchPill
 import eus.busdonostia.app.ui.components.SharedKeys
@@ -85,10 +85,9 @@ fun LinesScreen(onOpenLine: (String) -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             LinesFilter.entries.forEach { filter ->
-                FilterChip(
+                MotionFilterChip(
                     selected = state.filter == filter,
                     onClick = { vm.onFilterChange(filter) },
-                    modifier = Modifier.heightIn(min = 48.dp),
                     label = {
                         Text(
                             stringResource(
@@ -209,10 +208,9 @@ fun LineDetailScreen(lineId: String, onBack: () -> Unit, onOpenStop: (stopId: St
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     state.itineraries.forEachIndexed { index, itinerary ->
-                        FilterChip(
+                        MotionFilterChip(
                             selected = index == state.selected,
                             onClick = { vm.select(index) },
-                            modifier = Modifier.heightIn(min = 48.dp),
                             label = { Text(stringResource(R.string.line_towards, itinerary.destination), maxLines = 1, softWrap = false) },
                         )
                     }

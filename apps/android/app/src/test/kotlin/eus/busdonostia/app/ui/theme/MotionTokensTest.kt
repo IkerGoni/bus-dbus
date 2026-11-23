@@ -18,6 +18,7 @@ class MotionTokensTest {
     fun fullExponeLosTokensNuevos() {
         val full = MotionTokens.resolve(false)
         assertEquals(0.8f, full.searchClearScaleFactor, 0f)
+        assertEquals(0.6f, full.chipIndicatorStartScale, 0f)
         assertEquals(0.0625f, full.arrivalsStateSlideFraction, 0f)
         assertEquals(1100, full.livePulseDurationMs)
         assertEquals(0.3f, full.livePulseMinAlpha, 0f)
@@ -59,5 +60,6 @@ class MotionTokensTest {
         assertEquals(12.dp, DesignTokens.spacingMd)
         assertEquals(36.dp, DesignTokens.lineBadgeMinWidth)
         assertEquals(16.dp, DesignTokens.cornerRadiusCard)
+        assertEquals(32.dp, DesignTokens.chipVisualHeight)
     }
 }

@@ -31,7 +31,6 @@ import androidx.compose.material.icons.filled.NearMe
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material3.Button
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -55,6 +54,7 @@ import eus.busdonostia.app.ui.components.BorderedCard
 import eus.busdonostia.app.ui.components.FavoriteStar
 import eus.busdonostia.app.ui.components.InfoBanner
 import eus.busdonostia.app.ui.components.LineBadge
+import eus.busdonostia.app.ui.components.MotionFilterChip
 import eus.busdonostia.app.ui.components.ScreenHeader
 import eus.busdonostia.app.ui.components.SearchPill
 import eus.busdonostia.app.ui.components.SectionLabel
@@ -131,10 +131,9 @@ private fun TabChips(selected: StopsTab, onSelect: (StopsTab) -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         StopsTab.entries.forEach { tab ->
-            FilterChip(
+            MotionFilterChip(
                 selected = tab == selected,
                 onClick = { onSelect(tab) },
-                modifier = Modifier.heightIn(min = 48.dp),
                 label = {
                     Text(
                         stringResource(

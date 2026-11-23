@@ -31,7 +31,8 @@
       "springNoBounceDamping": 1.0,
       "springMediumBounceDamping": 0.5,
       "springMediumStiffness": 1500.0,
-      "searchClearScaleFactor": 0.8
+      "searchClearScaleFactor": 0.8,
+      "chipIndicatorStartScale": 0.6
     },
     "livePulse": {
       "durationMs": 1100,
@@ -63,7 +64,8 @@
       "timelineTerminalNode": 8,
       "timelineIntermediateNode": 6,
       "liveSignalDot": 8,
-      "lineBadgeMinWidth": 36
+      "lineBadgeMinWidth": 36,
+      "chipVisualHeight": 32
     }
   }
 }

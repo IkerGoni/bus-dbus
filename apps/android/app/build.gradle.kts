@@ -136,6 +136,7 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                     const val SPRING_MEDIUM_BOUNCE_DAMPING = ${floatLiteral(micro, "springMediumBounceDamping")}
                     const val SPRING_MEDIUM_STIFFNESS = ${floatLiteral(micro, "springMediumStiffness")}
                     const val SEARCH_CLEAR_SCALE_FACTOR = ${floatLiteral(micro, "searchClearScaleFactor")}
+                    const val CHIP_INDICATOR_START_SCALE = ${floatLiteral(micro, "chipIndicatorStartScale")}
                 }
 
                 object LivePulse {
@@ -178,6 +179,7 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                     val springMediumBounceDamping: Float,
                     val springMediumStiffness: Float,
                     val searchClearScaleFactor: Float,
+                    val chipIndicatorStartScale: Float,
                     val livePulseDurationMs: Int,
                     val livePulseMinAlpha: Float,
                     val livePulseMaxAlpha: Float,
@@ -211,6 +213,7 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                             springMediumBounceDamping = MicroInteractions.SPRING_MEDIUM_BOUNCE_DAMPING,
                             springMediumStiffness = MicroInteractions.SPRING_MEDIUM_STIFFNESS,
                             searchClearScaleFactor = MicroInteractions.SEARCH_CLEAR_SCALE_FACTOR,
+                            chipIndicatorStartScale = MicroInteractions.CHIP_INDICATOR_START_SCALE,
                             livePulseDurationMs = LivePulse.DURATION_MS,
                             livePulseMinAlpha = LivePulse.MIN_ALPHA,
                             livePulseMaxAlpha = LivePulse.MAX_ALPHA,
@@ -244,6 +247,7 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                             springMediumBounceDamping = 1f,
                             springMediumStiffness = 10_000f, // = Spring.StiffnessHigh: colapso instantáneo
                             searchClearScaleFactor = 1f,
+                            chipIndicatorStartScale = 1f,
                             livePulseDurationMs = 0,
                             livePulseMinAlpha = 1f,
                             livePulseMaxAlpha = 1f,
@@ -285,6 +289,7 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                     val TIMELINE_INTERMEDIATE_NODE = ${intVal(comps, "timelineIntermediateNode")}.dp
                     val LIVE_SIGNAL_DOT_SIZE = ${intVal(comps, "liveSignalDot")}.dp
                     val LINE_BADGE_MIN_WIDTH = ${intVal(comps, "lineBadgeMinWidth")}.dp
+                    val CHIP_VISUAL_HEIGHT = ${intVal(comps, "chipVisualHeight")}.dp
                 }
 
                 val spacingXs: Dp = Spacing.XS
@@ -301,6 +306,7 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                 val timelineIntermediateNode: Dp = Components.TIMELINE_INTERMEDIATE_NODE
                 val liveSignalDotSize: Dp = Components.LIVE_SIGNAL_DOT_SIZE
                 val lineBadgeMinWidth: Dp = Components.LINE_BADGE_MIN_WIDTH
+                val chipVisualHeight: Dp = Components.CHIP_VISUAL_HEIGHT
             }
         """.trimIndent() + "\n"
 

@@ -40,7 +40,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -70,6 +69,7 @@ import eus.busdonostia.app.ui.alerts.alertDestination
 import eus.busdonostia.app.ui.alerts.clockOf
 import eus.busdonostia.app.ui.appViewModel
 import eus.busdonostia.app.ui.components.BorderedCard
+import eus.busdonostia.app.ui.components.BrandPullToRefreshBox
 import eus.busdonostia.app.ui.components.FavoriteStar
 import eus.busdonostia.app.ui.components.LineBadge
 import eus.busdonostia.app.ui.components.MinutesLabel
@@ -141,7 +141,7 @@ fun HomeScreen(
                         EmptyAction(stringResource(R.string.home_cta_lines), primary = false) { onNavigate(Destination.LINES) },
                     ),
                 )
-                else -> PullToRefreshBox(isRefreshing = state.refreshing, onRefresh = vm::refresh, modifier = Modifier.fillMaxSize()) {
+                else -> BrandPullToRefreshBox(isRefreshing = state.refreshing, onRefresh = vm::refresh, modifier = Modifier.fillMaxSize()) {
                     LazyColumn(
                         Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
