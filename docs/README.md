@@ -9,8 +9,9 @@ Qué doc mirar para cada cosa. Si un doc contradice a
 | Necesito… | Mira |
 |---|---|
 | Reglas del repo, verificación y despliegue | [`AGENTS.md`](../AGENTS.md) |
-| Convenciones Git | [`docs/contributing/README.md`](docs/contributing/README.md) |
+| Convenciones Git | [`contributing/README.md`](contributing/README.md) |
 | Qué se hizo, qué falta y decisiones tomadas | [`ESTADO.md`](../ESTADO.md) |
+| Plan de ingeniería post-MVP (Sprints 5.0–8, tokens, KMP/iOS) | [`08-engineering-plan/README.md`](08-engineering-plan/README.md) |
 | Visión, comandos y configuración del bot | [`README.md`](../README.md) |
 | Pantallas, textos y callbacks del bot | [`05-ui/02-bot-telegram.md`](05-ui/02-bot-telegram.md) |
 | Por qué Android nativo y sin backend | [ADR 009](03-architecture/adrs/009-android-nativo-mvp.md) |
