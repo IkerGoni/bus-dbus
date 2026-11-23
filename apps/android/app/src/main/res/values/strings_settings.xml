@@ -9,6 +9,7 @@
     <string name="settings_section_language">Idioma</string>
     <string name="settings_language_es">Español</string>
     <string name="settings_language_eu">Euskara</string>
+    <string name="settings_language_en">Inglés</string>
     <string name="settings_section_notifications">Notificaciones</string>
     <string name="settings_notifications_on">Activadas</string>
     <string name="settings_notifications_off">Desactivadas</string>

@@ -10,7 +10,7 @@
     <string name="nav_alerts">Abisuak</string>
 
     <string name="home_empty_title">Oraindik ez duzu abisurik ez geltoki gogokorik</string>
-    <string name="home_empty_body">Gorde geltoki bat edo sortu abisu bat zure hurrengo autobusak hemen ikusteko.</string>
+    <string name="home_empty_body">Babestu geltoki bat edo sortu abisu bat zure hurrengo autobusak hemen ikusteko.</string>
     <string name="home_cta_nearby">Ikusi inguruko geltokiak</string>
     <string name="home_cta_lines">Arakatu lineak</string>
 
@@ -50,7 +50,7 @@
     <string name="stops_section_results">Emaitzak</string>
     <string name="stops_by_distance">Distantziaren arabera</string>
     <string name="stops_distance_walk">%1$s · %2$d min</string>
-    <string name="stops_walk_estimate_note">Distantzia lerro zuzenean. Oinezko minutuak %1$d m/min-ko estimazioa dira.</string>
+    <string name="stops_walk_estimate_note">Distantzia lerro zuzenean. Oinezko minutuak %1$d m/min-ko aurreikuntza dira.</string>
     <string name="stops_location_title">Ikusi geltoki hurbilenak</string>
     <string name="stops_location_body">Zure kokapena mugikorrean bakarrik erabiltzen dugu geltokiak distantziaren arabera ordenatzeko. Ez da gordetzen ez bidaltzen.</string>
     <string name="stops_location_allow">Baimendu kokapena</string>
@@ -65,10 +65,10 @@
     <!-- A05 · Geltokiaren xehetasuna -->
     <string name="stop_unnamed">Geltokia</string>
     <string name="stop_not_found_title">Ez da geltokia aurkitu</string>
-    <string name="stop_not_found_body">Estekak ez du katalogoko geltokirik adierazten. Itzuli Geltokiak atalera eta aukeratu bat.</string>
+    <string name="stop_not_found_body">Estekak ez du katalogoko geltokirik adierazten. Itzuli Geltokiak atalera eta hautatu bat.</string>
     <string name="stop_directions">Nola iritsi</string>
     <string name="stop_next_arrivals">Hurrengo iritsierak</string>
-    <string name="stop_line_star">Gorde %1$s linea geltoki honetan</string>
+    <string name="stop_line_star">Babestu %1$s linea geltoki herein</string>
     <string name="stop_line_starred">%1$s linea geltoki honetan gordeta</string>
     <string name="stop_notice">Dbus-en oharra: %1$s</string>
     <string name="stop_empty_title">Ez dago iritsiera hurbilik</string>
@@ -89,7 +89,7 @@
     <string name="lines_filter_favorites">Gogokoak ★</string>
     <string name="lines_filter_night">Gauekoak</string>
     <string name="lines_no_results_title">Ez dago «%1$s» bilaketarekin bat datorren linearik</string>
-    <string name="lines_no_results_body">Bilatu linea-zenbakiaren edo helmugaren arabera.</string>
+    <string name="lines_no_results_body">Aurkitu linea-zenbakiaren edo helmugaren arabera.</string>
     <string name="lines_favorites_empty_title">Oraindik ez duzu linea gogokorik</string>
     <string name="lines_favorites_empty_body">Ukitu linea baten izarra gordetzeko.</string>
     <string name="lines_show_all">Ikusi linea guztiak</string>
@@ -100,7 +100,7 @@
         <item quantity="other">%1$d geltoki</item>
     </plurals>
     <string name="line_not_found_title">%1$s linea ez dago katalogoan</string>
-    <string name="line_not_found_body">Itzuli lineen zerrendara eta aukeratu beste bat.</string>
+    <string name="line_not_found_body">Itzuli lineen zerrendara eta hautatu beste bat.</string>
     <string name="line_no_itineraries_title">Linea honek ez du ibilbiderik katalogoan</string>
     <string name="line_no_itineraries_body">Aplikazioaren katalogoak ez ditu bere geltokiak.</string>
 
@@ -124,8 +124,8 @@
 
     <!-- A04 · Nire abisuak -->
     <string name="alerts_title">Nire abisuak</string>
-    <string name="alerts_empty_cta">Aukeratu geltokia eta sortu abisua</string>
-    <string name="alerts_error_banner">Ezin izan dira zure abisuetako geltoki batzuk kontsultatu.</string>
+    <string name="alerts_empty_cta">Hautatu geltokia eta sortu abisua</string>
+    <string name="alerts_error_banner">Ezin izan dira zure abisuetako geltoki batzuk ikusi.</string>
     <string name="alerts_section_active">Aktiboak</string>
     <string name="alerts_section_paused">Pausatuak</string>
     <string name="alerts_new">Abisu berria</string>
@@ -137,7 +137,7 @@
     <string name="alert_active_switch">Abisu aktiboa</string>
     <string name="alert_subtitle">%1$s · %2$d\'-ko abisua</string>
     <string name="alert_ahead_short">%1$d\'-ko abisua</string>
-    <string name="alert_feed_error">Ezin izan da Dbus kontsultatu</string>
+    <string name="alert_feed_error">Ezin izan da Dbus ikusi</string>
     <string name="alert_feed_no_service">Zerbitzurik ez une honetan</string>
     <string name="alert_any_destination">Edozein helmuga</string>
     <string name="alert_status_triggered">Iristen</string>
@@ -160,12 +160,12 @@
     <string name="alert_minutes_slider">Aurrerapen-minutuak</string>
     <string name="alert_once_hint">Gordetzen duzunetik zaintzen du, behin abisatzen du eta ezabatu egiten da. %1$d egunera iraungitzen da, abisatu ez badu.</string>
     <string name="alert_preview">Jakinarazpenaren aurrebista</string>
-    <string name="alert_save">Gorde abisua</string>
+    <string name="alert_save">Babestu abisua</string>
     <string name="alert_conflict_title">Abisu hau badaukazu</string>
     <string name="alert_conflict_body">%2$s geltokian badago %1$s linearen abisu bat. Balio hauekin eguneratu nahi duzu?</string>
     <string name="alert_conflict_update">Eguneratu</string>
-    <string name="alert_error_no_stop">Aukeratu geltoki bat.</string>
-    <string name="alert_error_no_line">Aukeratu linea bat.</string>
+    <string name="alert_error_no_stop">Hautatu geltoki bat.</string>
+    <string name="alert_error_no_line">Hautatu linea bat.</string>
     <string name="alert_error_minutes">Aurrerapena %1$d eta %2$d minutu artekoa izan behar da.</string>
 
     <!-- Iritsiera-jakinarazpena eta A06ko aurrebista -->

@@ -6,7 +6,7 @@ import org.junit.Test
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
 
-/** B14: `es` (values/) y `eu` (values-eu/) tienen exactamente las mismas claves y ninguna vacía. */
+/** B14: `es` (values/), `eu` (values-eu/) y `en` (values-en/) tienen exactamente las mismas claves y ninguna vacía. */
 class StringsParityTest {
     /** Todas las `<string>` de los `strings*.xml` de [dir]. */
     private fun load(dir: String): Map<String, String> {
@@ -30,8 +30,15 @@ class StringsParityTest {
     }
 
     @Test
+    fun esYEnTienenLasMismasClaves() {
+        val es = load("values")
+        val en = load("values-en")
+        assertEquals(es.keys.sorted(), en.keys.sorted())
+    }
+
+    @Test
     fun ningunTextoVacio() {
-        (load("values") + load("values-eu").mapKeys { "eu:${it.key}" })
+        (load("values") + load("values-eu").mapKeys { "eu:${it.key}" } + load("values-en").mapKeys { "en:${it.key}" })
             .forEach { (k, v) -> assertTrue("Texto vacío: $k", v.isNotEmpty()) }
     }
 }

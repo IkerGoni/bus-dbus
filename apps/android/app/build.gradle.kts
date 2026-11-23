@@ -492,8 +492,7 @@ android {
     }
 
     androidResources {
-        // es (por defecto) y eu; nada más (ADR 009).
-        localeFilters += listOf("es", "eu")
+        localeFilters += listOf("es", "eu", "en")
     }
 
     testOptions {

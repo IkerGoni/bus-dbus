@@ -103,7 +103,11 @@ fun SettingsScreen(onBack: () -> Unit) {
         SectionLabel(stringResource(R.string.settings_section_language))
         BorderedCard(Modifier.padding(horizontal = 16.dp)) {
             CardColumn {
-                val langs = listOf(AppLanguage.ES to R.string.settings_language_es, AppLanguage.EU to R.string.settings_language_eu)
+                val langs = listOf(
+                    AppLanguage.ES to R.string.settings_language_es,
+                    AppLanguage.EU to R.string.settings_language_eu,
+                    AppLanguage.EN to R.string.settings_language_en,
+                )
                 val current = appLanguage
                 Segmented(langs.map { stringResource(it.second) }, langs.indexOfFirst { it.first == current }) {
                     setAppLanguage(langs[it].first)

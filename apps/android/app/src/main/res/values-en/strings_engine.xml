@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Alert engine (Sprint 4): channels, notifications and A04 -->
+    <string name="channel_monitoring_name">Alert monitoring</string>
+    <string name="channel_monitoring_description">Silent notification while the app queries Dbus for your alerts.</string>
+    <string name="channel_arrivals_name">Your alert arrivals</string>
+    <string name="channel_arrivals_description">Notifies when your bus is at the minutes you chose.</string>
+
+    <string name="notif_monitoring_one">Monitoring L%1$s at %2$s</string>
+    <plurals name="notif_monitoring_many">
+        <item quantity="one">Monitoring %1$d alert</item>
+        <item quantity="other">Monitoring %1$d alerts</item>
+    </plurals>
+    <string name="notif_monitoring_body">Queries Dbus every %1$d s until the bus arrives.</string>
+    <string name="notif_body">%1$s · %2$s</string>
+
+    <string name="notif_stopped_title">Alerts not monitored</string>
+    <string name="notif_stopped_no_service">Dbus has had no service or response for %1$d min. Open the app to resume monitoring.</string>
+    <string name="notif_watch_expired">L%1$s: no matching bus found in %2$d h. Monitoring stopped and alert deleted; create it again if needed.</string>
+    <string name="notif_stopped_time_limit">Android has limited background monitoring time. Open the app to resume monitoring.</string>
+
+    <string name="alerts_notifications_off">Notifications off: your alerts won\'t sound.</string>
+    <string name="alerts_notifications_enable">Enable</string>
+</resources>

@@ -85,13 +85,17 @@ class SettingsStore(
     }
 }
 
-/** Idiomas de la app (ADR 009): es por defecto, eu. */
-enum class AppLanguage(val tag: String) { ES("es"), EU("eu") }
+/** Idiomas de la app (ADR 009): es por defecto, eu, en. */
+enum class AppLanguage(val tag: String) { ES("es"), EU("eu"), EN("en") }
 
-/** Idioma efectivo: el elegido en A07 o, si no hay, el que resolvió el sistema (es si no es eu). */
+/** Idioma efectivo: el elegido en A07 o, si no hay, el que resolvió el sistema (es si no es eu ni en). */
 fun currentAppLanguage(resolvedLanguage: String): AppLanguage {
     val chosen = AppCompatDelegate.getApplicationLocales().get(0)?.language ?: resolvedLanguage
-    return if (chosen == AppLanguage.EU.tag) AppLanguage.EU else AppLanguage.ES
+    return when (chosen) {
+        AppLanguage.EU.tag -> AppLanguage.EU
+        AppLanguage.EN.tag -> AppLanguage.EN
+        else -> AppLanguage.ES
+    }
 }
 
 /** Cambia el idioma de la app: `LocaleManager` en Android 13+, AppCompat lo guarda y aplica antes. */

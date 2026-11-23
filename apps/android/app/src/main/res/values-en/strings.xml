@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Bus Donostia</string>
+    <!-- Launcher label and Play Store name: unofficial status goes in the name (A5-08). Inside the app, header reads "Bus Donostia". -->
+    <string name="app_launcher_name">Bus Donostia (unofficial)</string>
+
+    <string name="nav_home">Home</string>
+    <string name="nav_stops">Stops</string>
+    <string name="nav_lines">Lines</string>
+    <string name="nav_alerts">Alerts</string>
+
+    <string name="home_empty_title">No alerts or favorite stops yet</string>
+    <string name="home_empty_body">Save a stop or create an alert to see your next buses here.</string>
+    <string name="home_cta_nearby">View nearby stops</string>
+    <string name="home_cta_lines">Explore lines</string>
+
+    <string name="alerts_empty_title">No alerts</string>
+    <string name="alerts_empty_body">Create an alert from a stop and we\'ll notify you a few minutes before your bus arrives.</string>
+
+    <!-- Common -->
+    <string name="back">Back</string>
+    <string name="retry">Retry</string>
+    <string name="refresh">Refresh</string>
+    <string name="loading">Loading</string>
+    <string name="search_clear">Clear search</string>
+    <string name="filter_all">All</string>
+    <string name="catalog_error_title">Could not read stops catalog</string>
+    <string name="catalog_error_body">The catalog is bundled with the app. Reinstall or update it.</string>
+    <string name="osm_attribution">Stop coordinates: %1$s</string>
+    <string name="distance_m">%1$d m</string>
+    <string name="distance_km">%1$.1f km</string>
+    <string name="minutes_short">%1$d min</string>
+    <string name="minutes_now">Now</string>
+    <string name="source_live">Live</string>
+    <string name="source_scheduled">Scheduled</string>
+    <string name="destination_unknown">Destination not specified</string>
+    <string name="a11y_line">Line %1$s</string>
+    <string name="a11y_favorite_stop">Stop %1$s in favorites</string>
+    <string name="a11y_favorite_stop_line">Line %1$s at %2$s in favorites</string>
+    <string name="a11y_favorite_line">Line %1$s in favorites</string>
+
+    <!-- A02 · Stops -->
+    <string name="stops_title">Stops</string>
+    <string name="stops_search_hint">Stop or street</string>
+    <string name="stops_refresh_location">Refresh location</string>
+    <string name="stops_tab_nearby">Nearby</string>
+    <string name="stops_tab_favorites">Favorites</string>
+    <string name="stops_tab_recents">Recents</string>
+    <string name="stops_section_nearby">Near you</string>
+    <string name="stops_section_results">Results</string>
+    <string name="stops_by_distance">By distance</string>
+    <string name="stops_distance_walk">%1$s · %2$d min walk</string>
+    <string name="stops_walk_estimate_note">Straight-line distance. Walking minutes are an estimate at %1$d m/min.</string>
+    <string name="stops_location_title">View nearest stops</string>
+    <string name="stops_location_body">We use your location only on this device to sort stops by distance. It is not stored or sent anywhere.</string>
+    <string name="stops_location_allow">Allow location</string>
+    <string name="stops_location_unavailable">Could not get your location. Make sure it\'s enabled.</string>
+    <string name="stops_no_results_title">No stop matches «%1$s»</string>
+    <string name="stops_no_results_body">Try part of the stop or street name.</string>
+    <string name="stops_favorites_empty_title">No favorite stops yet</string>
+    <string name="stops_favorites_empty_body">Tap the star on a stop to keep it handy.</string>
+    <string name="stops_recents_empty_title">You haven\'t opened any stop</string>
+    <string name="stops_recents_empty_body">The last %1$d stops you view will appear here.</string>
+
+    <!-- A05 · Stop detail -->
+    <string name="stop_unnamed">Stop</string>
+    <string name="stop_not_found_title">Stop not found</string>
+    <string name="stop_not_found_body">This link doesn\'t match any stop in the catalog. Go back to Stops and pick one.</string>
+    <string name="stop_directions">Directions</string>
+    <string name="stop_next_arrivals">Next arrivals</string>
+    <string name="stop_line_star">Save line %1$s at this stop</string>
+    <string name="stop_line_starred">Line %1$s saved at this stop</string>
+    <string name="stop_notice">Dbus notice: %1$s</string>
+    <string name="stop_empty_title">No upcoming arrivals</string>
+    <string name="stop_line_empty">No upcoming arrivals for line %1$s</string>
+    <string name="stop_no_service_title">No service at the moment</string>
+    <string name="stop_no_service_body">Dbus indicates no bus is currently passing this stop.</string>
+    <string name="stop_stale">Could not refresh. Data from %1$s.</string>
+    <string name="stop_error_title">Error querying Dbus</string>
+    <string name="stop_error_body">Check your connection and try again.</string>
+
+    <!-- A03 · Lines and A03b · Itinerary -->
+    <string name="lines_title">Lines</string>
+    <plurals name="lines_count">
+        <item quantity="one">%1$d line</item>
+        <item quantity="other">%1$d lines</item>
+    </plurals>
+    <string name="lines_search_hint">Number or destination (e.g. 28, Ospitaleak)</string>
+    <string name="lines_filter_favorites">Favorites ★</string>
+    <string name="lines_filter_night">Night</string>
+    <string name="lines_no_results_title">No line matches «%1$s»</string>
+    <string name="lines_no_results_body">Search by line number or destination.</string>
+    <string name="lines_favorites_empty_title">No favorite lines yet</string>
+    <string name="lines_favorites_empty_body">Tap the star on a line to save it.</string>
+    <string name="lines_show_all">View all lines</string>
+    <string name="line_title">Line %1$s</string>
+    <string name="line_towards">Towards %1$s</string>
+    <plurals name="stops_count">
+        <item quantity="one">%1$d stop</item>
+        <item quantity="other">%1$d stops</item>
+    </plurals>
+    <string name="line_not_found_title">Line %1$s is not in the catalog</string>
+    <string name="line_not_found_body">Go back to the lines list and pick another.</string>
+    <string name="line_no_itineraries_title">This line has no itineraries in the catalog</string>
+    <string name="line_no_itineraries_body">The app catalog doesn\'t include its stops.</string>
+    <!-- Common (Sprint 3) -->
+    <string name="undo">Undo</string>
+    <string name="cancel">Cancel</string>
+    <string name="settings_open">Settings</string>
+    <plurals name="a11y_alerts_badge">
+        <item quantity="one">%1$d active alert</item>
+        <item quantity="other">%1$d active alerts</item>
+    </plurals>
+
+    <!-- A01 · Home -->
+    <string name="home_search_hint">Stop, street, line or destination</string>
+    <string name="home_search_empty_title">Nothing matches «%1$s»</string>
+    <string name="home_search_empty_body">Try a stop, a street, a line number or a destination.</string>
+    <string name="home_next_alert">Your next alert</string>
+    <string name="home_favorites">Favorite stops</string>
+    <string name="home_next_source">%1$s · %2$s</string>
+    <string name="home_next_no_arrivals">No upcoming arrivals · %1$s</string>
+
+    <!-- A04 · My alerts -->
+    <string name="alerts_title">My alerts</string>
+    <string name="alerts_empty_cta">Choose stop and create alert</string>
+    <string name="alerts_error_banner">Could not query some stops in your alerts.</string>
+    <string name="alerts_section_active">Active</string>
+    <string name="alerts_section_paused">Paused</string>
+    <string name="alerts_new">New alert</string>
+    <string name="alert_deleted">Alert deleted</string>
+    <string name="alert_paused">Alert paused</string>
+    <string name="alert_pause">Pause</string>
+    <string name="alert_edit">Edit alert</string>
+    <string name="alert_delete">Delete alert</string>
+    <string name="alert_active_switch">Alert active</string>
+    <string name="alert_subtitle">%1$s · Alert %2$d\'</string>
+    <string name="alert_ahead_short">Alert %1$d\'</string>
+    <string name="alert_feed_error">Could not query Dbus</string>
+    <string name="alert_feed_no_service">No service at the moment</string>
+    <string name="alert_any_destination">Any destination</string>
+    <string name="alert_status_triggered">Arriving</string>
+    <string name="alert_status_active">Active</string>
+    <string name="alert_status_expired">Expired</string>
+    <string name="alert_status_paused">Paused</string>
+
+    <!-- A06 · Configure alert -->
+    <string name="alert_new_title">New alert</string>
+    <string name="alert_edit_title">Edit alert</string>
+    <string name="alert_not_found_title">This alert no longer exists</string>
+    <string name="alert_not_found_body">You may have deleted it. Go back to My alerts.</string>
+    <string name="alert_step_stop">Stop and line</string>
+    <string name="alert_change_stop">Change</string>
+    <string name="alert_stop_no_lines">This stop has no lines in the catalog.</string>
+    <string name="alert_destination_label">Destination</string>
+    <string name="alert_step_minutes">Advance notice</string>
+    <string name="alert_minutes_before_suffix">min before</string>
+    <string name="alert_minutes_chip">%1$d\'</string>
+    <string name="alert_minutes_slider">Minutes in advance</string>
+    <string name="alert_once_hint">Monitors from save, alerts once and deletes. Expires after %1$d days if no bus arrives.</string>
+    <string name="alert_preview">Notification preview</string>
+    <string name="alert_save">Save alert</string>
+    <string name="alert_conflict_title">You already have this alert</string>
+    <string name="alert_conflict_body">There\'s already an alert for line %1$s at %2$s. Update it with these values?</string>
+    <string name="alert_conflict_update">Update</string>
+    <string name="alert_error_no_stop">Choose a stop.</string>
+    <string name="alert_error_no_line">Choose a line.</string>
+    <string name="alert_error_minutes">Advance notice must be between %1$d and %2$d minutes.</string>
+
+    <!-- Arrival notification and its preview in A06 -->
+    <string name="notif_title">L%1$s → %2$s in %3$d min</string>
+    <string name="notif_title_no_destination">L%1$s in %2$d min</string>
+
+    <!-- A05 · alerts -->
+    <string name="stop_create_alert">Create alert at this stop</string>
+    <string name="a11y_alert_for_arrival">Create alert for line %1$s towards %2$s</string>
+</resources>

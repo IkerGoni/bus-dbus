@@ -9,6 +9,7 @@
     <string name="settings_section_language">Hizkuntza</string>
     <string name="settings_language_es">Español</string>
     <string name="settings_language_eu">Euskara</string>
+    <string name="settings_language_en">Ingelesa</string>
     <string name="settings_section_notifications">Jakinarazpenak</string>
     <string name="settings_notifications_on">Aktibatuta</string>
     <string name="settings_notifications_off">Desaktibatuta</string>
@@ -23,7 +24,7 @@
     <string name="settings_counts_join">%1$s · %2$s</string>
     <string name="settings_catalog_date">Lineaz kanpoko katalogoaren sorrera-data</string>
     <string name="settings_live_last">Zuzeneko azken kontsulta</string>
-    <string name="settings_live_never">Oraindik ez da geltokirik kontsultatu</string>
+    <string name="settings_live_never">Oraindik ez da geltokirik ikusi</string>
     <string name="settings_section_about">Aplikazioari buruz</string>
     <string name="settings_version">Bertsioa</string>
     <string name="settings_credit_times">Denborak: Dbusen API publikoa</string>
