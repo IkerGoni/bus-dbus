@@ -292,7 +292,7 @@ private fun LazyListScope.favorites(state: HomeUiState, vm: HomeViewModel, onOpe
     item(key = "fav-label", contentType = "section_label") { SectionLabel(stringResource(R.string.home_favorites), Modifier.padding(horizontal = 0.dp)) }
     items(
         items = state.favorites,
-        key = { "fav-${it.row.stopId}-${it.row.favoriteLineId.orEmpty()}" },
+        key = { "fav-${it.row.stopId}-${it.row.favoriteLineId.orEmpty()}-${it.row.createdAtMs}" },
         contentType = { "favorite_stop" },
     ) { card ->
         FavoriteCard(card, state, onOpen = { onOpenStop(card.row.stopId, card.row.favoriteLineId) }, onUnstar = { vm.unstar(card.row) }, onRetry = vm::refresh)

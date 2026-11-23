@@ -170,7 +170,9 @@ class StopsViewModel(private val container: AppContainer) : ViewModel() {
     }
 }
 
-/** Favoritas: paradas (STOP) y parada+línea (STOP_LINE), más recientes primero; sin las que no estén en el catálogo. */
+/** Favoritas: paradas (STOP) y parada+línea (STOP_LINE), más recientes primero; sin las que no estén en el catálogo.
+ * Deduplica por (stopId, favoriteLineId): si existen varios favoritos idénticos se queda solo el más reciente,
+ * evitando tarjetas repetidas en HomeScreen. */
 fun favoriteRows(catalog: Catalog, favorites: List<Favorite>): List<StopRow> =
     favorites.sortedByDescending { it.createdAtMs }.mapNotNull { fav ->
         val stopId = fav.stopId ?: return@mapNotNull null
@@ -194,4 +196,4 @@ fun favoriteRows(catalog: Catalog, favorites: List<Favorite>): List<StopRow> =
             )
             FavoriteType.LINE -> null
         }
-    }
+    }.distinctBy { it.stopId to it.favoriteLineId }

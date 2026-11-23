@@ -49,6 +49,24 @@ class ScreenLogicTest {
     }
 
     @Test
+    fun favoriteRowsDeduplicaPorStopYLinea() {
+        // Dos favoritos STOP_LINE idénticos (misma parada, misma línea): debe quedar solo el más reciente.
+        val rows = favoriteRows(
+            catalog,
+            listOf(
+                Favorite(FavoriteType.STOP_LINE, "1", "28", 10), // más reciente
+                Favorite(FavoriteType.STOP_LINE, "1", "28", 5),  // duplicado más antiguo
+                Favorite(FavoriteType.STOP_LINE, "1", "28", 1),  // duplicado más antiguo
+                Favorite(FavoriteType.STOP_LINE, "1", "43", 7),  // misma parada, otra línea: distinto
+            ),
+        )
+        assertEquals(2, rows.size)
+        assertEquals(listOf("1", "1"), rows.map { it.stopId })
+        assertEquals(listOf("28", "43"), rows.map { it.favoriteLineId!! })
+        assertTrue(rows.all { it.starred })
+    }
+
+    @Test
     fun lineRowSoloCodigosPublicos() {
         val rows = lineRows(catalog, "", LinesFilter.ALL, emptySet())
         val publicCodes = catalog.lines.map { it.cod }.toSet()
