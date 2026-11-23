@@ -12,6 +12,7 @@ plugins {
  * en `assets/catalog.json` en cada build. El generado no se commitea ni se edita;
  * la fuente es `apps/bot/data/` (regenerar con `npm run build:catalog`).
  */
+@CacheableTask
 abstract class MergeCatalogTask : DefaultTask() {
     @get:InputFile
     @get:PathSensitive(PathSensitivity.NONE)
@@ -60,6 +61,7 @@ abstract class MergeCatalogTask : DefaultTask() {
     }
 }
 
+@CacheableTask
 abstract class GenerateDesignTokensTask : DefaultTask() {
     @get:InputFile
     @get:PathSensitive(PathSensitivity.NONE)
@@ -95,6 +97,83 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
         val spacing = section(style, "spacingDp")
         val radius = section(style, "cornerRadiusDp")
         val comps = section(style, "componentsDp")
+
+        // Validación defensiva: el build falla con el nombre exacto de la clave, no con un NPE opaco.
+        fun fail(message: String): Nothing = throw GradleException("design-tokens.json: $message")
+
+        fun requireKeys(section: Map<String, Any?>, path: String, vararg keys: String) {
+            keys.forEach { key ->
+                if (!section.containsKey(key)) fail("falta la clave '$path.$key'")
+            }
+        }
+
+        requireKeys(motion, "motion", "maxBlockingDurationMs")
+        requireKeys(
+            nav, "motion.navigation",
+            "bottomTabFadeInMs", "bottomTabFadeOutMs", "detailSlideInMs", "detailFadeInMs",
+            "detailSlideOutMs", "detailFadeOutMs", "detailSlideFraction",
+        )
+        requireKeys(
+            trans, "motion.transitions",
+            "arrivalsStateFadeInMs", "arrivalsStateFadeOutMs", "arrivalsStateSlideFraction",
+            "minutesSlideInMs", "minutesSlideOutMs", "searchClearButtonMs", "infoBannerMs",
+            "lineDirectionCrossfadeMs", "wizardStepSlideMs",
+        )
+        requireKeys(
+            micro, "motion.microInteractions",
+            "pressScaleFactor", "favoriteStarMinScale", "favoriteStarPeakScale", "favoriteStarRotationDeg",
+            "springNoBounceDamping", "springMediumBounceDamping", "springMediumStiffness",
+            "searchClearScaleFactor", "chipIndicatorStartScale",
+        )
+        requireKeys(pulse, "motion.livePulse", "durationMs", "minAlpha", "maxAlpha")
+        requireKeys(stagger, "motion.stagger", "itemDelayMs", "maxAnimatedIndex")
+        requireKeys(celebration, "motion.celebration", "particlesDurationMs")
+        requireKeys(spacing, "style.spacingDp", "xs", "sm", "md", "lg", "xl")
+        requireKeys(radius, "style.cornerRadiusDp", "chip", "card", "pill")
+        requireKeys(
+            comps, "style.componentsDp",
+            "timelineTerminalNode", "timelineIntermediateNode", "liveSignalDot", "lineBadgeMinWidth",
+            "chipVisualHeight",
+        )
+
+        val maxBlockingMs = intVal(motion, "maxBlockingDurationMs")
+
+        fun validate(prefix: String, value: Any?) {
+            when (value) {
+                is Map<*, *> -> value.forEach { (key, nested) -> validate("$prefix.$key", nested) }
+                is Number -> {
+                    val path = prefix
+                    val number = value.toFloat()
+                    // Duraciones bloqueantes: se excluyen pulso vivo y partículas (no bloquean).
+                    if (path.endsWith("Ms") && path != "motion.maxBlockingDurationMs" &&
+                        !path.startsWith("motion.livePulse.") && !path.startsWith("motion.celebration.")
+                    ) {
+                        if (value.toInt() > maxBlockingMs) {
+                            fail("'$path' = ${value.toInt()} ms supera maxBlockingDurationMs ($maxBlockingMs)")
+                        }
+                    }
+                    if (path.endsWith("Alpha") && (number < 0f || number > 1f)) {
+                        fail("'$path' debe estar en [0,1]")
+                    }
+                    if ((path.endsWith("Scale") || path.endsWith("ScaleFactor")) && number <= 0f) {
+                        fail("'$path' debe ser > 0")
+                    }
+                }
+                else -> {}
+            }
+        }
+        validate("motion", motion)
+        validate("style", style)
+
+        val maxAnimatedIndex = intVal(stagger, "maxAnimatedIndex")
+        val itemDelayMs = intVal(stagger, "itemDelayMs")
+        if (maxAnimatedIndex < 0) fail("'motion.stagger.maxAnimatedIndex' no puede ser negativo")
+        if (itemDelayMs * maxAnimatedIndex > maxBlockingMs) {
+            fail(
+                "'motion.stagger.itemDelayMs * maxAnimatedIndex' = ${itemDelayMs * maxAnimatedIndex} ms " +
+                    "supera maxBlockingDurationMs ($maxBlockingMs)",
+            )
+        }
 
         val pkgDir = outputDir.get().asFile.resolve("eus/busdonostia/app/ui/theme")
         pkgDir.mkdirs()
@@ -445,12 +524,15 @@ tasks.withType<Test>().configureEach {
     dependsOn(merge)
     val catalogDir = merge.flatMap { it.outputDir }
     val fixturesDir = contractFixtures.asFile
+    val tokensPath = designTokensJson.asFile.absolutePath
     inputs.dir(fixturesDir).withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.file(designTokensJson).withPathSensitivity(PathSensitivity.NONE)
     jvmArgumentProviders.add(
         CommandLineArgumentProvider {
             listOf(
                 "-Dcatalog.dir=${catalogDir.get().asFile.absolutePath}",
                 "-Dfixtures.dir=${fixturesDir.absolutePath}",
+                "-Ddesign.tokens=$tokensPath",
             )
         },
     )
