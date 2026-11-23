@@ -35,6 +35,13 @@ class AlertDraftTest {
     }
 
     @Test
+    fun nombreDesconocidoNuncaEsElCodigoDeParada() {
+        assertEquals("", base.copy(stopName = null).toRule("id", 1_000).stopName)
+        assertEquals("", base.copy(stopName = "   ").toRule("id", 1_000).stopName)
+        assertEquals("Pío Baroja 10", base.toRule("id", 1_000).stopName)
+    }
+
+    @Test
     fun dedupPorParadaYLinea() {
         val existing = base.toRule("old", 0)
         // Nuevo sin conflicto → insertar.

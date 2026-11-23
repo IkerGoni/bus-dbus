@@ -219,7 +219,11 @@ private fun AlertCard(
                 }
             }
             Text(
-                stringResource(R.string.alert_subtitle, rule.stopName, rule.minutesAhead),
+                stringResource(
+                    R.string.alert_subtitle,
+                    rule.stopName.ifBlank { stringResource(R.string.stop_unnamed) },
+                    rule.minutesAhead,
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,

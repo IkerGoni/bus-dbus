@@ -52,6 +52,10 @@ fun createNotificationChannels(context: Context) {
     )
 }
 
+/** El aviso guardado sin catálogo no tiene nombre: mostrar «parada sin nombre», nunca el código de poste. */
+private fun AlertRule.stopNameForDisplay(context: Context): String =
+    stopName.takeIf { it.isNotBlank() } ?: context.getString(R.string.stop_unnamed)
+
 private fun openAppIntent(context: Context): PendingIntent = PendingIntent.getActivity(
     context,
     0,
@@ -70,7 +74,7 @@ fun canNotifyArrivals(context: Context): Boolean {
 fun monitoringNotification(context: Context, watching: List<AlertRule>, pollIntervalSec: Int): Notification {
     val title = when (watching.size) {
         0 -> context.getString(R.string.channel_monitoring_name) // aún sin leer los avisos (primer instante tras arrancar)
-        1 -> watching.single().let { context.getString(R.string.notif_monitoring_one, it.lineId, it.stopName) }
+        1 -> watching.single().let { context.getString(R.string.notif_monitoring_one, it.lineId, it.stopNameForDisplay(context)) }
         else -> context.resources.getQuantityString(R.plurals.notif_monitoring_many, watching.size, watching.size)
     }
     return NotificationCompat.Builder(context, CHANNEL_MONITORING)
@@ -111,7 +115,7 @@ fun notifyArrival(
     val source = context.getString(
         if (firing.arrival.source == ArrivalSource.LIVE) R.string.source_live else R.string.source_scheduled,
     )
-    val body = context.getString(R.string.notif_body, rule.stopName, source)
+    val body = context.getString(R.string.notif_body, rule.stopNameForDisplay(context), source)
     val open = PendingIntent.getActivity(
         context,
         0,

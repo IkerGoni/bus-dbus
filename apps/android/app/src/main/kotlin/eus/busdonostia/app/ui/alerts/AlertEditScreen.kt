@@ -149,7 +149,15 @@ fun AlertEditScreen(
         AlertDialog(
             onDismissRequest = vm::dismissConflict,
             title = { Text(stringResource(R.string.alert_conflict_title)) },
-            text = { Text(stringResource(R.string.alert_conflict_body, conflict.lineId, conflict.stopName)) },
+            text = {
+                Text(
+                    stringResource(
+                        R.string.alert_conflict_body,
+                        conflict.lineId,
+                        conflict.stopName.ifBlank { stringResource(R.string.stop_unnamed) },
+                    ),
+                )
+            },
             confirmButton = {
                 TextButton(onClick = { vm.save(confirmed = true) }, modifier = Modifier.heightIn(min = 48.dp)) {
                     Text(stringResource(R.string.alert_conflict_update))
@@ -211,7 +219,7 @@ private fun StopAndLine(state: AlertEditUiState, vm: AlertEditViewModel) {
         ) {
             Column(Modifier.weight(1f)) {
                 Text(
-                    state.stopName ?: stringResource(R.string.stop_unnamed),
+                    state.stopName?.takeIf { it.isNotBlank() } ?: stringResource(R.string.stop_unnamed),
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -321,7 +329,7 @@ private fun Preview(state: AlertEditUiState) {
                 // Réplica de la notificación real (AlertNotifications): nombre de parada + fuente, sin código de poste.
                 stringResource(
                     R.string.notif_body,
-                    state.stopName ?: stringResource(R.string.stop_unnamed),
+                    state.stopName?.takeIf { it.isNotBlank() } ?: stringResource(R.string.stop_unnamed),
                     stringResource(R.string.source_live),
                 ),
                 style = MaterialTheme.typography.bodyMedium,

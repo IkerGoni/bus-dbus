@@ -288,7 +288,7 @@ private fun NextAlertCard(
                 }
             }
             Text(
-                rule.stopName,
+                rule.stopName.ifBlank { stringResource(R.string.stop_unnamed) },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,

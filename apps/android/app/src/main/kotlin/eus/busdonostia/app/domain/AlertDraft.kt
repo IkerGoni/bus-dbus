@@ -42,7 +42,9 @@ fun AlertDraft.toRule(
 ): AlertRule = AlertRule(
     id = id,
     stopId = checkNotNull(stopId),
-    stopName = stopName ?: stopId,
+    // Sin catálogo ni live, el nombre queda vacío: nunca guardar el código de poste como nombre.
+    // La UI y las notificaciones muestran R.string.stop_unnamed cuando está vacío.
+    stopName = stopName?.takeIf { it.isNotBlank() }.orEmpty(),
     lineId = normalizeLine(checkNotNull(lineId)),
     destination = destination,
     minutesAhead = minutesAhead.coerceIn(config.minMinutesAhead..config.maxMinutesAhead),

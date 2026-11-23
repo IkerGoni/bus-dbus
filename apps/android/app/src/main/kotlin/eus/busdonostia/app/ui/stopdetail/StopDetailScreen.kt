@@ -107,12 +107,13 @@ fun StopDetailScreen(
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) { vm.pollWhileVisible() }
     }
     val context = LocalContext.current
+    val unnamedStop = stringResource(R.string.stop_unnamed)
     // `geo:` solo si la parada tiene coordenadas y hay una app que lo abra (nada de botones sin acción).
     val directions: Intent? = remember(state.lat, state.lon, state.name) {
         val lat = state.lat
         val lon = state.lon
         if (lat == null || lon == null) return@remember null
-        val label = Uri.encode(state.name ?: stopId)
+        val label = Uri.encode(state.name?.takeIf { it.isNotBlank() } ?: unnamedStop)
         Intent(Intent.ACTION_VIEW, "geo:$lat,$lon?q=$lat,$lon($label)".toUri())
             .takeIf { it.resolveActivity(context.packageManager) != null }
     }
