@@ -134,7 +134,8 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
             comps, "style.componentsDp",
             "timelineTerminalNode", "timelineIntermediateNode", "liveSignalDot", "lineBadgeMinWidth",
             "lineBadgeSize", "chipVisualHeight", "touchTargetMin", "headerMinHeight", "skeletonRowHeight",
-            "iconSmall",
+            "iconSmall", "iconLarge", "lineBadgeChipSize", "progressIndicatorSize", "progressIndicatorStroke",
+            "arrivalRowMinHeight", "arrivalDividerInset", "stateMessageVerticalPadding",
         )
 
         val maxBlockingMs = intVal(motion, "maxBlockingDurationMs")
@@ -377,6 +378,13 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                     val HEADER_MIN_HEIGHT = ${intVal(comps, "headerMinHeight")}.dp
                     val SKELETON_ROW_HEIGHT = ${intVal(comps, "skeletonRowHeight")}.dp
                     val ICON_SMALL = ${intVal(comps, "iconSmall")}.dp
+                    val ICON_LARGE = ${intVal(comps, "iconLarge")}.dp
+                    val LINE_BADGE_CHIP_SIZE = ${intVal(comps, "lineBadgeChipSize")}.dp
+                    val PROGRESS_INDICATOR_SIZE = ${intVal(comps, "progressIndicatorSize")}.dp
+                    val PROGRESS_INDICATOR_STROKE = ${intVal(comps, "progressIndicatorStroke")}.dp
+                    val ARRIVAL_ROW_MIN_HEIGHT = ${intVal(comps, "arrivalRowMinHeight")}.dp
+                    val ARRIVAL_DIVIDER_INSET = ${intVal(comps, "arrivalDividerInset")}.dp
+                    val STATE_MESSAGE_VERTICAL_PADDING = ${intVal(comps, "stateMessageVerticalPadding")}.dp
                 }
 
                 val spacingXxs: Dp = Spacing.XXS
@@ -401,6 +409,13 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                 val headerMinHeight: Dp = Components.HEADER_MIN_HEIGHT
                 val skeletonRowHeight: Dp = Components.SKELETON_ROW_HEIGHT
                 val iconSmall: Dp = Components.ICON_SMALL
+                val iconLarge: Dp = Components.ICON_LARGE
+                val lineBadgeChipSize: Dp = Components.LINE_BADGE_CHIP_SIZE
+                val progressIndicatorSize: Dp = Components.PROGRESS_INDICATOR_SIZE
+                val progressIndicatorStroke: Dp = Components.PROGRESS_INDICATOR_STROKE
+                val arrivalRowMinHeight: Dp = Components.ARRIVAL_ROW_MIN_HEIGHT
+                val arrivalDividerInset: Dp = Components.ARRIVAL_DIVIDER_INSET
+                val stateMessageVerticalPadding: Dp = Components.STATE_MESSAGE_VERTICAL_PADDING
             }
         """.trimIndent() + "\n"
 

@@ -72,7 +72,14 @@
       "touchTargetMin": 48,
       "headerMinHeight": 56,
       "skeletonRowHeight": 72,
-      "iconSmall": 16
+      "iconSmall": 16,
+      "iconLarge": 32,
+      "lineBadgeChipSize": 24,
+      "progressIndicatorSize": 20,
+      "progressIndicatorStroke": 2,
+      "arrivalRowMinHeight": 56,
+      "arrivalDividerInset": 60,
+      "stateMessageVerticalPadding": 32
     }
   }
 }

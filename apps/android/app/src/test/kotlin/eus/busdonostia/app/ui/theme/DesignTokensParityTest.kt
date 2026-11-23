@@ -91,6 +91,13 @@ class DesignTokensParityTest {
             "componentsDp.headerMinHeight" to DesignTokens.headerMinHeight.value,
             "componentsDp.skeletonRowHeight" to DesignTokens.skeletonRowHeight.value,
             "componentsDp.iconSmall" to DesignTokens.iconSmall.value,
+            "componentsDp.iconLarge" to DesignTokens.iconLarge.value,
+            "componentsDp.lineBadgeChipSize" to DesignTokens.lineBadgeChipSize.value,
+            "componentsDp.progressIndicatorSize" to DesignTokens.progressIndicatorSize.value,
+            "componentsDp.progressIndicatorStroke" to DesignTokens.progressIndicatorStroke.value,
+            "componentsDp.arrivalRowMinHeight" to DesignTokens.arrivalRowMinHeight.value,
+            "componentsDp.arrivalDividerInset" to DesignTokens.arrivalDividerInset.value,
+            "componentsDp.stateMessageVerticalPadding" to DesignTokens.stateMessageVerticalPadding.value,
         )
         assertEquals("El JSON y DesignTokens deben cubrir los mismos estilos", actual.keys, leaves.keys)
         leaves.forEach { (path, value) ->

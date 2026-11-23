@@ -68,5 +68,9 @@ class MotionTokensTest {
         assertEquals(16.dp, DesignTokens.iconSmall)
         assertEquals(6.dp, DesignTokens.spacingXxs)
         assertEquals(12.dp, DesignTokens.cornerRadiusBanner)
+        assertEquals(24.dp, DesignTokens.lineBadgeChipSize)
+        assertEquals(56.dp, DesignTokens.arrivalRowMinHeight)
+        assertEquals(60.dp, DesignTokens.arrivalDividerInset)
+        assertEquals(32.dp, DesignTokens.iconLarge)
     }
 }

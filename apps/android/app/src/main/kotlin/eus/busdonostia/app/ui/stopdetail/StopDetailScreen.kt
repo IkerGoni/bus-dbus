@@ -9,7 +9,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import eus.busdonostia.app.ui.components.optionalSharedElement
@@ -43,7 +42,6 @@ import androidx.compose.material.icons.outlined.NightsStay
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -82,9 +80,9 @@ import eus.busdonostia.app.ui.components.ScreenHeader
 import eus.busdonostia.app.ui.components.SectionLabel
 import eus.busdonostia.app.ui.components.SharedKeys
 import eus.busdonostia.app.ui.components.SkeletonList
+import eus.busdonostia.app.ui.theme.DesignTokens
 import eus.busdonostia.app.ui.theme.LocalStatusColors
 import eus.busdonostia.app.ui.theme.MonoFamily
-import eus.busdonostia.app.ui.theme.MotionTokens
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -149,14 +147,14 @@ fun StopDetailScreen(
         if (selected != null) {
             TextButton(
                 onClick = { vm.toggleLineStar() },
-                modifier = Modifier.padding(horizontal = 8.dp).heightIn(min = 48.dp),
+                modifier = Modifier.padding(horizontal = DesignTokens.spacingSm).heightIn(min = DesignTokens.touchTargetMin),
             ) {
                 Icon(
                     if (state.lineStarred) Icons.Filled.Star else Icons.Outlined.StarOutline,
                     contentDescription = null,
                     tint = if (state.lineStarred) LocalStatusColors.current.favorite else LocalStatusColors.current.scheduled,
                 )
-                Spacer(Modifier.width(8.dp))
+                Spacer(Modifier.width(DesignTokens.spacingSm))
                 Text(
                     stringResource(if (state.lineStarred) R.string.stop_line_starred else R.string.stop_line_star, selected),
                 )
@@ -175,11 +173,11 @@ fun StopDetailScreen(
             onClick = { onCreateAlert(stopId, null, null) },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .heightIn(min = 48.dp),
+                .padding(horizontal = DesignTokens.spacingLg, vertical = DesignTokens.spacingSm)
+                .heightIn(min = DesignTokens.touchTargetMin),
         ) {
             Icon(Icons.Outlined.NotificationAdd, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(DesignTokens.spacingSm))
             Text(stringResource(R.string.stop_create_alert), maxLines = 1)
         }
     }
@@ -198,8 +196,8 @@ private fun LineChips(
         modifier = Modifier
             .fillMaxWidth()
             .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+            .padding(horizontal = DesignTokens.spacingLg, vertical = DesignTokens.spacingXs),
+        horizontalArrangement = Arrangement.spacedBy(DesignTokens.spacingSm),
     ) {
         MotionFilterChip(
             selected = state.selectedLine == null,
@@ -220,7 +218,7 @@ private fun LineChips(
                     LineBadge(
                         lineId = line,
                         colorArgb = state.lineColors[line],
-                        size = 24.dp,
+                        size = DesignTokens.lineBadgeChipSize,
                         modifier = if (sharedKey != null) Modifier.optionalSharedElement(sharedKey) else Modifier,
                     )
                 },
@@ -229,149 +227,174 @@ private fun LineChips(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Suppress("EXPERIMENTAL_API_USAGE")
 @Composable
 private fun Arrivals(state: StopDetailUiState, onRetry: () -> Unit, onStar: (Arrival) -> Unit, onBell: (Arrival) -> Unit) {
-    val view = state.view
-    val motion = rememberEffectiveMotionTokens()
     BrandPullToRefreshBox(
         isRefreshing = state.refreshing,
         onRefresh = onRetry,
         modifier = Modifier.fillMaxSize(),
     ) {
-        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 16.dp)) {
-        // Capturar LazyListScope receiver para pasarlo a funciones internas
-        val listScope = this
-        item(key = "stop-arrivals-header", contentType = "arrival_header") {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                SectionLabel(stringResource(R.string.stop_next_arrivals), modifier = Modifier.weight(1f))
-                Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) {
-                    if (state.refreshing) {
-                        CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-                    } else {
-                        IconButton(onClick = onRetry) {
-                            Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.refresh))
-                        }
-                    }
-                }
-            }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(bottom = DesignTokens.spacingLg),
+        ) {
+            stopDetailItems(state = state, onRetry = onRetry, onStar = onStar, onBell = onBell)
         }
-        item(key = "stop-arrivals-view", contentType = "arrivals_view") {
-            // Capturar LazyItemScope para AnimatedContent, pero usar listScope del LazyColumn para notice/arrivalItems
-            val itemScope = this@item
-            AnimatedContent(
-                targetState = view,
-                contentKey = { it::class },
-                transitionSpec = {
-                    (fadeIn(tween(motion.arrivalsStateFadeInMs)) + slideInVertically(tween(motion.arrivalsStateFadeInMs)) { (it * motion.arrivalsStateSlideFraction).toInt() })
-                        .togetherWith(fadeOut(tween(motion.arrivalsStateFadeOutMs)))
-                },
-                label = "arrivalsViewState",
-            ) { view ->
-                when (view) {
-                    ArrivalsView.Loading -> SkeletonList(rows = 3, rowHeight = 56.dp)
-                    is ArrivalsView.Empty -> {
-                        notice(listScope, view.notice, "empty")
-                        StatusMessage(Icons.Outlined.Inbox, stringResource(R.string.stop_empty_title), null)
-                    }
-                    is ArrivalsView.Live -> {
-                        notice(listScope, view.notice, "live")
-                        arrivalItems(listScope, state, onStar, onBell, "live")
-                    }
-                    is ArrivalsView.Degraded -> when (view.reason) {
-                        DegradedReason.NO_SERVICE -> StatusMessage(
-                            Icons.Outlined.NightsStay,
-                            stringResource(R.string.stop_no_service_title),
-                            view.notice ?: stringResource(R.string.stop_no_service_body),
-                        )
-                        DegradedReason.STALE -> Column {
-                            InfoBanner(
-                                visible = true,
-                                text = stringResource(R.string.stop_stale, clockOf(view.fetchedAtMs)),
-                                warning = true,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                            ) {
-                                TextButton(onClick = onRetry, modifier = Modifier.heightIn(min = 48.dp)) {
-                                    Text(stringResource(R.string.retry))
-                                }
-                            }
-                            notice(listScope, view.notice, "stale")
-                            arrivalItems(listScope, state, onStar, onBell, "stale")
-                        }
-                    }
-                    ArrivalsView.Error -> StatusMessage(
-                        Icons.Outlined.ErrorOutline,
-                        stringResource(R.string.stop_error_title),
-                        stringResource(R.string.stop_error_body),
-                        action = stringResource(R.string.retry) to onRetry,
+    }
+}
+
+/**
+ * Contenido de A05 como un único `LazyListScope`: cabecera, bloque de estado y llegadas son
+ * ítems reales de la lista. Antes se emitían ítems desde dentro de otro `item`, lo que rompía
+ * el reciclado de `LazyColumn` y el recuento de claves durante las transiciones.
+ */
+private fun LazyListScope.stopDetailItems(
+    state: StopDetailUiState,
+    onRetry: () -> Unit,
+    onStar: (Arrival) -> Unit,
+    onBell: (Arrival) -> Unit,
+) {
+    item(key = "stop-arrivals-header", contentType = "arrival_header") {
+        ArrivalsHeader(refreshing = state.refreshing, onRetry = onRetry)
+    }
+    item(key = "stop-arrivals-status", contentType = "arrivals_status") {
+        ArrivalsStatus(state = state, onRetry = onRetry)
+    }
+    if (state.showsArrivals) {
+        if (state.rows.isEmpty()) {
+            item(key = "stop-line-empty", contentType = "status_message") {
+                StatusMessage(
+                    Icons.Outlined.Inbox,
+                    stringResource(R.string.stop_line_empty, state.selectedLine.orEmpty()),
+                    null,
+                )
+            }
+        } else {
+            items(state.rows, key = { it.key }, contentType = { "arrival_row" }) { row ->
+                val arrival = row.arrival
+                Column(modifier = motionAnimateItem()) {
+                    ArrivalRow(
+                        arrival = arrival,
+                        minutes = row.minutes,
+                        colorArgb = state.lineColors[arrival.lineId],
+                        stopName = state.name ?: stringResource(R.string.stop_unnamed),
+                        starred = arrival.lineId in state.starredLines,
+                        onStar = { onStar(arrival) },
+                    ) { onBell(arrival) }
+                    HorizontalDivider(
+                        Modifier.padding(start = DesignTokens.arrivalDividerInset),
+                        color = LocalStatusColors.current.border,
                     )
                 }
             }
         }
-        val attribution = state.coordinatesAttribution
-        if (state.lat != null && attribution != null) {
-            item(key = "stop-attribution", contentType = "attribution") {
-                Text(
-                    stringResource(R.string.osm_attribution, attribution),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+    }
+    val attribution = state.coordinatesAttribution
+    if (state.lat != null && attribution != null) {
+        item(key = "stop-attribution", contentType = "attribution") {
+            Text(
+                stringResource(R.string.osm_attribution, attribution),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = DesignTokens.spacingLg, vertical = DesignTokens.spacingMd),
+            )
+        }
+    }
+}
+
+/** `Live` y `STALE` traen filas; `NO_SERVICE`, `Empty` y `Error` no. */
+private val StopDetailUiState.showsArrivals: Boolean
+    get() = when (val current = view) {
+        ArrivalsView.Loading, ArrivalsView.Error, is ArrivalsView.Empty -> false
+        is ArrivalsView.Live -> true
+        is ArrivalsView.Degraded -> current.reason == DegradedReason.STALE
+    }
+
+@Composable
+private fun ArrivalsHeader(refreshing: Boolean, onRetry: () -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        SectionLabel(stringResource(R.string.stop_next_arrivals), modifier = Modifier.weight(1f))
+        Box(Modifier.size(DesignTokens.touchTargetMin), contentAlignment = Alignment.Center) {
+            if (refreshing) {
+                CircularProgressIndicator(
+                    Modifier.size(DesignTokens.progressIndicatorSize),
+                    strokeWidth = DesignTokens.progressIndicatorStroke,
                 )
+            } else {
+                IconButton(onClick = onRetry) {
+                    Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.refresh))
+                }
             }
         }
+    }
+}
+
+/** Aviso de Dbus, carga, vacío, sin servicio o error. Solo cabecera y mensajes: nunca filas. */
+@Composable
+private fun ArrivalsStatus(state: StopDetailUiState, onRetry: () -> Unit) {
+    val motion = rememberEffectiveMotionTokens()
+    AnimatedContent(
+        targetState = state.view,
+        contentKey = { it::class },
+        transitionSpec = {
+            (
+                fadeIn(tween(motion.arrivalsStateFadeInMs)) + slideInVertically(tween(motion.arrivalsStateFadeInMs)) {
+                    (it * motion.arrivalsStateSlideFraction).toInt()
+                }
+                ).togetherWith(fadeOut(tween(motion.arrivalsStateFadeOutMs)))
+        },
+        label = "arrivalsViewState",
+    ) { view ->
+        when (view) {
+            ArrivalsView.Loading -> SkeletonList(rows = 3, rowHeight = DesignTokens.arrivalRowMinHeight)
+            is ArrivalsView.Empty -> {
+                NoticeBanner(view.notice)
+                StatusMessage(Icons.Outlined.Inbox, stringResource(R.string.stop_empty_title), null)
+            }
+            is ArrivalsView.Live -> NoticeBanner(view.notice)
+            is ArrivalsView.Degraded -> when (view.reason) {
+                DegradedReason.NO_SERVICE -> StatusMessage(
+                    Icons.Outlined.NightsStay,
+                    stringResource(R.string.stop_no_service_title),
+                    view.notice ?: stringResource(R.string.stop_no_service_body),
+                )
+                DegradedReason.STALE -> {
+                    InfoBanner(
+                        visible = true,
+                        text = stringResource(R.string.stop_stale, clockOf(view.fetchedAtMs)),
+                        warning = true,
+                        modifier = Modifier.padding(horizontal = DesignTokens.spacingLg, vertical = DesignTokens.spacingXs),
+                    ) {
+                        TextButton(
+                            onClick = onRetry,
+                            modifier = Modifier.heightIn(min = DesignTokens.touchTargetMin),
+                        ) {
+                            Text(stringResource(R.string.retry))
+                        }
+                    }
+                    NoticeBanner(view.notice)
+                }
+            }
+            ArrivalsView.Error -> StatusMessage(
+                Icons.Outlined.ErrorOutline,
+                stringResource(R.string.stop_error_title),
+                stringResource(R.string.stop_error_body),
+                action = stringResource(R.string.retry) to onRetry,
+            )
         }
     }
 }
 
 /** `avisos` de Dbus: visibles también cuando hay datos. */
-private fun notice(listScope: LazyListScope, text: String?, tag: String) {
+@Composable
+private fun NoticeBanner(text: String?) {
     if (text == null) return
-    // Key derivada de la vista: durante una transición de AnimatedContent se componen a la vez
-    // el contenido saliente y el entrante, y dos keys estáticas colisionarían en la misma lista.
-    listScope.item(key = "stop-notice-$tag", contentType = "notice_banner") {
-        InfoBanner(
-            visible = true,
-            text = stringResource(R.string.stop_notice, text),
-            warning = true,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-        )
-    }
-}
-
-private fun arrivalItems(listScope: LazyListScope,
-    state: StopDetailUiState,
-    onStar: (Arrival) -> Unit,
-    onBell: (Arrival) -> Unit,
-    tag: String,
-) {
-    val rows = state.rows
-    if (rows.isEmpty()) {
-        listScope.item(key = "stop-line-empty-$tag", contentType = "status_message") {
-            StatusMessage(
-                Icons.Outlined.Inbox,
-                stringResource(R.string.stop_line_empty, state.selectedLine.orEmpty()),
-                null,
-            )
-        }
-        return
-    }
-    listScope.items(rows, key = { it.key }, contentType = { "arrival_row" }) { row ->
-        val arrival = row.arrival
-        Column(
-            modifier = motionAnimateItem(),
-        ) {
-            ArrivalRow(
-                arrival = arrival,
-                minutes = row.minutes,
-                colorArgb = state.lineColors[arrival.lineId],
-                stopName = state.name ?: stringResource(R.string.stop_unnamed),
-                starred = arrival.lineId in state.starredLines,
-                onStar = { onStar(arrival) },
-            ) { onBell(arrival) }
-            HorizontalDivider(Modifier.padding(start = 60.dp), color = LocalStatusColors.current.border)
-        }
-    }
+    InfoBanner(
+        visible = true,
+        text = stringResource(R.string.stop_notice, text),
+        warning = true,
+        modifier = Modifier.padding(horizontal = DesignTokens.spacingLg, vertical = DesignTokens.spacingXs),
+    )
 }
 
 /**
@@ -391,10 +414,15 @@ private fun ArrivalRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 56.dp)
-            .padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+            .heightIn(min = DesignTokens.arrivalRowMinHeight)
+            .padding(
+                start = DesignTokens.spacingLg,
+                end = DesignTokens.spacingXs,
+                top = DesignTokens.spacingXs,
+                bottom = DesignTokens.spacingXs,
+            ),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(DesignTokens.spacingMd),
     ) {
         LineBadge(arrival.lineId, colorArgb)
         // Hora bajo el destino: deja sitio a ★ y 🔔 sin recortar el destino en móviles estrechos.
@@ -439,11 +467,14 @@ private fun StatusMessage(icon: ImageVector, title: String, body: String?, actio
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 32.dp),
+            .padding(
+                horizontal = DesignTokens.spacingXl,
+                vertical = DesignTokens.stateMessageVerticalPadding,
+            ),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(DesignTokens.spacingSm),
     ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(32.dp))
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(DesignTokens.iconLarge))
         Text(title, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
         if (body != null) {
             Text(
@@ -454,7 +485,7 @@ private fun StatusMessage(icon: ImageVector, title: String, body: String?, actio
             )
         }
         if (action != null) {
-            Button(onClick = action.second, modifier = Modifier.heightIn(min = 48.dp)) { Text(action.first) }
+            Button(onClick = action.second, modifier = Modifier.heightIn(min = DesignTokens.touchTargetMin)) { Text(action.first) }
         }
     }
 }
