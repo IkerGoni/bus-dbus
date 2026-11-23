@@ -20,48 +20,50 @@
 
   <p><strong>Última actualización:</strong> 2026-11-23<br>
     <strong>Responsable:</strong> Dev Igoni — Iker Goñi Cuesta (Pamplona, España)<br>
-    <strong>Contacto:</strong> <a href="mailto:dev.mail.igoni@gmail.com">dev.mail.igoni@gmail.com</a></p>
+    <strong>Contacto:</strong> dev.mail.igoni@gmail.com</p>
 
   <h2>1. Qué hace la aplicación</h2>
 
-  <p>Badator! permite consultar tiempos de llegada de autobuses en tiempo real en Donostia / San Sebastián, guardar paradas y líneas favoritas, localizar paradas cercanas y configurar avisos de llegada. Es una aplicación independiente y no oficial; no está asociada a Dbus ni al Ayuntamiento de Donostia / San Sebastián.</p>
+  <p>Badator! permite consultar información de llegadas de autobuses en Donostia / San Sebastián, guardar favoritos, localizar paradas próximas y configurar avisos. La app no es oficial ni está asociada a Dbus o al Ayuntamiento.</p>
 
-  <h2>2. Datos usados en el dispositivo y permisos</h2>
+  <h2>2. Datos usados en el dispositivo</h2>
 
   <ul>
-    <li><strong>Ubicación (opcional):</strong> los permisos <code>ACCESS_COARSE_LOCATION</code> y <code>ACCESS_FINE_LOCATION</code> se solicitan únicamente si el usuario pide buscar paradas cercanas. La ubicación se usa de forma efímera en memoria dentro del dispositivo para ordenar paradas por distancia; nunca se guarda en disco ni se transmite al desarrollador ni a terceros. La aplicación funciona completamente sin este permiso.</li>
-    <li><strong>Datos almacenados localmente:</strong> favoritos, paradas recientes, preferencias y avisos configurados se guardan únicamente en el almacenamiento privado del dispositivo mediante Room (SQLite local) y DataStore. El manifiesto declara <code>android:allowBackup="false"</code>, por lo que Android no realiza copias de seguridad automáticas de estos datos en Google Drive.</li>
-    <li><strong>Notificaciones y servicio en primer plano (opcionales):</strong> los permisos <code>POST_NOTIFICATIONS</code>, <code>FOREGROUND_SERVICE</code> y <code>FOREGROUND_SERVICE_DATA_SYNC</code> se utilizan solo cuando el usuario activa avisos de llegada. Mientras haya avisos activos, un servicio en primer plano consulta las llegadas y muestra una notificación persistente; se detiene automáticamente cuando ya no quedan avisos activos.</li>
+    <li><strong>Ubicación:</strong> si el usuario concede el permiso de ubicación aproximada o precisa y solicita buscar paradas cercanas, la aplicación obtiene la ubicación para identificar paradas próximas. Según la implementación revisada en noviembre de 2026, no la persiste. La ubicación es opcional, se procesa únicamente en memoria en el dispositivo para ordenar paradas cercanas y nunca se guarda ni se transmite a terceros.</li>
+    <li><strong>Favoritos, recientes, preferencias y avisos:</strong> almacenados localmente con los mecanismos de persistencia de la app; se utilizan para proporcionar las funcionalidades solicitadas. Se almacenan localmente en Room (SQLite) y DataStore con <code>android:allowBackup="false"</code>. Puedes eliminarlos desde la app, borrando los datos en los ajustes de Android o desinstalándola.</li>
+    <li><strong>Notificaciones:</strong> si el usuario concede permiso, se utilizan para los avisos configurados. El servicio de seguimiento puede mostrar una notificación persistente mientras está activo.</li>
   </ul>
 
   <h2>3. Consultas de red y proveedor externo</h2>
 
-  <p>Para mostrar llegadas en tiempo real, Badator! consulta directamente la API pública de <a href="https://www.dbus.eus">Dbus (Donostiako Autobusak)</a> en <code>http://app.dbus.eus/SSIIMovilWSv2/ws/cons/tiemposParada</code>. Estas solicitudes pueden transmitir al proveedor la dirección IP del dispositivo, metadatos técnicos de conexión y los identificadores de las paradas consultadas. Puedes consultar la política de privacidad del proveedor en <a href="https://www.dbus.eus/privacidad/">https://www.dbus.eus/privacidad/</a>.</p>
+  <p>Para consultar llegadas, Badator! solicita información a una API externa del servicio de transporte. Estas conexiones pueden revelar al proveedor la dirección IP, metadatos técnicos de conexión y los códigos de las paradas solicitadas. La API pública de Dbus (<code>http://app.dbus.eus/SSIIMovilWSv2/ws/cons/tiemposParada</code>) responde actualmente solo por <strong>HTTP</strong>. El manifiesto declara <code>cleartextTrafficPermitted="true"</code> exclusivamente para <code>app.dbus.eus</code>, y la app no contacta con ningún otro servidor. Por ello, las consultas a dicho servicio no viajan cifradas en tránsito.</p>
 
-  <p>La API de Dbus responde actualmente solo mediante <strong>HTTP</strong>. La configuración de seguridad de red de la aplicación declara <code>cleartextTrafficPermitted="true"</code> exclusivamente para <code>app.dbus.eus</code> y no existen otros servidores ni endpoints de red. Por este motivo, las consultas a dicho servicio no viajan cifradas en tránsito.</p>
+  <p>El proveedor de datos de llegadas es <strong>Dbus (Donostiako Autobusak)</strong> (https://www.dbus.eus), cuya política de privacidad puede consultarse en https://www.dbus.eus/privacidad/.</p>
 
   <h2>4. Analítica, publicidad y terceros</h2>
 
-  <p>Badator! no recopila ni comparte datos personales con terceros. No incluye SDKs de analítica, publicidad, informes de fallos ni telemetría. Sus dependencias son exclusivamente técnicas y funcionales (AndroidX, Jetpack Compose, Room, OkHttp, kotlinx.serialization y Kotlin Coroutines), sin Firebase ni Google Play Services.</p>
+  <p>Badator! no incluye SDKs de analítica, publicidad, informes de fallos ni telemetría. Sus dependencias son exclusivamente funcionales (AndroidX, Jetpack Compose, Room, OkHttp, kotlinx.serialization y Kotlin Coroutines). No utiliza Firebase, Google Play Services ni terceros que recopilen o compartan datos.</p>
 
-  <h2>5. Conservación y eliminación de datos</h2>
+  <h2>5. Conservación y eliminación</h2>
 
-  <p>Badator! no cuenta con registro ni cuentas de usuario, y el desarrollador no almacena datos personales en servidores externos. Los datos locales permanecen únicamente en el dispositivo hasta que el usuario elimine favoritos, recientes o avisos desde la propia aplicación, borre los datos de la app en los ajustes de Android o la desinstale.</p>
+  <p>Los datos locales se conservan en el dispositivo hasta que el usuario los elimine desde las funciones correspondientes o hasta que desinstale la app, salvo excepciones demostradas por el sistema. Los datos locales (favoritos, paradas recientes, avisos y preferencias) se guardan en Room (SQLite) y DataStore dentro del almacenamiento privado del dispositivo. La app no tiene cuentas de usuario. El manifiesto declara <code>android:allowBackup="false"</code>, por lo que no se realizan copias de seguridad automáticas en Google Drive. Puedes borrar los datos desde la propia app, borrando los datos de la aplicación en los ajustes de Android o desinstalándola.</p>
+
+  <p>Para cualquier solicitud relacionada con los datos personales, el usuario puede contactar con dev.mail.igoni@gmail.com. Badator! no dispone de cuentas de usuario ni almacena datos personales en servidores propios.</p>
 
   <h2>6. Derechos de los usuarios</h2>
 
-  <p>Para cualquier consulta sobre privacidad o para ejercer los derechos reconocidos por la normativa aplicable (acceso, rectificación, supresión, limitación u oposición), puedes escribir a <a href="mailto:dev.mail.igoni@gmail.com">dev.mail.igoni@gmail.com</a>.</p>
+  <p>Los usuarios pueden solicitar información sobre el tratamiento de sus datos y ejercer los derechos que les correspondan conforme a la normativa aplicable escribiendo a dev.mail.igoni@gmail.com. Responsable: Iker Goñi Cuesta (Pamplona, España).</p>
 
   <h2>7. Menores</h2>
 
-  <p>Badator! está destinada a un público general (PEGI 3 / Everyone). No está dirigida a menores de 13 años y no recopila datos personales de menores de forma intencionada.</p>
+  <p>Badator! está dirigida a público general (PEGI 3 / Everyone), no a menores de 13 años, y no recopila datos personales de menores.</p>
 
-  <h2>8. Cambios en esta política</h2>
+  <h2>8. Cambios</h2>
 
-  <p>Las actualizaciones relevantes de esta política se publicarán en <a href="https://igoni.github.io/bus-dbus/privacy-policy-es.html">https://igoni.github.io/bus-dbus/privacy-policy-es.html</a>.</p>
+  <p>Se publicarán las actualizaciones relevantes de esta política en https://ikergoni.github.io/bus-dbus/privacy/privacy-policy-es.html.</p>
 
   <footer>
-    Última actualización: 2026-11-23 | Dev Igoni | <a href="https://igoni.github.io/bus-dbus/privacy-policy-es.html">https://igoni.github.io/bus-dbus/privacy-policy-es.html</a>
+    Última actualización: 2026-11-23 | Dev Igoni | <a href="https://ikergoni.github.io/bus-dbus/privacy/privacy-policy-es.html">https://ikergoni.github.io/bus-dbus/privacy/privacy-policy-es.html</a>
   </footer>
 </body>
 </html>

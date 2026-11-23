@@ -21,7 +21,8 @@ const PACK = path.resolve(
 );
 const OUT_DIR = path.resolve(ROOT, 'docs/privacy');
 
-const githubUser = process.env.PRIVACY_GITHUB_USER || 'igoni';
+const githubUser = process.env.PRIVACY_GITHUB_USER || 'IkerGoni';
+const pagesHost = githubUser.toLowerCase();
 
 // ---- Configuración parametrizada por variables de entorno ----
 const CONFIG = {
@@ -30,9 +31,9 @@ const CONFIG = {
   supportEmail: process.env.PRIVACY_SUPPORT_EMAIL || 'dev.mail.igoni@gmail.com',
   githubUser,
   privacyUrls: {
-    es: `https://${githubUser}.github.io/bus-dbus/privacy-policy-es.html`,
-    eu: `https://${githubUser}.github.io/bus-dbus/privacy-policy-eu.html`,
-    en: `https://${githubUser}.github.io/bus-dbus/privacy-policy-en.html`,
+    es: `https://${pagesHost}.github.io/bus-dbus/privacy/privacy-policy-es.html`,
+    eu: `https://${pagesHost}.github.io/bus-dbus/privacy/privacy-policy-eu.html`,
+    en: `https://${pagesHost}.github.io/bus-dbus/privacy/privacy-policy-en.html`,
   },
   dbusProvider: {
     name: 'Dbus (Donostiako Autobusak)',

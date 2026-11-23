@@ -20,48 +20,26 @@
 
   <p><strong>Last updated:</strong> 2026-11-23<br>
     <strong>Controller:</strong> Dev Igoni — Iker Goñi Cuesta (Pamplona, España)<br>
-    <strong>Contact:</strong> <a href="mailto:dev.mail.igoni@gmail.com">dev.mail.igoni@gmail.com</a></p>
+    <strong>Contact:</strong> dev.mail.igoni@gmail.com</p>
 
-  <h2>1. What the app does</h2>
+  <p>Badator! provides local bus arrival information, nearby stop discovery, favorites and one-time alerts for Donostia / San Sebastián. It is independent and unofficial.</p>
 
-  <p>Badator! lets you check real-time bus arrival times in Donostia / San Sebastián, save favorite stops and lines, find nearby stops, and set arrival alerts. It is an independent and unofficial app, not affiliated with Dbus or the Donostia / San Sebastián City Council.</p>
+  <p><strong>Location:</strong> when you request nearby stops and grant approximate or precise location permission, the app uses your location to identify nearby stops. Location is optional, used ephemerally in memory on the device to sort nearby stops, and is never persisted or transmitted to third parties.</p>
 
-  <h2>2. On-device data and permissions</h2>
+  <p><strong>On-device data:</strong> favorites, recent stops, settings and configured alerts are stored locally to provide app features. Data is stored locally in Room (SQLite) and DataStore with <code>android:allowBackup="false"</code> (no automatic Google Drive backup). You can delete it in-app, via Android app settings, or by uninstalling.</p>
 
-  <ul>
-    <li><strong>Location (optional):</strong> <code>ACCESS_COARSE_LOCATION</code> and <code>ACCESS_FINE_LOCATION</code> are requested only when you explicitly ask to find nearby stops. Your location is processed ephemerally in memory on the device to sort stops by distance; it is never saved to storage and never transmitted to the developer or third parties. The app works fully without location permission.</li>
-    <li><strong>Locally stored data:</strong> favorites, recent stops, preferences, and configured alerts are stored solely in the app's private on-device storage using Room (local SQLite) and DataStore. The manifest sets <code>android:allowBackup="false"</code>, so Android does not automatically back up this data to Google Drive.</li>
-    <li><strong>Notifications and foreground service (optional):</strong> <code>POST_NOTIFICATIONS</code>, <code>FOREGROUND_SERVICE</code>, and <code>FOREGROUND_SERVICE_DATA_SYNC</code> are used only when you configure arrival alerts. While alerts are active, a foreground service checks arrivals and displays a persistent notification, stopping automatically once no active alerts remain.</li>
-  </ul>
+  <p><strong>External arrival data source:</strong> the app contacts an external transit API. The provider may receive your IP address, connection metadata and requested stop identifiers. The public Dbus API (<code>http://app.dbus.eus/SSIIMovilWSv2/ws/cons/tiemposParada</code>) currently responds only over <strong>HTTP</strong>. The manifest declares <code>cleartextTrafficPermitted="true"</code> exclusively for <code>app.dbus.eus</code>, and no other network endpoints are used. Accordingly, requests to that endpoint are not encrypted in transit.</p>
 
-  <h2>3. Network requests and external data provider</h2>
+  <p><strong>Analytics and advertising:</strong> Badator! does not include analytics, advertising, crash reporting, or telemetry SDKs. Its dependencies are strictly functional (AndroidX, Jetpack Compose, Room, OkHttp, kotlinx.serialization, and Kotlin Coroutines). It does not use Firebase, Google Play Services, or third-party trackers.</p>
 
-  <p>To display live arrivals, Badator! connects directly to the public <a href="https://www.dbus.eus">Dbus (Donostiako Autobusak)</a> API at <code>http://app.dbus.eus/SSIIMovilWSv2/ws/cons/tiemposParada</code>. These requests may expose your device's IP address, standard connection metadata, and requested stop identifiers to Dbus. You can review the provider's privacy policy at <a href="https://www.dbus.eus/privacidad/">https://www.dbus.eus/privacidad/</a>.</p>
+  <p><strong>Retention and deletion:</strong> Local data (favorites, recent stops, alerts, and preferences) is stored in Room (SQLite) and DataStore inside the app private storage on your device. The app has no user accounts. The manifest sets <code>android:allowBackup="false"</code>, so no automatic Google Drive backup is performed. You can delete your data from within the app, by clearing app data in Android settings, or by uninstalling the app.</p>
 
-  <p>The Dbus API currently responds only over <strong>HTTP</strong>. The app's network security configuration declares <code>cleartextTrafficPermitted="true"</code> exclusively for <code>app.dbus.eus</code>, and no other network endpoints are contacted. Accordingly, requests to that endpoint are not encrypted in transit.</p>
+  <p><strong>Your rights:</strong> contact dev.mail.igoni@gmail.com regarding privacy requests. Controller: Iker Goñi Cuesta (Pamplona, España). Contact: dev.mail.igoni@gmail.com.</p>
 
-  <h2>4. Analytics, advertising, and third parties</h2>
-
-  <p>Badator! does not collect or share personal data with third parties. It includes no analytics, advertising, crash reporting, or telemetry SDKs. Its dependencies are strictly technical and functional (AndroidX, Jetpack Compose, Room, OkHttp, kotlinx.serialization, and Kotlin Coroutines), with no Firebase and no Google Play Services.</p>
-
-  <h2>5. Data retention and deletion</h2>
-
-  <p>Badator! has no user accounts, and the developer does not store personal data on external servers. Local data remains only on your device until you remove favorites, recents, or alerts within the app, clear the app's data in Android settings, or uninstall the app.</p>
-
-  <h2>6. Your rights</h2>
-
-  <p>For any privacy inquiry or to exercise your rights under applicable data protection law (access, rectification, erasure, restriction, or objection), contact <a href="mailto:dev.mail.igoni@gmail.com">dev.mail.igoni@gmail.com</a>.</p>
-
-  <h2>7. Children</h2>
-
-  <p>Badator! is intended for a general audience (PEGI 3 / Everyone). It is not directed at children under 13 and does not knowingly collect personal data from children.</p>
-
-  <h2>8. Changes to this policy</h2>
-
-  <p>Relevant updates to this policy will be published at <a href="https://igoni.github.io/bus-dbus/privacy-policy-en.html">https://igoni.github.io/bus-dbus/privacy-policy-en.html</a>.</p>
+  <p><strong>Changes:</strong> updates to this policy will be posted at https://ikergoni.github.io/bus-dbus/privacy/privacy-policy-en.html.</p>
 
   <footer>
-    Last updated: 2026-11-23 | Dev Igoni | <a href="https://igoni.github.io/bus-dbus/privacy-policy-en.html">https://igoni.github.io/bus-dbus/privacy-policy-en.html</a>
+    Last updated: 2026-11-23 | Dev Igoni | <a href="https://ikergoni.github.io/bus-dbus/privacy/privacy-policy-en.html">https://ikergoni.github.io/bus-dbus/privacy/privacy-policy-en.html</a>
   </footer>
 </body>
 </html>
