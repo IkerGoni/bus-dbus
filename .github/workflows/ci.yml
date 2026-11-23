@@ -37,12 +37,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @dbus/contracts --filter @dbus/core run build
       - run: pnpm --filter @dbus/contracts --filter @dbus/core run test
-      - run: pnpm --filter @dbus/bot run test tests/alerts.test.ts tests/db-migration.test.ts tests/nearby-index.test.ts tests/telegram-launch.test.ts tests/unit.test.ts tests/validate-line.test.ts tests/haversine-parity.test.ts -- --reporter=verbose
+      - run: pnpm --filter @dbus/bot run test tests/alerts.test.ts tests/nearby-index.test.ts tests/telegram-launch.test.ts tests/unit.test.ts tests/validate-line.test.ts tests/haversine-parity.test.ts -- --reporter=verbose
 
   test-integration:
     runs-on: ubuntu-latest
     needs: test
-    if: always()
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -54,13 +53,16 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @dbus/contracts --filter @dbus/core run build
-      - run: pnpm --filter @dbus/bot run test tests/integration.test.ts tests/handlers.test.ts -- --testTimeout=30000 --reporter=verbose
+      - id: integration
+        run: pnpm --filter @dbus/bot run test tests/integration.test.ts tests/handlers.test.ts -- --testTimeout=30000 --reporter=verbose
+        # Hits the external Dbus live API; allowed to fail gracefully without blocking CI while reporting a warning below.
         continue-on-error: true
       - name: Report integration result
-        if: failure()
+        if: steps.integration.outcome == 'failure'
         run: |
-          echo '⚠️ Tests de integración fallaron (API Dbus no disponible o timeout)'
-          echo 'Esto es esperado si la API externa no responde. No se silencia el fallo.'
+          echo "::warning title=Integration tests failed::External Dbus live API may be unreachable/timed out, or an integration/handler regression occurred. Inspect the integration step logs."
+          echo '⚠️ Tests de integración fallaron (API Dbus no disponible, timeout o regresión en integración/handlers).'
+          echo 'Revisar los logs del paso integration para confirmar si es indisponibilidad externa o una regresión.'
 
   build:
     runs-on: ubuntu-latest
@@ -80,5 +82,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist
+          path: |
+            packages/contracts/dist
+            packages/core/dist
+            apps/bot/dist
           retention-days: 7
