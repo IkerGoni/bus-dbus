@@ -1,6 +1,6 @@
 ---
 name: Donostia Transit UI — Android MVP v1
-version: 2.0.0
+version: 2.1.0
 platform: Android (Material Design 3)
 languages: [es, eu]
 accessibility: WCAG AA (>= 4.5:1)
@@ -95,17 +95,19 @@ typography:
     lineHeight: 1rem
     fontVariantNumeric: tabular-nums
 rounded:
-  badge: 0.5rem
-  button: 0.75rem
-  card: 1rem
-  sheet: 1.5rem
+  badge: 0.5rem     # 8dp
+  banner: 0.75rem   # 12dp
+  button: 0.5rem    # 8dp
+  card: 1rem        # 16dp
+  sheet: 1rem       # 16dp
   pill: 9999px
 spacing:
-  xs: 0.25rem
-  sm: 0.5rem
-  md: 1rem
-  lg: 1.5rem
-  xl: 2rem
+  xxs: 0.375rem   # 6dp
+  xs: 0.25rem     # 4dp
+  sm: 0.5rem      # 8dp
+  md: 0.75rem     # 12dp
+  lg: 1rem        # 16dp
+  xl: 1.5rem      # 24dp
 ---
 
 # Donostia Transit UI — Sistema de Diseño Unificado (Android MVP v1)

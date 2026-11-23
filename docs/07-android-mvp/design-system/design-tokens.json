@@ -63,7 +63,7 @@
       "favorite": "#FBBF24"
     },
     "dbusLines": {
-      "_comment": "Colores por línea eliminados (2026-11-22): no coincidían con la API (L27 real = #747719, aquí #005BB5). El color sale de linea.color en vivo; _default solo si nunca se ha visto.",
+      "_comment": "Colores por l\u00ednea eliminados (2026-11-22): no coincid\u00edan con la API (L27 real = #747719, aqu\u00ed #005BB5). El color sale de linea.color en vivo; _default solo si nunca se ha visto.",
       "_default": {
         "bg": "#334155",
         "fg": "#FFFFFF"
@@ -71,17 +71,19 @@
     }
   },
   "spacingDp": {
+    "xxs": 6,
     "xs": 4,
     "sm": 8,
-    "md": 16,
-    "lg": 24,
-    "xl": 32
+    "md": 12,
+    "lg": 16,
+    "xl": 24
   },
   "radiusDp": {
     "badge": 8,
-    "button": 12,
+    "button": 8,
     "card": 16,
-    "sheet": 24,
+    "banner": 12,
+    "sheet": 16,
     "pill": 999
   },
   "typography": {
