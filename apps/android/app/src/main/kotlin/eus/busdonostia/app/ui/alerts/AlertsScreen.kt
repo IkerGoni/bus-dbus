@@ -54,6 +54,8 @@ import eus.busdonostia.app.domain.ArrivalsView
 import eus.busdonostia.app.domain.FeedHint
 import eus.busdonostia.app.domain.feedHint
 import eus.busdonostia.app.ui.appViewModel
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import eus.busdonostia.app.ui.components.BorderedCard
 import eus.busdonostia.app.ui.components.InfoBanner
 import eus.busdonostia.app.ui.components.LineBadge
@@ -61,6 +63,7 @@ import eus.busdonostia.app.ui.components.MinutesLabel
 import eus.busdonostia.app.ui.components.ScreenHeader
 import eus.busdonostia.app.ui.components.SectionLabel
 import eus.busdonostia.app.ui.components.SkeletonList
+import eus.busdonostia.app.ui.components.rememberEffectiveMotionTokens
 import eus.busdonostia.app.ui.screens.EmptyAction
 import eus.busdonostia.app.ui.screens.EmptyState
 import eus.busdonostia.app.ui.system.notificationSettingsIntent
@@ -174,6 +177,7 @@ private fun LazyListScope.group(
         SectionLabel(stringResource(title), modifier = Modifier.padding(horizontal = 0.dp), trailing = items.size.toString())
     }
     items(items, key = { it.rule.id }, contentType = { "alert_card" }) { item ->
+        val motion = rememberEffectiveMotionTokens()
         AlertCard(
             item = item,
             stopView = state.stopViews[item.rule.stopId],
@@ -181,6 +185,14 @@ private fun LazyListScope.group(
             onActiveChange = { vm.setActive(item.rule, it) },
             onEdit = { onEdit(item.rule.id) },
             onDelete = { onDelete(item.rule) },
+            modifier = Modifier.animateItem(
+                fadeInSpec = tween(motion.arrivalsStateFadeInMs),
+                placementSpec = spring(
+                    dampingRatio = motion.springNoBounceDamping,
+                    stiffness = motion.springMediumStiffness,
+                ),
+                fadeOutSpec = tween(motion.arrivalsStateFadeOutMs),
+            ),
         )
     }
 }
@@ -193,9 +205,10 @@ private fun AlertCard(
     onActiveChange: (Boolean) -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val rule = item.rule
-    BorderedCard {
+    BorderedCard(modifier = modifier) {
         Column(Modifier.padding(start = 16.dp, top = 12.dp, end = 4.dp, bottom = 4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 LineBadge(rule.lineId, colorArgb)

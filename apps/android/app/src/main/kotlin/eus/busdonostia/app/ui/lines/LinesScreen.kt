@@ -1,5 +1,10 @@
 package eus.busdonostia.app.ui.lines
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -27,10 +32,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -41,12 +51,17 @@ import eus.busdonostia.app.ui.appViewModel
 import eus.busdonostia.app.ui.components.BorderedCard
 import eus.busdonostia.app.ui.components.FavoriteStar
 import eus.busdonostia.app.ui.components.LineBadge
+import eus.busdonostia.app.ui.components.LocalReducedMotion
 import eus.busdonostia.app.ui.components.ScreenHeader
 import eus.busdonostia.app.ui.components.SearchPill
 import eus.busdonostia.app.ui.components.SkeletonList
 import eus.busdonostia.app.ui.components.lineColor
+import eus.busdonostia.app.ui.components.optionalSharedElement
+import eus.busdonostia.app.ui.components.rememberEffectiveMotionTokens
 import eus.busdonostia.app.ui.screens.EmptyAction
 import eus.busdonostia.app.ui.screens.EmptyState
+import eus.busdonostia.app.ui.theme.DesignTokens
+import kotlinx.coroutines.delay
 
 /** A03 · Líneas. */
 @Composable
@@ -104,8 +119,24 @@ fun LinesScreen(onOpenLine: (String) -> Unit) {
                 listOf(EmptyAction(stringResource(R.string.lines_show_all), primary = true) { vm.onFilterChange(LinesFilter.ALL) }),
             )
             else -> LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 16.dp)) {
-                items(state.rows, key = { it.lineId }, contentType = { "line_card" }) { row ->
-                    LineCard(row, state.lineColors[row.lineId], onClick = { onOpenLine(row.lineId) }, onStar = { vm.toggleStar(row.lineId) })
+                itemsIndexed(state.rows, key = { _, it -> it.lineId }, contentType = { _, _ -> "line_card" }) { index, row ->
+                    val motion = rememberEffectiveMotionTokens()
+                    LineCard(
+                        row = row,
+                        colorArgb = state.lineColors[row.lineId],
+                        onClick = { onOpenLine(row.lineId) },
+                        onStar = { vm.toggleStar(row.lineId) },
+                        modifier = Modifier
+                            .animateItem(
+                                fadeInSpec = tween(motion.arrivalsStateFadeInMs),
+                                placementSpec = spring(
+                                    dampingRatio = motion.springNoBounceDamping,
+                                    stiffness = motion.springMediumStiffness,
+                                ),
+                                fadeOutSpec = tween(motion.arrivalsStateFadeOutMs),
+                            )
+                            .staggerEntrance(index = index, triggerKey = state.filter),
+                    )
                 }
             }
         }
@@ -113,8 +144,14 @@ fun LinesScreen(onOpenLine: (String) -> Unit) {
 }
 
 @Composable
-private fun LineCard(row: LineRow, colorArgb: Int?, onClick: () -> Unit, onStar: () -> Unit) {
-    BorderedCard(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp), onClick = onClick) {
+private fun LineCard(
+    row: LineRow,
+    colorArgb: Int?,
+    onClick: () -> Unit,
+    onStar: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    BorderedCard(modifier = modifier.padding(horizontal = 16.dp, vertical = 6.dp), onClick = onClick) {
         Row(
             modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -190,25 +227,69 @@ fun LineDetailScreen(lineId: String, onBack: () -> Unit, onOpenStop: (stopId: St
                 }
                 val color = lineColor(state.colorArgb)
                 val hole = MaterialTheme.colorScheme.background
-                LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(top = 8.dp, bottom = 16.dp)) {
-                    itemsIndexed(
-                        state.stops,
-                        // Posición + parada: estable dentro del itinerario aunque una parada se repita (líneas circulares).
-                        key = { index, stop -> "$index-${stop.stopId}" },
-                        contentType = { _, _ -> "timeline_row" },
-                    ) { index, stop ->
-                        TimelineRow(
-                            stop = stop,
-                            first = index == 0,
-                            last = index == state.stops.lastIndex,
-                            color = color,
-                            hole = hole,
-                            onClick = { onOpenStop(stop.stopId, line.cod) },
-                        )
+                val motion = rememberEffectiveMotionTokens()
+                Crossfade(
+                    targetState = state.selected to state.stops,
+                    animationSpec = tween(motion.lineDirectionCrossfadeMs),
+                    label = "lineDirectionCrossfade",
+                ) { (selectedIndex, stops) ->
+                    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(top = 8.dp, bottom = 16.dp)) {
+                        itemsIndexed(
+                            stops,
+                            // Posición + parada: estable dentro del itinerario aunque una parada se repita (líneas circulares).
+                            key = { index, stop -> "$index-${stop.stopId}" },
+                            contentType = { _, _ -> "timeline_row" },
+                        ) { index, stop ->
+                            TimelineRow(
+                                stop = stop,
+                                first = index == 0,
+                                last = index == stops.lastIndex,
+                                color = color,
+                                hole = hole,
+                                onClick = { onOpenStop(stop.stopId, line.cod) },
+                                modifier = Modifier
+                                    .animateItem(
+                                        fadeInSpec = tween(motion.arrivalsStateFadeInMs),
+                                        placementSpec = spring(
+                                            dampingRatio = motion.springNoBounceDamping,
+                                            stiffness = motion.springMediumStiffness,
+                                        ),
+                                        fadeOutSpec = tween(motion.arrivalsStateFadeOutMs),
+                                    )
+                                    .staggerEntrance(index = index, triggerKey = selectedIndex),
+                            )
+                        }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun Modifier.staggerEntrance(index: Int, triggerKey: Any): Modifier {
+    val reducedMotion = LocalReducedMotion.current
+    val isInspection = LocalInspectionMode.current
+    val motion = rememberEffectiveMotionTokens()
+    if (reducedMotion || isInspection || index >= motion.staggerMaxAnimatedIndex || motion.arrivalsStateFadeInMs == 0) {
+        return this
+    }
+    val progress = remember(triggerKey, index) { Animatable(0f) }
+    val density = LocalDensity.current
+    val offsetPx = with(density) { DesignTokens.spacingMd.toPx() }
+    LaunchedEffect(triggerKey, index) {
+        delay((index * motion.staggerItemDelayMs).toLong())
+        progress.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(
+                durationMillis = motion.arrivalsStateFadeInMs,
+                easing = FastOutSlowInEasing,
+            ),
+        )
+    }
+    return this.graphicsLayer {
+        alpha = progress.value
+        translationY = (1f - progress.value) * offsetPx
     }
 }
 
@@ -220,9 +301,10 @@ private fun TimelineRow(
     color: androidx.compose.ui.graphics.Color,
     hole: androidx.compose.ui.graphics.Color,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
             .clickable(onClick = onClick)
@@ -248,7 +330,8 @@ private fun TimelineRow(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 12.dp),
+                .padding(horizontal = 12.dp)
+                .optionalSharedElement("stop-name-${stop.stopId}"),
         )
         Icon(
             Icons.AutoMirrored.Filled.KeyboardArrowRight,

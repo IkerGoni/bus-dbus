@@ -1,6 +1,10 @@
 package eus.busdonostia.app.ui.components
 
 import android.provider.Settings
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -9,29 +13,119 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import eus.busdonostia.app.ui.theme.DesignTokens
 import eus.busdonostia.app.ui.theme.MotionTokens
 
 /** CompositionLocal para accesibilidad: true cuando el usuario tiene "Quitar animaciones" activado. */
 val LocalReducedMotion = compositionLocalOf { false }
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+val LocalSharedTransitionScope = compositionLocalOf<SharedTransitionScope?> { null }
+
+val LocalAnimatedVisibilityScope = compositionLocalOf<AnimatedVisibilityScope?> { null }
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+fun Modifier.optionalSharedElement(key: String): Modifier = composed {
+    if (LocalReducedMotion.current) return@composed this
+    val sharedScope = LocalSharedTransitionScope.current ?: return@composed this
+    val visScope = LocalAnimatedVisibilityScope.current ?: return@composed this
+    with(sharedScope) {
+        this@composed.sharedElement(
+            sharedContentState = rememberSharedContentState(key = key),
+            animatedVisibilityScope = visScope,
+        )
+    }
+}
+
+@Composable
+fun AnimatedMinutesText(
+    minutes: Int,
+    formattedText: String,
+    modifier: Modifier = Modifier,
+    style: TextStyle = LocalTextStyle.current,
+    color: Color = Color.Unspecified,
+) {
+    val reducedMotion = LocalReducedMotion.current
+    val motion = rememberEffectiveMotionTokens()
+    val tabularStyle = style.copy(fontFeatureSettings = "tnum")
+
+    if (reducedMotion) {
+        Text(
+            text = formattedText,
+            style = tabularStyle,
+            color = color,
+            modifier = modifier,
+            maxLines = 1,
+            softWrap = false,
+        )
+    } else {
+        AnimatedContent(
+            targetState = minutes to formattedText,
+            transitionSpec = {
+                val isDecreasing = targetState.first < initialState.first
+                val enterOffset: (Int) -> Int = { height -> if (isDecreasing) -height else height }
+                val exitOffset: (Int) -> Int = { height -> if (isDecreasing) height else -height }
+
+                (slideInVertically(
+                    animationSpec = tween(
+                        durationMillis = motion.minutesSlideInMs,
+                        easing = FastOutSlowInEasing,
+                    ),
+                    initialOffsetY = enterOffset,
+                ) + fadeIn(
+                    animationSpec = tween(durationMillis = motion.minutesSlideInMs),
+                )).togetherWith(
+                    slideOutVertically(
+                        animationSpec = tween(
+                            durationMillis = motion.minutesSlideOutMs,
+                            easing = FastOutSlowInEasing,
+                        ),
+                        targetOffsetY = exitOffset,
+                    ) + fadeOut(
+                        animationSpec = tween(durationMillis = motion.minutesSlideOutMs),
+                    ),
+                )
+            },
+            label = "minutesSlide",
+            modifier = modifier,
+        ) { (_, text) ->
+            Text(
+                text = text,
+                style = tabularStyle,
+                color = color,
+                maxLines = 1,
+                softWrap = false,
+            )
+        }
+    }
+}
 
 /**
  * Lee `Settings.Global.ANIMATOR_DURATION_SCALE == 0f` (API real de Android para "Quitar animaciones").

@@ -60,6 +60,255 @@ abstract class MergeCatalogTask : DefaultTask() {
     }
 }
 
+abstract class GenerateDesignTokensTask : DefaultTask() {
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val tokensFile: RegularFileProperty
+
+    @get:OutputDirectory
+    abstract val outputDir: DirectoryProperty
+
+    @TaskAction
+    fun generate() {
+        @Suppress("UNCHECKED_CAST")
+        val root = groovy.json.JsonSlurper().parse(tokensFile.get().asFile, "UTF-8") as Map<String, Any?>
+
+        @Suppress("UNCHECKED_CAST")
+        fun section(parent: Map<String, Any?>, key: String): Map<String, Any?> =
+            parent[key] as Map<String, Any?>
+
+        fun intVal(map: Map<String, Any?>, key: String): Int =
+            (map[key] as Number).toInt()
+
+        fun floatLiteral(map: Map<String, Any?>, key: String): String =
+            "${(map[key] as Number).toDouble()}f"
+
+        val motion = section(root, "motion")
+        val nav = section(motion, "navigation")
+        val trans = section(motion, "transitions")
+        val micro = section(motion, "microInteractions")
+        val pulse = section(motion, "livePulse")
+        val stagger = section(motion, "stagger")
+        val celebration = section(motion, "celebration")
+
+        val style = section(root, "style")
+        val spacing = section(style, "spacingDp")
+        val radius = section(style, "cornerRadiusDp")
+        val comps = section(style, "componentsDp")
+
+        val pkgDir = outputDir.get().asFile.resolve("eus/busdonostia/app/ui/theme")
+        pkgDir.mkdirs()
+
+        val motionKt = """
+            package eus.busdonostia.app.ui.theme
+
+            object MotionTokens {
+                const val MAX_BLOCKING_DURATION_MS = ${intVal(motion, "maxBlockingDurationMs")}
+
+                object Navigation {
+                    const val BOTTOM_TAB_FADE_IN_MS = ${intVal(nav, "bottomTabFadeInMs")}
+                    const val BOTTOM_TAB_FADE_OUT_MS = ${intVal(nav, "bottomTabFadeOutMs")}
+                    const val DETAIL_SLIDE_IN_MS = ${intVal(nav, "detailSlideInMs")}
+                    const val DETAIL_FADE_IN_MS = ${intVal(nav, "detailFadeInMs")}
+                    const val DETAIL_SLIDE_OUT_MS = ${intVal(nav, "detailSlideOutMs")}
+                    const val DETAIL_FADE_OUT_MS = ${intVal(nav, "detailFadeOutMs")}
+                    const val DETAIL_SLIDE_FRACTION = ${floatLiteral(nav, "detailSlideFraction")}
+                }
+
+                object Transitions {
+                    const val ARRIVALS_STATE_FADE_IN_MS = ${intVal(trans, "arrivalsStateFadeInMs")}
+                    const val ARRIVALS_STATE_FADE_OUT_MS = ${intVal(trans, "arrivalsStateFadeOutMs")}
+                    const val ARRIVALS_STATE_SLIDE_FRACTION = ${floatLiteral(trans, "arrivalsStateSlideFraction")}
+                    const val MINUTES_SLIDE_IN_MS = ${intVal(trans, "minutesSlideInMs")}
+                    const val MINUTES_SLIDE_OUT_MS = ${intVal(trans, "minutesSlideOutMs")}
+                    const val SEARCH_CLEAR_BUTTON_MS = ${intVal(trans, "searchClearButtonMs")}
+                    const val INFO_BANNER_MS = ${intVal(trans, "infoBannerMs")}
+                    const val LINE_DIRECTION_CROSSFADE_MS = ${intVal(trans, "lineDirectionCrossfadeMs")}
+                    const val WIZARD_STEP_SLIDE_MS = ${intVal(trans, "wizardStepSlideMs")}
+                }
+
+                object MicroInteractions {
+                    const val PRESS_SCALE_FACTOR = ${floatLiteral(micro, "pressScaleFactor")}
+                    const val FAVORITE_STAR_MIN_SCALE = ${floatLiteral(micro, "favoriteStarMinScale")}
+                    const val FAVORITE_STAR_PEAK_SCALE = ${floatLiteral(micro, "favoriteStarPeakScale")}
+                    const val FAVORITE_STAR_ROTATION_DEG = ${floatLiteral(micro, "favoriteStarRotationDeg")}
+                    const val SPRING_NO_BOUNCE_DAMPING = ${floatLiteral(micro, "springNoBounceDamping")}
+                    const val SPRING_MEDIUM_BOUNCE_DAMPING = ${floatLiteral(micro, "springMediumBounceDamping")}
+                    const val SPRING_MEDIUM_STIFFNESS = ${floatLiteral(micro, "springMediumStiffness")}
+                    const val SEARCH_CLEAR_SCALE_FACTOR = ${floatLiteral(micro, "searchClearScaleFactor")}
+                }
+
+                object LivePulse {
+                    const val DURATION_MS = ${intVal(pulse, "durationMs")}
+                    const val MIN_ALPHA = ${floatLiteral(pulse, "minAlpha")}
+                    const val MAX_ALPHA = ${floatLiteral(pulse, "maxAlpha")}
+                }
+
+                object Stagger {
+                    const val ITEM_DELAY_MS = ${intVal(stagger, "itemDelayMs")}
+                    const val MAX_ANIMATED_INDEX = ${intVal(stagger, "maxAnimatedIndex")}
+                }
+
+                object Celebration {
+                    const val PARTICLES_DURATION_MS = ${intVal(celebration, "particlesDurationMs")}
+                }
+
+                data class ResolvedMotionTokens(
+                    val bottomTabFadeInMs: Int,
+                    val bottomTabFadeOutMs: Int,
+                    val detailSlideInMs: Int,
+                    val detailFadeInMs: Int,
+                    val detailSlideOutMs: Int,
+                    val detailFadeOutMs: Int,
+                    val detailSlideFraction: Float,
+                    val arrivalsStateFadeInMs: Int,
+                    val arrivalsStateFadeOutMs: Int,
+                    val arrivalsStateSlideFraction: Float,
+                    val minutesSlideInMs: Int,
+                    val minutesSlideOutMs: Int,
+                    val searchClearButtonMs: Int,
+                    val infoBannerMs: Int,
+                    val lineDirectionCrossfadeMs: Int,
+                    val wizardStepSlideMs: Int,
+                    val pressScaleFactor: Float,
+                    val favoriteStarMinScale: Float,
+                    val favoriteStarPeakScale: Float,
+                    val favoriteStarRotationDeg: Float,
+                    val springNoBounceDamping: Float,
+                    val springMediumBounceDamping: Float,
+                    val springMediumStiffness: Float,
+                    val searchClearScaleFactor: Float,
+                    val livePulseDurationMs: Int,
+                    val livePulseMinAlpha: Float,
+                    val livePulseMaxAlpha: Float,
+                    val staggerItemDelayMs: Int,
+                    val staggerMaxAnimatedIndex: Int,
+                    val particlesDurationMs: Int,
+                ) {
+                    companion object {
+                        val FULL = ResolvedMotionTokens(
+                            bottomTabFadeInMs = Navigation.BOTTOM_TAB_FADE_IN_MS,
+                            bottomTabFadeOutMs = Navigation.BOTTOM_TAB_FADE_OUT_MS,
+                            detailSlideInMs = Navigation.DETAIL_SLIDE_IN_MS,
+                            detailFadeInMs = Navigation.DETAIL_FADE_IN_MS,
+                            detailSlideOutMs = Navigation.DETAIL_SLIDE_OUT_MS,
+                            detailFadeOutMs = Navigation.DETAIL_FADE_OUT_MS,
+                            detailSlideFraction = Navigation.DETAIL_SLIDE_FRACTION,
+                            arrivalsStateFadeInMs = Transitions.ARRIVALS_STATE_FADE_IN_MS,
+                            arrivalsStateFadeOutMs = Transitions.ARRIVALS_STATE_FADE_OUT_MS,
+                            arrivalsStateSlideFraction = Transitions.ARRIVALS_STATE_SLIDE_FRACTION,
+                            minutesSlideInMs = Transitions.MINUTES_SLIDE_IN_MS,
+                            minutesSlideOutMs = Transitions.MINUTES_SLIDE_OUT_MS,
+                            searchClearButtonMs = Transitions.SEARCH_CLEAR_BUTTON_MS,
+                            infoBannerMs = Transitions.INFO_BANNER_MS,
+                            lineDirectionCrossfadeMs = Transitions.LINE_DIRECTION_CROSSFADE_MS,
+                            wizardStepSlideMs = Transitions.WIZARD_STEP_SLIDE_MS,
+                            pressScaleFactor = MicroInteractions.PRESS_SCALE_FACTOR,
+                            favoriteStarMinScale = MicroInteractions.FAVORITE_STAR_MIN_SCALE,
+                            favoriteStarPeakScale = MicroInteractions.FAVORITE_STAR_PEAK_SCALE,
+                            favoriteStarRotationDeg = MicroInteractions.FAVORITE_STAR_ROTATION_DEG,
+                            springNoBounceDamping = MicroInteractions.SPRING_NO_BOUNCE_DAMPING,
+                            springMediumBounceDamping = MicroInteractions.SPRING_MEDIUM_BOUNCE_DAMPING,
+                            springMediumStiffness = MicroInteractions.SPRING_MEDIUM_STIFFNESS,
+                            searchClearScaleFactor = MicroInteractions.SEARCH_CLEAR_SCALE_FACTOR,
+                            livePulseDurationMs = LivePulse.DURATION_MS,
+                            livePulseMinAlpha = LivePulse.MIN_ALPHA,
+                            livePulseMaxAlpha = LivePulse.MAX_ALPHA,
+                            staggerItemDelayMs = Stagger.ITEM_DELAY_MS,
+                            staggerMaxAnimatedIndex = Stagger.MAX_ANIMATED_INDEX,
+                            particlesDurationMs = Celebration.PARTICLES_DURATION_MS,
+                        )
+
+                        val ZERO = ResolvedMotionTokens(
+                            bottomTabFadeInMs = 0,
+                            bottomTabFadeOutMs = 0,
+                            detailSlideInMs = 0,
+                            detailFadeInMs = 0,
+                            detailSlideOutMs = 0,
+                            detailFadeOutMs = 0,
+                            detailSlideFraction = 0f,
+                            arrivalsStateFadeInMs = 0,
+                            arrivalsStateFadeOutMs = 0,
+                            arrivalsStateSlideFraction = 0f,
+                            minutesSlideInMs = 0,
+                            minutesSlideOutMs = 0,
+                            searchClearButtonMs = 0,
+                            infoBannerMs = 0,
+                            lineDirectionCrossfadeMs = 0,
+                            wizardStepSlideMs = 0,
+                            pressScaleFactor = 1f,
+                            favoriteStarMinScale = 1f,
+                            favoriteStarPeakScale = 1f,
+                            favoriteStarRotationDeg = 0f,
+                            springNoBounceDamping = 1f,
+                            springMediumBounceDamping = 1f,
+                            springMediumStiffness = 1f,
+                            searchClearScaleFactor = 1f,
+                            livePulseDurationMs = 0,
+                            livePulseMinAlpha = 1f,
+                            livePulseMaxAlpha = 1f,
+                            staggerItemDelayMs = 0,
+                            staggerMaxAnimatedIndex = 0,
+                            particlesDurationMs = 0,
+                        )
+                    }
+                }
+
+                fun resolve(reducedMotion: Boolean): ResolvedMotionTokens =
+                    if (reducedMotion) ResolvedMotionTokens.ZERO else ResolvedMotionTokens.FULL
+            }
+        """.trimIndent() + "\n"
+
+        val designKt = """
+            package eus.busdonostia.app.ui.theme
+
+            import androidx.compose.ui.unit.Dp
+            import androidx.compose.ui.unit.dp
+
+            object DesignTokens {
+                object Spacing {
+                    val XS = ${intVal(spacing, "xs")}.dp
+                    val SM = ${intVal(spacing, "sm")}.dp
+                    val MD = ${intVal(spacing, "md")}.dp
+                    val LG = ${intVal(spacing, "lg")}.dp
+                    val XL = ${intVal(spacing, "xl")}.dp
+                }
+
+                object CornerRadius {
+                    val CHIP = ${intVal(radius, "chip")}.dp
+                    val CARD = ${intVal(radius, "card")}.dp
+                    val PILL = ${intVal(radius, "pill")}.dp
+                }
+
+                object Components {
+                    val TIMELINE_TERMINAL_NODE = ${intVal(comps, "timelineTerminalNode")}.dp
+                    val TIMELINE_INTERMEDIATE_NODE = ${intVal(comps, "timelineIntermediateNode")}.dp
+                    val LIVE_SIGNAL_DOT_SIZE = ${intVal(comps, "liveSignalDot")}.dp
+                    val LINE_BADGE_MIN_WIDTH = ${intVal(comps, "lineBadgeMinWidth")}.dp
+                }
+
+                val spacingXs: Dp = Spacing.XS
+                val spacingSm: Dp = Spacing.SM
+                val spacingMd: Dp = Spacing.MD
+                val spacingLg: Dp = Spacing.LG
+                val spacingXl: Dp = Spacing.XL
+
+                val cornerRadiusChip: Dp = CornerRadius.CHIP
+                val cornerRadiusCard: Dp = CornerRadius.CARD
+                val cornerRadiusPill: Dp = CornerRadius.PILL
+
+                val timelineTerminalNode: Dp = Components.TIMELINE_TERMINAL_NODE
+                val timelineIntermediateNode: Dp = Components.TIMELINE_INTERMEDIATE_NODE
+                val liveSignalDotSize: Dp = Components.LIVE_SIGNAL_DOT_SIZE
+                val lineBadgeMinWidth: Dp = Components.LINE_BADGE_MIN_WIDTH
+            }
+        """.trimIndent() + "\n"
+
+        pkgDir.resolve("MotionTokens.kt").writeText(motionKt, Charsets.UTF_8)
+        pkgDir.resolve("DesignTokens.kt").writeText(designKt, Charsets.UTF_8)
+    }
+}
+
 /**
  * Firma de release (H8). Con Play App Signing esta es la clave de subida: la crea y la
  * custodia Iker, nunca va al repo (`*.jks` y `*.keystore` están ignorados). Se lee de
@@ -78,6 +327,7 @@ val unsignedRelease = providers.gradleProperty("dbus.release.unsigned").orNull =
 
 val botData = layout.projectDirectory.dir("../../bot/data")
 val contractFixtures = layout.projectDirectory.dir("../../../packages/contracts/fixtures")
+val designTokensJson = layout.projectDirectory.file("../../../packages/contracts/design-tokens.json")
 
 android {
     namespace = "eus.busdonostia.app"
@@ -87,8 +337,8 @@ android {
         applicationId = "eus.busdonostia.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "1.1.0"
         // URL HTTPS del config.json remoto (ADR 009). Vacía hasta configurar el hosting estático: solo la empaquetada.
         buildConfigField("String", "REMOTE_CONFIG_URL", "\"\"")
     }
@@ -149,6 +399,7 @@ kotlin {
     // Permitir APIs experimentales de animación de Compose
     compilerOptions {
         freeCompilerArgs.add("-opt-in=androidx.compose.animation.ExperimentalAnimationApi")
+        freeCompilerArgs.add("-opt-in=androidx.compose.animation.ExperimentalSharedTransitionApi")
     }
 }
 
@@ -158,11 +409,17 @@ room {
 
 androidComponents {
     onVariants { variant ->
-        val task = tasks.register<MergeCatalogTask>("merge${variant.name.replaceFirstChar(Char::uppercase)}Catalog") {
+        val capName = variant.name.replaceFirstChar(Char::uppercase)
+        val task = tasks.register<MergeCatalogTask>("merge${capName}Catalog") {
             catalogFile.set(botData.file("dbus-catalog.json"))
             coordinatesFile.set(botData.file("dbus-stop-coordinates.json"))
         }
         variant.sources.assets?.addGeneratedSourceDirectory(task, MergeCatalogTask::outputDir)
+
+        val tokensTask = tasks.register<GenerateDesignTokensTask>("generate${capName}DesignTokens") {
+            tokensFile.set(designTokensJson)
+        }
+        variant.sources.java?.addGeneratedSourceDirectory(tokensTask, GenerateDesignTokensTask::outputDir)
     }
 }
 

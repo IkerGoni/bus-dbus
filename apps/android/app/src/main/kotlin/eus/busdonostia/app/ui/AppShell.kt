@@ -1,10 +1,16 @@
 package eus.busdonostia.app.ui
 
 import android.net.Uri
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.padding
@@ -18,6 +24,7 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +52,8 @@ import eus.busdonostia.app.R
 import eus.busdonostia.app.domain.badgeText
 import eus.busdonostia.app.ui.alerts.AlertEditScreen
 import eus.busdonostia.app.ui.alerts.AlertsScreen
+import eus.busdonostia.app.ui.components.LocalAnimatedVisibilityScope
+import eus.busdonostia.app.ui.components.LocalSharedTransitionScope
 import eus.busdonostia.app.ui.components.rememberEffectiveMotionTokens
 import eus.busdonostia.app.ui.home.HomeScreen
 import eus.busdonostia.app.ui.settings.SettingsScreen
@@ -77,6 +86,7 @@ object DetailRoutes {
     fun line(lineId: String): String = "line/${Uri.encode(lineId)}"
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun AppShell(navController: NavHostController = rememberNavController()) {
     // Pestaña activa: la última raíz de pestaña visitada; los detalles (A05, A03b) conservan la suya.
@@ -116,11 +126,25 @@ fun AppShell(navController: NavHostController = rememberNavController()) {
                         onClick = { navigateTo(dest) },
                         icon = {
                             val badgeText = if (dest == Destination.ALERTS) badgeText(badge) else null
+                            val motion = rememberEffectiveMotionTokens()
                             BadgedBox(
                                 badge = {
-                                    if (badgeText != null) {
-                                        val description = pluralStringResource(R.plurals.a11y_alerts_badge, badge, badge)
-                                        Badge(Modifier.semantics { contentDescription = description }) { Text(badgeText, maxLines = 1) }
+                                    if (dest == Destination.ALERTS) {
+                                        androidx.compose.animation.AnimatedVisibility(
+                                            visible = badgeText != null,
+                                            enter = scaleIn(
+                                                animationSpec = spring(
+                                                    dampingRatio = motion.springMediumBounceDamping,
+                                                    stiffness = motion.springMediumStiffness,
+                                                ),
+                                            ) + fadeIn(tween(motion.bottomTabFadeInMs)),
+                                            exit = scaleOut(tween(motion.bottomTabFadeOutMs)) + fadeOut(tween(motion.bottomTabFadeOutMs)),
+                                        ) {
+                                            val description = pluralStringResource(R.plurals.a11y_alerts_badge, badge, badge)
+                                            Badge(Modifier.semantics { contentDescription = description }) {
+                                                Text(badgeText.orEmpty(), maxLines = 1)
+                                            }
+                                        }
                                     }
                                 },
                             ) {
@@ -151,107 +175,127 @@ fun AppShell(navController: NavHostController = rememberNavController()) {
     ) { innerPadding ->
         val motion = rememberEffectiveMotionTokens()
         val tabRoutes = Destination.entries.map { it.route }.toSet()
-        NavHost(
-            navController = navController,
-            startDestination = Destination.HOME.route,
-            modifier = Modifier.padding(innerPadding),
-            enterTransition = {
-                val isTabSwitch = initialState.destination.route in tabRoutes && targetState.destination.route in tabRoutes
-                if (isTabSwitch) {
-                    fadeIn(tween(motion.bottomTabFadeInMs))
-                } else {
-                    slideInHorizontally(
-                        animationSpec = tween(motion.detailSlideInMs, easing = FastOutSlowInEasing),
-                        initialOffsetX = { (it * motion.detailSlideFraction).toInt() },
-                    ) + fadeIn(tween(motion.detailFadeInMs))
-                }
-            },
-            exitTransition = {
-                val isTabSwitch = initialState.destination.route in tabRoutes && targetState.destination.route in tabRoutes
-                if (isTabSwitch) {
-                    fadeOut(tween(motion.bottomTabFadeOutMs))
-                } else {
-                    fadeOut(tween(motion.detailFadeOutMs))
-                }
-            },
-            popEnterTransition = {
-                fadeIn(tween(motion.detailFadeInMs))
-            },
-            popExitTransition = {
-                slideOutHorizontally(
-                    animationSpec = tween(motion.detailSlideOutMs, easing = FastOutSlowInEasing),
-                    targetOffsetX = { (it * motion.detailSlideFraction).toInt() },
-                ) + fadeOut(tween(motion.detailFadeOutMs))
-            },
-        ) {
-            composable(Destination.HOME.route) {
-                HomeScreen(onNavigate = navigateTo, onOpenStop = openStop, onOpenLine = openLine, onOpenSettings = openSettings)
-            }
-            composable(Destination.STOPS.route) { StopsScreen(onOpenStop = openStop) }
-            composable(Destination.LINES.route) { LinesScreen(onOpenLine = openLine) }
-            composable(Destination.ALERTS.route) {
-                AlertsScreen(
-                    onNewAlert = { navController.navigate(DetailRoutes.alertNew()) },
-                    onEditAlert = { navController.navigate(DetailRoutes.alertEdit(it)) },
-                    onChooseStop = { navigateTo(Destination.STOPS) },
-                    onOpenSettings = openSettings,
-                )
-            }
-            composable(
-                DetailRoutes.ALERT_NEW,
-                arguments = listOf("stopId", "lineId", "destination").map { name ->
-                    navArgument(name) {
-                        type = NavType.StringType
-                        nullable = true
-                        defaultValue = null
-                    }
-                },
-            ) { entry ->
-                val args = checkNotNull(entry.arguments)
-                AlertEditScreen(
-                    alertId = null,
-                    stopId = args.getString("stopId"),
-                    lineId = args.getString("lineId"),
-                    destination = args.getString("destination"),
-                    onDone = { navController.popBackStack() },
-                )
-            }
-            composable(DetailRoutes.ALERT_EDIT, arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->
-                AlertEditScreen(
-                    alertId = checkNotNull(checkNotNull(entry.arguments).getString("id")),
-                    stopId = null,
-                    lineId = null,
-                    destination = null,
-                    onDone = { navController.popBackStack() },
-                )
-            }
-            composable(DetailRoutes.SETTINGS) { SettingsScreen(onBack = { navController.popBackStack() }) }
-            composable(
-                DetailRoutes.STOP,
-                arguments = listOf(
-                    navArgument("stopId") { type = NavType.StringType },
-                    navArgument("line") {
-                        type = NavType.StringType
-                        nullable = true
-                        defaultValue = null
+        SharedTransitionLayout {
+            CompositionLocalProvider(LocalSharedTransitionScope provides this) {
+                NavHost(
+                    navController = navController,
+                    startDestination = Destination.HOME.route,
+                    modifier = Modifier.padding(innerPadding),
+                    enterTransition = {
+                        val isTabSwitch = initialState.destination.route in tabRoutes && targetState.destination.route in tabRoutes
+                        if (isTabSwitch) {
+                            fadeIn(tween(motion.bottomTabFadeInMs))
+                        } else {
+                            slideInHorizontally(
+                                animationSpec = tween(motion.detailSlideInMs, easing = FastOutSlowInEasing),
+                                initialOffsetX = { (it * motion.detailSlideFraction).toInt() },
+                            ) + fadeIn(tween(motion.detailFadeInMs))
+                        }
                     },
-                ),
-                deepLinks = listOf(navDeepLink { uriPattern = DetailRoutes.STOP_DEEP_LINK }),
-            ) { entry ->
-                val args = checkNotNull(entry.arguments)
-                StopDetailScreen(
-                    stopId = checkNotNull(args.getString("stopId")),
-                    highlightLine = args.getString("line"),
-                    onBack = { navController.popBackStack() },
-                    onCreateAlert = { stop, line, destination -> navController.navigate(DetailRoutes.alertNew(stop, line, destination)) },
-                )
-            }
-            composable(DetailRoutes.LINE, arguments = listOf(navArgument("lineId") { type = NavType.StringType })) { entry ->
-                LineDetailScreen(
-                    lineId = checkNotNull(checkNotNull(entry.arguments).getString("lineId")),
-                    onBack = { navController.popBackStack() },
-                    onOpenStop = openStop,
-                )
+                    exitTransition = {
+                        val isTabSwitch = initialState.destination.route in tabRoutes && targetState.destination.route in tabRoutes
+                        if (isTabSwitch) {
+                            fadeOut(tween(motion.bottomTabFadeOutMs))
+                        } else {
+                            fadeOut(tween(motion.detailFadeOutMs))
+                        }
+                    },
+                    popEnterTransition = {
+                        fadeIn(tween(motion.detailFadeInMs))
+                    },
+                    popExitTransition = {
+                        slideOutHorizontally(
+                            animationSpec = tween(motion.detailSlideOutMs, easing = FastOutSlowInEasing),
+                            targetOffsetX = { (it * motion.detailSlideFraction).toInt() },
+                        ) + fadeOut(tween(motion.detailFadeOutMs))
+                    },
+                ) {
+                    composable(Destination.HOME.route) {
+                        CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
+                            HomeScreen(onNavigate = navigateTo, onOpenStop = openStop, onOpenLine = openLine, onOpenSettings = openSettings)
+                        }
+                    }
+                    composable(Destination.STOPS.route) {
+                        CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
+                            StopsScreen(onOpenStop = openStop)
+                        }
+                    }
+                    composable(Destination.LINES.route) {
+                        CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
+                            LinesScreen(onOpenLine = openLine)
+                        }
+                    }
+                    composable(Destination.ALERTS.route) {
+                        CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
+                            AlertsScreen(
+                                onNewAlert = { navController.navigate(DetailRoutes.alertNew()) },
+                                onEditAlert = { navController.navigate(DetailRoutes.alertEdit(it)) },
+                                onChooseStop = { navigateTo(Destination.STOPS) },
+                                onOpenSettings = openSettings,
+                            )
+                        }
+                    }
+                    composable(
+                        DetailRoutes.ALERT_NEW,
+                        arguments = listOf("stopId", "lineId", "destination").map { name ->
+                            navArgument(name) {
+                                type = NavType.StringType
+                                nullable = true
+                                defaultValue = null
+                            }
+                        },
+                    ) { entry ->
+                        val args = checkNotNull(entry.arguments)
+                        AlertEditScreen(
+                            alertId = null,
+                            stopId = args.getString("stopId"),
+                            lineId = args.getString("lineId"),
+                            destination = args.getString("destination"),
+                            onDone = { navController.popBackStack() },
+                        )
+                    }
+                    composable(DetailRoutes.ALERT_EDIT, arguments = listOf(navArgument("id") { type = NavType.StringType })) { entry ->
+                        AlertEditScreen(
+                            alertId = checkNotNull(checkNotNull(entry.arguments).getString("id")),
+                            stopId = null,
+                            lineId = null,
+                            destination = null,
+                            onDone = { navController.popBackStack() },
+                        )
+                    }
+                    composable(DetailRoutes.SETTINGS) { SettingsScreen(onBack = { navController.popBackStack() }) }
+                    composable(
+                        DetailRoutes.STOP,
+                        arguments = listOf(
+                            navArgument("stopId") { type = NavType.StringType },
+                            navArgument("line") {
+                                type = NavType.StringType
+                                nullable = true
+                                defaultValue = null
+                            },
+                        ),
+                        deepLinks = listOf(navDeepLink { uriPattern = DetailRoutes.STOP_DEEP_LINK }),
+                    ) { entry ->
+                        val args = checkNotNull(entry.arguments)
+                        CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
+                            StopDetailScreen(
+                                stopId = checkNotNull(args.getString("stopId")),
+                                highlightLine = args.getString("line"),
+                                onBack = { navController.popBackStack() },
+                                onCreateAlert = { stop, line, destination -> navController.navigate(DetailRoutes.alertNew(stop, line, destination)) },
+                            )
+                        }
+                    }
+                    composable(DetailRoutes.LINE, arguments = listOf(navArgument("lineId") { type = NavType.StringType })) { entry ->
+                        CompositionLocalProvider(LocalAnimatedVisibilityScope provides this) {
+                            LineDetailScreen(
+                                lineId = checkNotNull(checkNotNull(entry.arguments).getString("lineId")),
+                                onBack = { navController.popBackStack() },
+                                onOpenStop = openStop,
+                            )
+                        }
+                    }
+                }
             }
         }
     }

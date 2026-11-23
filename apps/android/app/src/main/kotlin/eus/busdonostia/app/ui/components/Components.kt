@@ -83,11 +83,11 @@ private fun onLineColor(background: Color): Color {
 
 /** Cuadrado de línea Dbus: 28 dp en listas, 36 dp en cabeceras. */
 @Composable
-fun LineBadge(lineId: String, colorArgb: Int?, size: Dp = 28.dp) {
+fun LineBadge(lineId: String, colorArgb: Int?, size: Dp = 28.dp, modifier: Modifier = Modifier) {
     val bg = lineColor(colorArgb)
     val description = stringResource(R.string.a11y_line, lineId)
     Box(
-        modifier = Modifier
+        modifier = modifier
             .size(size)
             .clip(RoundedCornerShape(if (size > 30.dp) 12.dp else 8.dp))
             .background(bg)
@@ -205,6 +205,7 @@ fun SearchPill(query: String, onQueryChange: (String) -> Unit, placeholder: Stri
 fun ScreenHeader(
     title: String,
     subtitle: String? = null,
+    titleModifier: Modifier = Modifier,
     navigation: (@Composable () -> Unit)? = null,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
@@ -223,6 +224,7 @@ fun ScreenHeader(
                 color = MaterialTheme.colorScheme.onBackground,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                modifier = titleModifier,
             )
             if (subtitle != null) {
                 Text(
@@ -270,7 +272,7 @@ fun MinutesLabel(minutes: Int, source: ArrivalSource) {
         } else {
             Icon(Icons.Outlined.Schedule, contentDescription = null, tint = tint, modifier = Modifier.size(16.dp))
         }
-        Text(text = text, style = CountdownRow, color = tint, maxLines = 1, softWrap = false)
+        AnimatedMinutesText(minutes = minutes, formattedText = text, style = CountdownRow, color = tint)
     }
 }
 

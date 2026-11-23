@@ -57,8 +57,12 @@ import eus.busdonostia.app.ui.components.ScreenHeader
 import eus.busdonostia.app.ui.components.SearchPill
 import eus.busdonostia.app.ui.components.SectionLabel
 import eus.busdonostia.app.ui.components.SkeletonList
+import eus.busdonostia.app.ui.components.optionalSharedElement
+import eus.busdonostia.app.ui.components.rememberEffectiveMotionTokens
 import eus.busdonostia.app.ui.screens.EmptyAction
 import eus.busdonostia.app.ui.screens.EmptyState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 
 private val LOCATION_PERMISSIONS = arrayOf(
     Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -251,7 +255,21 @@ private fun LazyListScope.rows(
     onStar: (StopRow) -> Unit,
 ) {
     items(rows, key = { "${it.stopId}:${it.favoriteLineId.orEmpty()}" }, contentType = { "stop_card" }) { row ->
-        StopCard(row, state.lineColors, onClick = { onOpenStop(row.stopId, row.favoriteLineId) }, onStar = { onStar(row) })
+        val motion = rememberEffectiveMotionTokens()
+        StopCard(
+            row = row,
+            lineColors = state.lineColors,
+            onClick = { onOpenStop(row.stopId, row.favoriteLineId) },
+            onStar = { onStar(row) },
+            modifier = Modifier.animateItem(
+                fadeInSpec = tween(motion.arrivalsStateFadeInMs),
+                placementSpec = spring(
+                    dampingRatio = motion.springNoBounceDamping,
+                    stiffness = motion.springMediumStiffness,
+                ),
+                fadeOutSpec = tween(motion.arrivalsStateFadeOutMs),
+            ),
+        )
     }
 }
 
@@ -296,8 +314,14 @@ fun distanceText(meters: Long): String =
     if (meters < 1_000) stringResource(R.string.distance_m, meters) else stringResource(R.string.distance_km, meters / 1_000.0)
 
 @Composable
-private fun StopCard(row: StopRow, lineColors: Map<String, Int>, onClick: () -> Unit, onStar: () -> Unit) {
-    BorderedCard(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp), onClick = onClick) {
+private fun StopCard(
+    row: StopRow,
+    lineColors: Map<String, Int>,
+    onClick: () -> Unit,
+    onStar: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    BorderedCard(modifier = modifier.padding(horizontal = 16.dp, vertical = 6.dp), onClick = onClick) {
         Column(Modifier.padding(start = 16.dp, top = 4.dp, bottom = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -305,7 +329,9 @@ private fun StopCard(row: StopRow, lineColors: Map<String, Int>, onClick: () -> 
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f, fill = false),
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .optionalSharedElement("stop-name-${row.stopId}"),
                 )
                 Spacer(Modifier.weight(1f))
                 FavoriteStar(
@@ -324,7 +350,13 @@ private fun StopCard(row: StopRow, lineColors: Map<String, Int>, onClick: () -> 
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
-                        row.lineIds.forEach { LineBadge(it, lineColors[it]) }
+                        row.lineIds.forEach {
+                            LineBadge(
+                                lineId = it,
+                                colorArgb = lineColors[it],
+                                modifier = Modifier.optionalSharedElement("line-badge-${row.stopId}-$it"),
+                            )
+                        }
                     }
                     // Desambiguación legible para paradas homónimas: sentido/destino principal.
                     row.mainDestination?.let { dest ->

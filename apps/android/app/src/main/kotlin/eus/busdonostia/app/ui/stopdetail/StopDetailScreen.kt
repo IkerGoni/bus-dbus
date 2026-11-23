@@ -7,8 +7,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
+import eus.busdonostia.app.ui.components.optionalSharedElement
 import eus.busdonostia.app.ui.components.rememberEffectiveMotionTokens
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +41,7 @@ import androidx.compose.material.icons.outlined.NightsStay
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -46,6 +49,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -114,6 +118,7 @@ fun StopDetailScreen(
     Column(Modifier.fillMaxSize()) {
         ScreenHeader(
             title = state.name ?: stringResource(R.string.stop_unnamed),
+            titleModifier = Modifier.optionalSharedElement("stop-name-$stopId"),
             navigation = {
                 IconButton(onClick = onBack) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
@@ -131,7 +136,7 @@ fun StopDetailScreen(
                 description = stringResource(R.string.a11y_favorite_stop, state.name ?: stringResource(R.string.stop_unnamed)),
             )
         }
-        LineChips(state, vm::selectLine)
+        LineChips(stopId, state, vm::selectLine)
         val selected = state.selectedLine
         if (selected != null) {
             TextButton(
@@ -173,7 +178,7 @@ fun StopDetailScreen(
 }
 
 @Composable
-private fun LineChips(state: StopDetailUiState, onSelect: (String?) -> Unit) {
+private fun LineChips(stopId: String, state: StopDetailUiState, onSelect: (String?) -> Unit) {
     if (state.lineIds.isEmpty()) return
     Row(
         modifier = Modifier
@@ -192,19 +197,32 @@ private fun LineChips(state: StopDetailUiState, onSelect: (String?) -> Unit) {
             FilterChip(
                 selected = state.selectedLine == line,
                 onClick = { onSelect(if (state.selectedLine == line) null else line) },
-                label = { LineBadge(line, state.lineColors[line], size = 24.dp) },
+                label = {
+                    LineBadge(
+                        lineId = line,
+                        colorArgb = state.lineColors[line],
+                        size = 24.dp,
+                        modifier = Modifier.optionalSharedElement("line-badge-$stopId-$line"),
+                    )
+                },
                 modifier = Modifier.heightIn(min = 48.dp),
             )
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("EXPERIMENTAL_API_USAGE")
 @Composable
 private fun Arrivals(state: StopDetailUiState, onRetry: () -> Unit, onStar: (Arrival) -> Unit, onBell: (Arrival) -> Unit) {
     val view = state.view
     val motion = rememberEffectiveMotionTokens()
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 16.dp)) {
+    PullToRefreshBox(
+        isRefreshing = state.refreshing,
+        onRefresh = onRetry,
+        modifier = Modifier.fillMaxSize(),
+    ) {
+        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 16.dp)) {
         // Capturar LazyListScope receiver para pasarlo a funciones internas
         val listScope = this
         item(key = "stop-arrivals-header", contentType = "arrival_header") {
@@ -284,6 +302,7 @@ private fun Arrivals(state: StopDetailUiState, onRetry: () -> Unit, onStar: (Arr
                 )
             }
         }
+        }
     }
 }
 
@@ -320,16 +339,28 @@ private fun arrivalItems(listScope: LazyListScope,
         return
     }
     listScope.items(rows, key = { it.key }, contentType = { "arrival_row" }) { row ->
+        val motion = rememberEffectiveMotionTokens()
         val arrival = row.arrival
-        ArrivalRow(
-            arrival = arrival,
-            minutes = row.minutes,
-            colorArgb = state.lineColors[arrival.lineId],
-            stopName = state.name ?: stringResource(R.string.stop_unnamed),
-            starred = arrival.lineId in state.starredLines,
-            onStar = { onStar(arrival) },
-        ) { onBell(arrival) }
-        HorizontalDivider(Modifier.padding(start = 60.dp), color = LocalStatusColors.current.border)
+        Column(
+            modifier = Modifier.animateItem(
+                fadeInSpec = tween(motion.arrivalsStateFadeInMs),
+                placementSpec = spring(
+                    dampingRatio = motion.springNoBounceDamping,
+                    stiffness = motion.springMediumStiffness,
+                ),
+                fadeOutSpec = tween(motion.arrivalsStateFadeOutMs),
+            ),
+        ) {
+            ArrivalRow(
+                arrival = arrival,
+                minutes = row.minutes,
+                colorArgb = state.lineColors[arrival.lineId],
+                stopName = state.name ?: stringResource(R.string.stop_unnamed),
+                starred = arrival.lineId in state.starredLines,
+                onStar = { onStar(arrival) },
+            ) { onBell(arrival) }
+            HorizontalDivider(Modifier.padding(start = 60.dp), color = LocalStatusColors.current.border)
+        }
     }
 }
 

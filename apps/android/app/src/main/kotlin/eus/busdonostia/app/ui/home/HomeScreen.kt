@@ -5,8 +5,12 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
+import eus.busdonostia.app.ui.components.AnimatedMinutesText
+import eus.busdonostia.app.ui.components.LiveSignalDot
+import eus.busdonostia.app.ui.components.optionalSharedElement
 import eus.busdonostia.app.ui.components.rememberEffectiveMotionTokens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -172,19 +176,47 @@ private fun SearchResults(
         EmptyState(stringResource(R.string.home_search_empty_title, state.query), stringResource(R.string.home_search_empty_body))
         return
     }
+    val motion = rememberEffectiveMotionTokens()
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
         if (state.stopResults.isNotEmpty()) {
             item(key = "search-stops-label", contentType = "section_label") { SectionLabel(stringResource(R.string.nav_stops)) }
             items(state.stopResults, key = { "s-${it.cod}" }, contentType = { "stop_result" }) { stop ->
-                ResultRow(onClick = { onOpenStop(stop.cod, null) }) {
-                    Text(stop.desc, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+                ResultRow(
+                    onClick = { onOpenStop(stop.cod, null) },
+                    modifier = Modifier.animateItem(
+                        fadeInSpec = tween(motion.arrivalsStateFadeInMs),
+                        placementSpec = spring(
+                            dampingRatio = motion.springNoBounceDamping,
+                            stiffness = motion.springMediumStiffness,
+                        ),
+                        fadeOutSpec = tween(motion.arrivalsStateFadeOutMs),
+                    ),
+                ) {
+                    Text(
+                        stop.desc,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .weight(1f)
+                            .optionalSharedElement("stop-name-${stop.cod}"),
+                    )
                 }
             }
         }
         if (state.lineResults.isNotEmpty()) {
             item(key = "search-lines-label", contentType = "section_label") { SectionLabel(stringResource(R.string.nav_lines)) }
             items(state.lineResults, key = { "l-${it.cod}" }, contentType = { "line_result" }) { line ->
-                ResultRow(onClick = { onOpenLine(line.cod) }) {
+                ResultRow(
+                    onClick = { onOpenLine(line.cod) },
+                    modifier = Modifier.animateItem(
+                        fadeInSpec = tween(motion.arrivalsStateFadeInMs),
+                        placementSpec = spring(
+                            dampingRatio = motion.springNoBounceDamping,
+                            stiffness = motion.springMediumStiffness,
+                        ),
+                        fadeOutSpec = tween(motion.arrivalsStateFadeOutMs),
+                    ),
+                ) {
                     LineBadge(line.cod, state.lineColors[line.cod])
                     Text(
                         line.destinations.joinToString(" · "),
@@ -199,9 +231,13 @@ private fun SearchResults(
 }
 
 @Composable
-private fun ResultRow(onClick: () -> Unit, content: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit) {
+private fun ResultRow(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit,
+) {
     Row(
-        Modifier
+        modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
             .clickable(onClick = onClick)
@@ -227,7 +263,12 @@ private fun NextAlertCard(
     BorderedCard(onClick = onOpen) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                LineBadge(rule.lineId, colorArgb, size = 36.dp)
+                LineBadge(
+                    rule.lineId,
+                    colorArgb,
+                    size = 36.dp,
+                    modifier = Modifier.optionalSharedElement("line-badge-${rule.stopId}-${rule.lineId}"),
+                )
                 Text(
                     alertDestination(rule),
                     style = MaterialTheme.typography.titleMedium,
@@ -237,13 +278,20 @@ private fun NextAlertCard(
                 )
                 if (arrival != null) {
                     val minutes = item.remainingMin ?: remainingMinutes(arrival, arrival.fetchedAtMs)
-                    Text(
-                        if (minutes <= 0) stringResource(R.string.minutes_now) else stringResource(R.string.minutes_short, minutes),
-                        style = CountdownHero,
-                        color = if (arrival.source == ArrivalSource.LIVE) colors.live else colors.scheduled,
-                        maxLines = 1,
-                        softWrap = false,
-                    )
+                    val isLive = arrival.source == ArrivalSource.LIVE
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        LiveSignalDot(
+                            isLive = isLive,
+                            liveColor = colors.live,
+                            scheduledColor = colors.scheduled,
+                        )
+                        AnimatedMinutesText(
+                            minutes = minutes,
+                            formattedText = if (minutes <= 0) stringResource(R.string.minutes_now) else stringResource(R.string.minutes_short, minutes),
+                            style = CountdownHero,
+                            color = if (isLive) colors.live else colors.scheduled,
+                        )
+                    }
                 }
             }
             Text(
@@ -252,6 +300,7 @@ private fun NextAlertCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.optionalSharedElement("stop-name-${rule.stopId}"),
             )
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 AlertStatusLabel(item)
@@ -292,17 +341,39 @@ private fun LazyListScope.favorites(state: HomeUiState, vm: HomeViewModel, onOpe
     item(key = "fav-label", contentType = "section_label") { SectionLabel(stringResource(R.string.home_favorites), Modifier.padding(horizontal = 0.dp)) }
     items(
         items = state.favorites,
-        key = { "fav-${it.row.stopId}-${it.row.favoriteLineId.orEmpty()}-${it.row.createdAtMs}" },
+        key = { "fav-${it.row.stopId}-${it.row.favoriteLineId.orEmpty()}" },
         contentType = { "favorite_stop" },
     ) { card ->
-        FavoriteCard(card, state, onOpen = { onOpenStop(card.row.stopId, card.row.favoriteLineId) }, onUnstar = { vm.unstar(card.row) }, onRetry = vm::refresh)
+        val motion = rememberEffectiveMotionTokens()
+        FavoriteCard(
+            card = card,
+            state = state,
+            onOpen = { onOpenStop(card.row.stopId, card.row.favoriteLineId) },
+            onUnstar = { vm.unstar(card.row) },
+            onRetry = vm::refresh,
+            modifier = Modifier.animateItem(
+                fadeInSpec = tween(motion.arrivalsStateFadeInMs),
+                placementSpec = spring(
+                    dampingRatio = motion.springNoBounceDamping,
+                    stiffness = motion.springMediumStiffness,
+                ),
+                fadeOutSpec = tween(motion.arrivalsStateFadeOutMs),
+            ),
+        )
     }
 }
 
 @Composable
-private fun FavoriteCard(card: FavoriteStopCard, state: HomeUiState, onOpen: () -> Unit, onUnstar: () -> Unit, onRetry: () -> Unit) {
+private fun FavoriteCard(
+    card: FavoriteStopCard,
+    state: HomeUiState,
+    onOpen: () -> Unit,
+    onUnstar: () -> Unit,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val row = card.row
-    BorderedCard(onClick = onOpen) {
+    BorderedCard(modifier = modifier, onClick = onOpen) {
         Column(Modifier.padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
@@ -310,9 +381,18 @@ private fun FavoriteCard(card: FavoriteStopCard, state: HomeUiState, onOpen: () 
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f, fill = false),
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .optionalSharedElement("stop-name-${row.stopId}"),
                 )
-                row.favoriteLineId?.let { LineBadge(it, state.lineColors[it], size = 24.dp) }
+                row.favoriteLineId?.let {
+                    LineBadge(
+                        it,
+                        state.lineColors[it],
+                        size = 24.dp,
+                        modifier = Modifier.optionalSharedElement("line-badge-${row.stopId}-$it"),
+                    )
+                }
                 Box(Modifier.weight(1f))
                 FavoriteStar(
                     checked = true,
