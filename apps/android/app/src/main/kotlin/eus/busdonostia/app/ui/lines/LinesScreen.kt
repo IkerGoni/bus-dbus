@@ -3,13 +3,11 @@ package eus.busdonostia.app.ui.lines
 import eus.busdonostia.app.ui.components.motionAnimateItem
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,7 +21,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -33,16 +30,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -53,7 +47,6 @@ import eus.busdonostia.app.ui.appViewModel
 import eus.busdonostia.app.ui.components.BorderedCard
 import eus.busdonostia.app.ui.components.FavoriteStar
 import eus.busdonostia.app.ui.components.LineBadge
-import eus.busdonostia.app.ui.components.LocalReducedMotion
 import eus.busdonostia.app.ui.components.ScreenHeader
 import eus.busdonostia.app.ui.components.SearchPill
 import eus.busdonostia.app.ui.components.SharedKeys
@@ -61,11 +54,12 @@ import eus.busdonostia.app.ui.components.SharedOrigins
 import eus.busdonostia.app.ui.components.SkeletonList
 import eus.busdonostia.app.ui.components.lineColor
 import eus.busdonostia.app.ui.components.optionalSharedElement
+import eus.busdonostia.app.ui.components.pressScale
 import eus.busdonostia.app.ui.components.rememberEffectiveMotionTokens
+import eus.busdonostia.app.ui.components.rememberStaggerEntrance
+import eus.busdonostia.app.ui.components.staggerEntrance
 import eus.busdonostia.app.ui.screens.EmptyAction
 import eus.busdonostia.app.ui.screens.EmptyState
-import eus.busdonostia.app.ui.theme.DesignTokens
-import kotlinx.coroutines.delay
 
 /** A03 · Líneas. */
 @Composable
@@ -122,17 +116,19 @@ fun LinesScreen(onOpenLine: (String) -> Unit) {
                 stringResource(R.string.lines_favorites_empty_body),
                 listOf(EmptyAction(stringResource(R.string.lines_show_all), primary = true) { vm.onFilterChange(LinesFilter.ALL) }),
             )
-            else -> LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 16.dp)) {
-                itemsIndexed(state.rows, key = { _, it -> it.lineId }, contentType = { _, _ -> "line_card" }) { index, row ->
-                    val motion = rememberEffectiveMotionTokens()
-                    LineCard(
-                        row = row,
-                        colorArgb = state.lineColors[row.lineId],
-                        onClick = { onOpenLine(row.lineId) },
-                        onStar = { vm.toggleStar(row.lineId) },
-                        modifier = motionAnimateItem()
-                            .staggerEntrance(index = index, triggerKey = state.filter),
-                    )
+            else -> {
+                val entrance = rememberStaggerEntrance(state.filter)
+                LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 16.dp)) {
+                    itemsIndexed(state.rows, key = { _, it -> it.lineId }, contentType = { _, _ -> "line_card" }) { index, row ->
+                        LineCard(
+                            row = row,
+                            colorArgb = state.lineColors[row.lineId],
+                            onClick = { onOpenLine(row.lineId) },
+                            onStar = { vm.toggleStar(row.lineId) },
+                            modifier = motionAnimateItem()
+                                .staggerEntrance(index = index, state = entrance),
+                        )
+                    }
                 }
             }
         }
@@ -229,6 +225,7 @@ fun LineDetailScreen(lineId: String, onBack: () -> Unit, onOpenStop: (stopId: St
                     animationSpec = tween(motion.lineDirectionCrossfadeMs),
                     label = "lineDirectionCrossfade",
                 ) { (selectedIndex, stops) ->
+                    val entrance = rememberStaggerEntrance(selectedIndex)
                     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(top = 8.dp, bottom = 16.dp)) {
                         itemsIndexed(
                             stops,
@@ -246,40 +243,13 @@ fun LineDetailScreen(lineId: String, onBack: () -> Unit, onOpenStop: (stopId: St
                                 origin = origin,
                                 onClick = { onOpenStop(stop.stopId, line.cod, origin) },
                                 modifier = motionAnimateItem()
-                                    .staggerEntrance(index = index, triggerKey = selectedIndex),
+                                    .staggerEntrance(index = index, state = entrance),
                             )
                         }
                     }
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun Modifier.staggerEntrance(index: Int, triggerKey: Any): Modifier {
-    val reducedMotion = LocalReducedMotion.current
-    val isInspection = LocalInspectionMode.current
-    val motion = rememberEffectiveMotionTokens()
-    if (reducedMotion || isInspection || index >= motion.staggerMaxAnimatedIndex || motion.arrivalsStateFadeInMs == 0) {
-        return this
-    }
-    val progress = remember(triggerKey, index) { Animatable(0f) }
-    val density = LocalDensity.current
-    val offsetPx = with(density) { DesignTokens.spacingMd.toPx() }
-    LaunchedEffect(triggerKey, index) {
-        delay((index * motion.staggerItemDelayMs).toLong())
-        progress.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(
-                durationMillis = motion.arrivalsStateFadeInMs,
-                easing = FastOutSlowInEasing,
-            ),
-        )
-    }
-    return this.graphicsLayer {
-        alpha = progress.value
-        translationY = (1f - progress.value) * offsetPx
     }
 }
 
@@ -294,11 +264,13 @@ private fun TimelineRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val interaction = remember { MutableInteractionSource() }
     Row(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
-            .clickable(onClick = onClick)
+            .pressScale(interaction)
+            .clickable(interactionSource = interaction, indication = ripple(), onClick = onClick)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
