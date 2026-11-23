@@ -142,7 +142,7 @@ fun rememberSystemReducedMotion(): Boolean {
         Settings.Global.getFloat(
             context.contentResolver,
             Settings.Global.ANIMATOR_DURATION_SCALE,
-            1f
+            1f,
         ) == 0f
     }
 }
@@ -188,9 +188,7 @@ fun LazyItemScope.motionAnimateItem(modifier: Modifier = Modifier): Modifier {
  * Modifier de escala al pulsar (press feedback) operando EXCLUSIVAMENTE en `graphicsLayer`.
  * No dispara recomposición ni cambios de layout. Respeta `LocalReducedMotion`.
  */
-fun Modifier.pressScale(
-    interactionSource: MutableInteractionSource
-): Modifier = composed {
+fun Modifier.pressScale(interactionSource: MutableInteractionSource): Modifier = composed {
     val reducedMotion = LocalReducedMotion.current
     val isPressed by interactionSource.collectIsPressedAsState()
     val motion = rememberEffectiveMotionTokens()
@@ -215,9 +213,9 @@ fun Modifier.pressScale(
 fun LiveSignalDot(
     isLive: Boolean,
     modifier: Modifier = Modifier,
-    dotSize: androidx.compose.ui.unit.Dp = eus.busdonostia.app.ui.theme.DesignTokens.liveSignalDotSize,
-    liveColor: androidx.compose.ui.graphics.Color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
-    scheduledColor: androidx.compose.ui.graphics.Color = androidx.compose.material3.MaterialTheme.colorScheme.outline
+    dotSize: Dp = DesignTokens.liveSignalDotSize,
+    liveColor: Color = MaterialTheme.colorScheme.primary,
+    scheduledColor: Color = MaterialTheme.colorScheme.outline,
 ) {
     val reducedMotion = LocalReducedMotion.current
     val motion = rememberEffectiveMotionTokens()
@@ -237,16 +235,16 @@ fun LiveSignalDot(
             label = "liveDotAlpha"
         )
     } else {
-        remember { androidx.compose.runtime.mutableFloatStateOf(1f) }
+        remember { mutableFloatStateOf(1f) }
     }
 
-    androidx.compose.foundation.layout.Box(
+    Box(
         modifier = modifier
             .size(dotSize)
             .graphicsLayer { this.alpha = alpha.value }
             .background(
                 color = if (isLive) liveColor else scheduledColor,
-                shape = androidx.compose.foundation.shape.CircleShape
-            )
+                shape = CircleShape,
+            ),
     )
 }

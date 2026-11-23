@@ -61,5 +61,12 @@ class MotionTokensTest {
         assertEquals(36.dp, DesignTokens.lineBadgeMinWidth)
         assertEquals(16.dp, DesignTokens.cornerRadiusCard)
         assertEquals(32.dp, DesignTokens.chipVisualHeight)
+        assertEquals(28.dp, DesignTokens.lineBadgeSize)
+        assertEquals(48.dp, DesignTokens.touchTargetMin)
+        assertEquals(56.dp, DesignTokens.headerMinHeight)
+        assertEquals(72.dp, DesignTokens.skeletonRowHeight)
+        assertEquals(16.dp, DesignTokens.iconSmall)
+        assertEquals(6.dp, DesignTokens.spacingXxs)
+        assertEquals(12.dp, DesignTokens.cornerRadiusBanner)
     }
 }

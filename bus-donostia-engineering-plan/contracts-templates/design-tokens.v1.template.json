@@ -49,6 +49,7 @@
   },
   "style": {
     "spacingDp": {
+      "xxs": 6,
       "xs": 4,
       "sm": 8,
       "md": 12,
@@ -57,6 +58,7 @@
     },
     "cornerRadiusDp": {
       "chip": 8,
+      "banner": 12,
       "card": 16,
       "pill": 999
     },
@@ -65,7 +67,12 @@
       "timelineIntermediateNode": 6,
       "liveSignalDot": 8,
       "lineBadgeMinWidth": 36,
-      "chipVisualHeight": 32
+      "lineBadgeSize": 28,
+      "chipVisualHeight": 32,
+      "touchTargetMin": 48,
+      "headerMinHeight": 56,
+      "skeletonRowHeight": 72,
+      "iconSmall": 16
     }
   }
 }

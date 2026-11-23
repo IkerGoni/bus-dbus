@@ -128,12 +128,13 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
         requireKeys(pulse, "motion.livePulse", "durationMs", "minAlpha", "maxAlpha")
         requireKeys(stagger, "motion.stagger", "itemDelayMs", "maxAnimatedIndex")
         requireKeys(celebration, "motion.celebration", "particlesDurationMs")
-        requireKeys(spacing, "style.spacingDp", "xs", "sm", "md", "lg", "xl")
-        requireKeys(radius, "style.cornerRadiusDp", "chip", "card", "pill")
+        requireKeys(spacing, "style.spacingDp", "xxs", "xs", "sm", "md", "lg", "xl")
+        requireKeys(radius, "style.cornerRadiusDp", "chip", "banner", "card", "pill")
         requireKeys(
             comps, "style.componentsDp",
             "timelineTerminalNode", "timelineIntermediateNode", "liveSignalDot", "lineBadgeMinWidth",
-            "chipVisualHeight",
+            "lineBadgeSize", "chipVisualHeight", "touchTargetMin", "headerMinHeight", "skeletonRowHeight",
+            "iconSmall",
         )
 
         val maxBlockingMs = intVal(motion, "maxBlockingDurationMs")
@@ -350,6 +351,7 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
 
             object DesignTokens {
                 object Spacing {
+                    val XXS = ${intVal(spacing, "xxs")}.dp
                     val XS = ${intVal(spacing, "xs")}.dp
                     val SM = ${intVal(spacing, "sm")}.dp
                     val MD = ${intVal(spacing, "md")}.dp
@@ -359,6 +361,7 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
 
                 object CornerRadius {
                     val CHIP = ${intVal(radius, "chip")}.dp
+                    val BANNER = ${intVal(radius, "banner")}.dp
                     val CARD = ${intVal(radius, "card")}.dp
                     val PILL = ${intVal(radius, "pill")}.dp
                 }
@@ -369,8 +372,14 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                     val LIVE_SIGNAL_DOT_SIZE = ${intVal(comps, "liveSignalDot")}.dp
                     val LINE_BADGE_MIN_WIDTH = ${intVal(comps, "lineBadgeMinWidth")}.dp
                     val CHIP_VISUAL_HEIGHT = ${intVal(comps, "chipVisualHeight")}.dp
+                    val LINE_BADGE_SIZE = ${intVal(comps, "lineBadgeSize")}.dp
+                    val TOUCH_TARGET_MIN = ${intVal(comps, "touchTargetMin")}.dp
+                    val HEADER_MIN_HEIGHT = ${intVal(comps, "headerMinHeight")}.dp
+                    val SKELETON_ROW_HEIGHT = ${intVal(comps, "skeletonRowHeight")}.dp
+                    val ICON_SMALL = ${intVal(comps, "iconSmall")}.dp
                 }
 
+                val spacingXxs: Dp = Spacing.XXS
                 val spacingXs: Dp = Spacing.XS
                 val spacingSm: Dp = Spacing.SM
                 val spacingMd: Dp = Spacing.MD
@@ -378,6 +387,7 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                 val spacingXl: Dp = Spacing.XL
 
                 val cornerRadiusChip: Dp = CornerRadius.CHIP
+                val cornerRadiusBanner: Dp = CornerRadius.BANNER
                 val cornerRadiusCard: Dp = CornerRadius.CARD
                 val cornerRadiusPill: Dp = CornerRadius.PILL
 
@@ -386,6 +396,11 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                 val liveSignalDotSize: Dp = Components.LIVE_SIGNAL_DOT_SIZE
                 val lineBadgeMinWidth: Dp = Components.LINE_BADGE_MIN_WIDTH
                 val chipVisualHeight: Dp = Components.CHIP_VISUAL_HEIGHT
+                val lineBadgeSize: Dp = Components.LINE_BADGE_SIZE
+                val touchTargetMin: Dp = Components.TOUCH_TARGET_MIN
+                val headerMinHeight: Dp = Components.HEADER_MIN_HEIGHT
+                val skeletonRowHeight: Dp = Components.SKELETON_ROW_HEIGHT
+                val iconSmall: Dp = Components.ICON_SMALL
             }
         """.trimIndent() + "\n"
 

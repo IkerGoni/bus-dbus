@@ -12,6 +12,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -90,13 +91,22 @@ private fun onLineColor(background: Color): Color {
 
 /** Cuadrado de línea Dbus: 28 dp en listas, 36 dp en cabeceras. */
 @Composable
-fun LineBadge(lineId: String, colorArgb: Int?, size: Dp = 28.dp, modifier: Modifier = Modifier) {
+fun LineBadge(
+    lineId: String,
+    colorArgb: Int?,
+    size: Dp = DesignTokens.lineBadgeSize,
+    modifier: Modifier = Modifier,
+) {
     val bg = lineColor(colorArgb)
     val description = stringResource(R.string.a11y_line, lineId)
     Box(
         modifier = modifier
             .size(size)
-            .clip(RoundedCornerShape(if (size > 30.dp) 12.dp else 8.dp))
+            .clip(
+                RoundedCornerShape(
+                    if (size > DesignTokens.lineBadgeSize) DesignTokens.cornerRadiusBanner else DesignTokens.cornerRadiusChip,
+                ),
+            )
             .background(bg)
             .semantics { contentDescription = description },
         contentAlignment = Alignment.Center,
@@ -142,7 +152,7 @@ fun MotionFilterChip(
         leadingIcon = leadingIcon,
         colors = FilterChipDefaults.filterChipColors(selectedContainerColor = Color.Transparent),
         modifier = modifier
-            .heightIn(min = 48.dp)
+            .heightIn(min = DesignTokens.touchTargetMin)
             .drawBehind {
                 if (progress <= 0f) return@drawBehind
                 val start = motion.chipIndicatorStartScale
@@ -195,7 +205,7 @@ fun FavoriteStar(checked: Boolean, onToggle: () -> Unit, description: String) {
             onToggle()
         },
         modifier = Modifier
-            .size(48.dp)
+            .size(DesignTokens.touchTargetMin)
             .graphicsLayer {
                 this.scaleX = scale
                 this.scaleY = scale
@@ -220,7 +230,7 @@ fun SearchPill(query: String, onQueryChange: (String) -> Unit, placeholder: Stri
         onValueChange = onQueryChange,
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(min = 48.dp)
+            .heightIn(min = DesignTokens.touchTargetMin)
             .border(1.dp, LocalStatusColors.current.border, CircleShape),
         placeholder = { Text(placeholder, maxLines = 1, overflow = TextOverflow.Ellipsis) },
         leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
@@ -259,8 +269,11 @@ fun ScreenHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 56.dp)
-            .padding(start = if (navigation == null) 16.dp else 4.dp, end = 4.dp),
+            .heightIn(min = DesignTokens.headerMinHeight)
+            .padding(
+                start = if (navigation == null) DesignTokens.spacingLg else DesignTokens.spacingXs,
+                end = DesignTokens.spacingXs,
+            ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         navigation?.invoke()
@@ -290,8 +303,8 @@ fun ScreenHeader(
 @Composable
 fun BorderedCard(modifier: Modifier = Modifier, onClick: (() -> Unit)? = null, content: @Composable () -> Unit) {
     val colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    val border = androidx.compose.foundation.BorderStroke(1.dp, LocalStatusColors.current.border)
-    val shape = RoundedCornerShape(16.dp)
+    val border = BorderStroke(1.dp, LocalStatusColors.current.border)
+    val shape = RoundedCornerShape(DesignTokens.cornerRadiusCard)
     if (onClick != null) {
         Card(onClick = onClick, modifier = modifier.fillMaxWidth(), shape = shape, colors = colors, border = border) {
             content()
@@ -311,13 +324,18 @@ fun MinutesLabel(minutes: Int, source: ArrivalSource) {
     val text = if (minutes <= 0) stringResource(R.string.minutes_now) else stringResource(R.string.minutes_short, minutes)
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(DesignTokens.spacingXxs),
         modifier = Modifier.semantics(mergeDescendants = true) { contentDescription = "$sourceText, $text" },
     ) {
         if (live) {
             LiveSignalDot(isLive = true, liveColor = tint)
         } else {
-            Icon(Icons.Outlined.Schedule, contentDescription = null, tint = tint, modifier = Modifier.size(16.dp))
+            Icon(
+                Icons.Outlined.Schedule,
+                contentDescription = null,
+                tint = tint,
+                modifier = Modifier.size(DesignTokens.iconSmall),
+            )
         }
         AnimatedMinutesText(minutes = minutes, formattedText = text, style = CountdownRow, color = tint)
     }
@@ -325,21 +343,21 @@ fun MinutesLabel(minutes: Int, source: ArrivalSource) {
 
 /** Esqueleto de carga: [rows] bloques grises del alto de una tarjeta. */
 @Composable
-fun SkeletonList(rows: Int = 4, rowHeight: Dp = 72.dp) {
+fun SkeletonList(rows: Int = 4, rowHeight: Dp = DesignTokens.skeletonRowHeight) {
     val description = stringResource(R.string.loading)
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(DesignTokens.spacingLg)
             .semantics { contentDescription = description },
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(DesignTokens.spacingMd),
     ) {
         repeat(rows) {
             Box(
                 Modifier
                     .fillMaxWidth()
                     .height(rowHeight)
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(DesignTokens.cornerRadiusCard))
                     .background(MaterialTheme.colorScheme.surfaceVariant),
             )
         }
@@ -349,7 +367,11 @@ fun SkeletonList(rows: Int = 4, rowHeight: Dp = 72.dp) {
 /** Etiqueta de sección en mayúsculas (`CERCA DE TI`), sin saltos de línea. */
 @Composable
 fun SectionLabel(text: String, modifier: Modifier = Modifier, trailing: String? = null) {
-    Row(modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = DesignTokens.spacingLg, vertical = DesignTokens.spacingSm),
+    ) {
         Text(
             text = text.uppercase(),
             style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 0.6.sp),
@@ -389,9 +411,9 @@ fun InfoBanner(
         Row(
             modifier = modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(DesignTokens.cornerRadiusBanner))
                 .background(if (warning) colors.warningContainer else MaterialTheme.colorScheme.surfaceVariant)
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .padding(horizontal = DesignTokens.spacingMd, vertical = DesignTokens.spacingSm),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -401,7 +423,7 @@ fun InfoBanner(
                 modifier = Modifier.weight(1f),
             )
             if (action != null) {
-                Box(Modifier.width(8.dp))
+                Box(Modifier.width(DesignTokens.spacingSm))
                 action()
             }
         }

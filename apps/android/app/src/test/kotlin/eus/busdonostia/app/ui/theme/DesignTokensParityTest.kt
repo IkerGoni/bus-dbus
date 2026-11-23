@@ -71,19 +71,26 @@ class DesignTokensParityTest {
         val leaves = flatten("", root.getValue("style").jsonObject)
         // `Dp` es value class: los getters están manglados en JVM, comparamos los valores directamente.
         val actual = mapOf(
+            "spacingDp.xxs" to DesignTokens.spacingXxs.value,
             "spacingDp.xs" to DesignTokens.spacingXs.value,
             "spacingDp.sm" to DesignTokens.spacingSm.value,
             "spacingDp.md" to DesignTokens.spacingMd.value,
             "spacingDp.lg" to DesignTokens.spacingLg.value,
             "spacingDp.xl" to DesignTokens.spacingXl.value,
             "cornerRadiusDp.chip" to DesignTokens.cornerRadiusChip.value,
+            "cornerRadiusDp.banner" to DesignTokens.cornerRadiusBanner.value,
             "cornerRadiusDp.card" to DesignTokens.cornerRadiusCard.value,
             "cornerRadiusDp.pill" to DesignTokens.cornerRadiusPill.value,
             "componentsDp.timelineTerminalNode" to DesignTokens.timelineTerminalNode.value,
             "componentsDp.timelineIntermediateNode" to DesignTokens.timelineIntermediateNode.value,
             "componentsDp.liveSignalDot" to DesignTokens.liveSignalDotSize.value,
             "componentsDp.lineBadgeMinWidth" to DesignTokens.lineBadgeMinWidth.value,
+            "componentsDp.lineBadgeSize" to DesignTokens.lineBadgeSize.value,
             "componentsDp.chipVisualHeight" to DesignTokens.chipVisualHeight.value,
+            "componentsDp.touchTargetMin" to DesignTokens.touchTargetMin.value,
+            "componentsDp.headerMinHeight" to DesignTokens.headerMinHeight.value,
+            "componentsDp.skeletonRowHeight" to DesignTokens.skeletonRowHeight.value,
+            "componentsDp.iconSmall" to DesignTokens.iconSmall.value,
         )
         assertEquals("El JSON y DesignTokens deben cubrir los mismos estilos", actual.keys, leaves.keys)
         leaves.forEach { (path, value) ->
