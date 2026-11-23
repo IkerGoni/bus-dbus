@@ -121,22 +121,26 @@ fun AlertsScreen(
                     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 96.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    if (!system.notificationsEnabled) {
-                        item(key = "banner-notifications-off", contentType = "info_banner") {
-                            InfoBanner(stringResource(R.string.alerts_notifications_off), warning = true) {
-                                TextButton(
-                                    onClick = { context.openSettings(notificationSettingsIntent(context)) },
-                                    modifier = Modifier.heightIn(min = 48.dp),
-                                ) { Text(stringResource(R.string.alerts_notifications_enable)) }
-                            }
+                    item(key = "banner-notifications-off", contentType = "info_banner") {
+                        InfoBanner(
+                            visible = !system.notificationsEnabled,
+                            text = stringResource(R.string.alerts_notifications_off),
+                            warning = true,
+                        ) {
+                            TextButton(
+                                onClick = { context.openSettings(notificationSettingsIntent(context)) },
+                                modifier = Modifier.heightIn(min = 48.dp),
+                            ) { Text(stringResource(R.string.alerts_notifications_enable)) }
                         }
                     }
-                    if (state.anyError) {
-                        item(key = "banner-error", contentType = "info_banner") {
-                            InfoBanner(stringResource(R.string.alerts_error_banner), warning = true) {
-                                TextButton(onClick = vm::refresh, modifier = Modifier.heightIn(min = 48.dp)) {
-                                    Text(stringResource(R.string.retry))
-                                }
+                    item(key = "banner-error", contentType = "info_banner") {
+                        InfoBanner(
+                            visible = state.anyError,
+                            text = stringResource(R.string.alerts_error_banner),
+                            warning = true,
+                        ) {
+                            TextButton(onClick = vm::refresh, modifier = Modifier.heightIn(min = 48.dp)) {
+                                Text(stringResource(R.string.retry))
                             }
                         }
                     }

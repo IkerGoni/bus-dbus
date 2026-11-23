@@ -39,7 +39,7 @@
 
     <!-- A02 · Geltokiak -->
     <string name="stops_title">Geltokiak</string>
-    <string name="stops_search_hint">Kodea edo kalea (adib. 340, Boulevard)</string>
+    <string name="stops_search_hint">Kodea edo kalea</string>
     <string name="stops_refresh_location">Eguneratu kokapena</string>
     <string name="stops_tab_nearby">Hurbilekoak</string>
     <string name="stops_tab_favorites">Gogokoak</string>
@@ -61,7 +61,7 @@
     <string name="stops_recents_empty_body">Kontsultatzen dituzun azken 10 geltokiak hemen agertuko dira.</string>
 
     <!-- A05 · Geltokiaren xehetasuna -->
-    <string name="stop_title_fallback">%1$s geltokia</string>
+    <string name="stop_unnamed">Geltokia</string>
     <string name="stop_directions">Nola iritsi</string>
     <string name="stop_next_arrivals">Hurrengo iritsierak</string>
     <string name="stop_line_star">Gorde %1$s linea geltoki honetan</string>
@@ -104,7 +104,6 @@
     <string name="undo">Desegin</string>
     <string name="cancel">Utzi</string>
     <string name="settings_open">Ezarpenak</string>
-    <string name="stop_with_code">%1$s (%2$s)</string>
     <plurals name="a11y_alerts_badge">
         <item quantity="one">%1$d abisu aktibo</item>
         <item quantity="other">%1$d abisu aktibo</item>
@@ -168,7 +167,6 @@
     <!-- Iritsiera-jakinarazpena eta A06ko aurrebista -->
     <string name="notif_title">L%1$s → %2$s, %3$d min barru</string>
     <string name="notif_title_no_destination">L%1$s, %2$d min barru</string>
-    <string name="notif_body_stop">%1$s (%2$s)</string>
 
     <!-- A05 · abisuak -->
     <string name="stop_create_alert">Sortu abisua geltoki honetan</string>

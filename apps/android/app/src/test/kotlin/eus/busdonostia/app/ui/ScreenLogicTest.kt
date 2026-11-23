@@ -8,6 +8,8 @@ import eus.busdonostia.app.ui.lines.lineRows
 import eus.busdonostia.app.ui.lines.starredLines
 import eus.busdonostia.app.ui.stops.favoriteRows
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -44,5 +46,30 @@ class ScreenLogicTest {
         assertEquals("28", rows[0].favoriteLineId)
         assertEquals(listOf("28"), rows[0].lineIds)
         assertTrue(rows.all { it.starred })
+    }
+
+    @Test
+    fun lineRowSoloCodigosPublicos() {
+        val rows = lineRows(catalog, "", LinesFilter.ALL, emptySet())
+        val publicCodes = catalog.lines.map { it.cod }.toSet()
+        rows.forEach { assertTrue("lineId público: ${it.lineId}", publicCodes.contains(it.lineId)) }
+        rows.forEach { row ->
+            val matchingLine = catalog.lines.find { it.cod == row.lineId }
+            assertNotNull("lineId ${row.lineId} debe existir como código público", matchingLine)
+            assertTrue("lineId debe ser el código público: ${row.lineId}", matchingLine!!.cod == row.lineId)
+        }
+    }
+
+    @Test
+    fun stopRowSinCodigosEnTextosVisibles() {
+        val favRows = favoriteRows(
+            catalog,
+            listOf(Favorite(FavoriteType.STOP, "340", null, 1)),
+        )
+        favRows.forEach { row ->
+            assertFalse("name no debe contener stopId: ${row.name}", row.name.contains(row.stopId))
+            row.mainDestination?.let { assertFalse("mainDestination no debe contener stopId: $it", it.contains(row.stopId)) }
+            row.lineIds.forEach { assertTrue("lineId público: $it", catalog.lines.map { it.cod }.toSet().contains(it)) }
+        }
     }
 }

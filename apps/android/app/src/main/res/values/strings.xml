@@ -39,7 +39,7 @@
 
     <!-- A02 · Paradas -->
     <string name="stops_title">Paradas</string>
-    <string name="stops_search_hint">Código o calle (ej. 340, Boulevard)</string>
+    <string name="stops_search_hint">Código o calle</string>
     <string name="stops_refresh_location">Actualizar ubicación</string>
     <string name="stops_tab_nearby">Cercanas</string>
     <string name="stops_tab_favorites">Favoritas</string>
@@ -61,7 +61,7 @@
     <string name="stops_recents_empty_body">Las últimas 10 paradas que consultes aparecerán aquí.</string>
 
     <!-- A05 · Detalle de parada -->
-    <string name="stop_title_fallback">Parada %1$s</string>
+    <string name="stop_unnamed">Parada</string>
     <string name="stop_directions">Cómo llegar</string>
     <string name="stop_next_arrivals">Próximas llegadas</string>
     <string name="stop_line_star">Guardar la línea %1$s en esta parada</string>
@@ -103,7 +103,6 @@
     <string name="undo">Deshacer</string>
     <string name="cancel">Cancelar</string>
     <string name="settings_open">Ajustes</string>
-    <string name="stop_with_code">%1$s (%2$s)</string>
     <plurals name="a11y_alerts_badge">
         <item quantity="one">%1$d aviso activo</item>
         <item quantity="other">%1$d avisos activos</item>
@@ -167,7 +166,6 @@
     <!-- Notificación de llegada y su vista previa en A06 -->
     <string name="notif_title">L%1$s → %2$s en %3$d min</string>
     <string name="notif_title_no_destination">L%1$s en %2$d min</string>
-    <string name="notif_body_stop">%1$s (%2$s)</string>
 
     <!-- A05 · avisos -->
     <string name="stop_create_alert">Crear aviso en esta parada</string>

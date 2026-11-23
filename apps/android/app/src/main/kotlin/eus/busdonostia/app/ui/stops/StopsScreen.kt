@@ -57,7 +57,6 @@ import eus.busdonostia.app.ui.components.ScreenHeader
 import eus.busdonostia.app.ui.components.SearchPill
 import eus.busdonostia.app.ui.components.SectionLabel
 import eus.busdonostia.app.ui.components.SkeletonList
-import eus.busdonostia.app.ui.components.StopCodePill
 import eus.busdonostia.app.ui.screens.EmptyAction
 import eus.busdonostia.app.ui.screens.EmptyState
 
@@ -182,14 +181,15 @@ private fun StopsContent(
             is LocationState.Located -> StopList {
                 section(R.string.stops_section_nearby, R.string.stops_by_distance)
                 rows(state.rows, state, onOpenStop, onStar)
-                item { NearbyFootnote(state.coordinatesAttribution) }
+                item(key = "nearby-footnote", contentType = "footnote") { NearbyFootnote(state.coordinatesAttribution) }
             }
             LocationState.NoPermission, LocationState.Unavailable -> StopList {
-                item {
+                item(key = "nearby-location", contentType = "info_banner") {
                     if (location == LocationState.NoPermission) {
                         LocationPrompt(askLocation)
                     } else {
                         InfoBanner(
+                            visible = true,
                             text = stringResource(R.string.stops_location_unavailable),
                             warning = true,
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -239,7 +239,7 @@ private fun StopList(content: LazyListScope.() -> Unit) {
 }
 
 private fun LazyListScope.section(label: Int, trailing: Int? = null) {
-    item {
+    item(key = "section-$label", contentType = "section_label") {
         SectionLabel(stringResource(label), trailing = trailing?.let { stringResource(it) })
     }
 }
@@ -307,8 +307,6 @@ private fun StopCard(row: StopRow, lineColors: Map<String, Int>, onClick: () -> 
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false),
                 )
-                Spacer(Modifier.width(8.dp))
-                StopCodePill(row.stopId)
                 Spacer(Modifier.weight(1f))
                 FavoriteStar(
                     checked = row.starred,
@@ -321,12 +319,24 @@ private fun StopCard(row: StopRow, lineColors: Map<String, Int>, onClick: () -> 
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                FlowRow(
-                    modifier = Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    row.lineIds.forEach { LineBadge(it, lineColors[it]) }
+                Column(modifier = Modifier.weight(1f)) {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        row.lineIds.forEach { LineBadge(it, lineColors[it]) }
+                    }
+                    // Desambiguación legible para paradas homónimas: sentido/destino principal.
+                    row.mainDestination?.let { dest ->
+                        Text(
+                            text = dest,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+                    }
                 }
                 // Distancia en la fila de líneas para no recortar el nombre de la parada.
                 if (row.meters != null && row.walkMinutes != null) {

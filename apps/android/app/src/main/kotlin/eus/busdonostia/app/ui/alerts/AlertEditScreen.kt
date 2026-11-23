@@ -53,7 +53,6 @@ import eus.busdonostia.app.ui.components.ScreenHeader
 import eus.busdonostia.app.ui.components.SearchPill
 import eus.busdonostia.app.ui.components.SectionLabel
 import eus.busdonostia.app.ui.components.SkeletonList
-import eus.busdonostia.app.ui.components.StopCodePill
 import eus.busdonostia.app.ui.screens.EmptyAction
 import eus.busdonostia.app.ui.screens.EmptyState
 import eus.busdonostia.app.ui.system.needsNotificationPermission
@@ -189,7 +188,6 @@ private fun StopAndLine(state: AlertEditUiState, vm: AlertEditViewModel) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                StopCodePill(stop.cod)
                 Text(stop.desc, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
             }
         }
@@ -213,12 +211,11 @@ private fun StopAndLine(state: AlertEditUiState, vm: AlertEditViewModel) {
         ) {
             Column(Modifier.weight(1f)) {
                 Text(
-                    state.stopName ?: stringResource(R.string.stop_title_fallback, stopId),
+                    state.stopName ?: stringResource(R.string.stop_unnamed),
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                StopCodePill(stopId)
             }
             TextButton(onClick = vm::openStopPicker, modifier = Modifier.heightIn(min = 48.dp)) {
                 Text(stringResource(R.string.alert_change_stop))
@@ -305,7 +302,7 @@ private fun MinutesAhead(minutes: Int, range: IntRange, onChange: (Int) -> Unit)
 private fun Preview(state: AlertEditUiState) {
     val draft = state.draft
     val line = draft.lineId ?: return
-    val stopId = draft.stopId ?: return
+    if (draft.stopId == null) return
     SectionLabel(stringResource(R.string.alert_preview), modifier = Modifier.padding(horizontal = 0.dp))
     BorderedCard {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -321,7 +318,12 @@ private fun Preview(state: AlertEditUiState) {
                 ?: stringResource(R.string.notif_title_no_destination, line, draft.minutesAhead)
             Text(title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(
-                stringResource(R.string.notif_body_stop, state.stopName ?: stopId, stopId),
+                // Réplica de la notificación real (AlertNotifications): nombre de parada + fuente, sin código de poste.
+                stringResource(
+                    R.string.notif_body,
+                    state.stopName ?: stringResource(R.string.stop_unnamed),
+                    stringResource(R.string.source_live),
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,

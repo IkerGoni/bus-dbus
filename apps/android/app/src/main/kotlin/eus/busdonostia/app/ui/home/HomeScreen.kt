@@ -1,5 +1,13 @@
 package eus.busdonostia.app.ui.home
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import eus.busdonostia.app.ui.components.rememberEffectiveMotionTokens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -67,6 +75,7 @@ import eus.busdonostia.app.ui.screens.EmptyAction
 import eus.busdonostia.app.ui.screens.EmptyState
 import eus.busdonostia.app.ui.theme.CountdownHero
 import eus.busdonostia.app.ui.theme.LocalStatusColors
+import eus.busdonostia.app.ui.theme.MotionTokens
 import kotlinx.coroutines.launch
 
 /** A01 · Inicio: próximo aviso, paradas favoritas en vivo y búsqueda universal (paradas y líneas). */
@@ -322,39 +331,51 @@ private fun FavoriteCard(card: FavoriteStopCard, state: HomeUiState, onOpen: () 
     }
 }
 
+@Suppress("EXPERIMENTAL_API_USAGE")
 @Composable
 private fun FavoriteArrivals(card: FavoriteStopCard, state: HomeUiState, onRetry: () -> Unit) {
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
-    when (val view = card.view) {
-        ArrivalsView.Loading -> SkeletonList(rows = 1, rowHeight = 24.dp)
-        ArrivalsView.Error -> Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.stop_error_title), color = muted, modifier = Modifier.weight(1f))
-            TextButton(onClick = onRetry, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.retry)) }
-        }
-        is ArrivalsView.Empty -> Text(stringResource(R.string.stop_empty_title), color = muted)
-        else -> if (view is ArrivalsView.Degraded && view.reason == DegradedReason.NO_SERVICE) {
-            Text(view.notice ?: stringResource(R.string.stop_no_service_title), color = muted, maxLines = 2, overflow = TextOverflow.Ellipsis)
-        } else {
-            if (view is ArrivalsView.Degraded) {
-                Text(stringResource(R.string.stop_stale, clockOf(view.fetchedAtMs)), color = muted, style = MaterialTheme.typography.bodySmall)
+    val motion = rememberEffectiveMotionTokens()
+    AnimatedContent(
+        targetState = card.view,
+        contentKey = { it::class },
+        transitionSpec = {
+            (fadeIn(tween(motion.arrivalsStateFadeInMs)) + slideInVertically(tween(motion.arrivalsStateFadeInMs)) { (it * motion.arrivalsStateSlideFraction).toInt() })
+                .togetherWith(fadeOut(tween(motion.arrivalsStateFadeOutMs)))
+        },
+        label = "arrivalsViewState",
+    ) { view ->
+        when (view) {
+            ArrivalsView.Loading -> SkeletonList(rows = 1, rowHeight = 24.dp)
+            ArrivalsView.Error -> Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.stop_error_title), color = muted, modifier = Modifier.weight(1f))
+                TextButton(onClick = onRetry, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.retry)) }
             }
-            if (card.rows.isEmpty()) {
-                Text(
-                    card.row.favoriteLineId?.let { stringResource(R.string.stop_line_empty, it) } ?: stringResource(R.string.stop_empty_title),
-                    color = muted,
-                )
-            }
-            card.rows.forEach { arrivalRow ->
-                val arrival = arrivalRow.arrival
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    LineBadge(arrival.lineId, state.lineColors[arrival.lineId], size = 24.dp)
+            is ArrivalsView.Empty -> Text(stringResource(R.string.stop_empty_title), color = muted)
+            else -> if (view is ArrivalsView.Degraded && view.reason == DegradedReason.NO_SERVICE) {
+                Text(view.notice ?: stringResource(R.string.stop_no_service_title), color = muted, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            } else {
+                if (view is ArrivalsView.Degraded) {
+                    Text(stringResource(R.string.stop_stale, clockOf(view.fetchedAtMs)), color = muted, style = MaterialTheme.typography.bodySmall)
+                }
+                if (card.rows.isEmpty()) {
                     Text(
-                        arrival.destination.ifEmpty { stringResource(R.string.destination_unknown) },
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f),
+                        card.row.favoriteLineId?.let { stringResource(R.string.stop_line_empty, it) } ?: stringResource(R.string.stop_empty_title),
+                        color = muted,
                     )
-                    MinutesLabel(arrivalRow.minutes, arrival.source)
+                }
+                card.rows.forEach { arrivalRow ->
+                    val arrival = arrivalRow.arrival
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        LineBadge(arrival.lineId, state.lineColors[arrival.lineId], size = 24.dp)
+                        Text(
+                            arrival.destination.ifEmpty { stringResource(R.string.destination_unknown) },
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f),
+                        )
+                        MinutesLabel(arrivalRow.minutes, arrival.source)
+                    }
                 }
             }
         }

@@ -41,6 +41,8 @@ data class StopRow(
     val walkMinutes: Int? = null,
     /** Favorito parada+línea (STOP_LINE): la estrella de la fila se refiere a esa línea. */
     val favoriteLineId: String? = null,
+    /** Destino principal para desambiguar paradas homónimas (p. ej. "Hacia Amara" vs "Hacia Centro"). */
+    val mainDestination: String? = null,
     val starred: Boolean,
 )
 
@@ -91,7 +93,15 @@ class StopsViewModel(private val container: AppContainer) : ViewModel() {
         }
         val starredStops = input.favorites.filter { it.type == FavoriteType.STOP }.mapNotNull { it.stopId }.toSet()
         fun row(stop: CatalogStop, meters: Long? = null, walk: Int? = null) =
-            StopRow(stop.cod, stop.desc, stop.lines, meters, walk, starred = stop.cod in starredStops)
+            StopRow(
+                stopId = stop.cod,
+                name = stop.desc,
+                lineIds = stop.lines,
+                meters = meters,
+                walkMinutes = walk,
+                mainDestination = stop.destinations.firstOrNull(),
+                starred = stop.cod in starredStops,
+            )
 
         val recentRows = recents.mapNotNull { catalog.stopByCode(it.stopId)?.let(::row) }
         val rows = when {
@@ -165,13 +175,21 @@ fun favoriteRows(catalog: Catalog, favorites: List<Favorite>): List<StopRow> =
     favorites.sortedByDescending { it.createdAtMs }.mapNotNull { fav ->
         val stopId = fav.stopId ?: return@mapNotNull null
         val stop = catalog.stopByCode(stopId) ?: return@mapNotNull null
+        val mainDest = stop.destinations.firstOrNull()
         when (fav.type) {
-            FavoriteType.STOP -> StopRow(stop.cod, stop.desc, stop.lines, starred = true)
+            FavoriteType.STOP -> StopRow(
+                stopId = stop.cod,
+                name = stop.desc,
+                lineIds = stop.lines,
+                mainDestination = mainDest,
+                starred = true,
+            )
             FavoriteType.STOP_LINE -> StopRow(
-                stop.cod,
-                stop.desc,
-                listOfNotNull(fav.lineId),
+                stopId = stop.cod,
+                name = stop.desc,
+                lineIds = listOfNotNull(fav.lineId),
                 favoriteLineId = fav.lineId,
+                mainDestination = mainDest,
                 starred = true,
             )
             FavoriteType.LINE -> null

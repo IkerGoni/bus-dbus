@@ -1,0 +1,131 @@
+package eus.busdonostia.app.ui.components
+
+import android.provider.Settings
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.unit.Dp
+import eus.busdonostia.app.ui.theme.DesignTokens
+import eus.busdonostia.app.ui.theme.MotionTokens
+
+/** CompositionLocal para accesibilidad: true cuando el usuario tiene "Quitar animaciones" activado. */
+val LocalReducedMotion = compositionLocalOf { false }
+
+/**
+ * Lee `Settings.Global.ANIMATOR_DURATION_SCALE == 0f` (API real de Android para "Quitar animaciones").
+ * En `@Preview` / Robolectric (`LocalInspectionMode.current`) devuelve `true` para no bloquear `waitForIdle()`.
+ */
+@Composable
+fun rememberSystemReducedMotion(): Boolean {
+    if (LocalInspectionMode.current) return true
+    val context = LocalContext.current
+    return remember(context) {
+        Settings.Global.getFloat(
+            context.contentResolver,
+            Settings.Global.ANIMATOR_DURATION_SCALE,
+            1f
+        ) == 0f
+    }
+}
+
+/**
+ * Devuelve los tokens de motion resueltos según accesibilidad.
+ * Cuando `reducedMotion == true`, colapsa todas las duraciones a 0 y desactiva pulsos/rotaciones.
+ * Usar en lugar de `MotionTokens` directamente en composables.
+ */
+@Composable
+fun rememberEffectiveMotionTokens(): MotionTokens.ResolvedMotionTokens {
+    val reducedMotion = LocalReducedMotion.current
+    return MotionTokens.resolve(reducedMotion)
+}
+
+/**
+ * Modifier de escala al pulsar (press feedback) operando EXCLUSIVAMENTE en `graphicsLayer`.
+ * No dispara recomposición ni cambios de layout. Respeta `LocalReducedMotion`.
+ */
+fun Modifier.pressScale(
+    interactionSource: MutableInteractionSource
+): Modifier = composed {
+    val reducedMotion = LocalReducedMotion.current
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val motion = rememberEffectiveMotionTokens()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed && !reducedMotion) motion.pressScaleFactor else 1f,
+        animationSpec = spring(
+            dampingRatio = motion.springNoBounceDamping,
+            stiffness = motion.springMediumStiffness
+        ),
+        label = "pressScale"
+    )
+    graphicsLayer {
+        this.scaleX = scale
+        this.scaleY = scale
+    }
+}
+
+/**
+ * Punto de pulso LIVE (GPS) — 8 dp, alpha animado `1.0 ↔ 0.3` en 1100 ms.
+ * El texto de minutos permanece al 100% opacidad con `tnum`; solo pulsa el punto.
+ * Respeta `LocalReducedMotion` y `LocalInspectionMode` (no bloquea tests).
+ */
+@Composable
+fun LiveSignalDot(
+    isLive: Boolean,
+    modifier: Modifier = Modifier,
+    dotSize: androidx.compose.ui.unit.Dp = eus.busdonostia.app.ui.theme.DesignTokens.liveSignalDotSize,
+    liveColor: androidx.compose.ui.graphics.Color = androidx.compose.material3.MaterialTheme.colorScheme.primary,
+    scheduledColor: androidx.compose.ui.graphics.Color = androidx.compose.material3.MaterialTheme.colorScheme.outline
+) {
+    val reducedMotion = LocalReducedMotion.current
+    val motion = rememberEffectiveMotionTokens()
+    val animatePulse = isLive && !reducedMotion && !LocalInspectionMode.current
+    val alpha = if (animatePulse) {
+        val transition = rememberInfiniteTransition(label = "liveGpsPulse")
+        transition.animateFloat(
+            initialValue = motion.livePulseMaxAlpha,
+            targetValue = motion.livePulseMinAlpha,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = motion.livePulseDurationMs,
+                    easing = FastOutSlowInEasing
+                ),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "liveDotAlpha"
+        )
+    } else {
+        remember { androidx.compose.runtime.mutableFloatStateOf(1f) }
+    }
+
+    androidx.compose.foundation.layout.Box(
+        modifier = modifier
+            .size(dotSize)
+            .graphicsLayer { this.alpha = alpha.value }
+            .background(
+                color = if (isLive) liveColor else scheduledColor,
+                shape = androidx.compose.foundation.shape.CircleShape
+            )
+    )
+}

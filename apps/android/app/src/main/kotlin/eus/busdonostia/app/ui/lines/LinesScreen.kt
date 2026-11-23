@@ -44,7 +44,6 @@ import eus.busdonostia.app.ui.components.LineBadge
 import eus.busdonostia.app.ui.components.ScreenHeader
 import eus.busdonostia.app.ui.components.SearchPill
 import eus.busdonostia.app.ui.components.SkeletonList
-import eus.busdonostia.app.ui.components.StopCodePill
 import eus.busdonostia.app.ui.components.lineColor
 import eus.busdonostia.app.ui.screens.EmptyAction
 import eus.busdonostia.app.ui.screens.EmptyState
@@ -243,7 +242,7 @@ private fun TimelineRow(
             }
         }
         Text(
-            text = stop.name ?: stop.stopId,
+            text = stop.name ?: stringResource(R.string.stop_unnamed),
             style = if (first || last) MaterialTheme.typography.titleMedium else MaterialTheme.typography.bodyLarge,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -251,7 +250,6 @@ private fun TimelineRow(
                 .weight(1f)
                 .padding(horizontal = 12.dp),
         )
-        StopCodePill(stop.stopId)
         Icon(
             Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,

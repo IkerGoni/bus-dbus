@@ -20,7 +20,8 @@
       "searchClearButtonMs": 160,
       "infoBannerMs": 200,
       "lineDirectionCrossfadeMs": 200,
-      "wizardStepSlideMs": 240
+      "wizardStepSlideMs": 240,
+      "arrivalsStateSlideFraction": 0.0625
     },
     "microInteractions": {
       "pressScaleFactor": 0.97,
@@ -29,7 +30,8 @@
       "favoriteStarRotationDeg": 72.0,
       "springNoBounceDamping": 1.0,
       "springMediumBounceDamping": 0.5,
-      "springMediumStiffness": 1500.0
+      "springMediumStiffness": 1500.0,
+      "searchClearScaleFactor": 0.8
     },
     "livePulse": {
       "durationMs": 1100,

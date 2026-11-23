@@ -1,6 +1,12 @@
 package eus.busdonostia.app.ui
 
 import android.net.Uri
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -39,6 +45,7 @@ import eus.busdonostia.app.R
 import eus.busdonostia.app.domain.badgeText
 import eus.busdonostia.app.ui.alerts.AlertEditScreen
 import eus.busdonostia.app.ui.alerts.AlertsScreen
+import eus.busdonostia.app.ui.components.rememberEffectiveMotionTokens
 import eus.busdonostia.app.ui.home.HomeScreen
 import eus.busdonostia.app.ui.settings.SettingsScreen
 import eus.busdonostia.app.ui.stopdetail.StopDetailScreen
@@ -142,10 +149,40 @@ fun AppShell(navController: NavHostController = rememberNavController()) {
             }
         },
     ) { innerPadding ->
+        val motion = rememberEffectiveMotionTokens()
+        val tabRoutes = Destination.entries.map { it.route }.toSet()
         NavHost(
             navController = navController,
             startDestination = Destination.HOME.route,
             modifier = Modifier.padding(innerPadding),
+            enterTransition = {
+                val isTabSwitch = initialState.destination.route in tabRoutes && targetState.destination.route in tabRoutes
+                if (isTabSwitch) {
+                    fadeIn(tween(motion.bottomTabFadeInMs))
+                } else {
+                    slideInHorizontally(
+                        animationSpec = tween(motion.detailSlideInMs, easing = FastOutSlowInEasing),
+                        initialOffsetX = { (it * motion.detailSlideFraction).toInt() },
+                    ) + fadeIn(tween(motion.detailFadeInMs))
+                }
+            },
+            exitTransition = {
+                val isTabSwitch = initialState.destination.route in tabRoutes && targetState.destination.route in tabRoutes
+                if (isTabSwitch) {
+                    fadeOut(tween(motion.bottomTabFadeOutMs))
+                } else {
+                    fadeOut(tween(motion.detailFadeOutMs))
+                }
+            },
+            popEnterTransition = {
+                fadeIn(tween(motion.detailFadeInMs))
+            },
+            popExitTransition = {
+                slideOutHorizontally(
+                    animationSpec = tween(motion.detailSlideOutMs, easing = FastOutSlowInEasing),
+                    targetOffsetX = { (it * motion.detailSlideFraction).toInt() },
+                ) + fadeOut(tween(motion.detailFadeOutMs))
+            },
         ) {
             composable(Destination.HOME.route) {
                 HomeScreen(onNavigate = navigateTo, onOpenStop = openStop, onOpenLine = openLine, onOpenSettings = openSettings)

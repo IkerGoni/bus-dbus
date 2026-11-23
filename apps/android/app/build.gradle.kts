@@ -145,6 +145,11 @@ android {
 
 kotlin {
     jvmToolchain(17)
+    
+    // Permitir APIs experimentales de animación de Compose
+    compilerOptions {
+        freeCompilerArgs.add("-opt-in=androidx.compose.animation.ExperimentalAnimationApi")
+    }
 }
 
 room {
