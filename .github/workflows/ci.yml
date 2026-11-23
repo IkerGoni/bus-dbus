@@ -37,7 +37,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @dbus/contracts --filter @dbus/core run build
       - run: pnpm --filter @dbus/contracts --filter @dbus/core run test
-      - run: pnpm --filter @dbus/bot run test -- --exclude="tests/integration.test.ts" --exclude="tests/handlers.test.ts" --reporter=verbose
+      - run: pnpm --filter @dbus/bot run test tests/alerts.test.ts tests/db-migration.test.ts tests/nearby-index.test.ts tests/telegram-launch.test.ts tests/unit.test.ts tests/validate-line.test.ts tests/haversine-parity.test.ts -- --reporter=verbose
 
   test-integration:
     runs-on: ubuntu-latest
