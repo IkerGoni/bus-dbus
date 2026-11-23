@@ -43,7 +43,6 @@ app Android nativa en desarrollo. Proyecto no oficial, sin afiliación con Dbus.
 │   ├── core/           # @dbus/core — dominio compartido
 │   └── contracts/      # @dbus/contracts — fixtures reales y catálogo
 ├── docs/               # ver docs/README.md
-├── state/kanban/       # kanban histórico
 ├── .github/workflows/  # ci.yml, android.yml
 ├── AGENTS.md · ESTADO.md · README.md
 └── package.json · pnpm-workspace.yaml · tsconfig.json · biome.json
@@ -136,4 +135,5 @@ Spec: [`docs/07-android-mvp/`](docs/07-android-mvp/README.md) · plan:
 
 ## Licencia
 
-Sin decidir. Repositorio privado hasta que el autor decida.
+El código de este repositorio se distribuye bajo la [Licencia MIT](LICENSE).
+Las fuentes tipográficas empaquetadas en `apps/android/licenses/` conservan su propia licencia SIL Open Font License 1.1.

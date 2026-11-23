@@ -1,13 +1,22 @@
 # Environment variables (never commit real credentials)
 .env
 .env.local
-.env.*.local
+.env.*
+!.env.example
 
-# Bot
+# Signing keys & Play Console credentials (never commit)
+*.keystore
+*.jks
+.gplay/
+play-service-account.json
+gplay-service-account*.json
+
+# Bot & local databases
 apps/bot/.env
 bot.db
-*.db
-*.db-journal
+*.db*
+state/
+.worktrees/
 
 # Dependencies
 node_modules/
@@ -16,6 +25,7 @@ node_modules/
 dist/
 dist-types/
 dist-ssr/
+build/
 *.local
 
 # TypeScript build info

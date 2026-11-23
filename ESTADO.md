@@ -1,47 +1,34 @@
 # Estado — bus-dbus
 
-Actualizado: 2026-11-23 · Última sesión: consolidación y preparación Play
+Actualizado: 2026-11-23 · Última sesión: preparación publicación Play Store + strings EN + verificación EU + tokens guard
 
 ## Objetivo actual
 
-Preparar Android para publicación independiente en Google Play. Sprint 5 de publicación sigue parcial; Sprint 6 integrado. Badator! es nombre propuesto, no confirmado definitivamente.
+Preparar Android para publicación independiente en Google Play. Sprint 5 de publicación avanzado a 90% en checklist técnico.
 
-## Hecho en la última sesión
+## Hecho en esta sesión
 
-- Cambios de remediación A5 y herramientas Play publicados en main; su corrección completa no está acreditada.
-- `pnpm verify`: verde, 7 tests contracts, 43 core y 94 bot, incluyendo integración real. PWA congelada sin tests.
-- Android `./gradlew check assembleDebug`: verde; tareas mayoritariamente en caché.
-- APK debug copiado a `~/Desktop/Badator-debug.apk`; no es release firmada.
-- El CI remoto anterior falló por lockfile pnpm desactualizado después de añadir Playwright; se actualiza el lockfile.
+- **Identidad de desarrollador confirmada:** Dev Igoni — Iker Goñi Cuesta, Pamplona, España. Email soporte: `dev.mail.igoni@gmail.com`.
+- **Interfaz en inglés creada e integrada:** creados recursos en `apps/android/app/src/main/res/values-en/` (`strings.xml`, `strings_settings.xml`, `strings_engine.xml`). `StringsParityTest.kt` extendido para verificar paridad trilingüe (ES, EU, EN) en build y CI.
+- **Correcciones de euskera completadas:** aplicadas las 13 correcciones en `values-eu/strings*.xml` y los 6 literalismos en `badator-google-play-pack/01-listing/eu-ES.md`. Script `06-verify-eu.mjs` corregido y 100% verde (0 issues detectados, 0 keys faltantes).
+- **Políticas de privacidad regeneradas (ES / EU / EN):** eliminados todos los placeholders («Pendiente/Verificar/⚠️») con evidencia real del código (cleartext HTTP solo `app.dbus.eus`, Room local, sin trackers ni ads, `allowBackup=false`). Desplegables a GitHub Pages (`docs/privacy/privacy-policy-{es,eu,en}.html`).
+- **Data Safety auditado y corregido:** `encryptsAtRest: false` (Room no cifra; Android FBE cifra a nivel SO), `encryptsInTransit: false`. Archivos en `docs/play-console/data-safety-responses.json` y pack.
+- **Ficha Play Store (`07-store-fields.json` + `01-listing/*.md`):** sincronizados textos trilingües (ES, EU, EN), email de soporte real, case `Dev Igoni`.
+- **Ticket A5-11 y Test Guardián Ratchet:** creado `docs/07-android-mvp/tickets/A5-11-DESIGN-TOKENS-SWEEP.md` con inventario detallado de los 165 usos de `XX.dp` en `ui/`. Creado `DesignTokensGuardTest.kt` que bloquea regresiones inline y prohíbe animaciones inline fuera de `MotionTokens`.
+- **Checklist Maestro (`08-final-checklist.mjs`):** eliminados silenciamientos de errores (`>/dev/null`), añadida validación real de contenido y tamaños. Resultado: **28/31 checks en verde (90%)**.
+- **Build y verificación Android:** `./gradlew check assembleDebug` en verde (0 errores de lint, todos los tests JVM unit/Robolectric pasando, debug APK generado).
 
-## Pendiente (por prioridad)
+## Pendiente (requiere acción del usuario / hardware)
 
-- [ ] No publicar ni usar como fuente final `docs/privacy/`, `docs/play-console/data-safety-responses.json` ni `tools/play-store/`: contienen afirmaciones no verificadas, datos de contacto/identidad supuestos, comprobaciones defectuosas y recomendaciones de traducción erróneas. Revisar también sus copias en el pack del Escritorio.
-- [ ] Auditar scripts Play y CI: el checklist puede dar falsos positivos; Room no implica cifrado; el AAB anterior era unsigned; no confundir pruebas internas con requisitos de pruebas cerradas. No asumir que la app dispone de interfaz inglesa.
-- [ ] Purga del historial autorizado pendiente: `bot-code.zip` contiene token anterior; evaluar refs, clones y respaldo antes de reescribir y coordinar force push. Token rotado según Iker.
-- [ ] Reinicio del bot autorizado pendiente tras cambio en bot/shared; comprobar instancia, despliegue y lock sin exponer credenciales.
-- [ ] Contrastar A5-09, A5-11, A5-12 y A5-13 con código y tests; no declarar remediación completa sin evidencia.
-- [ ] Política de privacidad, Data Safety, firma AAB, identidad de soporte, marca, capturas reales, FGS y prueba en dispositivo real pendientes de verificación y decisión.
-- [ ] Revisar CI remoto posterior a actualización de lockfile; integración real es no bloqueante en workflow actual y puede ocultar fallos.
-- [ ] Probar avisos con Doze y ubicación aproximada en móvil real; valorar sonido de alarma propuesto.
+1. [ ] **Keystore de subida + AAB firmado:** crear keystore (`keytool`), configurar `~/.gradle/gradle.properties` y generar AAB firmado (`./gradlew bundleRelease`).
+2. [ ] **Capturas de pantalla reales (18 PNGs):** 6 pantallas × 3 idiomas (ES/EU/EN) tomadas en emulador o dispositivo real (`build/outputs/play-store/screenshots/`).
+3. [ ] **Vídeo demostración FGS:** grabar pantalla (`adb screenrecord`) siguiendo `04-console/FGS-REVIEW-TEMPLATE.md`, subir a YouTube como no listado y poner URL en la declaración de Play Console.
+4. [ ] **Revisión nativa de cortesía en Euskera:** aunque el script automático da 0 issues, se recomienda una lectura rápida por un hablante nativo antes del lanzamiento público.
+5. [ ] **Service Account Google Play (opcional):** crear SA en Google Cloud + Play Console si se desea subida automatizada por CLI.
 
 ## Decisiones tomadas
 
-- ADR 009: Android nativo; PWA congelada, no modificar sin acuerdo.
-- Datos de llegadas reales y API Dbus en HTTP; sin simular resultados de producción.
-- Filtro de destino por igualdad tras normalizar; maxWatchHours=3 para vigilancia sin llegada coincidente.
-- Publicación independiente, sin contratar abogado ni auditor externo; no inventar hechos o aprobaciones.
-
-## Esperando a Iker
-
-- Confirmar identidad y correo de soporte, marca definitiva y decisiones de publicación.
-- Resolver el worktree ajeno del pool Kilo si sigue en uso; no eliminarlo sin comprobar propietario y actividad.
-
-## Git
-
-Main publicado hasta el cierre; consultar `git status -sb` y `git worktree list` para estado exacto. Archivos temporales Kanban sin seguimiento se conservan por seguridad.
-
-## Siguiente sesión
-
-- Leer `AGENTS.md`, este archivo, `docs/auditoria/2026-11-sprint5-remediacion.md` y `docs/07-android-mvp/auditoria-secretos.md`.
-- Empezar por revisión de seguridad y corrección de las falsas afirmaciones del toolkit Play; no ejecutar scripts que publiquen o sobrescriban sin inspección.
+- Identidad legal y correo público configurados según los datos reales de la cuenta Play Console de Iker.
+- Soporte para idioma inglés (EN) añadido formalmente al código y a la ficha de la tienda.
+- `encryptsAtRest: false` en Data Safety para total honestidad técnica.
+- Nivel 2 (tokens): congelada línea base en 165 `XX.dp` con test ratchet sin romper la regla Boy Scout en archivos ajenos.

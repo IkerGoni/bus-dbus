@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Plantilla launchd para refrescar el catálogo semanalmente.
+  Antes de cargarla con `launchctl load`, sustituye los placeholders:
+    sed -e "s|__REPO_ROOT__|/ruta/a/bus-dbus|g" \
+        -e "s|__LOG_DIR__|/tmp|g" \
+        apps/bot/scripts/com.dbus.catalog-weekly.plist > ~/Library/LaunchAgents/com.dbus.catalog-weekly.plist
+-->
 <plist version="1.0">
 <dict>
   <key>Label</key>
@@ -7,7 +14,7 @@
   <key>ProgramArguments</key>
   <array>
     <string>/bin/sh</string>
-    <string>/Users/dev/Workspace/projects/bus-dbus/apps/bot/scripts/refresh-catalog-weekly.sh</string>
+    <string>__REPO_ROOT__/apps/bot/scripts/refresh-catalog-weekly.sh</string>
   </array>
   <key>StartCalendarInterval</key>
   <dict>
@@ -18,8 +25,8 @@
   <key>RunAtLoad</key>
   <false/>
   <key>StandardOutPath</key>
-  <string>/private/var/folders/l9/wn3qv1050bxcsk3_wk79d8h00000gn/T/dbus-catalog-refresh.log</string>
+  <string>__LOG_DIR__/dbus-catalog-refresh.log</string>
   <key>StandardErrorPath</key>
-  <string>/private/var/folders/l9/wn3qv1050bxcsk3_wk79d8h00000gn/T/dbus-catalog-refresh.log</string>
+  <string>__LOG_DIR__/dbus-catalog-refresh.log</string>
 </dict>
 </plist>

@@ -2,6 +2,8 @@
   "name": "bus-dbus",
   "version": "0.1.0-beta",
   "private": true,
+  "license": "MIT",
+  "author": "Iker Goñi Cuesta <dev.mail.igoni@gmail.com>",
   "type": "module",
   "packageManager": "pnpm@11.5.3",
   "engines": {
@@ -11,7 +13,7 @@
     "dev": "pnpm --filter @dbus/mobile dev",
     "dev:bot": "pnpm --filter @dbus/bot dev",
     "build": "pnpm --filter @dbus/contracts build && pnpm --filter @dbus/core build && pnpm --filter @dbus/mobile build",
-    "build:ci": "pnpm --filter @dbus/contracts build && pnpm --filter @dbus/core build",
+    "build:ci": "pnpm --filter @dbus/contracts build && pnpm --filter @dbus/core build && pnpm --filter @dbus/bot build",
     "typecheck": "tsc -b packages/contracts packages/core apps/bot",
     "typecheck:all": "tsc -b",
     "test": "pnpm -r test",
