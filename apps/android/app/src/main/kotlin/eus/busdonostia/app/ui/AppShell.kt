@@ -1,20 +1,15 @@
 package eus.busdonostia.app.ui
 
 import android.net.Uri
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,10 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -48,10 +40,10 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import eus.busdonostia.app.ui.lines.LineDetailScreen
 import eus.busdonostia.app.ui.lines.LinesScreen
-import eus.busdonostia.app.R
 import eus.busdonostia.app.domain.badgeText
 import eus.busdonostia.app.ui.alerts.AlertEditScreen
 import eus.busdonostia.app.ui.alerts.AlertsScreen
+import eus.busdonostia.app.ui.components.AlertBadge
 import eus.busdonostia.app.ui.components.LocalAnimatedVisibilityScope
 import eus.busdonostia.app.ui.components.LocalSharedTransitionScope
 import eus.busdonostia.app.ui.components.rememberEffectiveMotionTokens
@@ -140,25 +132,10 @@ fun AppShell(navController: NavHostController = rememberNavController()) {
                         onClick = { navigateTo(dest) },
                         icon = {
                             val badgeText = if (dest == Destination.ALERTS) badgeText(badge) else null
-                            val motion = rememberEffectiveMotionTokens()
                             BadgedBox(
                                 badge = {
                                     if (dest == Destination.ALERTS) {
-                                        androidx.compose.animation.AnimatedVisibility(
-                                            visible = badgeText != null,
-                                            enter = scaleIn(
-                                                animationSpec = spring(
-                                                    dampingRatio = motion.springMediumBounceDamping,
-                                                    stiffness = motion.springMediumStiffness,
-                                                ),
-                                            ) + fadeIn(tween(motion.bottomTabFadeInMs)),
-                                            exit = scaleOut(tween(motion.bottomTabFadeOutMs)) + fadeOut(tween(motion.bottomTabFadeOutMs)),
-                                        ) {
-                                            val description = pluralStringResource(R.plurals.a11y_alerts_badge, badge, badge)
-                                            Badge(Modifier.semantics { contentDescription = description }) {
-                                                Text(badgeText.orEmpty(), maxLines = 1)
-                                            }
-                                        }
+                                        AlertBadge(count = badge, text = badgeText)
                                     }
                                 },
                             ) {
