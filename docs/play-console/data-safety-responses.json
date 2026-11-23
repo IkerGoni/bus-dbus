@@ -22,7 +22,7 @@
   },
   "securityPractices": {
     "encryptsInTransit": false,
-    "encryptsAtRest": true,
+    "encryptsAtRest": false,
     "allowsDeletion": true
   },
   "dataTypes": {
@@ -51,7 +51,7 @@
     "android.permission.FOREGROUND_SERVICE_DATA_SYNC"
   ],
   "reviewerNotes": {
-    "location": "La ubicación es OPCIONAL. La app funciona完全amente sin ella (búsqueda manual, favoritos, avisos). Solo se usa para \"Cercanas\" bajo petición expresa del usuario. Nunca sale del dispositivo.",
+    "location": "La ubicación es OPCIONAL. La app funciona completamente sin ella (búsqueda manual, favoritos, avisos). Solo se usa para \"Cercanas\" bajo petición expresa del usuario. Nunca sale del dispositivo.",
     "network": "La API de llegadas (http://app.dbus.eus/SSIIMovilWSv2/ws/cons/tiemposParada) responde solo por HTTP. El manifiesto declara cleartextTrafficPermitted=true EXCLUSIVAMENTE para app.dbus.eus. No hay otros endpoints. Por tanto NO se puede marcar \"cifrado en tránsito\" para toda la app.",
     "analytics": "Sin SDKs de analítica, crash reporting, publicidad ni telemetría. Dependencias: AndroidX, Compose, Room, OkHttp, kotlinx.serialization, coroutines. Sin Firebase, sin Play Services.",
     "storage": "Datos locales (favoritos, recientes, avisos, preferencias) en Room SQLite dentro del sandbox de la app. android:allowBackup=\"false\" → no backup automático en Google Drive. Usuario elimina todo desde la UI o desinstalando.",

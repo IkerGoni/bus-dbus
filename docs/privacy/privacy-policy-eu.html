@@ -5,18 +5,63 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pribatutasun-politika — Badator!</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; color: #1a1a1a; }
+    body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; color: #1a1a1a; }
     h1 { color: #143E3C; border-bottom: 2px solid #A4E8BD; padding-bottom: 0.5rem; }
     h2 { color: #143E3C; margin-top: 2rem; }
     a { color: #143E3C; }
+    code { background: #f4f4f4; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
     ul { padding-left: 1.5rem; }
     li { margin-bottom: 0.5rem; }
     footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid #ddd; font-size: 0.9rem; color: #666; }
   </style>
 </head>
 <body>
-  <p><h1>Pribatutasun-politika — Badator! (BERRIZKO BERTZIOA)</h1><p><strong>Azken eguneratzea:</strong> 2026-11-23<br><strong>Arduraduna:</strong> Dev iGoni — Iker Goñi (autónomo, España)<br><strong>Kontaktua:</strong> dev.mail.igoni@gmail.com</p><p>Badator! aplikazioak Donostiako autobusen iritsierak kontsultatzeko, gogokoak gordetzeko, inguruko geltokiak aurkitzeko eta abisuak ezartzeko aukera ematen du. Ez da Dbusen edo Donostiako Udalaren aplikazio ofiziala.</p><p><strong>Kokapena:</strong> erabiltzaileak inguruko geltokiak bilatzeko baimena ematen duenean bakarrik eskatzen da; aztertutako inplementazioan ez da modu iraunkorrean gordetzen. <strong>Azken bertsioan egiaztatu behar da.</strong></p><p><strong>Gailuan gordetako datuak:</strong> gogokoak, azken geltokiak, hobespenak eta abisuak. Horien ezabaketa eta segurtasun-kopiak egiaztatu behar dira.</p><p><strong>Kanpoko zerbitzua:</strong> iritsiera-informazioa eskuratzeko, aplikazioak garraio-zerbitzuaren kanpoko API batekin komunikatzen da. Zerbitzuak IP helbidea eta konexioaren metadatu teknikoak jaso ditzake. Aztertutako inplementazioak HTTP erabiltzen du. Ez esan komunikazio guztiak zifratuta daudela, hori egiaztatu gabe.</p><p><strong>Analitika eta publizitatea:</strong> Egoki: <strong>ez da analitika, publicitate, crash-reporting edo telemetria SDK-rik</strong>. Menpegotasunak: AndroidX, Compose, Room, OkHttp, kotlinx.serialization, coroutines. Ez Firebase, ez Play Services, ez hirugarrenak datuak bilatzen dituztenak..</p><p><strong>Datuen kontserbazioa eta ezabaketa:</strong> Datu lokalak (gogokoak, azkenak, abisuak, aukerak): Room SQLite app-aren karpeta pribatuetan. Ezabatzea: erabiltzaileak UI-tik edo app-a desinstalatzen duenean. Backup-automatikorik ez: manifestoan <strong>android:allowBackup="false"</strong>. Eguneraketak: Room-esquema migratzen du; datuak mantentzen dira..</p><p><strong>Eskubideak:</strong> pribatutasunari buruzko kontsultak dev.mail.igoni@gmail.com helbidera bidal daitezke. Osatu lege-informazioa argitaratu aurretik.</p><p><strong>Aldaketak:</strong> politika honen eguneraketak https://ikergoni.github.io/bus-dbus/privacy-policy-eu.html helbidean argitaratuko dira.</p><p>---</p><p><strong>EZ ARGITARATU BERRIKUSPENIK GABE:</strong> ingelesezko eta gaztelaniazko dokumentuarekin koherentzia egiaztatu eta lege-/datu-auditoria amaitu behar da.<br></p>
+  <h1>Pribatutasun-politika — Badator!</h1>
+
+  <p><strong>Azken eguneraketa:</strong> 2026-11-23<br>
+    <strong>Arduraduna:</strong> Dev Igoni — Iker Goñi Cuesta (Pamplona, España)<br>
+    <strong>Kontaktua:</strong> <a href="mailto:dev.mail.igoni@gmail.com">dev.mail.igoni@gmail.com</a></p>
+
+  <h2>1. Zer egiten du aplikazioak</h2>
+
+  <p>Badator! aplikazioak Donostiako autobusen iritsiera-denborak denbora errealean kontsultatzeko, gogoko geltokiak eta lineak gordetzeko, inguruko geltokiak aurkitzeko eta iritsiera-abisuak konfiguratzeko aukera ematen du. Aplikazio independentea eta ez-ofiziala da; ez dago Dbusi edo Donostiako Udalari lotuta.</p>
+
+  <h2>2. Gailuan erabiltzen diren datuak eta baimenak</h2>
+
+  <ul>
+    <li><strong>Kokapena (aukerakoa):</strong> <code>ACCESS_COARSE_LOCATION</code> eta <code>ACCESS_FINE_LOCATION</code> baimenak erabiltzaileak inguruko geltokiak bilatzea eskatzen duenean bakarrik erabiltzen dira. Kokapena gailuaren memorian soilik prozesatzen da unean-unean, geltokiak distantziaren arabera ordenatzeko; ez da inoiz diskoan gordetzen eta ez zaio garatzaileari edo hirugarrenei bidaltzen. Aplikazioak baimen hori gabe ere funtzionatzen du erabat.</li>
+    <li><strong>Gailuan gordetako datuak:</strong> gogokoak, azken geltokiak, hobespenak eta konfiguratutako abisuak gailuaren biltegiratze pribatuan bakarrik gordetzen dira, Room (SQLite lokala) eta DataStore bidez. Manifestuak <code>android:allowBackup="false"</code> deklaratzen duenez, Androidek ez du datu horien segurtasun-kopia automatikorik egiten Google Driven.</li>
+    <li><strong>Jakinarazpenak eta lehen planoko zerbitzua (aukerakoak):</strong> <code>POST_NOTIFICATIONS</code>, <code>FOREGROUND_SERVICE</code> eta <code>FOREGROUND_SERVICE_DATA_SYNC</code> baimenak erabiltzaileak iritsiera-abisuak aktibatzen dituenean bakarrik erabiltzen dira. Abisu aktiboak dauden bitartean, lehen planoko zerbitzu batek iritsierak kontsultatzen ditu eta jakinarazpen iraunkor bat erakusten du; abisu aktiborik geratzen ez denean automatikoki gelditzen da.</li>
+  </ul>
+
+  <h2>3. Sare-kontsultak eta kanpoko datu-hornitzailea</h2>
+
+  <p>Iritsierak denbora errealean erakusteko, Badator! zuzenean konektatzen da <a href="https://www.dbus.eus">Dbus (Donostiako Autobusak)</a> zerbitzuaren API publikora: <code>http://app.dbus.eus/SSIIMovilWSv2/ws/cons/tiemposParada</code>. Kontsulta horiek gailuaren IP helbidea, konexioaren metadatu teknikoak eta eskatutako geltokien identifikatzaileak helaraz diezazkiokete hornitzaileari. Hornitzailearen pribatutasun-politika helbide honetan kontsulta daiteke: <a href="https://www.dbus.eus/privacidad/">https://www.dbus.eus/privacidad/</a>.</p>
+
+  <p>Dbusen APIak gaur egun <strong>HTTP</strong> bidez bakarrik erantzuten du. Aplikazioaren sare-segurtasuneko konfigurazioak <code>cleartextTrafficPermitted="true"</code> deklaratzen du <code>app.dbus.eus</code> domeinurako bakarrik, eta ez dago beste zerbitzari edo sare-helbiderik. Hori dela eta, zerbitzu horretara egindako kontsultak ez doaz zifratuta garraioan.</p>
+
+  <h2>4. Analitika, publizitatea eta hirugarrenak</h2>
+
+  <p>Badator! aplikazioak ez du datu pertsonalik biltzen edo hirugarrenekin partekatzen. Ez du analitika, publizitate, errore-txosten edo telemetria SDKrik. Bere mendekotasunak teknikoak eta funtzionalak bakarrik dira (AndroidX, Jetpack Compose, Room, OkHttp, kotlinx.serialization eta Kotlin Coroutines), Firebase edo Google Play Services gabe.</p>
+
+  <h2>5. Datuen kontserbazioa eta ezabaketa</h2>
+
+  <p>Badator! aplikazioak ez du erabiltzaile-konturik, eta garatzaileak ez du datu pertsonalik gordetzen kanpoko zerbitzarietan. Datu lokalak gailuan bakarrik mantentzen dira, harik eta erabiltzaileak gogokoak, azkenak edo abisuak aplikaziotik bertatik kendu, Androiden ezarpenetatik aplikazioaren datuak ezabatu edo aplikazioa desinstalatu arte.</p>
+
+  <h2>6. Erabiltzaileen eskubideak</h2>
+
+  <p>Pribatutasunari buruzko edozein kontsulta egiteko edo aplikagarria den araudiak aitortutako eskubideak (sarbidea, zuzenketa, ezabaketa, mugatzea edo aurka egitea) baliatzeko, <a href="mailto:dev.mail.igoni@gmail.com">dev.mail.igoni@gmail.com</a> helbidera idatz dezakezu.</p>
+
+  <h2>7. Adingabeak</h2>
+
+  <p>Badator! publiko orokorrari zuzenduta dago (PEGI 3 / Everyone). Ez dago 13 urtetik beherakoei zuzenduta eta ez du adingabeen datu pertsonalik biltzen nahita.</p>
+
+  <h2>8. Politika honetako aldaketak</h2>
+
+  <p>Pribatutasun-politika honen eguneraketa esanguratsuak helbide honetan argitaratuko dira: <a href="https://igoni.github.io/bus-dbus/privacy-policy-eu.html">https://igoni.github.io/bus-dbus/privacy-policy-eu.html</a>.</p>
+
   <footer>
-    Última actualización: 2026-11-23 | Dev iGoni | <a href="https://ikergoni.github.io/bus-dbus/privacy-policy-eu.html">https://ikergoni.github.io/bus-dbus/privacy-policy-eu.html</a>
+    Azken eguneraketa: 2026-11-23 | Dev Igoni | <a href="https://igoni.github.io/bus-dbus/privacy-policy-eu.html">https://igoni.github.io/bus-dbus/privacy-policy-eu.html</a>
   </footer>
-</body></html>
+</body>
+</html>
