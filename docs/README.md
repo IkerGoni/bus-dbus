@@ -9,12 +9,16 @@ Qué doc mirar para cada cosa. Si un doc contradice a
 | Necesito… | Mira |
 |---|---|
 | Reglas del repo, verificación y despliegue | [`AGENTS.md`](../AGENTS.md) |
+| Convenciones Git | [`docs/contributing/README.md`](docs/contributing/README.md) |
 | Qué se hizo, qué falta y decisiones tomadas | [`ESTADO.md`](../ESTADO.md) |
 | Visión, comandos y configuración del bot | [`README.md`](../README.md) |
 | Pantallas, textos y callbacks del bot | [`05-ui/02-bot-telegram.md`](05-ui/02-bot-telegram.md) |
 | Por qué Android nativo y sin backend | [ADR 009](03-architecture/adrs/009-android-nativo-mvp.md) |
 | Plan y resultado de los sprints Android | [`07-android-mvp/SPRINTS.md`](07-android-mvp/SPRINTS.md) |
 | Prompt del próximo sprint (5, publicación) | [`07-android-mvp/prompts/SPRINT-5.md`](07-android-mvp/prompts/SPRINT-5.md) |
+| Prompt de auditoría adversarial del Sprint 5 / MVP | [`07-android-mvp/prompts/AUDIT-SPRINT-5.md`](07-android-mvp/prompts/AUDIT-SPRINT-5.md) |
+| Resultado de esa auditoría (veredicto y hallazgos A5-NN) | [`auditoria/2026-11-sprint5-adversarial.md`](auditoria/2026-11-sprint5-adversarial.md) |
+| Plan y estado de la remediación de A5-NN | [`auditoria/2026-11-sprint5-remediacion.md`](auditoria/2026-11-sprint5-remediacion.md) |
 | Reglas duras para implementar Android | [`07-android-mvp/docs/00-agent-guardrails.md`](07-android-mvp/docs/00-agent-guardrails.md) |
 | Modelos, estados de aviso y matching | [`07-android-mvp/docs/02-domain-contracts.md`](07-android-mvp/docs/02-domain-contracts.md) |
 | Spec de pantallas A01–A08 | [`07-android-mvp/docs/03-android-screens.md`](07-android-mvp/docs/03-android-screens.md) |

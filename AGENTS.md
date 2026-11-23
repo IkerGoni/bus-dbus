@@ -96,7 +96,7 @@ pnpm --filter @dbus/bot build      # tsc -b -> apps/bot/dist
 Android (toolchain en `apps/android/README.md`):
 
 ```bash
-cd apps/android && ./gradlew check assembleDebug   # lint + 94 tests JVM por variante + APK debug
+cd apps/android && ./gradlew check assembleDebug   # lint + 152 (debug) / 138 (release) JVM por variante + APK debug
 ```
 
 Root: `pnpm verify` (lint + typecheck + tests de `apps/bot` y `packages/**`).
@@ -120,6 +120,15 @@ PID nuevo. Un cambio solo de docs no requiere reiniciar el bot.
 - No persistir ubicación del usuario: efímera en sesión.
 - Tests nuevos: bot en `apps/bot/tests/`, Android en
   `apps/android/app/src/test/`; dominio compartido en `packages/core/`.
+
+## Git
+
+Antes de la primera operación Git que cambie algo en la sesión (commit,
+ramas/worktrees, merge, push, `restore`, `reset`, `fetch --prune`), leer
+`docs/contributing/README.md` y el doc que enrute. Las consultas y el
+`fetch` normal no lo requieren. Resumen: Conventional Commits en español,
+sin sprint/versión en el asunto; merges `merge: <desc> (<rama>)`;
+`Co-authored-by` solo si es veraz. La política no concede permisos.
 
 ## Documentación
 
