@@ -36,7 +36,8 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @dbus/contracts --filter @dbus/core run build
-      - run: pnpm --filter @dbus/bot --filter @dbus/contracts --filter @dbus/core run test
+      - run: pnpm --filter @dbus/contracts --filter @dbus/core run test
+      - run: pnpm --filter @dbus/bot run test -- --exclude tests/integration.test.ts --exclude tests/handlers.test.ts
 
   test-integration:
     runs-on: ubuntu-latest
