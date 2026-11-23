@@ -6,7 +6,7 @@ import {
   formatArrival,
   getNextArrivals,
 } from './arrival.js';
-import { getActiveAlerts, updateAlert } from './db.js';
+import { deactivateAlert, getActiveAlerts, updateAlert } from './db.js';
 import { logger } from './logger.js';
 import type { UserAlert } from './types.js';
 
@@ -71,9 +71,10 @@ async function checkAlertsUnsafe(): Promise<void> {
   }
 
   const now = Date.now();
-  const alerts = getActiveAlerts().filter((alert) => {
+  const allAlerts = await getActiveAlerts();
+  const alerts = allAlerts.filter((alert) => {
     if (now - alert.createdAt <= MAX_ALERT_AGE_MS) return true;
-    updateAlert(alert.id, { active: false });
+    void updateAlert(alert.id, { active: false });
     logger.info(`🧹 Alert ${alert.id} expired (older than 7 days)`);
     return false;
   });
@@ -106,7 +107,7 @@ async function checkAlertsUnsafe(): Promise<void> {
           await botInstance.telegram.sendMessage(alert.chatId, msg, {
             parse_mode: 'Markdown',
           });
-          updateAlert(alert.id, { active: false, sendFailures: 0 });
+          await updateAlert(alert.id, { active: false, sendFailures: 0 });
           sentCount++;
           // Sin chat_id en claro (H19): el id del aviso basta para seguirlo.
           logger.info(`✅ Alert ${alert.id} triggered`);
@@ -115,7 +116,7 @@ async function checkAlertsUnsafe(): Promise<void> {
           // el mismo fallo cada minuto hasta la caducidad del aviso.
           const failures = alert.sendFailures + 1;
           failedCount++;
-          updateAlert(alert.id, {
+          await updateAlert(alert.id, {
             sendFailures: failures,
             active: failures < MAX_SEND_FAILURES,
           });

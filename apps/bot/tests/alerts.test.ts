@@ -37,7 +37,7 @@ function fakeBot(sendMessage: (...args: unknown[]) => Promise<unknown>) {
   return { telegram: { sendMessage } } as unknown as Telegraf<Context>;
 }
 
-function newAlert() {
+async function newAlert() {
   return createAlert({
     chatId: CHAT,
     stopId: '2',
@@ -50,13 +50,13 @@ function newAlert() {
   });
 }
 
-beforeEach(() => {
-  for (const alert of getAlertsByChat(CHAT)) deleteAlert(alert.id);
+beforeEach(async () => {
+  for (const alert of await getAlertsByChat(CHAT)) await deleteAlert(alert.id);
   mocks.getNextArrivals.mockReset();
 });
 
-afterEach(() => {
-  for (const alert of getAlertsByChat(CHAT)) deleteAlert(alert.id);
+afterEach(async () => {
+  for (const alert of await getAlertsByChat(CHAT)) await deleteAlert(alert.id);
   vi.useRealTimers();
   vi.restoreAllMocks();
 });
@@ -65,20 +65,20 @@ describe('scheduler de avisos (garantías de AGENTS.md:45-47)', () => {
   it('desactiva avisos de más de 7 días sin enviar ni consultar la API', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-11-01T00:00:00Z'));
-    const alert = newAlert();
+    const alert = await newAlert();
     const send = vi.fn().mockResolvedValue({});
     setBotInstance(fakeBot(send));
 
     vi.setSystemTime(new Date('2026-11-09T00:00:00Z')); // 8 días después
     await triggerAlertCheck();
 
-    expect(getAlertById(alert.id)?.active).toBe(false);
+    expect((await getAlertById(alert.id))?.active).toBe(false);
     expect(send).not.toHaveBeenCalled();
     expect(mocks.getNextArrivals).not.toHaveBeenCalled();
   });
 
   it('un doble disparo concurrente consulta la API una sola vez', async () => {
-    const alert = newAlert();
+    const alert = await newAlert();
     let release!: () => void;
     const gate = new Promise<void>((resolve) => {
       release = resolve;
@@ -95,11 +95,11 @@ describe('scheduler de avisos (garantías de AGENTS.md:45-47)', () => {
     await Promise.all([first, second]);
 
     expect(send).toHaveBeenCalledTimes(1);
-    expect(getAlertById(alert.id)?.active).toBe(false);
+    expect((await getAlertById(alert.id))?.active).toBe(false);
   });
 
   it('desactiva tras 3 fallos de envío y no vuelve a intentarlo', async () => {
-    const alert = newAlert();
+    const alert = await newAlert();
     mocks.getNextArrivals.mockResolvedValue([ARRIVAL]);
     const send = vi.fn().mockRejectedValue(new Error('chat bloqueado'));
     setBotInstance(fakeBot(send));
@@ -108,7 +108,7 @@ describe('scheduler de avisos (garantías de AGENTS.md:45-47)', () => {
     await triggerAlertCheck();
     await triggerAlertCheck();
 
-    expect(getAlertById(alert.id)).toMatchObject({
+    expect(await getAlertById(alert.id)).toMatchObject({
       active: false,
       sendFailures: 3,
     });
@@ -120,7 +120,7 @@ describe('scheduler de avisos (garantías de AGENTS.md:45-47)', () => {
   });
 
   it('prefiere la estimación GPS y filtra por destino', async () => {
-    const alert = newAlert();
+    const alert = await newAlert();
     mocks.getNextArrivals.mockResolvedValue([
       { ...ARRIVAL, lineId: '21', minutes: 1 },
       ARRIVAL,
@@ -135,11 +135,11 @@ describe('scheduler de avisos (garantías de AGENTS.md:45-47)', () => {
     const message = String(send.mock.calls[0][1]);
     expect(message).toContain('L28');
     expect(message).toContain('tiempo real');
-    expect(getAlertById(alert.id)?.active).toBe(false);
+    expect((await getAlertById(alert.id))?.active).toBe(false);
   });
 
   it('no escribe el chat_id en claro en los logs (H19)', async () => {
-    newAlert();
+    await newAlert();
     mocks.getNextArrivals.mockResolvedValue([ARRIVAL]);
     const lines: string[] = [];
     vi.spyOn(logger, 'info').mockImplementation((...args) => {
@@ -151,7 +151,7 @@ describe('scheduler de avisos (garantías de AGENTS.md:45-47)', () => {
 
     setBotInstance(fakeBot(vi.fn().mockResolvedValue({})));
     await triggerAlertCheck(); // envío correcto: el aviso queda inactivo
-    newAlert();
+    await newAlert();
     setBotInstance(fakeBot(vi.fn().mockRejectedValue(new Error('x'))));
     await triggerAlertCheck(); // envío fallido
 

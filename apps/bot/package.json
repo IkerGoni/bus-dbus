@@ -10,22 +10,23 @@
     "build:coordinates": "node scripts/build-stop-coordinates.mjs",
     "start": "node dist/index.js",
     "typecheck": "tsc -b",
-    "test": "BOT_TOKEN=vitest_test_token DB_PATH=:memory: vitest run",
-    "verify": "tsc -b && biome check src tests && BOT_TOKEN=vitest_test_token DB_PATH=:memory: vitest run"
+    "test": "BOT_TOKEN=vitest_test_token DB_DRIVER=memory vitest run",
+    "verify": "tsc -b && biome check src tests && BOT_TOKEN=vitest_test_token DB_DRIVER=memory vitest run"
   },
   "dependencies": {
     "@dbus/contracts": "workspace:*",
     "@dbus/core": "workspace:*",
-    "better-sqlite3": "^13.2.0",
     "node-cron": "^3.0.3",
+    "postgres": "^4.1.1",
     "telegraf": "^4.16.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@types/better-sqlite3": "^7.6.11",
     "@types/node": "^22.0.0",
     "@types/node-cron": "^3.0.11",
+    "@types/pg": "^8.23.1",
+    "pg-mem": "^3.0.14",
     "tsx": "^4.19.0",
     "typescript": "^5.7.3",
     "vitest": "^2.1.9"

@@ -149,11 +149,11 @@ describe('Arrival logic (live)', () => {
 describe('Database - Alerts', () => {
   const testChatId = 999999999;
 
-  it('creates, retrieves and deletes an alert', () => {
-    const existing = getAlertsByChat(testChatId);
-    for (const alert of existing) deleteAlert(alert.id);
+  it('creates, retrieves and deletes an alert', async () => {
+    const existing = await getAlertsByChat(testChatId);
+    for (const alert of existing) await deleteAlert(alert.id);
 
-    const alert = createAlert({
+    const alert = await createAlert({
       chatId: testChatId,
       stopId: STOP,
       stopName: 'Urbieta 12',
@@ -168,19 +168,20 @@ describe('Database - Alerts', () => {
     expect(alert.chatId).toBe(testChatId);
     expect(alert.stopId).toBe(STOP);
     expect(alert.minutesAhead).toBe(5);
-    expect(getAlertsByChat(testChatId).length).toBeGreaterThan(0);
-    expect(getActiveAlerts().some((a) => a.id === alert.id)).toBe(true);
-    expect(deleteAlert(alert.id)).toBe(true);
+    expect((await getAlertsByChat(testChatId)).length).toBeGreaterThan(0);
+    expect((await getActiveAlerts()).some((a) => a.id === alert.id)).toBe(true);
+    expect(await deleteAlert(alert.id)).toBe(true);
     expect(
-      getAlertsByChat(testChatId).find((a) => a.id === alert.id)
+      (await getAlertsByChat(testChatId)).find((a) => a.id === alert.id)
     ).toBeUndefined();
   });
 
-  it('finds an active alert for dedup and ignores inactive ones', () => {
+  it('finds an active alert for dedup and ignores inactive ones', async () => {
     const chatId = 777777777;
-    for (const alert of getAlertsByChat(chatId)) deleteAlert(alert.id);
+    for (const alert of await getAlertsByChat(chatId))
+      await deleteAlert(alert.id);
 
-    const alert = createAlert({
+    const alert = await createAlert({
       chatId,
       stopId: STOP,
       stopName: 'Urbieta 12',
@@ -190,21 +191,21 @@ describe('Database - Alerts', () => {
       minutesAhead: 5,
       active: true,
     });
-    expect(findActiveAlert(chatId, STOP, '28')?.id).toBe(alert.id);
-    updateAlert(alert.id, { active: false });
-    expect(findActiveAlert(chatId, STOP, '28')).toBeNull();
-    deleteAlert(alert.id);
+    expect((await findActiveAlert(chatId, STOP, '28'))?.id).toBe(alert.id);
+    await updateAlert(alert.id, { active: false });
+    expect(await findActiveAlert(chatId, STOP, '28')).toBeNull();
+    await deleteAlert(alert.id);
   });
 });
 
 describe('Database - Favorites', () => {
   const testChatId = 888888888;
 
-  it('creates, retrieves and removes a favorite', () => {
-    const existing = getFavorites(testChatId);
-    for (const fav of existing) removeFavorite(fav.id);
+  it('creates, retrieves and removes a favorite', async () => {
+    const existing = await getFavorites(testChatId);
+    for (const fav of existing) await removeFavorite(fav.id);
 
-    const fav = addFavorite({
+    const fav = await addFavorite({
       chatId: testChatId,
       stopId: STOP,
       stopName: 'Urbieta 12',
@@ -215,18 +216,18 @@ describe('Database - Favorites', () => {
 
     expect(fav.id).toBeDefined();
     expect(fav.chatId).toBe(testChatId);
-    expect(getFavorites(testChatId).length).toBeGreaterThan(0);
-    expect(removeFavorite(fav.id)).toBe(true);
+    expect((await getFavorites(testChatId)).length).toBeGreaterThan(0);
+    expect(await removeFavorite(fav.id)).toBe(true);
     expect(
-      getFavorites(testChatId).find((f) => f.id === fav.id)
+      (await getFavorites(testChatId)).find((f) => f.id === fav.id)
     ).toBeUndefined();
   });
 
-  it('finds a favorite for dedup', () => {
+  it('finds a favorite for dedup', async () => {
     const chatId = 666666666;
-    for (const fav of getFavorites(chatId)) removeFavorite(fav.id);
+    for (const fav of await getFavorites(chatId)) await removeFavorite(fav.id);
 
-    const fav = addFavorite({
+    const fav = await addFavorite({
       chatId,
       stopId: STOP,
       stopName: 'Urbieta 12',
@@ -234,16 +235,16 @@ describe('Database - Favorites', () => {
       lineName: 'L28',
       destination: 'Ospitaleak',
     });
-    expect(findFavorite(chatId, STOP, '28')?.id).toBe(fav.id);
-    expect(findFavorite(chatId, STOP, '21')).toBeNull();
-    removeFavorite(fav.id);
+    expect((await findFavorite(chatId, STOP, '28'))?.id).toBe(fav.id);
+    expect(await findFavorite(chatId, STOP, '21')).toBeNull();
+    await removeFavorite(fav.id);
   });
 
-  it('guarda una parada completa (sin línea) como favorito', () => {
+  it('guarda una parada completa (sin línea) como favorito', async () => {
     const chatId = 444444444;
-    for (const fav of getFavorites(chatId)) removeFavorite(fav.id);
+    for (const fav of await getFavorites(chatId)) await removeFavorite(fav.id);
 
-    const fav = addFavorite({
+    const fav = await addFavorite({
       chatId,
       stopId: STOP,
       stopName: 'Urbieta 12',
@@ -252,16 +253,16 @@ describe('Database - Favorites', () => {
       destination: 'Todas las líneas',
     });
     expect(fav.lineId).toBe('');
-    expect(findFavorite(chatId, STOP, '')?.id).toBe(fav.id);
-    expect(findFavorite(chatId, STOP, '28')).toBeNull();
-    removeFavorite(fav.id);
+    expect((await findFavorite(chatId, STOP, ''))?.id).toBe(fav.id);
+    expect(await findFavorite(chatId, STOP, '28')).toBeNull();
+    await removeFavorite(fav.id);
   });
 });
 
 describe('Database - resistencia de avisos', () => {
   const chatId = 222222222;
 
-  function newAlert() {
+  async function newAlert() {
     return createAlert({
       chatId,
       stopId: STOP,
@@ -274,43 +275,46 @@ describe('Database - resistencia de avisos', () => {
     });
   }
 
-  it('persiste los fallos de envío y permite desactivar el aviso', () => {
-    for (const alert of getAlertsByChat(chatId)) deleteAlert(alert.id);
-    const alert = newAlert();
+  it('persiste los fallos de envío y permite desactivar el aviso', async () => {
+    for (const alert of await getAlertsByChat(chatId))
+      await deleteAlert(alert.id);
+    const alert = await newAlert();
     try {
       expect(alert.sendFailures).toBe(0);
-      expect(updateAlert(alert.id, { sendFailures: 2 })).toBe(true);
-      expect(getAlertById(alert.id)?.sendFailures).toBe(2);
-      expect(updateAlert(alert.id, { active: false, sendFailures: 3 })).toBe(
-        true
-      );
-      expect(getAlertById(alert.id)?.active).toBe(false);
+      expect(await updateAlert(alert.id, { sendFailures: 2 })).toBe(true);
+      expect((await getAlertById(alert.id))?.sendFailures).toBe(2);
+      expect(
+        await updateAlert(alert.id, { active: false, sendFailures: 3 })
+      ).toBe(true);
+      expect((await getAlertById(alert.id))?.active).toBe(false);
     } finally {
-      deleteAlert(alert.id);
+      await deleteAlert(alert.id);
     }
   });
 
-  it('el guard de duplicados es atómico', () => {
-    for (const alert of getAlertsByChat(chatId)) deleteAlert(alert.id);
-    const alert = newAlert();
+  it('el guard de duplicados es atómico', async () => {
+    for (const alert of await getAlertsByChat(chatId))
+      await deleteAlert(alert.id);
+    const alert = await newAlert();
     try {
-      expect(() => newAlert()).toThrow(DuplicateAlertError);
-      expect(getAlertsByChat(chatId)).toHaveLength(1);
+      await expect(newAlert()).rejects.toThrow(DuplicateAlertError);
+      expect(await getAlertsByChat(chatId)).toHaveLength(1);
 
-      deleteAlert(alert.id);
-      expect(() => newAlert()).not.toThrow();
+      await deleteAlert(alert.id);
+      await expect(newAlert()).resolves.toBeDefined();
     } finally {
-      for (const current of getAlertsByChat(chatId)) deleteAlert(current.id);
+      for (const current of await getAlertsByChat(chatId))
+        await deleteAlert(current.id);
     }
   });
 
-  it('updateAlert ignora columnas no permitidas', () => {
-    const alert = newAlert();
+  it('updateAlert ignora columnas no permitidas', async () => {
+    const alert = await newAlert();
     try {
-      expect(updateAlert(alert.id, { bogus: 1 } as never)).toBe(false);
-      expect(getAlertById(alert.id)?.destination).toBe('Ospitaleak');
+      expect(await updateAlert(alert.id, { bogus: 1 } as never)).toBe(false);
+      expect((await getAlertById(alert.id))?.destination).toBe('Ospitaleak');
     } finally {
-      deleteAlert(alert.id);
+      await deleteAlert(alert.id);
     }
   });
 });
@@ -318,20 +322,20 @@ describe('Database - resistencia de avisos', () => {
 describe('Database - Favorite lines', () => {
   const testChatId = 333333333;
 
-  it('creates, finds and removes a favorite line', () => {
-    for (const line of getFavoriteLines(testChatId))
-      removeFavoriteLine(line.id);
+  it('creates, finds and removes a favorite line', async () => {
+    for (const line of await getFavoriteLines(testChatId))
+      await removeFavoriteLine(line.id);
 
-    const line = addFavoriteLine({
+    const line = await addFavoriteLine({
       chatId: testChatId,
       lineId: '28',
       lineName: 'L28',
       destination: 'Amara - Ospitaleak - Miramon',
     });
     expect(line.id).toBeDefined();
-    expect(findFavoriteLine(testChatId, '28')?.id).toBe(line.id);
-    expect(getFavoriteLines(testChatId)).toHaveLength(1);
-    expect(removeFavoriteLine(line.id)).toBe(true);
-    expect(getFavoriteLines(testChatId)).toHaveLength(0);
+    expect((await findFavoriteLine(testChatId, '28'))?.id).toBe(line.id);
+    expect(await getFavoriteLines(testChatId)).toHaveLength(1);
+    expect(await removeFavoriteLine(line.id)).toBe(true);
+    expect(await getFavoriteLines(testChatId)).toHaveLength(0);
   });
 });

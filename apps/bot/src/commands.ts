@@ -15,6 +15,7 @@ import {
   searchStops,
 } from './catalog.js';
 import {
+  deactivateAlert,
   deleteAlert,
   getActiveAlerts,
   getAlertById,
@@ -205,7 +206,7 @@ export async function handleAviso(ctx: Context): Promise<void> {
 export async function handleLista(ctx: Context): Promise<void> {
   const chatId = ctx.chat?.id;
   if (!chatId) return;
-  const alerts = getAlertsByChat(chatId);
+  const alerts = await getAlertsByChat(chatId);
   const msg = buildAlertsText(alerts);
   const extras = { parse_mode: 'Markdown' as const, ...alertsKeyboard(alerts) };
   if (ctx.callbackQuery) {
@@ -226,12 +227,12 @@ export async function handleBorrar(ctx: Context): Promise<void> {
     });
     return;
   }
-  const alert = getAlertById(id);
+  const alert = await getAlertById(id);
   if (!alert || alert.chatId !== chatId) {
     await ctx.reply('❌ Aviso no encontrado o no te pertenece');
     return;
   }
-  deleteAlert(id);
+  await deleteAlert(id);
   await ctx.reply(`🗑️ Aviso **#${id}** eliminado`, { parse_mode: 'Markdown' });
 }
 
@@ -295,15 +296,16 @@ export async function handleEstado(ctx: Context): Promise<void> {
     )
   );
   const alertsStats = getAlertStats();
+  const activeAlerts = await getActiveAlerts();
   const msg = `🟢 **Estado del bot**
- 📡 Fuente: ${escapeMd(getDataSource())}
- 🚏 Paradas en caché: ${stats.stops} · semilla Dbus: ${stats.popularStops}
- 📚 Índice: ${catalog.lines} líneas · ${catalog.stops} paradas · ${ageDays} d${
-   ageDays > 7 ? ' ⚠️ regenerar con `npm run build:catalog`' : ''
- }
+  📡 Fuente: ${escapeMd(getDataSource())}
+  🚏 Paradas en caché: ${stats.stops} · semilla Dbus: ${stats.popularStops}
+  📚 Índice: ${catalog.lines} líneas · ${catalog.stops} paradas · ${ageDays} d${
+    ageDays > 7 ? ' ⚠️ regenerar con `npm run build:catalog`' : ''
+  }
   🔎 Rango sondeado: ids 1..${coverage.lineIdsScanned} · último con datos: ${coverage.lastLineIdWithData}
-  🔔 Avisos activos: ${getActiveAlerts().length} · enviados: ${alertsStats.sent} · fallidos: ${alertsStats.failed}
- ⏱ Proceso activo: ${Math.floor(process.uptime())} s`;
+  🔔 Avisos activos: ${activeAlerts.length} · enviados: ${alertsStats.sent} · fallidos: ${alertsStats.failed}
+  ⏱ Proceso activo: ${Math.floor(process.uptime())} s`;
   await ctx.reply(msg, { parse_mode: 'Markdown' });
 }
 
@@ -321,7 +323,7 @@ export async function handleFavCommand(ctx: Context): Promise<void> {
     return;
   }
   if (args[1] === 'linea' && args[2]) {
-    const result = storeLineFavorite(chatId, args[2]);
+    const result = await storeLineFavorite(chatId, args[2]);
     await ctx.reply(
       result === 'added'
         ? '⭐ Línea guardada'
@@ -334,21 +336,23 @@ export async function handleFavCommand(ctx: Context): Promise<void> {
   if (args[1] === 'remove') {
     const id = Number.parseInt(args[2] ?? '', 10);
     if (!Number.isNaN(id)) {
-      if (getFavorites(chatId).some((fav) => fav.id === id)) {
-        removeFavorite(id);
+      const favs = await getFavorites(chatId);
+      if (favs.some((fav) => fav.id === id)) {
+        await removeFavorite(id);
         await ctx.reply('🗑️ Favorito eliminado');
         return;
       }
-      if (getFavoriteLines(chatId).some((line) => line.id === id)) {
-        removeFavoriteLine(id);
+      const lines = await getFavoriteLines(chatId);
+      if (lines.some((line) => line.id === id)) {
+        await removeFavoriteLine(id);
         await ctx.reply('🗑️ Línea eliminada');
         return;
       }
     }
   }
 
-  const favs = getFavorites(chatId);
-  const lines = getFavoriteLines(chatId);
+  const favs = await getFavorites(chatId);
+  const lines = await getFavoriteLines(chatId);
   if (!favs.length && !lines.length) {
     await ctx.reply(
       '⭐ No tienes favoritos. Usa `/buscar` para encontrar uno.',

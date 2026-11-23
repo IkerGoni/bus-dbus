@@ -138,11 +138,12 @@ export async function handleFavLineRemoveCallback(ctx: Context): Promise<void> {
   const chatId = ctx.chat?.id;
   if (!match || !chatId) return;
   const id = Number.parseInt(match[1], 10);
-  if (!getFavoriteLines(chatId).some((line) => line.id === id)) {
+  const lines = await getFavoriteLines(chatId);
+  if (!lines.some((line) => line.id === id)) {
     await answer(ctx, '❌ Línea no encontrada');
     return;
   }
-  removeFavoriteLine(id);
+  await removeFavoriteLine(id);
   await answer(ctx, '🗑️ Línea eliminada');
   await showFavorites(ctx);
 }
@@ -229,9 +230,8 @@ export async function handleFavView(ctx: Context): Promise<void> {
   const match = callbackData(ctx).match(/^fav_view_(\d+)$/);
   const chatId = ctx.chat?.id;
   if (!match || !chatId) return;
-  const fav = getFavorites(chatId).find(
-    (f) => f.id === Number.parseInt(match[1], 10)
-  );
+  const favs = await getFavorites(chatId);
+  const fav = favs.find((f) => f.id === Number.parseInt(match[1], 10));
   if (!fav) {
     await answer(ctx, '❌ Favorito no encontrado');
     return;
@@ -245,11 +245,12 @@ export async function handleFavRemove(ctx: Context): Promise<void> {
   const chatId = ctx.chat?.id;
   if (!match || !chatId) return;
   const id = Number.parseInt(match[1], 10);
-  if (!getFavorites(chatId).some((f) => f.id === id)) {
+  const favs = await getFavorites(chatId);
+  if (!favs.some((f) => f.id === id)) {
     await answer(ctx, '❌ Favorito no encontrado');
     return;
   }
-  removeFavorite(id);
+  await removeFavorite(id);
   await answer(ctx, '🗑️ Favorito eliminado');
   await showFavorites(ctx);
 }
@@ -259,12 +260,12 @@ export async function handleAlertDelete(ctx: Context): Promise<void> {
   const chatId = ctx.chat?.id;
   if (!match || !chatId) return;
   const id = Number.parseInt(match[1], 10);
-  const alert = getAlertById(id);
+  const alert = await getAlertById(id);
   if (!alert || alert.chatId !== chatId) {
     await answer(ctx, '❌ Aviso no encontrado');
     return;
   }
-  deleteAlert(id);
+  await deleteAlert(id);
   await answer(ctx, '🗑️ Aviso eliminado');
   await handleLista(ctx);
 }

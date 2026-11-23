@@ -158,7 +158,8 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
 
   it('creates an alert with the public line and offers a delete button', async () => {
     const target = { ...chat, id: 555555555 };
-    for (const alert of getAlertsByChat(target.id)) deleteAlert(alert.id);
+    for (const alert of await getAlertsByChat(target.id))
+      await deleteAlert(alert.id);
     try {
       let start = sent.length;
       await bot.handleUpdate(
@@ -174,7 +175,8 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
       expect(listed).toContain('adel_');
       expect(listed).toContain('L28');
 
-      const alert = getAlertsByChat(target.id)[0];
+      const alerts = await getAlertsByChat(target.id);
+      const alert = alerts[0];
       expect(alert?.lineId).toBe('28');
 
       start = sent.length;
@@ -191,15 +193,17 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
           )
       ).toBe(true);
       expect(textsSince(start)).not.toContain('adel_');
-      expect(getAlertsByChat(target.id)).toHaveLength(0);
+      expect(await getAlertsByChat(target.id)).toHaveLength(0);
     } finally {
-      for (const alert of getAlertsByChat(target.id)) deleteAlert(alert.id);
+      for (const alert of await getAlertsByChat(target.id))
+        await deleteAlert(alert.id);
     }
   });
 
   it('rechaza un aviso duplicado por comando', async () => {
     const target = { ...chat, id: 555555556 };
-    for (const alert of getAlertsByChat(target.id)) deleteAlert(alert.id);
+    for (const alert of await getAlertsByChat(target.id))
+      await deleteAlert(alert.id);
     try {
       await bot.handleUpdate(
         messageUpdate('/aviso 2 32 5', 20, target) as never
@@ -210,13 +214,15 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
       );
       expect(textsSince(start)).toContain('Ya tienes un aviso activo');
     } finally {
-      for (const alert of getAlertsByChat(target.id)) deleteAlert(alert.id);
+      for (const alert of await getAlertsByChat(target.id))
+        await deleteAlert(alert.id);
     }
   });
 
   it('el flujo interactivo informa del duplicado y muestra la ETA', async () => {
     const target = { ...chat, id: 555555557 };
-    for (const alert of getAlertsByChat(target.id)) deleteAlert(alert.id);
+    for (const alert of await getAlertsByChat(target.id))
+      await deleteAlert(alert.id);
     try {
       let start = sent.length;
       await bot.handleUpdate(messageUpdate('/start', 22, target) as never);
@@ -246,7 +252,8 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
         true
       );
     } finally {
-      for (const alert of getAlertsByChat(target.id)) deleteAlert(alert.id);
+      for (const alert of await getAlertsByChat(target.id))
+        await deleteAlert(alert.id);
     }
   });
 
@@ -326,30 +333,33 @@ describe('Telegram bot end-to-end (real Dbus data)', () => {
 
   it('/fav add sin línea guarda la parada completa', async () => {
     const target = { ...chat, id: 555555558 };
-    for (const fav of getFavorites(target.id)) removeFavorite(fav.id);
+    for (const fav of await getFavorites(target.id))
+      await removeFavorite(fav.id);
     try {
       const start = sent.length;
       await bot.handleUpdate(messageUpdate('/fav add 2', 43, target) as never);
       expect(textsSince(start)).toContain('Favorito guardado');
-      expect(getFavorites(target.id)[0]?.lineId).toBe('');
+      expect((await getFavorites(target.id))[0]?.lineId).toBe('');
     } finally {
-      for (const fav of getFavorites(target.id)) removeFavorite(fav.id);
+      for (const fav of await getFavorites(target.id))
+        await removeFavorite(fav.id);
     }
   });
 
   it('/fav linea guarda una línea favorita', async () => {
     const target = { ...chat, id: 555555559 };
-    for (const line of getFavoriteLines(target.id)) removeFavoriteLine(line.id);
+    for (const line of await getFavoriteLines(target.id))
+      await removeFavoriteLine(line.id);
     try {
       const start = sent.length;
       await bot.handleUpdate(
         messageUpdate('/fav linea 28', 44, target) as never
       );
       expect(textsSince(start)).toContain('Línea guardada');
-      expect(getFavoriteLines(target.id)[0]?.lineId).toBe('28');
+      expect((await getFavoriteLines(target.id))[0]?.lineId).toBe('28');
     } finally {
-      for (const line of getFavoriteLines(target.id))
-        removeFavoriteLine(line.id);
+      for (const line of await getFavoriteLines(target.id))
+        await removeFavoriteLine(line.id);
     }
   });
 

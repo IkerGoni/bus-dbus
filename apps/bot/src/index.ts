@@ -1,7 +1,7 @@
 import { Telegraf } from 'telegraf';
 import { stopAlertScheduler } from './alerts.js';
 import { config } from './config.js';
-import { getActiveAlerts } from './db.js';
+import { closePool, getActiveAlerts } from './db.js';
 import {
   getCachedStopCodes,
   getDataSource,
@@ -62,7 +62,8 @@ function startLiveRefresh(intervalMs: number): () => void {
     if (running) return;
     running = true;
     try {
-      const alertStops = getActiveAlerts().map((alert) => alert.stopId);
+      const activeAlerts = await getActiveAlerts();
+      const alertStops = activeAlerts.map((alert) => alert.stopId);
       const recentCached = getCachedStopCodes().reverse();
       const codes = [...new Set([...alertStops, ...recentCached])].slice(
         0,
@@ -125,14 +126,15 @@ void launchWithRetry(() => bot.launch({}, onLaunched)).catch(
   }
 );
 
-function shutdown(signal: string): void {
+async function shutdown(signal: string): Promise<void> {
   logger.info(`\n🛑 ${signal} — stopping bot`);
   stopRefresh();
   stopAlertScheduler();
   bot.stop(signal);
+  await closePool();
 }
 
-process.once('SIGINT', () => shutdown('SIGINT'));
-process.once('SIGTERM', () => shutdown('SIGTERM'));
+process.once('SIGINT', () => void shutdown('SIGINT'));
+process.once('SIGTERM', () => void shutdown('SIGTERM'));
 
 export { bot };

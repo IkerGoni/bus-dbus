@@ -431,15 +431,16 @@ export async function showAllStopsForLine(
 
 type LineFavoriteResult = 'added' | 'duplicate' | 'missing';
 
-export function storeLineFavorite(
+export async function storeLineFavorite(
   chatId: number,
   lineId: string
-): LineFavoriteResult {
+): Promise<LineFavoriteResult> {
   const line = getLineByCode(lineId);
   if (!line) return 'missing';
   const code = normalizeLine(line.cod);
-  if (findFavoriteLine(chatId, code)) return 'duplicate';
-  addFavoriteLine({
+  const existing = await findFavoriteLine(chatId, code);
+  if (existing) return 'duplicate';
+  await addFavoriteLine({
     chatId,
     lineId: code,
     lineName: `L${code}`,
@@ -454,7 +455,7 @@ export async function saveLineFavorite(
 ): Promise<void> {
   const chatId = ctx.chat?.id;
   if (!chatId) return;
-  const result = storeLineFavorite(chatId, lineId);
+  const result = await storeLineFavorite(chatId, lineId);
   await answer(
     ctx,
     result === 'added'
@@ -627,8 +628,8 @@ export function alertsKeyboard(alerts: UserAlert[]) {
 export async function showFavorites(ctx: Context): Promise<void> {
   const chatId = ctx.chat?.id;
   if (!chatId) return;
-  const favs = getFavorites(chatId);
-  const lines = getFavoriteLines(chatId);
+  const favs = await getFavorites(chatId);
+  const lines = await getFavoriteLines(chatId);
 
   if (!favs.length && !lines.length) {
     await safeEdit(
@@ -686,8 +687,9 @@ export async function saveFavorite(
     ? await getNextArrival(stopId, requestedLine)
     : null;
   const lineId = arrival ? normalizeLine(arrival.lineId) : requestedLine;
-  if (findFavorite(chatId, stopId, lineId)) return false;
-  addFavorite({
+  const existing = await findFavorite(chatId, stopId, lineId);
+  if (existing) return false;
+  await addFavorite({
     chatId,
     stopId,
     stopName: displayStopName(stopId),
@@ -732,7 +734,7 @@ export async function createAndConfirmAlert(
     ? normalizeLine(arrival.lineId)
     : toPublicLineId(lineId, stopId);
   const stopName = displayStopName(stopId);
-  const existing = findActiveAlert(chatId, stopId, publicLineId);
+  const existing = await findActiveAlert(chatId, stopId, publicLineId);
   if (existing) {
     clearSession(chatId);
     const text = duplicateAlertText(stopName, publicLineId, existing.id);
@@ -743,7 +745,7 @@ export async function createAndConfirmAlert(
 
   let alert: UserAlert;
   try {
-    alert = createAlert({
+    alert = await createAlert({
       chatId,
       stopId,
       stopName,
@@ -771,10 +773,10 @@ export async function createAndConfirmAlert(
       `(${arrival.realtime ? '📡 tiempo real' : '🕒 horario'})`
     : '🔎 Próxima llegada: sin estimación ahora mismo';
   const msg = `✅ **Aviso creado** (ID: \`${alert.id}\`)
- 🚏 ${escapeMd(stopName)} (${escapeMd(stopId)})
- 🚌 **L${escapeMd(publicLineId)}** → ${escapeMd(alert.destination)}
- 🔔 Te avisaré **${minutesAhead} min** antes
- ${eta}`;
+  🚏 ${escapeMd(stopName)} (${escapeMd(stopId)})
+  🚌 **L${escapeMd(publicLineId)}** → ${escapeMd(alert.destination)}
+  🔔 Te avisaré **${minutesAhead} min** antes
+  ${eta}`;
 
   clearSession(chatId);
   if (asEdit) {

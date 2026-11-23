@@ -9,6 +9,7 @@ import { z } from 'zod';
  */
 export const configSchema = z.object({
   botToken: z.string().min(1),
+  databaseUrl: z.string().url().optional(),
   dbusBaseUrl: z
     .string()
     .url()
@@ -17,6 +18,7 @@ export const configSchema = z.object({
   cacheTtlMs: z.number().int().positive().default(30_000),
   pollIntervalMs: z.number().int().positive().default(30_000),
   defaultAlertMinutes: z.number().int().positive().default(5),
+  // dbPath mantenido para compatibilidad tests (DB_PATH=:memory:)
   dbPath: z.string().default('./bot.db'),
   // Paradas cercanas: índice local de coordenadas (sin red). Las coordenadas
   // del usuario nunca se persisten. La ruta del índice se configura con
@@ -27,6 +29,7 @@ export const configSchema = z.object({
 
 export const config = configSchema.parse({
   botToken: process.env.BOT_TOKEN,
+  databaseUrl: process.env.DATABASE_URL || undefined,
   dbusBaseUrl: process.env.DBUS_BASE_URL || undefined,
   language: process.env.BOT_LANGUAGE || 'es',
   cacheTtlMs: process.env.CACHE_TTL_MS

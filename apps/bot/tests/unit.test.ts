@@ -24,7 +24,7 @@ import {
   searchLines,
   searchStops,
 } from '../src/catalog.js';
-import { config, configSchema } from '../src/config.js';
+import { configSchema } from '../src/config.js';
 import { evictOldestEntries } from '../src/dbus-client.js';
 import { getSessionCount, pruneSessions } from '../src/handlers.js';
 import { logger } from '../src/logger.js';
@@ -186,8 +186,10 @@ describe('catálogo de búsqueda (datos reales de Dbus)', () => {
 });
 
 describe('aislamiento de BD en tests', () => {
-  it('usa una BD en memoria, nunca apps/bot/bot.db', () => {
-    expect(config.dbPath).toBe(':memory:');
+  it('usa el driver en memoria, nunca una BD real', () => {
+    // Los tests fuerzan DB_DRIVER=memory (ver package.json). db.ts elige el
+    // backend en memoria y nunca abre conexión Postgres ni escribe bot.db.
+    expect(process.env.DB_DRIVER).toBe('memory');
   });
 });
 
