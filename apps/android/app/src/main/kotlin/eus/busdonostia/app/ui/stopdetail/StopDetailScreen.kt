@@ -1,5 +1,7 @@
 package eus.busdonostia.app.ui.stopdetail
 
+import eus.busdonostia.app.ui.components.motionAnimateItem
+
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedContent
@@ -339,17 +341,9 @@ private fun arrivalItems(listScope: LazyListScope,
         return
     }
     listScope.items(rows, key = { it.key }, contentType = { "arrival_row" }) { row ->
-        val motion = rememberEffectiveMotionTokens()
         val arrival = row.arrival
         Column(
-            modifier = Modifier.animateItem(
-                fadeInSpec = tween(motion.arrivalsStateFadeInMs),
-                placementSpec = spring(
-                    dampingRatio = motion.springNoBounceDamping,
-                    stiffness = motion.springMediumStiffness,
-                ),
-                fadeOutSpec = tween(motion.arrivalsStateFadeOutMs),
-            ),
+            modifier = motionAnimateItem(),
         ) {
             ArrivalRow(
                 arrival = arrival,

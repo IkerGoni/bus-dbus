@@ -1,5 +1,7 @@
 package eus.busdonostia.app.ui.stops
 
+import eus.busdonostia.app.ui.components.motionAnimateItem
+
 import android.Manifest
 import android.content.Intent
 import android.net.Uri
@@ -255,20 +257,12 @@ private fun LazyListScope.rows(
     onStar: (StopRow) -> Unit,
 ) {
     items(rows, key = { "${it.stopId}:${it.favoriteLineId.orEmpty()}" }, contentType = { "stop_card" }) { row ->
-        val motion = rememberEffectiveMotionTokens()
         StopCard(
             row = row,
             lineColors = state.lineColors,
             onClick = { onOpenStop(row.stopId, row.favoriteLineId) },
             onStar = { onStar(row) },
-            modifier = Modifier.animateItem(
-                fadeInSpec = tween(motion.arrivalsStateFadeInMs),
-                placementSpec = spring(
-                    dampingRatio = motion.springNoBounceDamping,
-                    stiffness = motion.springMediumStiffness,
-                ),
-                fadeOutSpec = tween(motion.arrivalsStateFadeOutMs),
-            ),
+            modifier = motionAnimateItem(),
         )
     }
 }

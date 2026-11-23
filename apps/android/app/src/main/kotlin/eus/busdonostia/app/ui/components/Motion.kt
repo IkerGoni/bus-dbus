@@ -6,11 +6,13 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -23,6 +25,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
@@ -155,6 +158,32 @@ fun rememberEffectiveMotionTokens(): MotionTokens.ResolvedMotionTokens {
     return MotionTokens.resolve(reducedMotion)
 }
 
+/** Spring de tokens; en reduced motion devuelve snap() (instantáneo). */
+@Composable
+fun <T> rememberMotionSpring(bouncy: Boolean = false): FiniteAnimationSpec<T> {
+    val reduced = LocalReducedMotion.current
+    val m = rememberEffectiveMotionTokens()
+    return remember(reduced, bouncy) {
+        if (reduced) snap() else spring(
+            dampingRatio = if (bouncy) m.springMediumBounceDamping else m.springNoBounceDamping,
+            stiffness = m.springMediumStiffness,
+        )
+    }
+}
+
+/** animateItem con tokens; en reduced motion, sin animación (specs = null). */
+@Composable
+fun LazyItemScope.motionAnimateItem(modifier: Modifier = Modifier): Modifier {
+    val reduced = LocalReducedMotion.current
+    val m = rememberEffectiveMotionTokens()
+    return if (reduced) modifier.animateItem(fadeInSpec = null, placementSpec = null, fadeOutSpec = null)
+    else modifier.animateItem(
+        fadeInSpec = tween(m.arrivalsStateFadeInMs),
+        placementSpec = spring(m.springNoBounceDamping, m.springMediumStiffness),
+        fadeOutSpec = tween(m.arrivalsStateFadeOutMs),
+    )
+}
+
 /**
  * Modifier de escala al pulsar (press feedback) operando EXCLUSIVAMENTE en `graphicsLayer`.
  * No dispara recomposición ni cambios de layout. Respeta `LocalReducedMotion`.
@@ -165,12 +194,10 @@ fun Modifier.pressScale(
     val reducedMotion = LocalReducedMotion.current
     val isPressed by interactionSource.collectIsPressedAsState()
     val motion = rememberEffectiveMotionTokens()
+    val springSpec = rememberMotionSpring<Float>()
     val scale by animateFloatAsState(
         targetValue = if (isPressed && !reducedMotion) motion.pressScaleFactor else 1f,
-        animationSpec = spring(
-            dampingRatio = motion.springNoBounceDamping,
-            stiffness = motion.springMediumStiffness
-        ),
+        animationSpec = springSpec,
         label = "pressScale"
     )
     graphicsLayer {

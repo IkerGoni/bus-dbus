@@ -2,9 +2,18 @@ package eus.busdonostia.app.ui.theme
 
 import androidx.compose.ui.unit.dp
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class MotionTokensTest {
+    @Test
+    fun zeroNoRalentizaMuelles() {
+        val zero = MotionTokens.resolve(true)
+        assertTrue(zero.springMediumStiffness >= 10_000f)
+        assertEquals(1f, zero.springNoBounceDamping, 0f)
+        assertEquals(1f, zero.springMediumBounceDamping, 0f)
+    }
+
     @Test
     fun fullExponeLosTokensNuevos() {
         val full = MotionTokens.resolve(false)
@@ -23,35 +32,25 @@ class MotionTokensTest {
     }
 
     @Test
-    fun zeroColapsaLosTokensNuevos() {
+    fun zeroColapsaTodosLosCampos() {
         val zero = MotionTokens.resolve(true)
-        assertEquals(1f, zero.searchClearScaleFactor, 0f)
-        assertEquals(0f, zero.arrivalsStateSlideFraction, 0f)
-        assertEquals(0, zero.livePulseDurationMs)
-        assertEquals(1f, zero.livePulseMinAlpha, 0f)
-        assertEquals(1f, zero.livePulseMaxAlpha, 0f)
-        assertEquals(0, zero.minutesSlideInMs)
-        assertEquals(0, zero.minutesSlideOutMs)
-        assertEquals(0, zero.staggerItemDelayMs)
-        assertEquals(0, zero.staggerMaxAnimatedIndex)
-        assertEquals(0, zero.arrivalsStateFadeInMs)
-        assertEquals(0, zero.arrivalsStateFadeOutMs)
-        assertEquals(0, zero.bottomTabFadeInMs)
-    }
-
-    @Test
-    fun fullYZeroSonSimetricosEnEscalas() {
-        val full = MotionTokens.ResolvedMotionTokens.FULL
-        val zero = MotionTokens.ResolvedMotionTokens.ZERO
-        assertEquals(1f, zero.pressScaleFactor, 0f)
-        assertEquals(1f, zero.searchClearScaleFactor, 0f)
-        assertEquals(1f, zero.favoriteStarMinScale, 0f)
-        assertEquals(1f, zero.favoriteStarPeakScale, 0f)
-        assertEquals(0f, zero.arrivalsStateSlideFraction, 0f)
-        assertEquals(0f, zero.favoriteStarRotationDeg, 0f)
-        assertEquals(0.97f, full.pressScaleFactor, 0f)
-        assertEquals(0.8f, full.favoriteStarMinScale, 0f)
-        assertEquals(1.15f, full.favoriteStarPeakScale, 0f)
+        val fields = MotionTokens.ResolvedMotionTokens::class.java.declaredFields
+            .filter { !java.lang.reflect.Modifier.isStatic(it.modifiers) }
+        assertTrue(fields.size > 20)
+        for (field in fields) {
+            field.isAccessible = true
+            val name = field.name
+            val value: Any = field.get(zero)!!
+            when {
+                name.endsWith("Ms") -> assertEquals("Field $name should be 0", 0, value)
+                name.endsWith("Index") -> assertEquals("Field $name should be 0", 0, value)
+                name == "springMediumStiffness" -> assertTrue("Stiffness should be >= 10000f", (value as Float) >= 10_000f)
+                name.endsWith("Damping") -> assertEquals("Field $name should be 1f", 1f, value as Float, 0f)
+                name.endsWith("Scale") || name.endsWith("ScaleFactor") -> assertEquals("Field $name should be 1f", 1f, value as Float, 0f)
+                name.endsWith("Fraction") || name.endsWith("Deg") -> assertEquals("Field $name should be 0f", 0f, value as Float, 0f)
+                name.endsWith("Alpha") -> assertEquals("Field $name should be 1f", 1f, value as Float, 0f)
+            }
+        }
     }
 
     @Test

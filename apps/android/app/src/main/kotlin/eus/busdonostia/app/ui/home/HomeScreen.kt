@@ -1,5 +1,7 @@
 package eus.busdonostia.app.ui.home
 
+import eus.busdonostia.app.ui.components.motionAnimateItem
+
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -183,14 +185,7 @@ private fun SearchResults(
             items(state.stopResults, key = { "s-${it.cod}" }, contentType = { "stop_result" }) { stop ->
                 ResultRow(
                     onClick = { onOpenStop(stop.cod, null) },
-                    modifier = Modifier.animateItem(
-                        fadeInSpec = tween(motion.arrivalsStateFadeInMs),
-                        placementSpec = spring(
-                            dampingRatio = motion.springNoBounceDamping,
-                            stiffness = motion.springMediumStiffness,
-                        ),
-                        fadeOutSpec = tween(motion.arrivalsStateFadeOutMs),
-                    ),
+                    modifier = motionAnimateItem(),
                 ) {
                     Text(
                         stop.desc,
@@ -208,14 +203,7 @@ private fun SearchResults(
             items(state.lineResults, key = { "l-${it.cod}" }, contentType = { "line_result" }) { line ->
                 ResultRow(
                     onClick = { onOpenLine(line.cod) },
-                    modifier = Modifier.animateItem(
-                        fadeInSpec = tween(motion.arrivalsStateFadeInMs),
-                        placementSpec = spring(
-                            dampingRatio = motion.springNoBounceDamping,
-                            stiffness = motion.springMediumStiffness,
-                        ),
-                        fadeOutSpec = tween(motion.arrivalsStateFadeOutMs),
-                    ),
+                    modifier = motionAnimateItem(),
                 ) {
                     LineBadge(line.cod, state.lineColors[line.cod])
                     Text(
@@ -351,14 +339,7 @@ private fun LazyListScope.favorites(state: HomeUiState, vm: HomeViewModel, onOpe
             onOpen = { onOpenStop(card.row.stopId, card.row.favoriteLineId) },
             onUnstar = { vm.unstar(card.row) },
             onRetry = vm::refresh,
-            modifier = Modifier.animateItem(
-                fadeInSpec = tween(motion.arrivalsStateFadeInMs),
-                placementSpec = spring(
-                    dampingRatio = motion.springNoBounceDamping,
-                    stiffness = motion.springMediumStiffness,
-                ),
-                fadeOutSpec = tween(motion.arrivalsStateFadeOutMs),
-            ),
+            modifier = motionAnimateItem(),
         )
     }
 }

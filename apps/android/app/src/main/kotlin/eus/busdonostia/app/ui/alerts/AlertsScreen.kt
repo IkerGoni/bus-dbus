@@ -1,5 +1,7 @@
 package eus.busdonostia.app.ui.alerts
 
+import eus.busdonostia.app.ui.components.motionAnimateItem
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -177,7 +179,6 @@ private fun LazyListScope.group(
         SectionLabel(stringResource(title), modifier = Modifier.padding(horizontal = 0.dp), trailing = items.size.toString())
     }
     items(items, key = { it.rule.id }, contentType = { "alert_card" }) { item ->
-        val motion = rememberEffectiveMotionTokens()
         AlertCard(
             item = item,
             stopView = state.stopViews[item.rule.stopId],
@@ -185,14 +186,7 @@ private fun LazyListScope.group(
             onActiveChange = { vm.setActive(item.rule, it) },
             onEdit = { onEdit(item.rule.id) },
             onDelete = { onDelete(item.rule) },
-            modifier = Modifier.animateItem(
-                fadeInSpec = tween(motion.arrivalsStateFadeInMs),
-                placementSpec = spring(
-                    dampingRatio = motion.springNoBounceDamping,
-                    stiffness = motion.springMediumStiffness,
-                ),
-                fadeOutSpec = tween(motion.arrivalsStateFadeOutMs),
-            ),
+            modifier = motionAnimateItem(),
         )
     }
 }

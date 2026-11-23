@@ -112,24 +112,19 @@ fun FavoriteStar(checked: Boolean, onToggle: () -> Unit, description: String) {
     val motion = rememberEffectiveMotionTokens()
     val interactionSource = remember { MutableInteractionSource() }
     val hapticFeedback = LocalHapticFeedback.current
+    val springSpec = rememberMotionSpring<Float>(bouncy = true)
     
     // Animación de escala con Spring: 0.8 (inactivo) → 1.15 (pico overshoot) → 1.0 (activo)
     val scale by animateFloatAsState(
         targetValue = if (checked) 1f else motion.favoriteStarMinScale,
-        animationSpec = spring(
-            dampingRatio = motion.springMediumBounceDamping,
-            stiffness = motion.springMediumStiffness,
-        ),
+        animationSpec = springSpec,
         label = "favoriteStarScale"
     )
     
     // Animación de rotación: 72° al activar, 0° al desactivar
     val rotation by animateFloatAsState(
         targetValue = if (checked) motion.favoriteStarRotationDeg else 0f,
-        animationSpec = spring(
-            dampingRatio = motion.springMediumBounceDamping,
-            stiffness = motion.springMediumStiffness,
-        ),
+        animationSpec = springSpec,
         label = "favoriteStarRotation"
     )
     

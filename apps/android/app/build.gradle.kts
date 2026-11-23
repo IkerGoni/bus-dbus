@@ -242,7 +242,7 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                             favoriteStarRotationDeg = 0f,
                             springNoBounceDamping = 1f,
                             springMediumBounceDamping = 1f,
-                            springMediumStiffness = 1f,
+                            springMediumStiffness = 10_000f, // = Spring.StiffnessHigh: colapso instantáneo
                             searchClearScaleFactor = 1f,
                             livePulseDurationMs = 0,
                             livePulseMinAlpha = 1f,

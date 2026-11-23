@@ -1,5 +1,7 @@
 package eus.busdonostia.app.ui.lines
 
+import eus.busdonostia.app.ui.components.motionAnimateItem
+
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -126,15 +128,7 @@ fun LinesScreen(onOpenLine: (String) -> Unit) {
                         colorArgb = state.lineColors[row.lineId],
                         onClick = { onOpenLine(row.lineId) },
                         onStar = { vm.toggleStar(row.lineId) },
-                        modifier = Modifier
-                            .animateItem(
-                                fadeInSpec = tween(motion.arrivalsStateFadeInMs),
-                                placementSpec = spring(
-                                    dampingRatio = motion.springNoBounceDamping,
-                                    stiffness = motion.springMediumStiffness,
-                                ),
-                                fadeOutSpec = tween(motion.arrivalsStateFadeOutMs),
-                            )
+                        modifier = motionAnimateItem()
                             .staggerEntrance(index = index, triggerKey = state.filter),
                     )
                 }
@@ -247,15 +241,7 @@ fun LineDetailScreen(lineId: String, onBack: () -> Unit, onOpenStop: (stopId: St
                                 color = color,
                                 hole = hole,
                                 onClick = { onOpenStop(stop.stopId, line.cod) },
-                                modifier = Modifier
-                                    .animateItem(
-                                        fadeInSpec = tween(motion.arrivalsStateFadeInMs),
-                                        placementSpec = spring(
-                                            dampingRatio = motion.springNoBounceDamping,
-                                            stiffness = motion.springMediumStiffness,
-                                        ),
-                                        fadeOutSpec = tween(motion.arrivalsStateFadeOutMs),
-                                    )
+                                modifier = motionAnimateItem()
                                     .staggerEntrance(index = index, triggerKey = selectedIndex),
                             )
                         }
