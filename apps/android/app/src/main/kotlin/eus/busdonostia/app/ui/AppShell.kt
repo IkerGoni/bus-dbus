@@ -62,7 +62,7 @@ import eus.busdonostia.app.ui.stops.StopsScreen
 
 /** Rutas de detalle (A05, A03b, A06, A07). Los parámetros son códigos públicos reales. */
 object DetailRoutes {
-    const val STOP = "stop/{stopId}?line={line}"
+    const val STOP = "stop/{stopId}?line={line}&from={from}"
     const val LINE = "line/{lineId}"
     const val ALERT_NEW = "alert/new?stopId={stopId}&lineId={lineId}&destination={destination}"
     const val ALERT_EDIT = "alert/{id}/edit"
@@ -80,10 +80,22 @@ object DetailRoutes {
 
     fun alertEdit(id: String): String = "alert/${Uri.encode(id)}/edit"
 
-    fun stop(stopId: String, lineId: String? = null): String =
-        "stop/${Uri.encode(stopId)}" + (lineId?.let { "?line=${Uri.encode(it)}" } ?: "")
+    fun stop(stopId: String, lineId: String? = null, from: String? = null): String =
+        "stop/${Uri.encode(stopId)}" + stopRouteQuery(lineId, from)
 
     fun line(lineId: String): String = "line/${Uri.encode(lineId)}"
+}
+
+/**
+ * Query de la ruta de parada. Función pura y sin `Uri` para poder testearla: los códigos
+ * públicos de línea y los orígenes de shared element son tokens seguros (sin espacios ni `&`).
+ */
+internal fun stopRouteQuery(lineId: String?, from: String?): String {
+    val params = listOfNotNull(
+        lineId?.let { "line=$it" },
+        from?.let { "from=$it" },
+    )
+    return if (params.isEmpty()) "" else "?" + params.joinToString("&")
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -109,7 +121,9 @@ fun AppShell(navController: NavHostController = rememberNavController()) {
             }
         }
     }
-    val openStop: (String, String?) -> Unit = { stopId, lineId -> navController.navigate(DetailRoutes.stop(stopId, lineId)) }
+    val openStop: (String, String?, String?) -> Unit = { stopId, lineId, from ->
+        navController.navigate(DetailRoutes.stop(stopId, lineId, from))
+    }
     val openLine: (String) -> Unit = { navController.navigate(DetailRoutes.line(it)) }
     val openSettings: () -> Unit = { navController.navigate(DetailRoutes.SETTINGS) { launchSingleTop = true } }
     val shell = appViewModel { ShellViewModel(it) }
@@ -273,6 +287,11 @@ fun AppShell(navController: NavHostController = rememberNavController()) {
                                 nullable = true
                                 defaultValue = null
                             },
+                            navArgument("from") {
+                                type = NavType.StringType
+                                nullable = true
+                                defaultValue = null
+                            },
                         ),
                         deepLinks = listOf(navDeepLink { uriPattern = DetailRoutes.STOP_DEEP_LINK }),
                     ) { entry ->
@@ -281,6 +300,7 @@ fun AppShell(navController: NavHostController = rememberNavController()) {
                             StopDetailScreen(
                                 stopId = checkNotNull(args.getString("stopId")),
                                 highlightLine = args.getString("line"),
+                                sharedOrigin = args.getString("from"),
                                 onBack = { navController.popBackStack() },
                                 onCreateAlert = { stop, line, destination -> navController.navigate(DetailRoutes.alertNew(stop, line, destination)) },
                             )

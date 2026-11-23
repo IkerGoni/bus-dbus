@@ -30,6 +30,7 @@ import eus.busdonostia.app.ui.alerts.pollStops
 import eus.busdonostia.app.ui.alerts.setAlertActive
 import eus.busdonostia.app.ui.alerts.stopsToWatch
 import eus.busdonostia.app.ui.alerts.updateAlert
+import eus.busdonostia.app.ui.components.SharedOrigins
 import eus.busdonostia.app.ui.stops.StopRow
 import eus.busdonostia.app.ui.stops.favoriteRows
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,6 +66,16 @@ data class HomeUiState(
 ) {
     val loading: Boolean get() = catalogReady == null || !alertsLoaded
     val isEmpty: Boolean get() = !loading && nextAlert == null && favorites.isEmpty()
+}
+
+/**
+ * Orígenes de shared element de las tarjetas visibles en Inicio (próximo aviso + favoritas).
+ * Función pura: permite comprobar que ninguna clave colisiona cuando varias tarjetas de la
+ * misma parada se ven a la vez.
+ */
+fun homeSharedOrigins(state: HomeUiState): List<String> = buildList {
+    state.nextAlert?.let { add(SharedOrigins.NEXT_ALERT) }
+    state.favorites.forEach { add(SharedOrigins.favorite(it.row.stopId, it.row.favoriteLineId)) }
 }
 
 /** Paradas favoritas (STOP y STOP_LINE) con sus próximas llegadas en vivo. */

@@ -58,6 +58,8 @@ import eus.busdonostia.app.ui.components.LineBadge
 import eus.busdonostia.app.ui.components.ScreenHeader
 import eus.busdonostia.app.ui.components.SearchPill
 import eus.busdonostia.app.ui.components.SectionLabel
+import eus.busdonostia.app.ui.components.SharedKeys
+import eus.busdonostia.app.ui.components.SharedOrigins
 import eus.busdonostia.app.ui.components.SkeletonList
 import eus.busdonostia.app.ui.components.optionalSharedElement
 import eus.busdonostia.app.ui.components.rememberEffectiveMotionTokens
@@ -73,7 +75,7 @@ private val LOCATION_PERMISSIONS = arrayOf(
 
 /** A02 · Paradas. [onOpenStop] recibe parada y, si la fila es parada+línea, la línea. */
 @Composable
-fun StopsScreen(onOpenStop: (stopId: String, lineId: String?) -> Unit) {
+fun StopsScreen(onOpenStop: (stopId: String, lineId: String?, from: String?) -> Unit) {
     val vm = appViewModel { StopsViewModel(it) }
     val state by vm.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -164,7 +166,7 @@ private fun TabChips(selected: StopsTab, onSelect: (StopsTab) -> Unit) {
 @Composable
 private fun StopsContent(
     state: StopsUiState,
-    onOpenStop: (String, String?) -> Unit,
+    onOpenStop: (String, String?, String?) -> Unit,
     onStar: (StopRow) -> Unit,
     askLocation: () -> Unit,
     retryLocation: () -> Unit,
@@ -176,7 +178,7 @@ private fun StopsContent(
         } else {
             StopList {
                 section(R.string.stops_section_results)
-                rows(state.rows, state, onOpenStop, onStar)
+                rows(state.rows, state, "query", onOpenStop, onStar)
             }
         }
         return
@@ -186,7 +188,7 @@ private fun StopsContent(
             LocationState.Locating -> SkeletonList()
             is LocationState.Located -> StopList {
                 section(R.string.stops_section_nearby, R.string.stops_by_distance)
-                rows(state.rows, state, onOpenStop, onStar)
+                rows(state.rows, state, state.tab.name, onOpenStop, onStar)
                 item(key = "nearby-footnote", contentType = "footnote") { NearbyFootnote(state.coordinatesAttribution) }
             }
             LocationState.NoPermission, LocationState.Unavailable -> StopList {
@@ -208,7 +210,7 @@ private fun StopsContent(
                 }
                 if (state.recentRows.isNotEmpty()) {
                     section(R.string.stops_tab_recents)
-                    rows(state.recentRows, state, onOpenStop, onStar)
+                    rows(state.recentRows, state, "recent", onOpenStop, onStar)
                 }
             }
         }
@@ -220,7 +222,7 @@ private fun StopsContent(
                     listOf(EmptyAction(stringResource(R.string.home_cta_nearby), primary = true) { onTab(StopsTab.NEARBY) }),
                 )
             } else {
-                StopList { rows(state.rows, state, onOpenStop, onStar) }
+                StopList { rows(state.rows, state, state.tab.name, onOpenStop, onStar) }
             }
         StopsTab.RECENTS ->
             if (state.rows.isEmpty()) {
@@ -230,7 +232,7 @@ private fun StopsContent(
                     listOf(EmptyAction(stringResource(R.string.home_cta_nearby), primary = true) { onTab(StopsTab.NEARBY) }),
                 )
             } else {
-                StopList { rows(state.rows, state, onOpenStop, onStar) }
+                StopList { rows(state.rows, state, state.tab.name, onOpenStop, onStar) }
             }
     }
 }
@@ -253,14 +255,17 @@ private fun LazyListScope.section(label: Int, trailing: Int? = null) {
 private fun LazyListScope.rows(
     rows: List<StopRow>,
     state: StopsUiState,
-    onOpenStop: (String, String?) -> Unit,
+    originTag: String,
+    onOpenStop: (String, String?, String?) -> Unit,
     onStar: (StopRow) -> Unit,
 ) {
     items(rows, key = { "${it.stopId}:${it.favoriteLineId.orEmpty()}" }, contentType = { "stop_card" }) { row ->
+        val origin = SharedOrigins.stopRow(originTag, row.stopId, row.favoriteLineId)
         StopCard(
             row = row,
             lineColors = state.lineColors,
-            onClick = { onOpenStop(row.stopId, row.favoriteLineId) },
+            origin = origin,
+            onClick = { onOpenStop(row.stopId, row.favoriteLineId, origin) },
             onStar = { onStar(row) },
             modifier = motionAnimateItem(),
         )
@@ -311,6 +316,7 @@ fun distanceText(meters: Long): String =
 private fun StopCard(
     row: StopRow,
     lineColors: Map<String, Int>,
+    origin: String,
     onClick: () -> Unit,
     onStar: () -> Unit,
     modifier: Modifier = Modifier,
@@ -325,7 +331,7 @@ private fun StopCard(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .weight(1f, fill = false)
-                        .optionalSharedElement("stop-name-${row.stopId}"),
+                        .optionalSharedElement(SharedKeys.stopTitle(row.stopId, origin)),
                 )
                 Spacer(Modifier.weight(1f))
                 FavoriteStar(
@@ -348,7 +354,7 @@ private fun StopCard(
                             LineBadge(
                                 lineId = it,
                                 colorArgb = lineColors[it],
-                                modifier = Modifier.optionalSharedElement("line-badge-${row.stopId}-$it"),
+                                modifier = Modifier.optionalSharedElement(SharedKeys.line(row.stopId, it, origin)),
                             )
                         }
                     }

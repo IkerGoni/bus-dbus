@@ -56,6 +56,8 @@ import eus.busdonostia.app.ui.components.LineBadge
 import eus.busdonostia.app.ui.components.LocalReducedMotion
 import eus.busdonostia.app.ui.components.ScreenHeader
 import eus.busdonostia.app.ui.components.SearchPill
+import eus.busdonostia.app.ui.components.SharedKeys
+import eus.busdonostia.app.ui.components.SharedOrigins
 import eus.busdonostia.app.ui.components.SkeletonList
 import eus.busdonostia.app.ui.components.lineColor
 import eus.busdonostia.app.ui.components.optionalSharedElement
@@ -176,7 +178,7 @@ private fun LineCard(
 
 /** A03b · Itinerario: selector de sentido + timeline de paradas reales. Tap en parada → A05 con la línea. */
 @Composable
-fun LineDetailScreen(lineId: String, onBack: () -> Unit, onOpenStop: (stopId: String, lineId: String) -> Unit) {
+fun LineDetailScreen(lineId: String, onBack: () -> Unit, onOpenStop: (stopId: String, lineId: String, from: String) -> Unit) {
     val vm = appViewModel(key = "line:$lineId") { LineDetailViewModel(it, lineId) }
     val state by vm.state.collectAsStateWithLifecycle()
     val line = state.line
@@ -234,13 +236,15 @@ fun LineDetailScreen(lineId: String, onBack: () -> Unit, onOpenStop: (stopId: St
                             key = { index, stop -> "$index-${stop.stopId}" },
                             contentType = { _, _ -> "timeline_row" },
                         ) { index, stop ->
+                            val origin = SharedOrigins.timeline(selectedIndex, index)
                             TimelineRow(
                                 stop = stop,
                                 first = index == 0,
                                 last = index == stops.lastIndex,
                                 color = color,
                                 hole = hole,
-                                onClick = { onOpenStop(stop.stopId, line.cod) },
+                                origin = origin,
+                                onClick = { onOpenStop(stop.stopId, line.cod, origin) },
                                 modifier = motionAnimateItem()
                                     .staggerEntrance(index = index, triggerKey = selectedIndex),
                             )
@@ -286,6 +290,7 @@ private fun TimelineRow(
     last: Boolean,
     color: androidx.compose.ui.graphics.Color,
     hole: androidx.compose.ui.graphics.Color,
+    origin: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -317,7 +322,7 @@ private fun TimelineRow(
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 12.dp)
-                .optionalSharedElement("stop-name-${stop.stopId}"),
+                .optionalSharedElement(SharedKeys.stopTitle(stop.stopId, origin)),
         )
         Icon(
             Icons.AutoMirrored.Filled.KeyboardArrowRight,

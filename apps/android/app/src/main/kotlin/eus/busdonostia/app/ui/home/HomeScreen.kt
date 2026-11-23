@@ -76,6 +76,8 @@ import eus.busdonostia.app.ui.components.MinutesLabel
 import eus.busdonostia.app.ui.components.ScreenHeader
 import eus.busdonostia.app.ui.components.SearchPill
 import eus.busdonostia.app.ui.components.SectionLabel
+import eus.busdonostia.app.ui.components.SharedKeys
+import eus.busdonostia.app.ui.components.SharedOrigins
 import eus.busdonostia.app.ui.components.SkeletonList
 import eus.busdonostia.app.ui.screens.EmptyAction
 import eus.busdonostia.app.ui.screens.EmptyState
@@ -89,7 +91,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     onNavigate: (Destination) -> Unit,
-    onOpenStop: (stopId: String, lineId: String?) -> Unit,
+    onOpenStop: (stopId: String, lineId: String?, from: String?) -> Unit,
     onOpenLine: (String) -> Unit,
     onOpenSettings: () -> Unit,
 ) {
@@ -154,7 +156,7 @@ fun HomeScreen(
                                     item = next,
                                     view = state.nextAlertView,
                                     colorArgb = state.lineColors[next.rule.lineId],
-                                    onOpen = { onOpenStop(next.rule.stopId, next.rule.lineId) },
+                                    onOpen = { onOpenStop(next.rule.stopId, next.rule.lineId, SharedOrigins.NEXT_ALERT) },
                                     onPause = { onPause(next.rule) },
                                 )
                             }
@@ -171,7 +173,7 @@ fun HomeScreen(
 @Composable
 private fun SearchResults(
     state: HomeUiState,
-    onOpenStop: (String, String?) -> Unit,
+    onOpenStop: (String, String?, String?) -> Unit,
     onOpenLine: (String) -> Unit,
 ) {
     if (state.stopResults.isEmpty() && state.lineResults.isEmpty()) {
@@ -183,8 +185,9 @@ private fun SearchResults(
         if (state.stopResults.isNotEmpty()) {
             item(key = "search-stops-label", contentType = "section_label") { SectionLabel(stringResource(R.string.nav_stops)) }
             items(state.stopResults, key = { "s-${it.cod}" }, contentType = { "stop_result" }) { stop ->
+                val origin = SharedOrigins.search(stop.cod)
                 ResultRow(
-                    onClick = { onOpenStop(stop.cod, null) },
+                    onClick = { onOpenStop(stop.cod, null, origin) },
                     modifier = motionAnimateItem(),
                 ) {
                     Text(
@@ -193,7 +196,7 @@ private fun SearchResults(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier
                             .weight(1f)
-                            .optionalSharedElement("stop-name-${stop.cod}"),
+                            .optionalSharedElement(SharedKeys.stopTitle(stop.cod, origin)),
                     )
                 }
             }
@@ -255,7 +258,9 @@ private fun NextAlertCard(
                     rule.lineId,
                     colorArgb,
                     size = 36.dp,
-                    modifier = Modifier.optionalSharedElement("line-badge-${rule.stopId}-${rule.lineId}"),
+                    modifier = Modifier.optionalSharedElement(
+                        SharedKeys.line(rule.stopId, rule.lineId, SharedOrigins.NEXT_ALERT),
+                    ),
                 )
                 Text(
                     alertDestination(rule),
@@ -288,7 +293,9 @@ private fun NextAlertCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.optionalSharedElement("stop-name-${rule.stopId}"),
+                modifier = Modifier.optionalSharedElement(
+                    SharedKeys.stopTitle(rule.stopId, SharedOrigins.NEXT_ALERT),
+                ),
             )
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 AlertStatusLabel(item)
@@ -324,7 +331,7 @@ private fun nextAlertSourceText(item: AlertItem, view: ArrivalsView?): String {
     }
 }
 
-private fun LazyListScope.favorites(state: HomeUiState, vm: HomeViewModel, onOpenStop: (String, String?) -> Unit) {
+private fun LazyListScope.favorites(state: HomeUiState, vm: HomeViewModel, onOpenStop: (String, String?, String?) -> Unit) {
     if (state.favorites.isEmpty()) return
     item(key = "fav-label", contentType = "section_label") { SectionLabel(stringResource(R.string.home_favorites), Modifier.padding(horizontal = 0.dp)) }
     items(
@@ -332,11 +339,12 @@ private fun LazyListScope.favorites(state: HomeUiState, vm: HomeViewModel, onOpe
         key = { "fav-${it.row.stopId}-${it.row.favoriteLineId.orEmpty()}" },
         contentType = { "favorite_stop" },
     ) { card ->
-        val motion = rememberEffectiveMotionTokens()
+        val origin = SharedOrigins.favorite(card.row.stopId, card.row.favoriteLineId)
         FavoriteCard(
             card = card,
             state = state,
-            onOpen = { onOpenStop(card.row.stopId, card.row.favoriteLineId) },
+            origin = origin,
+            onOpen = { onOpenStop(card.row.stopId, card.row.favoriteLineId, origin) },
             onUnstar = { vm.unstar(card.row) },
             onRetry = vm::refresh,
             modifier = motionAnimateItem(),
@@ -348,6 +356,7 @@ private fun LazyListScope.favorites(state: HomeUiState, vm: HomeViewModel, onOpe
 private fun FavoriteCard(
     card: FavoriteStopCard,
     state: HomeUiState,
+    origin: String,
     onOpen: () -> Unit,
     onUnstar: () -> Unit,
     onRetry: () -> Unit,
@@ -364,14 +373,14 @@ private fun FavoriteCard(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .weight(1f, fill = false)
-                        .optionalSharedElement("stop-name-${row.stopId}"),
+                        .optionalSharedElement(SharedKeys.stopTitle(row.stopId, origin)),
                 )
                 row.favoriteLineId?.let {
                     LineBadge(
                         it,
                         state.lineColors[it],
                         size = 24.dp,
-                        modifier = Modifier.optionalSharedElement("line-badge-${row.stopId}-$it"),
+                        modifier = Modifier.optionalSharedElement(SharedKeys.line(row.stopId, it, origin)),
                     )
                 }
                 Box(Modifier.weight(1f))

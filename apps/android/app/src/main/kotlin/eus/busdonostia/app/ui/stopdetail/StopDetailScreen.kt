@@ -80,6 +80,7 @@ import eus.busdonostia.app.ui.components.LineBadge
 import eus.busdonostia.app.ui.components.MinutesLabel
 import eus.busdonostia.app.ui.components.ScreenHeader
 import eus.busdonostia.app.ui.components.SectionLabel
+import eus.busdonostia.app.ui.components.SharedKeys
 import eus.busdonostia.app.ui.components.SkeletonList
 import eus.busdonostia.app.ui.theme.LocalStatusColors
 import eus.busdonostia.app.ui.theme.MonoFamily
@@ -97,6 +98,7 @@ private fun clockOf(ms: Long): String = HH_MM.format(Instant.ofEpochMilli(ms).at
 fun StopDetailScreen(
     stopId: String,
     highlightLine: String?,
+    sharedOrigin: String?,
     onBack: () -> Unit,
     onCreateAlert: (stopId: String, lineId: String?, destination: String?) -> Unit,
 ) {
@@ -120,7 +122,11 @@ fun StopDetailScreen(
     Column(Modifier.fillMaxSize()) {
         ScreenHeader(
             title = state.name ?: stringResource(R.string.stop_unnamed),
-            titleModifier = Modifier.optionalSharedElement("stop-name-$stopId"),
+            titleModifier = if (sharedOrigin != null) {
+                Modifier.optionalSharedElement(SharedKeys.stopTitle(stopId, sharedOrigin))
+            } else {
+                Modifier
+            },
             navigation = {
                 IconButton(onClick = onBack) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
@@ -138,7 +144,7 @@ fun StopDetailScreen(
                 description = stringResource(R.string.a11y_favorite_stop, state.name ?: stringResource(R.string.stop_unnamed)),
             )
         }
-        LineChips(stopId, state, vm::selectLine)
+        LineChips(stopId, state, highlightLine, sharedOrigin, vm::selectLine)
         val selected = state.selectedLine
         if (selected != null) {
             TextButton(
@@ -180,7 +186,13 @@ fun StopDetailScreen(
 }
 
 @Composable
-private fun LineChips(stopId: String, state: StopDetailUiState, onSelect: (String?) -> Unit) {
+private fun LineChips(
+    stopId: String,
+    state: StopDetailUiState,
+    highlightLine: String?,
+    sharedOrigin: String?,
+    onSelect: (String?) -> Unit,
+) {
     if (state.lineIds.isEmpty()) return
     Row(
         modifier = Modifier
@@ -196,6 +208,12 @@ private fun LineChips(stopId: String, state: StopDetailUiState, onSelect: (Strin
             modifier = Modifier.heightIn(min = 48.dp),
         )
         state.lineIds.forEach { line ->
+            // Solo el chip de la línea con la que se abrió la parada lleva shared element; el resto, sin él.
+            val sharedKey = if (sharedOrigin != null && line == highlightLine) {
+                SharedKeys.line(stopId, line, sharedOrigin)
+            } else {
+                null
+            }
             FilterChip(
                 selected = state.selectedLine == line,
                 onClick = { onSelect(if (state.selectedLine == line) null else line) },
@@ -204,7 +222,7 @@ private fun LineChips(stopId: String, state: StopDetailUiState, onSelect: (Strin
                         lineId = line,
                         colorArgb = state.lineColors[line],
                         size = 24.dp,
-                        modifier = Modifier.optionalSharedElement("line-badge-$stopId-$line"),
+                        modifier = if (sharedKey != null) Modifier.optionalSharedElement(sharedKey) else Modifier,
                     )
                 },
                 modifier = Modifier.heightIn(min = 48.dp),
