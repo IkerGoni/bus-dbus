@@ -37,7 +37,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @dbus/contracts --filter @dbus/core run build
       - run: pnpm --filter @dbus/contracts --filter @dbus/core run test
-      - run: pnpm --filter @dbus/bot run test -- --exclude tests/integration.test.ts --exclude tests/handlers.test.ts
+      - run: pnpm --filter @dbus/bot run test -- --exclude="tests/integration.test.ts" --exclude="tests/handlers.test.ts" --reporter=verbose
 
   test-integration:
     runs-on: ubuntu-latest
@@ -54,7 +54,7 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @dbus/contracts --filter @dbus/core run build
-      - run: pnpm --filter @dbus/bot run test -- --testNamePattern='integration|live'
+      - run: pnpm --filter @dbus/bot run test tests/integration.test.ts tests/handlers.test.ts -- --testTimeout=30000 --reporter=verbose
         continue-on-error: true
       - name: Report integration result
         if: failure()
