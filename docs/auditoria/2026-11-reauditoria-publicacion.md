@@ -56,6 +56,7 @@ nunca en claro.
 
 1. Purga del historial (`git filter-repo --replace-text` sobre el correo del
    lockfile) y `push --force`, con `git bundle` de respaldo previo.
-2. Borrar runs y artefactos de Actions anteriores a la purga.
+2. Opcional: borrar runs y artefactos de Actions anteriores a la purga. Sus logs no
+   contienen el correo (0 en los 4 runs revisados).
 3. Hacer público el repo, activar Pages desde `main` y `/docs` y comprobar HTTP 200
    sin sesión en las tres políticas.

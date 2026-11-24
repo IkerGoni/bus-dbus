@@ -31,11 +31,13 @@ abajo. Informe completo en `docs/auditoria/2026-11-reauditoria-publicacion.md`.
 ## Pendiente
 
 1. **Purga del historial** de los 4 blobs con el correo del lockfile
-   (`filter-repo --replace-text` + `push --force`, con `git bundle` previo) y borrado
-   de runs y artefactos anteriores. Requiere confirmación explícita de Iker.
+   (`filter-repo --replace-text` + `push --force`, con `git bundle` previo). Requiere
+   confirmación explícita de Iker. Borrar los runs antiguos es opcional: sus logs no
+   contienen el correo (0 en los 4 runs).
+   Antes, auditoría externa del plan: `docs/07-android-mvp/prompts/AUDIT-PUBLICACION-PLAN.md`.
 2. **Hacer público el repo y activar Pages** (`main`, `/docs`); comprobar HTTP 200 sin
    sesión en las tres políticas y desde Ajustes. Requiere confirmación.
-3. Iker: revisión del euskera por hablante competente, huella de la clave de subida
+3. Iker: revisión del euskera (`~/Desktop/badator-google-play-pack/01-listing/REVISION-EUSKERA.md`), huella de la clave de subida
    en Play Console (`46:E6:55:…:AA:9B`) y requisito de test cerrado (12/14).
 
 ## Decisiones tomadas
