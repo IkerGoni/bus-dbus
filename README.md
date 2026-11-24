@@ -7,6 +7,7 @@
 **Live GPS arrivals · Offline stop discovery · One-shot arrival alerts**  
 **Native Android application (`Badator!`) + Telegram bot** for Donostia / San Sebastián.
 
+[![GitHub Release](https://img.shields.io/github/v/release/IkerGoni/bus-dbus?label=MVP%20Base&color=147e79)](https://github.com/IkerGoni/bus-dbus/releases/latest)
 [![Node CI](https://github.com/IkerGoni/bus-dbus/actions/workflows/ci.yml/badge.svg)](https://github.com/IkerGoni/bus-dbus/actions/workflows/ci.yml)
 [![Android CI](https://github.com/IkerGoni/bus-dbus/actions/workflows/android.yml/badge.svg)](https://github.com/IkerGoni/bus-dbus/actions/workflows/android.yml)
 ![Kotlin](https://img.shields.io/badge/Kotlin-Android-7F52FF?logo=kotlin&logoColor=white)
@@ -40,9 +41,16 @@ The result is **Bus Donostia**: an operational Telegram bot (`@dbus/bot`) and a 
 | **Features** | Live arrivals, search, lines, favorites, nearby stops (OSM), alert scheduler | Home, nearby/search stops, lines, favorites, one-shot alerts, ES / EU / EN localization |
 | **Stack** | Node 22+, TypeScript, Telegraf, PostgreSQL (`pg`) + in-memory test driver, Zod, Vitest, Biome | Kotlin, Jetpack Compose, Material 3, Room, OkHttp, kotlinx.serialization, `minSdk 26`, `targetSdk 36` |
 | **Verification** | 93 automated tests + Biome + `tsc -b` (plus 50 shared tests in `packages/`) | 156 JVM/Robolectric tests (debug) / 150 (release) + Android Lint + signed release AAB |
-| **Status** | Production-ready (real Dbus API, single-instance lock, 409 retry) | Feature-complete MVP; signed release AAB ready, Play Store release gates in progress |
+| **Status** | Production-ready (real Dbus API, single-instance lock, 409 retry) | **MVP Base (`v1.1.0`)** — signed APK in [GitHub Releases](https://github.com/IkerGoni/bus-dbus/releases/latest); Google Play rollout in progress |
 
 Both clients consume live data from the Dbus JSON API. The bundled stop catalogue (`548` stops, `39` lines, `127` itineraries) powers instant offline discovery; **it never invents arrival times**.
+
+### Download Badator! — MVP Base (`v1.1.0`)
+
+The current milestone is **MVP Base (`v1.1.0`)**, available as a signed Android APK (`minSdk 26`, Android 8.0+) while the Google Play rollout is completed:
+
+- **Download APK & checksums:** [GitHub Releases — `v1.1.0 — MVP Base`](https://github.com/IkerGoni/bus-dbus/releases/latest)
+- **Upgrade note:** the GitHub Release APK is signed with the project release key. When switching later to Google Play (Play App Signing), uninstall the GitHub APK first.
 
 ### Badator! (Android) screenshots
 
@@ -217,6 +225,30 @@ pnpm run build && npm run start
 ```
 
 > **Operational note:** never launch a second polling instance against the same `BOT_TOKEN` (triggers Telegram `409` conflicts). `git push` does not deploy or restart the production bot.
+
+---
+
+## Feedback & Roadmap
+
+We are currently in **MVP Base (`v1.1.0`)** and actively gathering real-world feedback from everyday commutes in Donostia to prioritize what ships next.
+
+### Share feedback (ES / EU / EN welcome)
+
+- **Found a bug or weird arrival/alert behavior?** [Open a bug report](https://github.com/IkerGoni/bus-dbus/issues/new?template=bug_report.yml)
+- **Have UX feedback or an improvement idea?** [Share feedback / suggest a feature](https://github.com/IkerGoni/bus-dbus/issues/new?template=feedback.yml)
+- **Prefer email?** `dev.mail.igoni@gmail.com`
+
+### Roadmap
+
+- **Now — `v1.1.0` (MVP Base)**
+  - Live GPS arrivals, offline stop discovery (`548` stops, `39` lines, `127` itineraries), nearby stops (offline OSM), favorites, one-shot adaptive alerts, ES / EU / EN localization, and the `@dbus/bot` Telegram bot.
+- **Soon**
+  - **Google Play Store launch** (closed testing and public rollout).
+  - **Feedback-driven refinements** prioritized from real-world MVP Base usage.
+  - **UX & interaction polish (`v1.2`)** — swipe-to-dismiss alerts with undo, animated alert setup wizard, lightweight native Canvas mascot for empty/onboarding states, and native Euskara review.
+- **Later / Exploring**
+  - **Native iOS app (`v2.0`)** — Kotlin Multiplatform (KMP) shared domain + native SwiftUI UI.
+  - **Optional static remote config** (`REMOTE_CONFIG_URL`) to tune operational polling parameters without requiring an app update.
 
 ---
 
