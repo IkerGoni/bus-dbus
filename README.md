@@ -54,12 +54,12 @@ Both clients consume live data from the Dbus JSON API. The bundled stop catalogu
 
 ## Built fast. Improved deliberately.
 
-The Git history is part of the engineering story. In the published Git tree, the repository went from its root commit (`2eabe0f`) to the merge of Android Sprint 4 (`00686f0`) — including the on-device alert engine — in **12 hours and 42 minutes of elapsed wall-clock time** (within a **22h 06m** total window from initial workspace kickoff on Nov 21, 18:32 UTC before pre-monorepo scratch artifacts were pruned), followed by targeted architecture audits, localization, token governance and release hardening.
+The Git history is part of the engineering story. In the published Git tree, the repository went from its root commit (`2eabe0f`) to the merge of Android Sprint 4 (`00686f0`) — including the on-device alert engine — in **12 hours and 42 minutes of elapsed wall-clock time** (the workspace itself was started earlier, on Nov 21 at 18:32 UTC according to session notes; that pre-history is not part of Git), followed by targeted architecture audits, localization, token governance and release hardening.
 
 | Elapsed from root commit (`2eabe0f`) | Recorded milestone |
 |---|---|
 | **0h 00m** | Root repository commit (`2eabe0f`) · **Nov 22, 2026, 03:56 UTC** |
-| **0h 53m** | Live Dbus JSON API integration in Telegram bot (`cdac19f`) · **04:49 UTC** |
+| **0h 52m** | Live Dbus JSON API integration in Telegram bot (`cdac19f`) · **04:49 UTC** |
 | **2h 19m** | Monorepo split with `@dbus/core` and `@dbus/contracts` (`8e7e294`) · **06:16 UTC** |
 | **7h 59m** | First Android Jetpack Compose foundation (`c129028`) · **11:56 UTC** |
 | **9h 50m** | Stops, stop detail and lines screens (`5fb7f7b`) · **13:46 UTC** |
@@ -67,6 +67,8 @@ The Git history is part of the engineering story. In the published Git tree, the
 | **11h 34m** | Android foreground service alert and notification engine (`5f687c3`) · **15:31 UTC** |
 | **12h 42m** | Sprint 4 integrated into `main` (`00686f0`) · **16:39 UTC** |
 | **Afterwards** | Architecture audits, adaptive polling, ES/EU/EN parity, compiled `DesignTokens`, PostgreSQL migration, Play Store release pipeline |
+
+Elapsed times and UTC times come from Git commit dates and are truncated to the minute.
 
 > **What this measures:** wall-clock time directly verifiable via `git log` between recorded commits — not net human working hours or a shortcut around testing. The speed comes from **parallel multi-agent orchestration under strict engineering guardrails**.
 
