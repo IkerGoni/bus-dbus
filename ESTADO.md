@@ -1,23 +1,47 @@
 # Estado — bus-dbus
 
-Actualizado: 2026-11-24 · Última sesión: cierre de auditorías adversariales pre-publicación (privacidad in-app, Data Safety, saneamiento Git, CI y Play Store 29/29)
+Actualizado: 2026-11-24 · Última sesión: reauditoría de publicación (GitHub y Google Play) y remediación
 
 ## Objetivo actual
 
-Repositorio y paquete de Google Play (`Badator!` v1.1.0) listos para publicación en repositorio remoto limpio y subida a Play Console (29/29 checks en verde).
+Publicar el repositorio y subir `Badator!` v1.1.0 (versionCode 2) a Play Console con
+evidencia por SHA y por binario. Veredicto: 🔴 NO-GO hasta cerrar los pendientes de
+abajo. Informe completo en `docs/auditoria/2026-11-reauditoria-publicacion.md`.
 
 ## Hecho en esta sesión
 
-- **Enlace a Política de Privacidad dentro de la app (`SettingsScreen.kt`):** añadido botón en Ajustes («Acerca de») que abre la política de privacidad pública según el idioma activo (`es`, `eu`, `en`), cubierto por `StringsParityTest` y `ScreenLogicTest.privacyPolicyUrlPorIdioma`. Migrados los 12 literales `.dp` de `SettingsScreen.kt` a `DesignTokens` (regla Boy Scout, límite `DesignTokensGuardTest` reducido de 165 a 153).
-- **Políticas de privacidad (`01-gen-privacy.mjs` + `docs/privacy/*.html`):** corregida referencia de persistencia a `Room (SQLite) y SharedPreferences`, razón social oficial (`Compañía del Tranvía de San Sebastián, S.A.U. — Dbus`), URLs oficiales de privacidad de Dbus con HTTP 200 en ES/EU/EN, mención explícita del intent `geo:` y eliminación de frases de borrador. Escritura remota en GitHub protegida tras `--deploy`.
-- **Data Safety (`02-audit-data-safety.mjs` + `data-safety-responses.json`):** `collectsLocation: false` y `location: null` (la ubicación es opcional, se procesa exclusivamente en memoria local y nunca sale del dispositivo), manteniendo `encryptsAtRest: false` y `encryptsInTransit: false`.
-- **Cifras, línea temporal y documentación alineadas (`README.md`, `AGENTS.md`, `apps/android/README.md`, `auditoria-secretos.md`):** 299 tests automatizados verificados (`7` contracts + `43` core + `93` bot = `143` TS; `156` debug / `150` release en Android), línea temporal de `README.md` trazada con hashes exactos sobre el árbol publicado (`12h 42m` de `2eabe0f` a `00686f0`), enlace directo a ADR 009, `docs/.nojekyll`, `.gitignore` ampliado (`*.p12`, `*.pem`, `*.key`) y workflows con `permissions: contents: read`.
-- **Saneamiento integral del historial Git:** purgados mediante `git filter-repo` correos no aprobados y rutas locales `/Users/...` en todos los blobs históricos, manteniendo el 100 % de los commits bajo la identidad `IkerGoni <8208093+IkerGoni@users.noreply.github.com>`.
-- **Checklist Maestro (`08-final-checklist.mjs`):** **29/29 checks en verde (100 %)**.
+- **Correo ajeno en el lockfile (ID-01):** venía del aviso `deprecated` de `glob@11`
+  (PWA congelada → `workbox-build`). Override a `glob@13` en `pnpm-workspace.yaml`;
+  0 apariciones en `main`. Guard `tools/repo/check-identity.mjs` en CI (correos fuera
+  de la lista aprobada, rutas locales e identidad y mensaje de HEAD).
+- **CI (CI-01):** el timeout de integración no llegaba a vitest. Desde los runners de
+  GitHub Dbus no es alcanzable (timeout de TCP); la integración pasa a
+  `integration.yml` (manual, con sonda) y se verifica en local con `pnpm verify`.
+- **Play:** texto FGS corregido en Data Safety y fichas (el tope de 3 h solo actúa si
+  no hay bus de la línea); decisión de Data Safety en
+  `docs/play-console/data-safety-decision.md`; política eu con identificadores de
+  parada; AAB/APK regenerados y firmados con DEX `9648d959…` (determinista, árbol
+  `apps/android` `e0db74e7`), los anteriores archivados como «no subir».
+- **Docs y paquete:** cronología del README truncada al minuto, índice sin SHA
+  inexistente, `*.apk`/`*.aab` ignorados, checklist que ya no se anuncia «listo para
+  publicar», guía del paquete sin rutas locales ni identificadores de GCP.
+- Verificación: 7 + 43 + 93 = 143 TS, `build:ci`, Android 156 debug / 150 release,
+  lint sin issues.
+
+## Pendiente
+
+1. **Purga del historial** de los 4 blobs con el correo del lockfile
+   (`filter-repo --replace-text` + `push --force`, con `git bundle` previo) y borrado
+   de runs y artefactos anteriores. Requiere confirmación explícita de Iker.
+2. **Hacer público el repo y activar Pages** (`main`, `/docs`); comprobar HTTP 200 sin
+   sesión en las tres políticas y desde Ajustes. Requiere confirmación.
+3. Iker: revisión del euskera por hablante competente, huella de la clave de subida
+   en Play Console (`46:E6:55:…:AA:9B`) y requisito de test cerrado (12/14).
 
 ## Decisiones tomadas
 
-- Identidad legal y correo público configurados según los datos reales de la cuenta Play Console de Iker.
-- Soporte para idioma inglés (EN) añadido formalmente al código y a la ficha de la tienda.
-- `encryptsAtRest: false` en Data Safety para total honestidad técnica.
-- Nivel 2 (tokens): congelada línea base en 165 `XX.dp` con test ratchet sin romper la regla Boy Scout en archivos ajenos.
+- Purga del historial al final: reescribe todos los SHA y no cambia el árbol de
+  `apps/android`, así que los binarios regenerados siguen valiendo.
+- Integración con Dbus fuera del CI de cada push (no alcanzable desde los runners).
+- Data Safety se mantiene en «sin recogida», con el riesgo residual documentado.
+- Override de `glob` en la raíz en vez de tocar `apps/mobile` (congelada).
