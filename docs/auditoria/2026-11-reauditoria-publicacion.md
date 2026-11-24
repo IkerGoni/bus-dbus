@@ -26,7 +26,7 @@ nunca en claro.
 - 1.188 blobs (1.308 pares blob–ruta, más 72 partes extraídas): 0 secretos, 0 claves
   y 0 rutas prohibidas (`bot-code.zip`, `state/`, keystores, binarios). Falsos
   positivos documentados: chat ids de test y nonces de excalidraw (teléfonos),
-  marcadores `/Users/dev` y `/Users/...` (rutas), `env.local` y `test.local` (hosts),
+  marcadores genéricos de ruta de usuario que dejó la purga anterior (rutas), `env.local` y `test.local` (hosts),
   `this@composed` de Kotlin (correo).
 - Tests: 7 + 43 + 93 = 143 TS; Android 156 debug / 150 release, lint sin issues.
 
