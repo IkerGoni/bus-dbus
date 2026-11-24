@@ -22,6 +22,7 @@ Qué doc mirar para cada cosa. Si un doc contradice a
 | Resumen final de esa remediación | [`auditoria/2026-11-sprint5-remediacion-final.md`](auditoria/2026-11-sprint5-remediacion-final.md) |
 | Reauditoría de publicación (GitHub y Play, hallazgos y pasos pendientes) | [`auditoria/2026-11-reauditoria-publicacion.md`](auditoria/2026-11-reauditoria-publicacion.md) |
 | Prompt para la auditoría externa del plan de publicación | [`07-android-mvp/prompts/AUDIT-PUBLICACION-PLAN.md`](07-android-mvp/prompts/AUDIT-PUBLICACION-PLAN.md) |
+| Prompt de ejecución controlada de publicación (paquete Play + GitHub + Pages) | [`07-android-mvp/prompts/EJECUCION-PUBLICACION.md`](07-android-mvp/prompts/EJECUCION-PUBLICACION.md) |
 | Por qué Data Safety declara «sin recogida» | [`play-console/data-safety-decision.md`](play-console/data-safety-decision.md) |
 | Reglas duras para implementar Android | [`07-android-mvp/docs/00-agent-guardrails.md`](07-android-mvp/docs/00-agent-guardrails.md) |
 | Modelos, estados de aviso y matching | [`07-android-mvp/docs/02-domain-contracts.md`](07-android-mvp/docs/02-domain-contracts.md) |
