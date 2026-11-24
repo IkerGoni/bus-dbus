@@ -7,6 +7,9 @@
 # Signing keys & Play Console credentials (never commit)
 *.keystore
 *.jks
+*.p12
+*.pem
+*.key
 .gplay/
 play-service-account.json
 gplay-service-account*.json

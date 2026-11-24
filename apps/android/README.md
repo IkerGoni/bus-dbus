@@ -25,7 +25,7 @@ y `avdmanager create avd -n dbus36 -k "system-images;android-36;google_apis;arm6
 ./gradlew check assembleDebug   # lint (MissingTranslation/HardcodedText = error) + tests JVM + APK debug
 ```
 
-Resultado esperado: **152 tests JVM (debug) / 138 tests JVM (release)**, 0 fallos, 0 errores de lint. CI: `.github/workflows/android.yml`.
+Resultado esperado: **156 tests JVM (debug) / 150 tests JVM (release)**, 0 fallos, 0 errores de lint. CI: `.github/workflows/android.yml`.
 
 ## Release firmado (H8)
 

@@ -51,16 +51,18 @@ Añadido tras A5-01:
 
 ## Acciones
 
-1. **Rotación del token: HECHA** (Iker, 2026-11-23, BotFather + `.env` raíz).
-   Verificado sin imprimir nada: el token actual de `.env` ya **no** coincide
-   con el del zip. El token filtrado queda invalidado aunque el blob permanezca.
-2. **Purga del historial: pendiente de decisión de Iker.** `git filter-repo`
-   reescribe historia y exige force-push (irreversible; todos los clones deben
-   re-clonarse). Procedimiento en
-   [`remediacion`](../auditoria/2026-11-sprint5-remediacion.md). Mientras no se
-   purgue, **el repo no puede hacerse público**.
-3. Reinicio del bot en producción con el token nuevo (regla 9): pendiente de
-   autorización; el bot está parado.
+1. **Rotación del token: HECHA** (Iker, 2026-11-23, BotFather + entorno local).
+   Verificado sin imprimir nada: el token vigente ya **no** coincide con el del
+   antiguo `bot-code.zip`. El token histórico quedó revocado e invalidado.
+2. **Purga del historial: HECHA** (2026-11-23/24 con `git filter-repo`).
+   Eliminados de todos los commits y árboles del repositorio `bot-code.zip`,
+   `state/**`, artefactos de `build/outputs/play-store/**`, correos no
+   destinados a soporte público y rutas locales `/Users/...`. Verificado con
+   escaneo completo de `git rev-list --all --objects` (0 ficheros prohibidos,
+   0 secretos, 100 % de commits con identidad pública unificada).
+3. **Publicación en contenedor remoto limpio:** para evitar que GitHub siga
+   sirviendo objetos huérfanos cacheados por runs antiguos de GitHub Actions,
+   el historial saneado se publica en un repositorio remoto limpio sin objetos
+   ni runs previos.
 
-**Estado:** token rotado y verificado · historial pendiente de purga ·
-informe original corregido (no volver a citar «0 coincidencias, no hay que rotar»).
+**Estado:** token rotado y revocado · historial Git purgado y verificado (0 secretos en blobs) · informe original corregido.

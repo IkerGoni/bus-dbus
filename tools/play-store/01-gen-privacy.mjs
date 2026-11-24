@@ -36,9 +36,13 @@ const CONFIG = {
     en: `https://${pagesHost}.github.io/bus-dbus/privacy/privacy-policy-en.html`,
   },
   dbusProvider: {
-    name: 'Dbus (Donostiako Autobusak)',
-    url: 'https://www.dbus.eus',
-    privacyUrl: 'https://www.dbus.eus/privacidad/',
+    name: 'Compañía del Tranvía de San Sebastián, S.A.U. — Dbus (Donostiako Autobusak)',
+    url: 'https://dbus.eus',
+    privacyUrls: {
+      es: 'https://dbus.eus/es/politica-de-privacidad/',
+      eu: 'https://dbus.eus/pribatutasun-politika/',
+      en: 'https://dbus.eus/en/privacy-policy/',
+    },
   },
   github: {
     repo: process.env.GH_PAGES_REPO || `${githubUser}/bus-dbus`,
@@ -156,10 +160,10 @@ function fillTemplate(templates, lang, evidence) {
 
   const retentionStatus = evidence.usesRoom && evidence.allowBackupFalse
     ? (lang === 'es'
-      ? 'Los datos locales (favoritos, paradas recientes, avisos y preferencias) se guardan en Room (SQLite) y DataStore dentro del almacenamiento privado del dispositivo. La app no tiene cuentas de usuario. El manifiesto declara `android:allowBackup="false"`, por lo que no se realizan copias de seguridad automáticas en Google Drive. Puedes borrar los datos desde la propia app, borrando los datos de la aplicación en los ajustes de Android o desinstalándola'
+      ? 'Los datos locales (favoritos, paradas recientes, avisos y preferencias) se guardan en Room (SQLite) y SharedPreferences dentro del almacenamiento privado del dispositivo. La app no tiene cuentas de usuario. El manifiesto declara `android:allowBackup="false"`, por lo que no se realizan copias de seguridad automáticas en Google Drive. Puedes borrar los datos desde la propia app, borrando los datos de la aplicación en los ajustes de Android o desinstalándola'
       : lang === 'eu'
-        ? 'Datu lokalak (gogokoak, azken geltokiak, abisuak eta hobespenak) gailuaren biltegiratze pribatuan gordetzen dira, Room (SQLite) eta DataStore bidez. Aplikazioak ez du erabiltzaile-konturik. Manifestuak `android:allowBackup="false"` deklaratzen duenez, ez da segurtasun-kopia automatikorik egiten Google Driven. Datuak aplikaziotik bertatik, Androiden ezarpenetatik edo aplikazioa desinstalatuz ezaba ditzakezu'
-        : 'Local data (favorites, recent stops, alerts, and preferences) is stored in Room (SQLite) and DataStore inside the app private storage on your device. The app has no user accounts. The manifest sets `android:allowBackup="false"`, so no automatic Google Drive backup is performed. You can delete your data from within the app, by clearing app data in Android settings, or by uninstalling the app')
+        ? 'Datu lokalak (gogokoak, azken geltokiak, abisuak eta hobespenak) gailuaren biltegiratze pribatuan gordetzen dira, Room (SQLite) eta SharedPreferences bidez. Aplikazioak ez du erabiltzaile-konturik. Manifestuak `android:allowBackup="false"` deklaratzen duenez, ez da segurtasun-kopia automatikorik egiten Google Driven. Datuak aplikaziotik bertatik, Androiden ezarpenetatik edo aplikazioa desinstalatuz ezaba ditzakezu'
+        : 'Local data (favorites, recent stops, alerts, and preferences) is stored in Room (SQLite) and SharedPreferences inside the app private storage on your device. The app has no user accounts. The manifest sets `android:allowBackup="false"`, so no automatic Google Drive backup is performed. You can delete your data from within the app, by clearing app data in Android settings, or by uninstalling the app')
     : 'Verification required before release';
 
   common['[AZKEN_AAB_AUDITORIAREN_EMAITZAK]'] = analyticsStatus;
@@ -169,10 +173,12 @@ function fillTemplate(templates, lang, evidence) {
 
   const specifics = {
     es: {
+      'Según la implementación revisada en noviembre de 2026, no la persiste. **Verificar que no se transmite a terceros en la build final.**':
+        'La ubicación es opcional, se procesa únicamente en memoria en el dispositivo para ordenar paradas cercanas y nunca se guarda ni se transmite a terceros. Al pulsar «Cómo llegar» en el detalle de una parada, la aplicación abre la app de mapas instalada mediante un intent estándar `geo:` pasando únicamente las coordenadas públicas y el nombre de la parada.',
       '**Verificar que no se transmite a terceros en la build final.**':
         'La ubicación es opcional, se procesa únicamente en memoria en el dispositivo para ordenar paradas cercanas y nunca se guarda ni se transmite a terceros.',
       '**Verificar esquema y borrado real.**':
-        'Se almacenan localmente en Room (SQLite) y DataStore con `android:allowBackup="false"`. Puedes eliminarlos desde la app, borrando los datos en los ajustes de Android o desinstalándola.',
+        'Se almacenan localmente en Room (SQLite) y SharedPreferences con `android:allowBackup="false"`. Puedes eliminarlos desde la app, borrando los datos en los ajustes de Android o desinstalándola.',
       'La implementación consultada usa **HTTP** para dicha API. No afirmar «cifrado en tránsito» para toda la aplicación hasta que cambie la infraestructura o se documente una alternativa segura.':
         `La API pública de Dbus (\`${evidence.apiEndpoint}\`) responde actualmente solo por **HTTP**. El manifiesto declara \`cleartextTrafficPermitted="true"\` exclusivamente para \`app.dbus.eus\`, y la app no contacta con ningún otro servidor. Por ello, las consultas a dicho servicio no viajan cifradas en tránsito.`,
       '[DEFINIR PUBLICO OBJETIVO Y REGLAS APLICABLES]':
@@ -180,12 +186,14 @@ function fillTemplate(templates, lang, evidence) {
       'Dev iGoni —': `${CONFIG.developer} —`,
     },
     eu: {
+      '; aztertutako inplementazioan ez da modu iraunkorrean gordetzen. **Azken bertsioan egiaztatu behar da.**':
+        '. Kokapena aukerakoa da, gailuko memorian soilik erabiltzen da inguruko geltokiak distantziaren arabera ordenatzeko, eta ez da inoiz gordetzen edo hirugarrenei bidaltzen. Geltoki baten xehetasunean «Nola iritsi» sakatzean, instalatutako mapa-aplikazioa `geo:` intent estandarraren bidez irekitzen da, geltokiaren koordenatu publikoak eta izena soilik pasatuz.',
       '**Azken bertsioan egiaztatu behar da.**':
         'Kokapena aukerakoa da, gailuko memorian soilik erabiltzen da inguruko geltokiak distantziaren arabera ordenatzeko, eta ez da inoiz gordetzen edo hirugarrenei bidaltzen.',
       'Horien ezabaketa eta segurtasun-kopiak egiaztatu behar dira.':
-        'Gailuan bertan gordetzen dira Room (SQLite lokala) eta DataStore bidez, `android:allowBackup="false"` ezarpenarekin. Erabiltzaileak aplikaziotik bertatik, Androiden ezarpenetatik edo aplikazioa desinstalatuz ezaba ditzake.',
+        'Gailuan bertan gordetzen dira Room (SQLite lokala) eta SharedPreferences bidez, `android:allowBackup="false"` ezarpenarekin. Erabiltzaileak aplikaziotik bertatik, Androiden ezarpenetatik edo aplikazioa desinstalatuz ezaba ditzake.',
       'Aztertutako inplementazioak HTTP erabiltzen du. Ez esan komunikazio guztiak zifratuta daudela, hori egiaztatu gabe.':
-        `Dbusen API publikoak (\`${evidence.apiEndpoint}\`) **HTTP** bidez bakarrik erantzuten du gaur egun. Manifestuak \`cleartextTrafficPermitted="true"\` deklaratzen du \`app.dbus.eus\` domeinurako bakarrik, eta ez dago beste sare-helbiderik. Hori dela eta, kontsulta horiek ez doaz zifratuta garraioan.`,
+        `Dbusen API publikoak (\`${evidence.apiEndpoint}\`) **HTTP** bidez bakarrik erantzuten du gaur egun. Manifestuak \`cleartextTrafficPermitted="true"\` deklaratzen du \`app.dbus.eus\` domeinurako bakarrik, eta ez dago beste sare-helbiderik. Hori dela eta, kontsulta horiek ez doaz zifratuta garraioan. Iritsiera-datuen hornitzailea **${CONFIG.dbusProvider.name}** (${CONFIG.dbusProvider.url}) da, eta bere pribatutasun-politika ${CONFIG.dbusProvider.privacyUrls.eu} helbidean kontsulta daiteke.`,
       'Osatu lege-informazioa argitaratu aurretik.':
         `Arduraduna: ${CONFIG.legalIdentity}. Kontaktua: ${CONFIG.supportEmail}.`,
       '[DEFINIR PUBLICO OBJETIVO Y REGLAS APLICABLES]':
@@ -194,11 +202,11 @@ function fillTemplate(templates, lang, evidence) {
     },
     en: {
       'In the source implementation reviewed in November 2026, location is not persisted; confirm the released binary does not transmit it to third parties.':
-        'Location is optional, used ephemerally in memory on the device to sort nearby stops, and is never persisted or transmitted to third parties.',
+        'Location is optional, used ephemerally in memory on the device to sort nearby stops, and is never persisted or transmitted to third parties. When tapping "Directions" on a stop detail screen, the app opens your installed map application via a standard Android `geo:` intent passing only the stop\'s public coordinates and name.',
       'Confirm deletion and backup behavior in the final build.':
-        'Data is stored locally in Room (SQLite) and DataStore with `android:allowBackup="false"` (no automatic Google Drive backup). You can delete it in-app, via Android app settings, or by uninstalling.',
+        'Data is stored locally in Room (SQLite) and SharedPreferences with `android:allowBackup="false"` (no automatic Google Drive backup). You can delete it in-app, via Android app settings, or by uninstalling.',
       'The source implementation reviewed uses **HTTP** for these requests, so do not claim all network data is encrypted in transit.':
-        `The public Dbus API (\`${evidence.apiEndpoint}\`) currently responds only over **HTTP**. The manifest declares \`cleartextTrafficPermitted="true"\` exclusively for \`app.dbus.eus\`, and no other network endpoints are used. Accordingly, requests to that endpoint are not encrypted in transit.`,
+        `The public Dbus API (\`${evidence.apiEndpoint}\`) currently responds only over **HTTP**. The manifest declares \`cleartextTrafficPermitted="true"\` exclusively for \`app.dbus.eus\`, and no other network endpoints are used. Accordingly, requests to that endpoint are not encrypted in transit. The transit data provider is **${CONFIG.dbusProvider.name}** (${CONFIG.dbusProvider.url}), whose privacy policy is available at ${CONFIG.dbusProvider.privacyUrls.en}.`,
       'Add the required legal information about the controller and applicable rights after a compliance review.':
         `Controller: ${CONFIG.legalIdentity}. Contact: ${CONFIG.supportEmail}.`,
       '[DEFINIR PUBLICO OBJETIVO Y REGLAS APLICABLES]':
@@ -219,7 +227,7 @@ function fillTemplate(templates, lang, evidence) {
   if (lang === 'es') {
     t = t.replace(
       /\*\*Pendiente de auditoría:\*\*[^\n]*/g,
-      `El proveedor de datos de llegadas es **${CONFIG.dbusProvider.name}** (${CONFIG.dbusProvider.url}), cuya política de privacidad puede consultarse en ${CONFIG.dbusProvider.privacyUrl}.`,
+      `El proveedor de datos de llegadas es **${CONFIG.dbusProvider.name}** (${CONFIG.dbusProvider.url}), cuya política de privacidad puede consultarse en ${CONFIG.dbusProvider.privacyUrls.es}.`,
     );
     t = t.replace(
       /\*\*Pendiente:\*\*[^\n]*/g,
@@ -340,8 +348,12 @@ ${renderedBlocks.join('\n\n')}
 `;
 }
 
-// ---- Despliegue a GitHub Pages ----
+// ---- Despliegue a GitHub Pages (requiere flag explícito --deploy) ----
 async function deployToGitHubPages(files) {
+  if (!process.argv.includes('--deploy')) {
+    console.log('ℹ️ Modo generación local (pasa --deploy para subir vía API con GH_TOKEN).');
+    return;
+  }
   if (!CONFIG.github.token) {
     console.log('⚠️ GH_TOKEN no configurado. Saltando deploy a GitHub Pages.');
     console.log('   Configura GH_TOKEN en .env.local o export GH_TOKEN=...');

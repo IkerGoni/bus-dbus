@@ -1,30 +1,19 @@
 # Estado — bus-dbus
 
-Actualizado: 2026-11-23 · Última sesión: preparación publicación Play Store + strings EN + verificación EU + tokens guard
+Actualizado: 2026-11-24 · Última sesión: cierre de auditorías adversariales pre-publicación (privacidad in-app, Data Safety, saneamiento Git, CI y Play Store 29/29)
 
 ## Objetivo actual
 
-Preparar Android para publicación independiente en Google Play. Sprint 5 de publicación avanzado a 90% en checklist técnico.
+Repositorio y paquete de Google Play (`Badator!` v1.1.0) listos para publicación en repositorio remoto limpio y subida a Play Console (29/29 checks en verde).
 
 ## Hecho en esta sesión
 
-- **Identidad de desarrollador confirmada:** Dev Igoni — Iker Goñi Cuesta, Pamplona, España. Email soporte: `dev.mail.igoni@gmail.com`.
-- **Interfaz en inglés creada e integrada:** creados recursos en `apps/android/app/src/main/res/values-en/` (`strings.xml`, `strings_settings.xml`, `strings_engine.xml`). `StringsParityTest.kt` extendido para verificar paridad trilingüe (ES, EU, EN) en build y CI.
-- **Correcciones de euskera completadas:** aplicadas las 13 correcciones en `values-eu/strings*.xml` y los 6 literalismos en `badator-google-play-pack/01-listing/eu-ES.md`. Script `06-verify-eu.mjs` corregido y 100% verde (0 issues detectados, 0 keys faltantes).
-- **Políticas de privacidad regeneradas (ES / EU / EN):** eliminados todos los placeholders («Pendiente/Verificar/⚠️») con evidencia real del código (cleartext HTTP solo `app.dbus.eus`, Room local, sin trackers ni ads, `allowBackup=false`). Desplegables a GitHub Pages (`docs/privacy/privacy-policy-{es,eu,en}.html`).
-- **Data Safety auditado y corregido:** `encryptsAtRest: false` (Room no cifra; Android FBE cifra a nivel SO), `encryptsInTransit: false`. Archivos en `docs/play-console/data-safety-responses.json` y pack.
-- **Ficha Play Store (`07-store-fields.json` + `01-listing/*.md`):** sincronizados textos trilingües (ES, EU, EN), email de soporte real, case `Dev Igoni`.
-- **Ticket A5-11 y Test Guardián Ratchet:** creado `docs/07-android-mvp/tickets/A5-11-DESIGN-TOKENS-SWEEP.md` con inventario detallado de los 165 usos de `XX.dp` en `ui/`. Creado `DesignTokensGuardTest.kt` que bloquea regresiones inline y prohíbe animaciones inline fuera de `MotionTokens`.
-- **Checklist Maestro (`08-final-checklist.mjs`):** eliminados silenciamientos de errores (`>/dev/null`), añadida validación real de contenido y tamaños. Resultado: **28/31 checks en verde (90%)**.
-- **Build y verificación Android:** `./gradlew check assembleDebug` en verde (0 errores de lint, todos los tests JVM unit/Robolectric pasando, debug APK generado).
-
-## Pendiente (requiere acción del usuario / hardware)
-
-1. [ ] **Keystore de subida + AAB firmado:** crear keystore (`keytool`), configurar `~/.gradle/gradle.properties` y generar AAB firmado (`./gradlew bundleRelease`).
-2. [ ] **Capturas de pantalla reales (18 PNGs):** 6 pantallas × 3 idiomas (ES/EU/EN) tomadas en emulador o dispositivo real (`build/outputs/play-store/screenshots/`).
-3. [ ] **Vídeo demostración FGS:** grabar pantalla (`adb screenrecord`) siguiendo `04-console/FGS-REVIEW-TEMPLATE.md`, subir a YouTube como no listado y poner URL en la declaración de Play Console.
-4. [ ] **Revisión nativa de cortesía en Euskera:** aunque el script automático da 0 issues, se recomienda una lectura rápida por un hablante nativo antes del lanzamiento público.
-5. [ ] **Service Account Google Play (opcional):** crear SA en Google Cloud + Play Console si se desea subida automatizada por CLI.
+- **Enlace a Política de Privacidad dentro de la app (`SettingsScreen.kt`):** añadido botón en Ajustes («Acerca de») que abre la política de privacidad pública según el idioma activo (`es`, `eu`, `en`), cubierto por `StringsParityTest` y `ScreenLogicTest.privacyPolicyUrlPorIdioma`. Migrados los 12 literales `.dp` de `SettingsScreen.kt` a `DesignTokens` (regla Boy Scout, límite `DesignTokensGuardTest` reducido de 165 a 153).
+- **Políticas de privacidad (`01-gen-privacy.mjs` + `docs/privacy/*.html`):** corregida referencia de persistencia a `Room (SQLite) y SharedPreferences`, razón social oficial (`Compañía del Tranvía de San Sebastián, S.A.U. — Dbus`), URLs oficiales de privacidad de Dbus con HTTP 200 en ES/EU/EN, mención explícita del intent `geo:` y eliminación de frases de borrador. Escritura remota en GitHub protegida tras `--deploy`.
+- **Data Safety (`02-audit-data-safety.mjs` + `data-safety-responses.json`):** `collectsLocation: false` y `location: null` (la ubicación es opcional, se procesa exclusivamente en memoria local y nunca sale del dispositivo), manteniendo `encryptsAtRest: false` y `encryptsInTransit: false`.
+- **Cifras, línea temporal y documentación alineadas (`README.md`, `AGENTS.md`, `apps/android/README.md`, `auditoria-secretos.md`):** 299 tests automatizados verificados (`7` contracts + `43` core + `93` bot = `143` TS; `156` debug / `150` release en Android), línea temporal de `README.md` trazada con hashes exactos sobre el árbol publicado (`12h 42m` de `2eabe0f` a `00686f0`), enlace directo a ADR 009, `docs/.nojekyll`, `.gitignore` ampliado (`*.p12`, `*.pem`, `*.key`) y workflows con `permissions: contents: read`.
+- **Saneamiento integral del historial Git:** purgados mediante `git filter-repo` correos no aprobados y rutas locales `/Users/...` en todos los blobs históricos, manteniendo el 100 % de los commits bajo la identidad `IkerGoni <8208093+IkerGoni@users.noreply.github.com>`.
+- **Checklist Maestro (`08-final-checklist.mjs`):** **29/29 checks en verde (100 %)**.
 
 ## Decisiones tomadas
 

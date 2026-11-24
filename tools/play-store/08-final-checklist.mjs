@@ -103,7 +103,23 @@ function checkDataSafetyJson(p, desc) {
       console.log(`  ❌ ${desc}: encryptsInTransit debe ser false`);
       return 0;
     }
-    console.log(`  ✅ ${desc}: verificado (encryptsAtRest=false, cleartext=true)`);
+    if (json.dataCollection?.collectsLocation !== false || json.dataTypes?.location !== null) {
+      console.log(`  ❌ ${desc}: collectsLocation debe ser false y dataTypes.location null (procesamiento 100% en dispositivo)`);
+      return 0;
+    }
+    if (json.dataSharing?.sharesLocation !== false) {
+      console.log(`  ❌ ${desc}: sharesLocation debe ser false`);
+      return 0;
+    }
+    const settingsKt = fs.readFileSync(
+      path.join(ROOT, 'apps/android/app/src/main/kotlin/eus/busdonostia/app/ui/settings/SettingsScreen.kt'),
+      'utf-8',
+    );
+    if (!settingsKt.includes('privacyPolicyIntent')) {
+      console.log(`  ❌ ${desc}: SettingsScreen.kt no enlaza a privacyPolicyIntent`);
+      return 0;
+    }
+    console.log(`  ✅ ${desc}: verificado (collectsLocation=false, encryptsAtRest=false, cleartext=true, in-app privacy link=true)`);
     return 1;
   } catch (e) {
     console.log(`  ❌ ${desc}: JSON inválido`);

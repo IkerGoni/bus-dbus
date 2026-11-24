@@ -39,7 +39,7 @@ The result is **Bus Donostia**: an operational Telegram bot (`@dbus/bot`) and a 
 | **Purpose** | Check live arrivals and schedule alerts directly from Telegram | Fast everyday access with local adaptive notifications |
 | **Features** | Live arrivals, search, lines, favorites, nearby stops (OSM), alert scheduler | Home, nearby/search stops, lines, favorites, one-shot alerts, ES / EU / EN localization |
 | **Stack** | Node 22+, TypeScript, Telegraf, PostgreSQL (`pg`) + in-memory test driver, Zod, Vitest, Biome | Kotlin, Jetpack Compose, Material 3, Room, OkHttp, kotlinx.serialization, `minSdk 26`, `targetSdk 36` |
-| **Verification** | 93 automated tests + Biome + `tsc -b` (plus 50 shared tests in `packages/`) | 152 JVM/Robolectric tests per variant + Android Lint + signed release AAB |
+| **Verification** | 93 automated tests + Biome + `tsc -b` (plus 50 shared tests in `packages/`) | 156 JVM/Robolectric tests (debug) / 150 (release) + Android Lint + signed release AAB |
 | **Status** | Production-ready (real Dbus API, single-instance lock, 409 retry) | Feature-complete MVP; signed release AAB and Play Store checklist at 29/29 |
 
 Both clients consume live data from the Dbus JSON API. The bundled stop catalogue (`548` stops, `39` lines, `127` itineraries) powers instant offline discovery; **it never invents arrival times**.
@@ -54,26 +54,28 @@ Both clients consume live data from the Dbus JSON API. The bundled stop catalogu
 
 ## Built fast. Improved deliberately.
 
-The Git history is part of the engineering story. The repository went from its first commit to the merge of Android Sprint 4 — including the on-device alert engine — in **22 hours and 6 minutes of elapsed wall-clock time**, followed by targeted architecture audits, localization, token governance and release hardening.
+The Git history is part of the engineering story. In the published Git tree, the repository went from its root commit (`2eabe0f`) to the merge of Android Sprint 4 (`00686f0`) — including the on-device alert engine — in **12 hours and 42 minutes of elapsed wall-clock time** (within a **22h 06m** total window from initial workspace kickoff on Nov 21, 18:32 UTC before pre-monorepo scratch artifacts were pruned), followed by targeted architecture audits, localization, token governance and release hardening.
 
-| Elapsed from first commit | Recorded milestone |
+| Elapsed from root commit (`2eabe0f`) | Recorded milestone |
 |---|---|
-| **0h** | First repository commit · **Nov 21, 2026, 18:32 UTC** |
-| **17h 24m** | First Android Jetpack Compose foundation |
-| **19h 14m** | Stops, stop detail and lines screens |
-| **19h 58m** | Home, alerts, settings and onboarding |
-| **20h 59m** | Android foreground service alert and notification engine |
-| **22h 06m** | Sprint 4 integrated into `main` |
+| **0h 00m** | Root repository commit (`2eabe0f`) · **Nov 22, 2026, 03:56 UTC** |
+| **0h 53m** | Live Dbus JSON API integration in Telegram bot (`cdac19f`) · **04:49 UTC** |
+| **2h 19m** | Monorepo split with `@dbus/core` and `@dbus/contracts` (`8e7e294`) · **06:16 UTC** |
+| **7h 59m** | First Android Jetpack Compose foundation (`c129028`) · **11:56 UTC** |
+| **9h 50m** | Stops, stop detail and lines screens (`5fb7f7b`) · **13:46 UTC** |
+| **10h 34m** | Home, alerts, settings and onboarding (`4d55cc6`) · **14:31 UTC** |
+| **11h 34m** | Android foreground service alert and notification engine (`5f687c3`) · **15:31 UTC** |
+| **12h 42m** | Sprint 4 integrated into `main` (`00686f0`) · **16:39 UTC** |
 | **Afterwards** | Architecture audits, adaptive polling, ES/EU/EN parity, compiled `DesignTokens`, PostgreSQL migration, Play Store release pipeline |
 
-> **What this measures:** wall-clock time between recorded Git commits — not net human working hours or a shortcut around testing. The speed comes from **parallel multi-agent orchestration under strict engineering guardrails**.
+> **What this measures:** wall-clock time directly verifiable via `git log` between recorded commits — not net human working hours or a shortcut around testing. The speed comes from **parallel multi-agent orchestration under strict engineering guardrails**.
 
 ```mermaid
 flowchart LR
-    A["First commit<br/>21 Nov · 18:32 UTC"] --> B["Android foundation<br/>22 Nov · 11:56 UTC"]
+    A["Root commit (2eabe0f)<br/>22 Nov · 03:56 UTC"] --> B["Android foundation<br/>22 Nov · 11:56 UTC"]
     B --> C["Core screens<br/>22 Nov · 14:31 UTC"]
     C --> D["Alert engine<br/>22 Nov · 15:31 UTC"]
-    D --> E["Sprint 4 merged<br/>22 Nov · 16:39 UTC"]
+    D --> E["Sprint 4 merged (00686f0)<br/>22 Nov · 16:39 UTC"]
     E --> F["Audits, ES/EU/EN,<br/>Postgres & Play release"]
     classDef milestone fill:#e6f6f4,stroke:#147e79,color:#143b41;
     class A,B,C,D,E,F milestone;
@@ -87,7 +89,7 @@ High output only matters if the codebase stays coherent, tested and releasable. 
 
 - **Parallel workstreams without collisions:** while one agent implements a feature or refactor inside an isolated **Git worktree** and its assigned **lane** (`apps/android/**` or `apps/bot/**`), I work in parallel with another agent on architecture decisions (ADRs), diagrams, UX refinements, contract parity or security/release audits.
 - **Explicit engineering guardrails:** every agent operates under [`AGENTS.md`](AGENTS.md) (non-negotiable product rules, lane ownership, zero-hardcoded-tokens policy, zero opaque internal IDs in UI) and [`docs/contributing/`](docs/contributing/README.md) (Conventional Commits, branch/worktree isolation and mandatory human approval before destructive or remote Git operations).
-- **Automated truth over trust:** cross-language domain rules are locked by shared real-API fixtures in `packages/contracts/` and parity tests across TypeScript and Kotlin, backed by **295 automated tests**, Biome, Android Lint, GitHub Actions CI and automated Play Store verification scripts (`tools/play-store/`).
+- **Automated truth over trust:** cross-language domain rules are locked by shared real-API fixtures in `packages/contracts/` and parity tests across TypeScript and Kotlin, backed by **299 automated tests** (`143` TypeScript + `156` Android JVM/Robolectric), Biome, Android Lint, GitHub Actions CI and automated Play Store verification scripts (`tools/play-store/`).
 
 ```mermaid
 flowchart LR
@@ -104,7 +106,7 @@ flowchart LR
     DEV --> W2
     DEV --> W3
 
-    W1 --> REV["Human review + Automated gates<br/>AGENTS.md · Lint · 295 tests · TS/Kotlin parity"]
+    W1 --> REV["Human review + Automated gates<br/>AGENTS.md · Lint · 299 tests · TS/Kotlin parity"]
     W2 --> REV
     W3 --> REV
 
@@ -134,7 +136,7 @@ flowchart TB
     subgraph KT["Android lane — Kotlin / Compose"]
         APP["Badator! UI<br/>Jetpack Compose + Material 3"]
         DOMAIN["Kotlin domain &<br/>adaptive FGS alert engine"]
-        ROOM["Room + DataStore<br/>local-only persistence"]
+        ROOM["Room + SharedPreferences<br/>local-only persistence"]
         APP --> DOMAIN
         DOMAIN --> ROOM
     end
@@ -175,7 +177,7 @@ AGENTS.md              Engineering guardrails and lane ownership for agents
 
 - **One-shot alerts over complex schedules:** the core job is removing repeated manual checks. Pick stop, line and lead time → adaptive Foreground Service monitors (`30s` / `60s` / `120s`) → notifies once → clears automatically (7-day expiration, GPS preference over schedule).
 - **Real API behavior over idealized specs:** public GTFS-RT `.pb` feeds returned `403 AccessDenied`, so both clients integrate defensively with Dbus's live JSON endpoint, handling stale data, source type (`tipo=1` GPS vs scheduled), and public vs internal line IDs (e.g., public line `28` vs internal ID `32`).
-- **Native Android over PWA ([ADR 009](docs/03-architecture/)):** a browser prototype was built first and deliberately frozen in favor of Kotlin + Compose for reliable local persistence, background alert lifecycle and Android-native UX — without operating a paid backend or Firebase.
+- **Native Android over PWA ([ADR 009](docs/03-architecture/adrs/009-android-nativo-mvp.md)):** a browser prototype was built first and deliberately frozen in favor of Kotlin + Compose for reliable local persistence, background alert lifecycle and Android-native UX — without operating a paid backend or Firebase.
 - **Privacy by design:** zero analytics, zero ads, zero trackers, `android:allowBackup="false"`, and ephemeral in-memory location used only on demand to sort nearby stops offline.
 - **Design & config discipline:** 3-tier configuration model (`assets/config.json` for runtime operational parameters, compile-time generated `DesignTokens`/`MotionTokens` guarded by `DesignTokensGuardTest`, and strict reduced-motion accessibility).
 
@@ -197,7 +199,7 @@ pnpm verify
 pnpm run build:ci
 ```
 
-### Verify and build Android (lint + 152 JVM tests per variant + APK)
+### Verify and build Android (lint + 156 debug / 150 release JVM tests + APK)
 
 ```bash
 cd apps/android

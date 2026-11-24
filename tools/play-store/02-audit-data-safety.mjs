@@ -189,9 +189,10 @@ function generateDataSafety(aab, source) {
   // Room: combinar AAB + source
   const hasRoom = aab.hasRoom || source.deps?.room;
 
-  // Determinar qué datos se recogen
-  const collectsLocation = allPerms.includes('android.permission.ACCESS_FINE_LOCATION') ||
-                           allPerms.includes('android.permission.ACCESS_COARSE_LOCATION');
+  // Determinar qué datos se recogen fuera del dispositivo (según guía de Google Play Data Safety,
+  // "recopilar" significa transmitir datos fuera del dispositivo del usuario; el uso efímero
+  // exclusivamente en memoria local sin transmisión externa NO constituye recopilación).
+  const collectsLocation = false;
   const collectsDeviceId = false; // No hay identidad de dispositivo
   const collectsPersonalInfo = false; // No hay cuenta de usuario
   const collectsAppActivity = false; // No analytics
@@ -200,7 +201,7 @@ function generateDataSafety(aab, source) {
   const collectsOther = false;
 
   // Compartir datos
-  const sharesLocation = false; // Solo local
+  const sharesLocation = false; // Nunca sale del dispositivo
   const sharesDeviceId = false;
   const sharesPersonalInfo = false;
   const sharesAppActivity = false;
@@ -212,19 +213,6 @@ function generateDataSafety(aab, source) {
   const encryptsInTransit = false; // API es HTTP cleartext
   const encryptsAtRest = false; // Room SQLite no cifra por defecto; Android FBE cifra a nivel SO, no la app
   const allowsDeletion = true; // Usuario borra favoritos/avisos, desinstala app
-
-  // Propósito de recogida
-  const purposes = {
-    location: collectsLocation ? ['app_functionality'] : [],
-    device_id: [],
-    personal_info: [],
-    app_activity: [],
-    app_performance: [],
-    diagnostics: [],
-    other: [],
-  };
-
-  const usesRoom = hasRoom;
 
   return {
     packageName: PACKAGE_NAME,
@@ -263,15 +251,7 @@ function generateDataSafety(aab, source) {
 
     // Data types details
     dataTypes: {
-      location: collectsLocation ? {
-        collected: true,
-        purpose: 'app_functionality', // Solo para ordenar paradas cercanas
-        description: 'Ubicación aproximada/precisa solo cuando el usuario solicita "Cercanas". Se usa en memoria para ordenar paradas por distancia. Nunca se persiste ni transmite.',
-        optional: true, // Usuario puede denegar y seguir usando la app
-        shared: false,
-        sharedWith: [],
-        sharedPurpose: [],
-      } : null,
+      location: null,
       device_id: null,
       personal_info: null,
       app_activity: null,
@@ -285,12 +265,12 @@ function generateDataSafety(aab, source) {
 
     // Notes for Play Console reviewer
     reviewerNotes: {
-      location: 'La ubicación es OPCIONAL. La app funciona completamente sin ella (búsqueda manual, favoritos, avisos). Solo se usa para "Cercanas" bajo petición expresa del usuario. Nunca sale del dispositivo.',
+      location: 'La ubicación NO se recopila ni se comparte (según la definición de Data Safety de Google Play, "recopilar" implica transmitir datos fuera del dispositivo). El permiso es OPCIONAL y se usa únicamente en memoria local en el dispositivo bajo petición expresa del usuario ("Cercanas") para calcular distancias frente al catálogo offline de paradas. Nunca se persiste ni se transmite a ningún servidor.',
       network: `La API de llegadas (${source.apiEndpoint || 'app.dbus.eus'}) responde solo por HTTP. El manifiesto declara cleartextTrafficPermitted=true EXCLUSIVAMENTE para app.dbus.eus. No hay otros endpoints. Por tanto NO se puede marcar "cifrado en tránsito" para toda la app.`,
       analytics: 'Sin SDKs de analítica, crash reporting, publicidad ni telemetría. Dependencias: AndroidX, Compose, Room, OkHttp, kotlinx.serialization, coroutines. Sin Firebase, sin Play Services.',
-      storage: 'Datos locales (favoritos, recientes, avisos, preferencias) en Room SQLite dentro del sandbox de la app. android:allowBackup="false" → no backup automático en Google Drive. Usuario elimina todo desde la UI o desinstalando.',
+      storage: 'Datos locales (favoritos, recientes, avisos, preferencias) en Room SQLite y SharedPreferences dentro del sandbox de la app. android:allowBackup="false" → no backup automático en Google Drive. Usuario elimina todo desde la UI o desinstalando.',
       fgs: 'Foreground Service DATA_SYNC para consultar llegadas en background mientras el usuario tiene avisos activos. Máx 3h vigilancia continua (config.maxWatchHours). Se detiene si no hay avisos. Usuario gestiona desde la app.',
-      geo: 'Intent geo: solo para "Cómo llegar" si hay app de mapas instalada. No es navegación propia.',
+      geo: 'Intent geo: solo para "Cómo llegar" si hay app de mapas instalada (envía únicamente coordenadas públicas de la parada). No es navegación propia.',
     },
 
     // Evidence files (para auditoría interna)
@@ -335,10 +315,8 @@ async function main() {
   console.log('\n📋 Para Play Console:');
   console.log('1. Abre Play Console → Tu app → Políticas de apps → Seguridad de los datos');
   console.log('2. Rellena el formulario usando los valores de data-safety-responses.json');
-  console.log('3. En "Tipo de datos" → Ubicación: marca "Sí, recopilamos" → "Funcionalidad de la app" → "Opcional" → "No se comparte"');
-  console.log('4. En "Prácticas de seguridad": NO marques "Cifrado en tránsito" (API es HTTP)');
-  console.log('5. En "Eliminación": marca "Sí, los usuarios pueden solicitar eliminación"');
-  console.log('5. Usa las "Notas para revisor" en el formulario o en la ficha de la app');
+  console.log('3. En "¿Recoge o comparte tu aplicación alguno de los tipos de datos de usuario requeridos?": marca "No" (la ubicación solo se procesa en memoria local en el dispositivo y nunca se transmite fuera)');
+  console.log('4. Usa las "Notas para revisor" de data-safety-responses.json en la declaración de permisos / revisión');
 
   // Copia también al pack
   const packFile = path.join(PACK, '04-console/DATA-SAFETY-RESPONSES.json');

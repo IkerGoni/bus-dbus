@@ -11,11 +11,12 @@ PWA, histórico); `docs/07-android-mvp/` = spec del MVP Android (ADR 009);
 ## Qué hay hoy
 
 - **Bot de Telegram** (`apps/bot/`): activo, datos reales de la API JSON de
-  Dbus. Paquete `@dbus/bot`. SQLite en `apps/bot/bot.db`.
-- **App Android** (`apps/android/`): Sprints 0–4 hechos (último merge
-  `b8e08f8`); Sprint 5 (publicación) pendiente. MVP v1 nativo, Kotlin +
-  Compose, Gradle fuera de pnpm. Spec en `docs/07-android-mvp/`, plan en
-  `docs/07-android-mvp/SPRINTS.md`, prompt pendiente en
+  Dbus. Paquete `@dbus/bot`. Persistencia en PostgreSQL (`pg`, con driver en
+  memoria en tests).
+- **App Android** (`apps/android/`): Sprints 0–4 hechos; Sprint 5 (publicación)
+  en cierre. MVP v1 nativo (`Badator!`), Kotlin + Compose, Gradle fuera de
+  pnpm. Spec en `docs/07-android-mvp/`, plan en
+  `docs/07-android-mvp/SPRINTS.md`, prompt en
   `docs/07-android-mvp/prompts/SPRINT-5.md`, decisión en ADR 009.
 - **PWA** (`apps/mobile/`): **congelada** por ADR 009 (build roto, ver
   `KNOWN_ISSUES.md`). No arreglar ni borrar sin acuerdo. Paquete `@dbus/mobile`.
@@ -83,20 +84,20 @@ destino) del bot aplican igual. Además:
 - Cleartext HTTP solo para `app.dbus.eus` (network security config).
 - Nunca mostrar segundos: la API da `minutos` enteros.
 - El catálogo empaquetado se genera desde `apps/bot/data/*.json`; no se edita.
-- Textos en `res/values*/strings*.xml`: `es` (`values/`) y `eu`
-  (`values-eu/`) con las mismas claves (`StringsParityTest`).
+- Textos en `res/values*/strings*.xml`: `es` (`values/`), `eu`
+  (`values-eu/`) y `en` (`values-en/`) con las mismas claves (`StringsParityTest`).
 
 ## Verificación
 
 ```bash
-pnpm --filter @dbus/bot verify     # tsc -b + biome + 86 tests (BOT_TOKEN + DB_PATH=:memory:)
+pnpm --filter @dbus/bot verify     # tsc -b + biome + 93 tests (BOT_TOKEN + DB en memoria)
 pnpm --filter @dbus/bot build      # tsc -b -> apps/bot/dist
 ```
 
 Android (toolchain en `apps/android/README.md`):
 
 ```bash
-cd apps/android && ./gradlew check assembleDebug   # lint + 152 (debug) / 146 (release) JVM por variante + APK debug
+cd apps/android && ./gradlew check assembleDebug   # lint + 156 (debug) / 150 (release) JVM por variante + APK debug
 ```
 
 Root: `pnpm verify` (lint + typecheck + tests de `apps/bot` y `packages/**`).

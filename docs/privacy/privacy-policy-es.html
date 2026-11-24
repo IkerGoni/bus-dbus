@@ -29,8 +29,8 @@
   <h2>2. Datos usados en el dispositivo</h2>
 
   <ul>
-    <li><strong>Ubicación:</strong> si el usuario concede el permiso de ubicación aproximada o precisa y solicita buscar paradas cercanas, la aplicación obtiene la ubicación para identificar paradas próximas. Según la implementación revisada en noviembre de 2026, no la persiste. La ubicación es opcional, se procesa únicamente en memoria en el dispositivo para ordenar paradas cercanas y nunca se guarda ni se transmite a terceros.</li>
-    <li><strong>Favoritos, recientes, preferencias y avisos:</strong> almacenados localmente con los mecanismos de persistencia de la app; se utilizan para proporcionar las funcionalidades solicitadas. Se almacenan localmente en Room (SQLite) y DataStore con <code>android:allowBackup="false"</code>. Puedes eliminarlos desde la app, borrando los datos en los ajustes de Android o desinstalándola.</li>
+    <li><strong>Ubicación:</strong> si el usuario concede el permiso de ubicación aproximada o precisa y solicita buscar paradas cercanas, la aplicación obtiene la ubicación para identificar paradas próximas. La ubicación es opcional, se procesa únicamente en memoria en el dispositivo para ordenar paradas cercanas y nunca se guarda ni se transmite a terceros. Al pulsar «Cómo llegar» en el detalle de una parada, la aplicación abre la app de mapas instalada mediante un intent estándar <code>geo:</code> pasando únicamente las coordenadas públicas y el nombre de la parada.</li>
+    <li><strong>Favoritos, recientes, preferencias y avisos:</strong> almacenados localmente con los mecanismos de persistencia de la app; se utilizan para proporcionar las funcionalidades solicitadas. Se almacenan localmente en Room (SQLite) y SharedPreferences con <code>android:allowBackup="false"</code>. Puedes eliminarlos desde la app, borrando los datos en los ajustes de Android o desinstalándola.</li>
     <li><strong>Notificaciones:</strong> si el usuario concede permiso, se utilizan para los avisos configurados. El servicio de seguimiento puede mostrar una notificación persistente mientras está activo.</li>
   </ul>
 
@@ -38,7 +38,7 @@
 
   <p>Para consultar llegadas, Badator! solicita información a una API externa del servicio de transporte. Estas conexiones pueden revelar al proveedor la dirección IP, metadatos técnicos de conexión y los códigos de las paradas solicitadas. La API pública de Dbus (<code>http://app.dbus.eus/SSIIMovilWSv2/ws/cons/tiemposParada</code>) responde actualmente solo por <strong>HTTP</strong>. El manifiesto declara <code>cleartextTrafficPermitted="true"</code> exclusivamente para <code>app.dbus.eus</code>, y la app no contacta con ningún otro servidor. Por ello, las consultas a dicho servicio no viajan cifradas en tránsito.</p>
 
-  <p>El proveedor de datos de llegadas es <strong>Dbus (Donostiako Autobusak)</strong> (https://www.dbus.eus), cuya política de privacidad puede consultarse en https://www.dbus.eus/privacidad/.</p>
+  <p>El proveedor de datos de llegadas es <strong>Compañía del Tranvía de San Sebastián, S.A.U. — Dbus (Donostiako Autobusak)</strong> (https://dbus.eus), cuya política de privacidad puede consultarse en https://dbus.eus/es/politica-de-privacidad/.</p>
 
   <h2>4. Analítica, publicidad y terceros</h2>
 
@@ -46,7 +46,7 @@
 
   <h2>5. Conservación y eliminación</h2>
 
-  <p>Los datos locales se conservan en el dispositivo hasta que el usuario los elimine desde las funciones correspondientes o hasta que desinstale la app, salvo excepciones demostradas por el sistema. Los datos locales (favoritos, paradas recientes, avisos y preferencias) se guardan en Room (SQLite) y DataStore dentro del almacenamiento privado del dispositivo. La app no tiene cuentas de usuario. El manifiesto declara <code>android:allowBackup="false"</code>, por lo que no se realizan copias de seguridad automáticas en Google Drive. Puedes borrar los datos desde la propia app, borrando los datos de la aplicación en los ajustes de Android o desinstalándola.</p>
+  <p>Los datos locales se conservan en el dispositivo hasta que el usuario los elimine desde las funciones correspondientes o hasta que desinstale la app, salvo excepciones demostradas por el sistema. Los datos locales (favoritos, paradas recientes, avisos y preferencias) se guardan en Room (SQLite) y SharedPreferences dentro del almacenamiento privado del dispositivo. La app no tiene cuentas de usuario. El manifiesto declara <code>android:allowBackup="false"</code>, por lo que no se realizan copias de seguridad automáticas en Google Drive. Puedes borrar los datos desde la propia app, borrando los datos de la aplicación en los ajustes de Android o desinstalándola.</p>
 
   <p>Para cualquier solicitud relacionada con los datos personales, el usuario puede contactar con dev.mail.igoni@gmail.com. Badator! no dispone de cuentas de usuario ni almacena datos personales en servidores propios.</p>
 
