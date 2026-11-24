@@ -126,6 +126,7 @@ data class ApiConfig(
         }
         if (alerts.maxBadgeCount !in 1..99) add("alerts.maxBadgeCount fuera de rango")
         if (alerts.maxWatchHours !in 1..24) add("alerts.maxWatchHours fuera de rango")
+        if (alerts.alarmTimeoutSec !in 10..300) add("alerts.alarmTimeoutSec fuera de rango")
 
         if (geo.walkingSpeedKmh !in 1.0..15.0) add("geo.walkingSpeedKmh fuera de rango")
         if (geo.lastKnownMaxAgeSec !in 10..600) add("geo.lastKnownMaxAgeSec fuera de rango")

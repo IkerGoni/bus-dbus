@@ -46,6 +46,8 @@ data class AlertsConfig(
      * Evita sondear hasta 7 días una línea que no aparece (p. ej. de noche).
      */
     val maxWatchHours: Int = 3,
+    /** Tiempo máximo que suena un aviso en modo alarma; pasado, se silencia solo. */
+    val alarmTimeoutSec: Int = 60,
 )
 
 @Serializable

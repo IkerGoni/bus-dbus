@@ -51,7 +51,8 @@
     "minMinutesAhead": 1,
     "maxMinutesAhead": 30,
     "maxBadgeCount": 9,
-    "maxWatchHours": 3
+    "maxWatchHours": 3,
+    "alarmTimeoutSec": 60
   },
   "geo": {
     "walkingSpeedKmh": 4.8,
