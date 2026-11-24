@@ -261,7 +261,7 @@ async function main() {
   results.fgsVideo += checkFile(path.join(PACK, '04-console/FGS-REVIEW-TEMPLATE.md'), 'Guion / Plantilla FGS (pack)');
 
   // 7. REVISIÓN EU
-  console.log('\n7️⃣ REVISIÓN EU (euskera):');
+  console.log('\n7️⃣ REVISIÓN EU automática (glosario; no sustituye la revisión de un hablante):');
   let euIssues = 0;
   let euFailed = false;
   try {
@@ -328,7 +328,11 @@ async function main() {
   const overall = totalChecks > 0 ? Math.round((totalPass / totalChecks) * 100) : 0;
   const ready = overall === 100;
 
-  console.log(`\n🎯 TOTAL: ${totalPass}/${totalChecks} (${overall}%) ${ready ? '🎉 LISTO PARA PUBLICAR' : '⚠️ PENDIENTES'}`);
+  console.log(`\n🎯 TOTAL: ${totalPass}/${totalChecks} (${overall}%) ${ready ? '✅ CHECKLIST COMPLETO' : '⚠️ PENDIENTES'}`);
+  // REPRO-01: el recuento mide presencia y formato, no es la evidencia del SHA ni de los binarios.
+  console.log('ℹ️ Comprueba presencia y formato. No sustituye los gates manuales de 05-release-gates.md');
+  console.log('   ni la evidencia por SHA de docs/auditoria/. Assets, capturas, vídeo y AAB son artefactos');
+  console.log('   no versionados (build/outputs/play-store/, apps/android/app/build/): en un clon limpio salen 23/29.');
 
   const remediationMap = {
     'Código': 'Corregir tests, lint, typecheck o compilación en Android / packages compartidos (`./gradlew check assembleDebug`, `pnpm verify`)',
@@ -357,7 +361,7 @@ async function main() {
   const report = `# RELEASE READY - Badator! v1.1.0
 
 **Fecha:** ${new Date().toISOString().split('T')[0]}
-**Estado global:** ${ready ? '✅ LISTO PARA PUBLICAR' : '⚠️ PENDIENTES'}
+**Estado del checklist:** ${ready ? '✅ completo (no sustituye los gates manuales ni la evidencia por SHA)' : '⚠️ PENDIENTES'}
 
 ## Resumen por categorías
 

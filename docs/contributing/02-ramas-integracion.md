@@ -44,9 +44,15 @@ ramas: el repo es privado en plan gratuito). El método se elige por cambio:
 
 ## CI y automatización
 
-- `ci.yml`: `pnpm install --frozen-lockfile` + `pnpm verify` (lint,
-  typecheck y tests de `apps/bot` y `packages/**`). Los tests de integración
-  usan la API real de Dbus; si cae, el fallo se reporta, no se silencia.
+- `ci.yml`: `pnpm install --frozen-lockfile`, lint, typecheck, guard de
+  identidad pública (`tools/repo/check-identity.mjs`), tests unitarios de
+  `apps/bot` y `packages/**` y `build:ci`.
+- `integration.yml` (manual): tests de integración contra la API real de
+  Dbus, con una sonda previa. Si falla la sonda, Dbus no responde desde el
+  runner; si falla el paso de tests, es una regresión. Desde los runners de
+  GitHub la API no es alcanzable (timeout de TCP), así que la integración de
+  cada cambio se verifica con `pnpm verify` en local; si Dbus cae, se dice,
+  no se silencia.
 - `android.yml`: `./gradlew check assembleDebug` con filtro de rutas.
 - La PWA congelada (ADR 009) no se compila ni se despliega desde CI.
 - Sin commitlint ni hooks de mensaje por ahora: la revisión es manual. Si

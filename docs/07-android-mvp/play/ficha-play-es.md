@@ -98,7 +98,7 @@ Geltokien koordenatuak OpenStreetMap-etik datoz, ODbL lizentziarekin.
 
 **¿Cuánto se ejecuta?** Solo mientras haya al menos un aviso activo creado por el usuario. Se detiene automáticamente cuando no quedan avisos activos (o cuando el usuario los pausa o elimina). Además:
 - Un aviso caduca a los **7 días** si no llega a dispararse.
-- Un aviso se vigila como máximo **3 horas seguidas sin encontrar un bus que coincida** (`alerts.maxWatchHours` en `config.json`); pasado ese tope, la app notifica que deja de vigilar y elimina el aviso.
+- Pasadas **3 horas** desde que se guardó un aviso (`alerts.maxWatchHours` en `config.json`), si en ese momento no hay ningún bus de su línea y destino en las llegadas, la app deja de vigilarlo, lo notifica y lo elimina. No es un tope fijo: si la línea sigue teniendo llegadas, el aviso se vigila hasta que suena, caduca o Android detiene el servicio.
 - Si Dbus lleva 60 min sin servicio o sin responder en todas las paradas vigiladas, el motor se para y lo notifica.
 - Android 15+ limita el FGS `dataSync` a 6 h por 24 h; al alcanzar el límite, la app lo notifica.
 - **Tras reiniciar el teléfono**, la vigilancia no arranca sola (Android 15 no permite iniciar `dataSync` desde `BOOT_COMPLETED`): se retoma al abrir la app.

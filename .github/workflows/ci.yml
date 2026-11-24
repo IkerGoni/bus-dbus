@@ -48,48 +48,6 @@ jobs:
           BOT_TOKEN: vitest_test_token
           DB_DRIVER: memory
 
-  test-integration:
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: '11.5.3'
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @dbus/contracts --filter @dbus/core run build
-      # Sonda: distingue «Dbus no responde desde el runner» de una regresión del código.
-      # Si Dbus no responde, el job falla en este paso y los tests no se ejecutan.
-      - name: Sonda de la API de Dbus
-        run: |
-          set +e
-          url='http://app.dbus.eus/SSIIMovilWSv2/ws/cons/tiemposParada?codParada=2&idioma=es'
-          for attempt in 1 2 3; do
-            result=$(curl -sS -o probe.json -w '%{http_code} %{time_total}s' --max-time 20 "$url" 2>&1)
-            rc=$?
-            echo "Sonda Dbus intento $attempt: curl=$rc http=$result" | tee -a "$GITHUB_STEP_SUMMARY"
-            if [ "$rc" -eq 0 ] && [ "${result%% *}" = "200" ] && grep -q '"estado"' probe.json; then exit 0; fi
-            sleep 10
-          done
-          echo "::error title=Dbus no disponible::La API de Dbus no responde desde el runner. No es una regresión del código: los tests de integración no se han ejecutado."
-          exit 1
-      - name: Tests de integración contra Dbus real
-        run: |
-          set -o pipefail
-          pnpm --filter @dbus/bot exec vitest run tests/integration.test.ts tests/handlers.test.ts --testTimeout=30000 --reporter=verbose 2>&1 | tee integration.log
-        env:
-          BOT_TOKEN: vitest_test_token
-          DB_DRIVER: memory
-      - name: Recuento de integración
-        if: always()
-        run: |
-          [ -f integration.log ] || exit 0
-          { echo '### Integración (Dbus real)'; sed -E 's/\x1b\[[0-9;]*m//g' integration.log | grep -E '^ +(Test Files|Tests) ' || echo 'sin recuento'; } >> "$GITHUB_STEP_SUMMARY"
-
   build:
     runs-on: ubuntu-latest
     needs: [lint-and-typecheck, test]

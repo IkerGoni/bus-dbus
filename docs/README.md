@@ -1,8 +1,7 @@
 # Índice de documentación — bus-dbus
 
 Qué doc mirar para cada cosa. Si un doc contradice a
-[`AGENTS.md`](../AGENTS.md), manda `AGENTS.md`. Revisado el 2026-11-22 contra
-`main` (`b8e08f8`).
+[`AGENTS.md`](../AGENTS.md), manda `AGENTS.md`. Revisado el 2026-11-24.
 
 ## Por pregunta
 
@@ -20,6 +19,9 @@ Qué doc mirar para cada cosa. Si un doc contradice a
 | Prompt de auditoría adversarial del Sprint 5 / MVP | [`07-android-mvp/prompts/AUDIT-SPRINT-5.md`](07-android-mvp/prompts/AUDIT-SPRINT-5.md) |
 | Resultado de esa auditoría (veredicto y hallazgos A5-NN) | [`auditoria/2026-11-sprint5-adversarial.md`](auditoria/2026-11-sprint5-adversarial.md) |
 | Plan y estado de la remediación de A5-NN | [`auditoria/2026-11-sprint5-remediacion.md`](auditoria/2026-11-sprint5-remediacion.md) |
+| Resumen final de esa remediación | [`auditoria/2026-11-sprint5-remediacion-final.md`](auditoria/2026-11-sprint5-remediacion-final.md) |
+| Reauditoría de publicación (GitHub y Play, hallazgos y pasos pendientes) | [`auditoria/2026-11-reauditoria-publicacion.md`](auditoria/2026-11-reauditoria-publicacion.md) |
+| Por qué Data Safety declara «sin recogida» | [`play-console/data-safety-decision.md`](play-console/data-safety-decision.md) |
 | Reglas duras para implementar Android | [`07-android-mvp/docs/00-agent-guardrails.md`](07-android-mvp/docs/00-agent-guardrails.md) |
 | Modelos, estados de aviso y matching | [`07-android-mvp/docs/02-domain-contracts.md`](07-android-mvp/docs/02-domain-contracts.md) |
 | Spec de pantallas A01–A08 | [`07-android-mvp/docs/03-android-screens.md`](07-android-mvp/docs/03-android-screens.md) |

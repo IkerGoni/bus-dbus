@@ -186,6 +186,9 @@ function fillTemplate(templates, lang, evidence) {
       'Dev iGoni —': `${CONFIG.developer} —`,
     },
     eu: {
+      // Paridad con es/en (PRIV-01): el proveedor también ve los geltokien identifikatzaileak.
+      'Zerbitzuak IP helbidea eta konexioaren metadatu teknikoak jaso ditzake.':
+        'Zerbitzuak IP helbidea, konexioaren metadatu teknikoak eta eskatutako geltokien identifikatzaileak jaso ditzake.',
       '; aztertutako inplementazioan ez da modu iraunkorrean gordetzen. **Azken bertsioan egiaztatu behar da.**':
         '. Kokapena aukerakoa da, gailuko memorian soilik erabiltzen da inguruko geltokiak distantziaren arabera ordenatzeko, eta ez da inoiz gordetzen edo hirugarrenei bidaltzen. Geltoki baten xehetasunean «Nola iritsi» sakatzean, instalatutako mapa-aplikazioa `geo:` intent estandarraren bidez irekitzen da, geltokiaren koordenatu publikoak eta izena soilik pasatuz.',
       '**Azken bertsioan egiaztatu behar da.**':
