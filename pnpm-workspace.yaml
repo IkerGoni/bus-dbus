@@ -10,3 +10,9 @@ allowBuilds:
   better-sqlite3: true
   esbuild: true
   "@biomejs/biome": true
+
+# glob@11 (vía @dbus/mobile → vite-plugin-pwa → workbox-build) está deprecado y
+# pnpm copia al lockfile el aviso del registro, que incluye un correo ajeno.
+# glob@13 mantiene `globSync` en CommonJS, que es lo único que usa workbox-build.
+overrides:
+  "workbox-build>glob": "^13.0.6"

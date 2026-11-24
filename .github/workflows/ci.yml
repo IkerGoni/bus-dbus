@@ -24,6 +24,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
       - run: pnpm run typecheck
+      - name: Identidad pública (correos y rutas locales)
+        run: node tools/repo/check-identity.mjs
 
   test:
     runs-on: ubuntu-latest
@@ -40,7 +42,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @dbus/contracts --filter @dbus/core run build
       - run: pnpm --filter @dbus/contracts --filter @dbus/core run test
-      - run: pnpm --filter @dbus/bot run test tests/alerts.test.ts tests/nearby-index.test.ts tests/telegram-launch.test.ts tests/unit.test.ts tests/validate-line.test.ts tests/haversine-parity.test.ts -- --reporter=verbose
+      # `exec` pasa las opciones a vitest; con `run test … -- --x` pnpm deja el `--` y vitest las ignora.
+      - run: pnpm --filter @dbus/bot exec vitest run tests/alerts.test.ts tests/nearby-index.test.ts tests/telegram-launch.test.ts tests/unit.test.ts tests/validate-line.test.ts tests/haversine-parity.test.ts --reporter=verbose
+        env:
+          BOT_TOKEN: vitest_test_token
+          DB_DRIVER: memory
 
   test-integration:
     runs-on: ubuntu-latest
@@ -56,16 +62,33 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @dbus/contracts --filter @dbus/core run build
-      - id: integration
-        run: pnpm --filter @dbus/bot run test tests/integration.test.ts tests/handlers.test.ts -- --testTimeout=30000 --reporter=verbose
-        # Hits the external Dbus live API; allowed to fail gracefully without blocking CI while reporting a warning below.
-        continue-on-error: true
-      - name: Report integration result
-        if: steps.integration.outcome == 'failure'
+      # Sonda: distingue «Dbus no responde desde el runner» de una regresión del código.
+      # Si Dbus no responde, el job falla en este paso y los tests no se ejecutan.
+      - name: Sonda de la API de Dbus
         run: |
-          echo "::warning title=Integration tests failed::External Dbus live API may be unreachable/timed out, or an integration/handler regression occurred. Inspect the integration step logs."
-          echo '⚠️ Tests de integración fallaron (API Dbus no disponible, timeout o regresión en integración/handlers).'
-          echo 'Revisar los logs del paso integration para confirmar si es indisponibilidad externa o una regresión.'
+          set +e
+          url='http://app.dbus.eus/SSIIMovilWSv2/ws/cons/tiemposParada?codParada=2&idioma=es'
+          for attempt in 1 2 3; do
+            result=$(curl -sS -o probe.json -w '%{http_code} %{time_total}s' --max-time 20 "$url" 2>&1)
+            rc=$?
+            echo "Sonda Dbus intento $attempt: curl=$rc http=$result" | tee -a "$GITHUB_STEP_SUMMARY"
+            if [ "$rc" -eq 0 ] && [ "${result%% *}" = "200" ] && grep -q '"estado"' probe.json; then exit 0; fi
+            sleep 10
+          done
+          echo "::error title=Dbus no disponible::La API de Dbus no responde desde el runner. No es una regresión del código: los tests de integración no se han ejecutado."
+          exit 1
+      - name: Tests de integración contra Dbus real
+        run: |
+          set -o pipefail
+          pnpm --filter @dbus/bot exec vitest run tests/integration.test.ts tests/handlers.test.ts --testTimeout=30000 --reporter=verbose 2>&1 | tee integration.log
+        env:
+          BOT_TOKEN: vitest_test_token
+          DB_DRIVER: memory
+      - name: Recuento de integración
+        if: always()
+        run: |
+          [ -f integration.log ] || exit 0
+          { echo '### Integración (Dbus real)'; sed -E 's/\x1b\[[0-9;]*m//g' integration.log | grep -E '^ +(Test Files|Tests) ' || echo 'sin recuento'; } >> "$GITHUB_STEP_SUMMARY"
 
   build:
     runs-on: ubuntu-latest

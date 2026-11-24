@@ -12,6 +12,10 @@
 *.key
 .gplay/
 play-service-account.json
+
+# Binarios de Android (firmados o no): se publican en Play, nunca en Git
+*.apk
+*.aab
 gplay-service-account*.json
 
 # Bot & local databases
