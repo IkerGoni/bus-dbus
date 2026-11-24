@@ -32,6 +32,7 @@
     <string name="settings_credit_stops">Paradas y líneas: Dbus Donostia</string>
     <string name="settings_credit_osm">Coordenadas de paradas © OpenStreetMap (ODbL)</string>
     <string name="settings_credit_fonts">Fuentes tipográficas: Plus Jakarta Sans y JetBrains Mono (SIL Open Font License 1.1)</string>
+    <string name="settings_privacy_policy">Política de privacidad</string>
 
     <!-- A08 · Onboarding -->
     <string name="onboarding_bullet_live">Llegadas reales de Dbus y paradas cercanas</string>

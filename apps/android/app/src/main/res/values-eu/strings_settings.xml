@@ -32,6 +32,7 @@
     <string name="settings_credit_stops">Geltokiak eta lineak: Dbus Donostia</string>
     <string name="settings_credit_osm">Geltokien koordenatuak © OpenStreetMap (ODbL)</string>
     <string name="settings_credit_fonts">Letra-tipoak: Plus Jakarta Sans eta JetBrains Mono (SIL Open Font License 1.1)</string>
+    <string name="settings_privacy_policy">Pribatutasun-politika</string>
 
     <!-- A08 · Onboarding -->
     <string name="onboarding_bullet_live">Dbusen benetako iristeak eta inguruko geltokiak</string>

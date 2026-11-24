@@ -32,6 +32,7 @@
     <string name="settings_credit_stops">Stops and lines: Dbus Donostia</string>
     <string name="settings_credit_osm">Stop coordinates © OpenStreetMap (ODbL)</string>
     <string name="settings_credit_fonts">Fonts: Plus Jakarta Sans and JetBrains Mono (SIL Open Font License 1.1)</string>
+    <string name="settings_privacy_policy">Privacy Policy</string>
 
     <!-- A08 · Onboarding -->
     <string name="onboarding_bullet_live">Real Dbus arrivals and nearby stops</string>

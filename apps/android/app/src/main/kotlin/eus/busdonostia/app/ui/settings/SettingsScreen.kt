@@ -31,7 +31,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eus.busdonostia.app.BusDonostiaApp
@@ -48,8 +47,11 @@ import eus.busdonostia.app.ui.components.SectionLabel
 import eus.busdonostia.app.ui.components.SkeletonList
 import eus.busdonostia.app.ui.system.batterySettingsIntent
 import eus.busdonostia.app.ui.system.notificationSettingsIntent
+import eus.busdonostia.app.ui.system.openExternalUrl
 import eus.busdonostia.app.ui.system.openSettings
+import eus.busdonostia.app.ui.system.privacyPolicyIntent
 import eus.busdonostia.app.ui.system.readSystemStatus
+import eus.busdonostia.app.ui.theme.DesignTokens
 import eus.busdonostia.app.ui.theme.MonoFamily
 import java.time.Instant
 import java.time.ZoneId
@@ -87,7 +89,7 @@ fun SettingsScreen(onBack: () -> Unit) {
         )
 
         SectionLabel(stringResource(R.string.settings_section_appearance))
-        BorderedCard(Modifier.padding(horizontal = 16.dp)) {
+        BorderedCard(Modifier.padding(horizontal = DesignTokens.spacingLg)) {
             CardColumn {
                 val modes = listOf(
                     ThemeMode.SYSTEM to R.string.settings_theme_system,
@@ -101,7 +103,7 @@ fun SettingsScreen(onBack: () -> Unit) {
         }
 
         SectionLabel(stringResource(R.string.settings_section_language))
-        BorderedCard(Modifier.padding(horizontal = 16.dp)) {
+        BorderedCard(Modifier.padding(horizontal = DesignTokens.spacingLg)) {
             CardColumn {
                 val langs = listOf(
                     AppLanguage.ES to R.string.settings_language_es,
@@ -116,7 +118,7 @@ fun SettingsScreen(onBack: () -> Unit) {
         }
 
         SectionLabel(stringResource(R.string.settings_section_notifications))
-        BorderedCard(Modifier.padding(horizontal = 16.dp)) {
+        BorderedCard(Modifier.padding(horizontal = DesignTokens.spacingLg)) {
             CardColumn {
                 Text(
                     stringResource(if (status.notificationsEnabled) R.string.settings_notifications_on else R.string.settings_notifications_off),
@@ -131,7 +133,7 @@ fun SettingsScreen(onBack: () -> Unit) {
         }
 
         SectionLabel(stringResource(R.string.settings_section_background))
-        BorderedCard(Modifier.padding(horizontal = 16.dp)) {
+        BorderedCard(Modifier.padding(horizontal = DesignTokens.spacingLg)) {
             CardColumn {
                 Text(stringResource(R.string.settings_battery), style = MaterialTheme.typography.titleMedium)
                 if (status.batteryUnrestricted) {
@@ -149,12 +151,12 @@ fun SettingsScreen(onBack: () -> Unit) {
         val loaded = catalog
         when {
             loaded == null -> SkeletonList(rows = 1)
-            loaded.isFailure -> BorderedCard(Modifier.padding(horizontal = 16.dp)) {
+            loaded.isFailure -> BorderedCard(Modifier.padding(horizontal = DesignTokens.spacingLg)) {
                 CardColumn { Text(stringResource(R.string.catalog_error_title), style = MaterialTheme.typography.bodyMedium) }
             }
             else -> {
                 val cat = loaded.getOrThrow()
-                BorderedCard(Modifier.padding(horizontal = 16.dp)) {
+                BorderedCard(Modifier.padding(horizontal = DesignTokens.spacingLg)) {
                     CardColumn {
                         Text(
                             stringResource(
@@ -177,7 +179,7 @@ fun SettingsScreen(onBack: () -> Unit) {
         }
 
         SectionLabel(stringResource(R.string.settings_section_about))
-        BorderedCard(Modifier.padding(horizontal = 16.dp)) {
+        BorderedCard(Modifier.padding(horizontal = DesignTokens.spacingLg)) {
             CardColumn {
                 ValueRow(stringResource(R.string.settings_version), BuildConfig.VERSION_NAME)
                 Hint(stringResource(R.string.settings_disclaimer))
@@ -188,9 +190,12 @@ fun SettingsScreen(onBack: () -> Unit) {
                         ?: stringResource(R.string.settings_credit_osm),
                 )
                 Hint(stringResource(R.string.settings_credit_fonts))
+                ActionButton(stringResource(R.string.settings_privacy_policy)) {
+                    context.openExternalUrl(privacyPolicyIntent(appLanguage))
+                }
             }
         }
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(DesignTokens.spacingXl))
     }
 }
 
@@ -205,7 +210,7 @@ private fun liveDate(ms: Long, locale: Locale): String =
 
 @Composable
 private fun CardColumn(content: @Composable () -> Unit) {
-    Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { content() }
+    Column(Modifier.fillMaxWidth().padding(DesignTokens.spacingLg), verticalArrangement = Arrangement.spacedBy(DesignTokens.spacingSm)) { content() }
 }
 
 @Composable
@@ -230,7 +235,7 @@ private fun ValueRow(label: String, value: String) {
 
 @Composable
 private fun ActionButton(label: String, onClick: () -> Unit) {
-    OutlinedButton(onClick = onClick, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+    OutlinedButton(onClick = onClick, modifier = Modifier.fillMaxWidth().heightIn(min = DesignTokens.touchTargetMin)) {
         Text(label, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }
 }
@@ -243,7 +248,7 @@ private fun Segmented(labels: List<String>, selected: Int, onSelect: (Int) -> Un
                 selected = index == selected,
                 onClick = { onSelect(index) },
                 shape = SegmentedButtonDefaults.itemShape(index, labels.size),
-                modifier = Modifier.heightIn(min = 48.dp),
+                modifier = Modifier.heightIn(min = DesignTokens.touchTargetMin),
             ) {
                 Text(label, maxLines = 1, softWrap = false)
             }

@@ -1,12 +1,14 @@
 package eus.busdonostia.app.ui
 
 import eus.busdonostia.app.TestData
+import eus.busdonostia.app.data.settings.AppLanguage
 import eus.busdonostia.app.domain.Favorite
 import eus.busdonostia.app.domain.FavoriteType
 import eus.busdonostia.app.ui.lines.LinesFilter
 import eus.busdonostia.app.ui.lines.lineRows
 import eus.busdonostia.app.ui.lines.starredLines
 import eus.busdonostia.app.ui.stops.favoriteRows
+import eus.busdonostia.app.ui.system.privacyPolicyUrl
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -89,5 +91,21 @@ class ScreenLogicTest {
             row.mainDestination?.let { assertFalse("mainDestination no debe contener stopId: $it", it.contains(row.stopId)) }
             row.lineIds.forEach { assertTrue("lineId público: $it", catalog.lines.map { it.cod }.toSet().contains(it)) }
         }
+    }
+
+    @Test
+    fun privacyPolicyUrlPorIdioma() {
+        assertEquals(
+            "https://ikergoni.github.io/bus-dbus/privacy/privacy-policy-es.html",
+            privacyPolicyUrl(AppLanguage.ES),
+        )
+        assertEquals(
+            "https://ikergoni.github.io/bus-dbus/privacy/privacy-policy-eu.html",
+            privacyPolicyUrl(AppLanguage.EU),
+        )
+        assertEquals(
+            "https://ikergoni.github.io/bus-dbus/privacy/privacy-policy-en.html",
+            privacyPolicyUrl(AppLanguage.EN),
+        )
     }
 }

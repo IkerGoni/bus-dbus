@@ -20,7 +20,7 @@ Actualmente existen 133 usos de `.dp` inline en la capa `ui/` (excluyendo `ui/th
 
 ---
 
-## 2. Inventario por Archivo (165 ocurrencias totales)
+## 2. Inventario por Archivo (153 ocurrencias restantes; `SettingsScreen.kt` ya migrado)
 
 | Archivo | Ocurrencias `XX.dp` | Principales valores |
 |---|---|---|
@@ -30,7 +30,7 @@ Actualmente existen 133 usos de `.dp` inline en la capa `ui/` (excluyendo `ui/th
 | `ui/lines/LinesScreen.kt` | 25 | `4.dp`, `6.dp`, `8.dp`, `12.dp`, `16.dp`, `24.dp`, `48.dp`, `56.dp` |
 | `ui/alerts/AlertsScreen.kt` | 20 | `8.dp`, `12.dp`, `16.dp`, `24.dp`, `48.dp` |
 | `ui/onboarding/OnboardingScreen.kt` | 13 | `8.dp`, `12.dp`, `16.dp`, `24.dp`, `48.dp` |
-| `ui/settings/SettingsScreen.kt` | 12 | `8.dp`, `16.dp`, `24.dp`, `48.dp` |
+| `ui/settings/SettingsScreen.kt` | 0 (migrado) | `DesignTokens.spacingSm`, `spacingLg`, `spacingXl`, `touchTargetMin` |
 | `ui/components/EmptyState.kt` | 3 | `16.dp`, `24.dp`, `48.dp` |
 | `ui/alerts/AlertComponents.kt` | 3 | `8.dp`, `12.dp`, `16.dp` |
 

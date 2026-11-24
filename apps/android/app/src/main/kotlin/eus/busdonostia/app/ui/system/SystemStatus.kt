@@ -10,11 +10,30 @@ import android.provider.Settings
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import eus.busdonostia.app.data.settings.AppLanguage
 
 /*
  * Estado real de permisos y ajustes del sistema que afectan a los avisos (A06, A07, A08).
  * Se relee en cada ON_RESUME: el usuario puede cambiarlos en Ajustes y volver.
  */
+
+private const val PRIVACY_BASE_URL = "https://ikergoni.github.io/bus-dbus/privacy"
+
+/** URL pública de la política de privacidad en GitHub Pages para el idioma activo de la app. */
+fun privacyPolicyUrl(language: AppLanguage): String =
+    "$PRIVACY_BASE_URL/privacy-policy-${language.tag}.html"
+
+/** Intent para abrir la política de privacidad en el navegador externo. */
+fun privacyPolicyIntent(language: AppLanguage): Intent =
+    Intent(Intent.ACTION_VIEW, privacyPolicyUrl(language).toUri())
+
+/** Abre un enlace externo en el navegador del sistema sin fallar si no hay visor instalado. */
+fun Context.openExternalUrl(intent: Intent) {
+    try {
+        startActivity(intent)
+    } catch (_: RuntimeException) {
+    }
+}
 
 data class SystemStatus(
     /** Notificaciones de la app activadas (permiso en 13+ y switch del sistema). */
