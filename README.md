@@ -4,81 +4,96 @@
 
 ### Know when your bus is coming. Get an alert instead of checking again.
 
-**Live GPS arrivals · Offline stop discovery · One-shot arrival alerts**  
-**Native Android application (`Badator!`) + Telegram bot** for Donostia / San Sebastián.
+<p align="center">
+  <a href="README.md"><img src="https://img.shields.io/badge/English-147e79?style=for-the-badge" alt="English" /></a>
+  <a href="README.es.md"><img src="https://img.shields.io/badge/Espa%C3%B1ol-2f363d?style=for-the-badge" alt="Español" /></a>
+</p>
+
+**Live GPS arrivals · Offline stop discovery · Adaptive one-shot alerts**  
+Native Android app (**Badator!**, Kotlin + Jetpack Compose) and production **Telegram bot** (`@dbus/bot`) for Donostia / San Sebastián.
 
 [![GitHub Release](https://img.shields.io/github/v/release/IkerGoni/bus-dbus?label=MVP%20Base&color=147e79)](https://github.com/IkerGoni/bus-dbus/releases/latest)
 [![Node CI](https://github.com/IkerGoni/bus-dbus/actions/workflows/ci.yml/badge.svg)](https://github.com/IkerGoni/bus-dbus/actions/workflows/ci.yml)
 [![Android CI](https://github.com/IkerGoni/bus-dbus/actions/workflows/android.yml/badge.svg)](https://github.com/IkerGoni/bus-dbus/actions/workflows/android.yml)
 ![Kotlin](https://img.shields.io/badge/Kotlin-Android-7F52FF?logo=kotlin&logoColor=white)
 ![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4?logo=android&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-Bot%20%26%20Contracts-3178C6?logo=typescript&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-22+-339933?logo=nodedotjs&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Bot%20Persistence-4169E1?logo=postgresql&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-Node%2022%2B-3178C6?logo=typescript&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Persistence-4169E1?logo=postgresql&logoColor=white)
 ![License: MIT](https://img.shields.io/badge/License-MIT-147e79.svg)
 
-<sub>Independent open-source project by <strong>Iker Goñi Cuesta (Dev Igoni)</strong>. Not affiliated with Dbus.</sub>
+<p align="center">
+  <a href="https://github.com/IkerGoni/bus-dbus/releases/latest"><strong>Download APK (MVP Base v1.1.0)</strong></a> ·
+  <a href="#why-this-project-matters-for-engineering-teams">Engineering Highlights</a> ·
+  <a href="#architecture-at-a-glance">Architecture</a> ·
+  <a href="#key-engineering-decisions--trade-offs">Trade-offs & ADRs</a> ·
+  <a href="#feedback--roadmap">Feedback & Roadmap</a>
+</p>
+
+<sub>Independent open-source product built by <strong>Iker Goñi Cuesta (Dev Igoni)</strong>. Not affiliated with Dbus.</sub>
 
 </div>
 
 ---
 
-## The problem
+## Why this project matters for engineering teams
 
-I kept reopening and refreshing a transit app just to answer one question: **when should I leave for the bus?**
+**Bus Donostia** started from an everyday friction — repeatedly reopening a transit app just to know *when to leave for the bus* — and became an end-to-end case study in **shipping a real, multi-client product with production discipline and AI-assisted velocity**.
 
-I wanted something simpler: check live arrival times fast, keep my habitual stops one tap away, and **get a notification when it is time to head out**. That everyday friction became a real-world engineering project: build a reliable, maintainable multi-client product quickly against live transit data using a **parallel, AI-assisted engineering workflow**.
-
-The result is **Bus Donostia**: an operational Telegram bot (`@dbus/bot`) and a native Kotlin/Jetpack Compose Android application (**Badator!**) packaged and verified for Google Play release.
+| Signal | Verified evidence in this repository |
+|---|---|
+| **Shipped, not a prototype** | Signed `2.39 MB` Android release APK (**[MVP Base `v1.1.0`](https://github.com/IkerGoni/bus-dbus/releases/latest)**, `minSdk 26`, `targetSdk 36`, R8 + Baseline Profiles) and a production Telegram bot consuming real municipal transit data (zero mocks). |
+| **Disciplined engineering velocity** | Root commit (`2eabe0f`) to merged Android Sprint 4 alert engine (`0fbdd74`) in **12h 42m** of verifiable Git wall-clock time via parallel multi-agent worktrees — followed by adversarial audits, ES/EU/EN parity, PostgreSQL migration, and release hardening. |
+| **Automated quality gates** | **299 automated tests** (`143` TypeScript + `156` Android JVM/Robolectric), cross-language TS/Kotlin parity against real API fixtures, strict Android Lint (`HardcodedText` & `MissingTranslation = error`), compile-time `DesignTokens`, GitHub Actions CI, and a public-identity leak guard (`tools/repo/check-identity.mjs`). |
+| **Pragmatic architecture** | Deliberate native Android pivot ([ADR 009](docs/03-architecture/adrs/009-android-nativo-mvp.md)) with **zero paid backend**, zero ads/trackers, KMP-ready pure Kotlin `domain/` (no Android or `java.time.*` imports), and instant offline discovery (`548` stops, `39` lines, `127` itineraries). |
 
 ---
 
-## What is inside
-
-| | Telegram bot (`apps/bot`) | Native Android app — **Badator!** (`apps/android`) |
-|---|---|---|
-| **Purpose** | Check live arrivals and schedule alerts directly from Telegram | Fast everyday access with local adaptive notifications |
-| **Features** | Live arrivals, search, lines, favorites, nearby stops (OSM), alert scheduler | Home, nearby/search stops, lines, favorites, one-shot alerts, ES / EU / EN localization |
-| **Stack** | Node 22+, TypeScript, Telegraf, PostgreSQL (`pg`) + in-memory test driver, Zod, Vitest, Biome | Kotlin, Jetpack Compose, Material 3, Room, OkHttp, kotlinx.serialization, `minSdk 26`, `targetSdk 36` |
-| **Verification** | 93 automated tests + Biome + `tsc -b` (plus 50 shared tests in `packages/`) | 156 JVM/Robolectric tests (debug) / 150 (release) + Android Lint + signed release AAB |
-| **Status** | Production-ready (real Dbus API, single-instance lock, 409 retry) | **MVP Base (`v1.1.0`)** — signed APK in [GitHub Releases](https://github.com/IkerGoni/bus-dbus/releases/latest); Google Play rollout in progress |
-
-Both clients consume live data from the Dbus JSON API. The bundled stop catalogue (`548` stops, `39` lines, `127` itineraries) powers instant offline discovery; **it never invents arrival times**.
-
-### Download Badator! — MVP Base (`v1.1.0`)
-
-The current milestone is **MVP Base (`v1.1.0`)**, available as a signed Android APK (`minSdk 26`, Android 8.0+) while the Google Play rollout is completed:
-
-- **Download APK & checksums:** [GitHub Releases — `v1.1.0 — MVP Base`](https://github.com/IkerGoni/bus-dbus/releases/latest)
-- **Upgrade note:** the GitHub Release APK is signed with the project release key. When switching later to Google Play (Play App Signing), uninstall the GitHub APK first.
-
-### Badator! (Android) screenshots
+## Product showcase & MVP Base (`v1.1.0`)
 
 | Nearby stops (offline OSM) | Live stop arrivals | One-shot alert setup | Active alerts |
 |:---:|:---:|:---:|:---:|
 | ![Nearby stops](docs/readme/nearby-stops.png) | ![Stop detail](docs/readme/stop-detail.png) | ![New alert](docs/readme/new-alert.png) | ![My alerts](docs/readme/my-alerts.png) |
 
+### Try Badator! (Android)
+
+The current milestone is **MVP Base (`v1.1.0`, `versionCode 2`)**, distributed as a signed Android APK while the Google Play Store rollout is completed:
+
+- **Download APK & SHA-256 checksums:** [GitHub Releases — `v1.1.0 — MVP Base`](https://github.com/IkerGoni/bus-dbus/releases/latest) (`minSdk 26` / Android 8.0+)
+- **Google Play upgrade note:** the GitHub Release APK is signed with the project release key. When switching later to Google Play (Play App Signing), uninstall the GitHub APK first.
+
+### Two clients, one shared product contract
+
+| | Telegram bot (`apps/bot`) | Native Android app — **Badator!** (`apps/android`) |
+|---|---|---|
+| **Primary use case** | Instant arrivals and scheduled alerts directly inside Telegram | Everyday mobile access with local adaptive Foreground Service alerts |
+| **Capabilities** | Live arrivals, stop/line search, favorites, nearby stops (OSM), alert scheduler | Home dashboard, offline nearby/search discovery, lines, favorites, one-shot alerts, **ES / EU / EN** localization |
+| **Stack** | Node 22+, TypeScript, Telegraf, PostgreSQL (`pg`) + in-memory test driver, Zod, Vitest, Biome | Kotlin, Jetpack Compose, Material 3, Room, OkHttp, `kotlinx.serialization`, R8, Baseline Profiles |
+| **Verification** | 93 bot tests + 50 shared tests (`packages/`) + Biome + `tsc -b` | 156 debug / 150 release JVM & Robolectric tests + Android Lint + signed release AAB & APK |
+| **Status** | Production-ready (real Dbus API, single-instance PID lock, 409 retry) | **MVP Base (`v1.1.0`)** — signed APK in [GitHub Releases](https://github.com/IkerGoni/bus-dbus/releases/latest); Google Play rollout in progress |
+
+Both clients consume live arrivals from the Dbus JSON API. The bundled stop catalogue (`548` stops, `39` lines, `127` itineraries) powers instant offline search and proximity sorting — **it never invents or extrapolates arrival times**.
+
 ---
 
 ## Built fast. Improved deliberately.
 
-The Git history is part of the engineering story. In the published Git tree, the repository went from its root commit (`2eabe0f`) to the merge of Android Sprint 4 (`0fbdd74`) — including the on-device alert engine — in **12 hours and 42 minutes of elapsed wall-clock time** (the workspace itself was started earlier, on Nov 21 at 18:32 UTC according to session notes; that pre-history is not part of Git), followed by targeted architecture audits, localization, token governance and release hardening.
+The Git history is a transparent engineering log. In the published Git tree, the repository went from its root commit (`2eabe0f`) to the merge of Android Sprint 4 (`0fbdd74`) — including the on-device adaptive alert engine — in **12 hours and 42 minutes of elapsed wall-clock time** (workspace bootstrap started earlier on Nov 21 at 18:32 UTC per session notes; that pre-history is outside Git), followed by adversarial architecture audits, localization parity, token governance, PostgreSQL migration, and release hardening.
 
-| Elapsed from root commit (`2eabe0f`) | Recorded milestone |
+| Elapsed from root (`2eabe0f`) | Recorded milestone |
 |---|---|
 | **0h 00m** | Root repository commit (`2eabe0f`) · **Nov 22, 2026, 03:56 UTC** |
 | **0h 52m** | Live Dbus JSON API integration in Telegram bot (`b724cd1`) · **04:49 UTC** |
-| **2h 19m** | Monorepo split with `@dbus/core` and `@dbus/contracts` (`643540b`) · **06:16 UTC** |
+| **2h 19m** | Monorepo split extracting `@dbus/core` and `@dbus/contracts` (`643540b`) · **06:16 UTC** |
 | **7h 59m** | First Android Jetpack Compose foundation (`20479eb`) · **11:56 UTC** |
 | **9h 50m** | Stops, stop detail and lines screens (`281e6c0`) · **13:46 UTC** |
 | **10h 34m** | Home, alerts, settings and onboarding (`45e8fb0`) · **14:31 UTC** |
 | **11h 34m** | Android foreground service alert and notification engine (`172aee5`) · **15:31 UTC** |
 | **12h 42m** | Sprint 4 integrated into `main` (`0fbdd74`) · **16:39 UTC** |
-| **Afterwards** | Architecture audits, adaptive polling, ES/EU/EN parity, compiled `DesignTokens`, PostgreSQL migration, Play Store release pipeline |
+| **Afterwards** | Adversarial audits, adaptive polling, ES/EU/EN parity, compiled `DesignTokens`, PostgreSQL migration, Play Store & GitHub Release pipeline |
 
-Elapsed times and UTC times come from Git commit dates and are truncated to the minute.
+<sub>Elapsed times and UTC timestamps come directly from Git commit dates (truncated to the minute).</sub>
 
-> **What this measures:** wall-clock time directly verifiable via `git log` between recorded commits — not net human working hours or a shortcut around testing. The speed comes from **parallel multi-agent orchestration under strict engineering guardrails**.
+> **What this demonstrates:** wall-clock delivery verifiable via `git log` — not shortcuts around testing or architecture. Speed comes from **parallel multi-agent orchestration under strict human engineering guardrails**.
 
 ```mermaid
 flowchart LR
@@ -86,30 +101,30 @@ flowchart LR
     B --> C["Core screens<br/>22 Nov · 14:31 UTC"]
     C --> D["Alert engine<br/>22 Nov · 15:31 UTC"]
     D --> E["Sprint 4 merged (0fbdd74)<br/>22 Nov · 16:39 UTC"]
-    E --> F["Audits, ES/EU/EN,<br/>Postgres & Play release"]
+    E --> F["Audits, ES/EU/EN,<br/>Postgres & MVP Base"]
     classDef milestone fill:#e6f6f4,stroke:#147e79,color:#143b41;
     class A,B,C,D,E,F milestone;
 ```
 
 ---
 
-## Parallel multi-agent orchestration, with a developer in control
+## AI-assisted engineering, human-led architecture
 
-High output only matters if the codebase stays coherent, tested and releasable. I built this project by **running multiple AI agents in parallel** while keeping **architecture, scope, integration and verification strictly under human control**:
+High output only compounds when the codebase stays coherent, observable, and releasable. This repository demonstrates how I operate **multiple AI agents in parallel** while keeping **architecture, product scope, code integration, and release gates strictly under human ownership**:
 
-- **Parallel workstreams without collisions:** while one agent implements a feature or refactor inside an isolated **Git worktree** and its assigned **lane** (`apps/android/**` or `apps/bot/**`), I work in parallel with another agent on architecture decisions (ADRs), diagrams, UX refinements, contract parity or security/release audits.
-- **Explicit engineering guardrails:** every agent operates under [`AGENTS.md`](AGENTS.md) (non-negotiable product rules, lane ownership, zero-hardcoded-tokens policy, zero opaque internal IDs in UI) and [`docs/contributing/`](docs/contributing/README.md) (Conventional Commits, branch/worktree isolation and mandatory human approval before destructive or remote Git operations).
-- **Automated truth over trust:** cross-language domain rules are locked by shared real-API fixtures in `packages/contracts/` and parity tests across TypeScript and Kotlin, backed by **299 automated tests** (`143` TypeScript + `156` Android JVM/Robolectric), Biome, Android Lint, GitHub Actions CI and automated Play Store verification scripts (`tools/play-store/`).
+- **Collision-free parallel lanes:** while one agent implements features or tests inside an isolated **Git worktree** within its assigned **lane** (`apps/android/**` or `apps/bot/**`), another workstream focuses in parallel on ADRs, UX specs, contract parity, or adversarial security/release audits.
+- **Written engineering guardrails:** every contributor and agent operates under [`AGENTS.md`](AGENTS.md) (non-negotiable domain rules, lane boundaries, 3-tier config/token policy, zero opaque internal IDs in UI) and [`docs/contributing/`](docs/contributing/README.md) (Conventional Commits, worktree isolation, and explicit human approval before remote or destructive Git actions).
+- **Automated truth over trust:** cross-language domain rules are locked by shared real-API fixtures in `packages/contracts/` and parity tests across TypeScript and Kotlin, backed by **299 automated tests**, Biome, Android Lint, GitHub Actions CI, and automated Play Store verification scripts (`tools/play-store/`).
 
 ```mermaid
 flowchart LR
-    DEV["Developer<br/>Product scope, ADRs & priorities"]
+    DEV["Engineer (Owner)<br/>Product scope, ADRs & release gates"]
 
     subgraph PARALLEL["Parallel AI-assisted workstreams"]
         direction TB
-        W1["Agent Lane A · Isolated Git worktree<br/>Feature implementation & unit tests"]
-        W2["Agent Lane B · Architecture & Design<br/>ADRs, diagrams, UX specs & token guards"]
-        W3["Agent Lane C · Audit & Release<br/>Security scans, privacy & Play Store checks"]
+        W1["Lane A · Isolated Git worktree<br/>Feature implementation & unit tests"]
+        W2["Lane B · Architecture & Design<br/>ADRs, diagrams, UX specs & token guards"]
+        W3["Lane C · Audit & Release<br/>Adversarial reviews, privacy & Play checks"]
     end
 
     DEV --> W1
@@ -122,7 +137,7 @@ flowchart LR
 
     REV --> GATE{"Passes all gates?"}
     GATE -- "No" --> DEV
-    GATE -- "Yes" --> INT["Clean commit, docs update & release decision"]
+    GATE -- "Yes" --> INT["Clean commit, docs sync & release"]
 ```
 
 ---
@@ -145,7 +160,7 @@ flowchart TB
 
     subgraph KT["Android lane — Kotlin / Compose"]
         APP["Badator! UI<br/>Jetpack Compose + Material 3"]
-        DOMAIN["Kotlin domain &<br/>adaptive FGS alert engine"]
+        DOMAIN["Pure Kotlin domain &<br/>adaptive FGS alert engine"]
         ROOM["Room + SharedPreferences<br/>local-only persistence"]
         APP --> DOMAIN
         DOMAIN --> ROOM
@@ -158,7 +173,7 @@ flowchart TB
     FIX -.-> DOMAIN
 ```
 
-The TypeScript bot consumes `@dbus/core` and `@dbus/contracts`. Android maintains a pure, KMP-ready Kotlin domain layer (`domain/` has zero Android or `java.time.*` dependencies) verified against the same real-API contract fixtures.
+The TypeScript bot consumes `@dbus/core` and `@dbus/contracts`. Android maintains a pure, **KMP-ready Kotlin domain layer** (`domain/` has zero Android or `java.time.*` dependencies) verified against the exact same real-API contract fixtures.
 
 ### Repository map
 
@@ -166,34 +181,38 @@ The TypeScript bot consumes `@dbus/core` and `@dbus/contracts`. Android maintain
 apps/
   android/             Badator! — native Kotlin + Jetpack Compose app (Gradle)
   bot/                 @dbus/bot — Telegram bot (Node 22+, TypeScript, PostgreSQL)
-  mobile/              @dbus/mobile — earlier PWA, frozen by ADR 009
+  mobile/              @dbus/mobile — earlier PWA prototype, deliberately frozen (ADR 009)
 packages/
   core/                @dbus/core — shared TypeScript domain logic
   contracts/           @dbus/contracts — real API fixtures, schemas & design tokens
 tools/
-  play-store/          Automated privacy, Data Safety, EU review & release checklist scripts
+  play-store/          Privacy, Data Safety, Euskara review & release verification scripts
+  repo/                Public-identity & local-path leak guard (CI-enforced)
 docs/
   03-architecture/     ADRs (including ADR 009: native Android pivot)
+  08-engineering-plan/ Post-MVP engineering roadmap (tokens, performance, KMP/iOS)
+  auditoria/           Adversarial audits & publication readiness logs
   contributing/        Commit conventions, worktree workflow & Git security rules
   privacy/             Published ES / EU / EN privacy policies (GitHub Pages)
-  readme/              Screenshots used in this README
-.github/workflows/     ci.yml (Node workspaces) and android.yml (Gradle)
-AGENTS.md              Engineering guardrails and lane ownership for agents
+.github/
+  ISSUE_TEMPLATE/      Structured bug & feedback forms (ES / EU / EN)
+  workflows/           ci.yml (Node workspaces), android.yml (Gradle), integration.yml
+AGENTS.md              Engineering guardrails and lane ownership
 ```
 
 ---
 
-## Key engineering decisions
+## Key engineering decisions & trade-offs
 
-- **One-shot alerts over complex schedules:** the core job is removing repeated manual checks. Pick stop, line and lead time → adaptive Foreground Service monitors (`30s` / `60s` / `120s`) → notifies once → clears automatically (7-day expiration, GPS preference over schedule).
-- **Real API behavior over idealized specs:** public GTFS-RT `.pb` feeds returned `403 AccessDenied`, so both clients integrate defensively with Dbus's live JSON endpoint, handling stale data, source type (`tipo=1` GPS vs scheduled), and public vs internal line IDs (e.g., public line `28` vs internal ID `32`).
-- **Native Android over PWA ([ADR 009](docs/03-architecture/adrs/009-android-nativo-mvp.md)):** a browser prototype was built first and deliberately frozen in favor of Kotlin + Compose for reliable local persistence, background alert lifecycle and Android-native UX — without operating a paid backend or Firebase.
-- **Privacy by design:** zero analytics, zero ads, zero trackers, `android:allowBackup="false"`, and ephemeral in-memory location used only on demand to sort nearby stops offline.
-- **Design & config discipline:** 3-tier configuration model (`assets/config.json` for runtime operational parameters, compile-time generated `DesignTokens`/`MotionTokens` guarded by `DesignTokensGuardTest`, and strict reduced-motion accessibility).
+- **Native Android over PWA ([ADR 009](docs/03-architecture/adrs/009-android-nativo-mvp.md)):** a browser prototype was built first and deliberately frozen instead of succumbing to sunk cost — moving to Kotlin + Compose unlocked reliable background alert lifecycles, offline local persistence, and native UX without running a paid backend or Firebase.
+- **Real API behavior over idealized specs:** public GTFS-RT `.pb` feeds returned `403 AccessDenied`, so both clients integrate defensively with Dbus's live JSON endpoint — handling stale feeds, arrival source types (`tipo=1` GPS vs scheduled), and public vs internal line IDs (e.g., public line `28` vs internal ID `32`).
+- **One-shot adaptive alerts over battery-draining polling:** pick stop, line, and lead time → on-device Foreground Service adapts polling cadence (`30s` / `60s` / `120s` and extended backoff tiers from `config.json`) → prefers GPS over timetable → notifies once and clears automatically (7-day expiration).
+- **3-tier config & compile-time design tokens:** operational parameters live in `assets/config.json` (ready for optional HTTPS override), while UI spacing and motion tokens compile from `packages/contracts/design-tokens.json` into Kotlin constants (`DesignTokens` / `MotionTokens`, guarded by `DesignTokensGuardTest`) — zero runtime JSON parsing overhead, full `@Preview` support, and strict `ANIMATOR_DURATION_SCALE` accessibility.
+- **Privacy & operability by design:** zero analytics, zero ads, zero trackers, `android:allowBackup="false"`, ephemeral in-memory location only on demand, and single-instance PID locking + Telegram `409` retry in `@dbus/bot`.
 
 ---
 
-## Verification and getting started
+## Verification & getting started
 
 ### Requirements
 
@@ -201,7 +220,7 @@ AGENTS.md              Engineering guardrails and lane ownership for agents
 - **JDK 17** and **Android SDK** (Android app; see [`apps/android/README.md`](apps/android/README.md))
 - A **separate Telegram `BOT_TOKEN`** via environment variable if running your own bot instance (never commit tokens or reuse production credentials)
 
-### Verify TypeScript workspaces (lint + typecheck + 143 tests + build)
+### Verify TypeScript workspaces (lint + typecheck + identity guard + 143 tests + build)
 
 ```bash
 pnpm install --frozen-lockfile
@@ -209,7 +228,7 @@ pnpm verify
 pnpm run build:ci
 ```
 
-### Verify and build Android (lint + 156 debug / 150 release JVM tests + APK)
+### Verify and build Android (Android Lint + 156 debug / 150 release JVM tests + APK)
 
 ```bash
 cd apps/android
@@ -234,9 +253,9 @@ We are currently in **MVP Base (`v1.1.0`)** and actively gathering real-world fe
 
 ### Share feedback (ES / EU / EN welcome)
 
-- **Found a bug or weird arrival/alert behavior?** [Open a bug report](https://github.com/IkerGoni/bus-dbus/issues/new?template=bug_report.yml)
+- **Found a bug or unexpected arrival/alert behavior?** [Open a bug report](https://github.com/IkerGoni/bus-dbus/issues/new?template=bug_report.yml)
 - **Have UX feedback or an improvement idea?** [Share feedback / suggest a feature](https://github.com/IkerGoni/bus-dbus/issues/new?template=feedback.yml)
-- **Prefer email?** `dev.mail.igoni@gmail.com`
+- **Direct contact:** `dev.mail.igoni@gmail.com`
 
 ### Roadmap
 
@@ -252,20 +271,18 @@ We are currently in **MVP Base (`v1.1.0`)** and actively gathering real-world fe
 
 ---
 
-## Status, limitations and external dependencies
+## Status, limitations & external dependencies
 
-- **External data source:** both products rely on Dbus's public, unofficial JSON endpoint (`app.dbus.eus`, currently HTTP-only for that host via scoped `network_security_config.xml`). Availability and schema are controlled by the transit operator.
-- **Android notifications:** alert timing on Android is subject to OS battery optimization, notification permissions and network connectivity.
-- **Frozen PWA (`apps/mobile`):** kept in the repository for architectural traceability (ADR 009); excluded from CI and not maintained.
+- **External data source:** both products rely on Dbus's public, unofficial JSON endpoint (`app.dbus.eus`, scoped HTTP cleartext only for that host via `network_security_config.xml`). Availability and schema are controlled by the transit operator.
+- **Android notifications:** alert timing on Android is subject to OS battery optimization, notification permissions, and network connectivity.
+- **Frozen PWA (`apps/mobile`):** preserved for architectural traceability (ADR 009); excluded from CI and not maintained.
 
 ---
 
-## Privacy, Google Play and Licensing
+## Privacy, Google Play & Licensing
 
-- **Developer / Support:** **Iker Goñi Cuesta (Dev Igoni)** · `dev.mail.igoni@gmail.com`
+- **Author / Support:** **Iker Goñi Cuesta (Dev Igoni)** · `dev.mail.igoni@gmail.com`
 - **Privacy policies (Badator!):**
-  - [Español](https://ikergoni.github.io/bus-dbus/privacy/privacy-policy-es.html)
-  - [Euskara](https://ikergoni.github.io/bus-dbus/privacy/privacy-policy-eu.html)
-  - [English](https://ikergoni.github.io/bus-dbus/privacy/privacy-policy-en.html)
-- **License:** original source code in this repository is licensed under the [MIT License](LICENSE). Bundled typography in `apps/android/licenses/` remains under SIL Open Font License 1.1. Stop coordinates use OpenStreetMap data (`© OpenStreetMap contributors, ODbL`). Dbus trademarks and live transit data belong to their respective owners.
-- **Further documentation:** [`AGENTS.md`](AGENTS.md) · [`docs/README.md`](docs/README.md) · [`docs/contributing/`](docs/contributing/README.md)
+  - [Español](https://ikergoni.github.io/bus-dbus/privacy/privacy-policy-es.html) · [Euskara](https://ikergoni.github.io/bus-dbus/privacy/privacy-policy-eu.html) · [English](https://ikergoni.github.io/bus-dbus/privacy/privacy-policy-en.html)
+- **License:** original source code is licensed under the [MIT License](LICENSE). Bundled typography in `apps/android/licenses/` remains under SIL Open Font License 1.1. Stop coordinates use OpenStreetMap data (`© OpenStreetMap contributors, ODbL`). Dbus trademarks and live transit data belong to their respective owners.
+- **Further reading:** [`AGENTS.md`](AGENTS.md) · [`docs/README.md`](docs/README.md) · [`docs/contributing/`](docs/contributing/README.md) · [`README.es.md`](README.es.md)

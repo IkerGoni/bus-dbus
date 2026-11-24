@@ -11,7 +11,7 @@ Qué doc mirar para cada cosa. Si un doc contradice a
 | Convenciones Git | [`contributing/README.md`](contributing/README.md) |
 | Qué se hizo, qué falta y decisiones tomadas | [`ESTADO.md`](../ESTADO.md) |
 | Plan de ingeniería post-MVP (Sprints 5.0–8, tokens, KMP/iOS) | [`08-engineering-plan/README.md`](08-engineering-plan/README.md) |
-| Visión, comandos y configuración del bot | [`README.md`](../README.md) |
+| Visión, arquitectura, descarga MVP Base y feedback (EN / ES) | [`README.md`](../README.md) · [`README.es.md`](../README.es.md) |
 | Pantallas, textos y callbacks del bot | [`05-ui/02-bot-telegram.md`](05-ui/02-bot-telegram.md) |
 | Por qué Android nativo y sin backend | [ADR 009](03-architecture/adrs/009-android-nativo-mvp.md) |
 | Plan y resultado de los sprints Android | [`07-android-mvp/SPRINTS.md`](07-android-mvp/SPRINTS.md) |

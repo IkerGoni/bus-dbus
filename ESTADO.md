@@ -1,16 +1,17 @@
 # Estado — bus-dbus
 
-Actualizado: 2026-11-24 · Última sesión: hito **MVP Base (`v1.1.0`)** publicado en GitHub Releases con canal de feedback y roadmap
+Actualizado: 2026-11-24 · Última sesión: hito **MVP Base (`v1.1.0`)** en GitHub Releases, canal de feedback, roadmap y README bilingüe orientado a perfil técnico
 
 ## Objetivo actual
 
 Hito **MVP Base (`v1.1.0`, `versionCode 2`)** etiquetado y publicado en
 `IkerGoni/bus-dbus` con el APK firmado de `Badator!` en GitHub Releases,
-plantillas de GitHub Issues para recoger feedback real y roadmap `Soon` en el
-`README.md`. GitHub Pages sigue activo con las 3 políticas de privacidad en
-`HTTP 200` sin sesión, Secret Scanning + Push protection en `0` alertas y el
-paquete de Google Play en `$PLAY_PACK_DIR` listo para los pasos manuales en
-Play Console.
+plantillas de GitHub Issues para recoger feedback real, roadmap `Soon` (sin
+avisos recurrentes) y portada bilingüe (`README.md` + `README.es.md`) enfocada
+a decisores técnicos y recruiters. GitHub Pages sigue activo con las 3 políticas
+de privacidad en `HTTP 200` sin sesión, Secret Scanning + Push protection en `0`
+alertas y el paquete de Google Play en `$PLAY_PACK_DIR` listo para los pasos
+manuales en Play Console.
 
 Detalle y trazabilidad completa de la publicación:
 [`docs/auditoria/2026-11-estado-publicacion.md`](docs/auditoria/2026-11-estado-publicacion.md).
@@ -20,13 +21,14 @@ Detalle y trazabilidad completa de la publicación:
 - **Hito MVP Base (`v1.1.0`) y recogida de feedback:**
   - Añadidas plantillas de GitHub Issues (`.github/ISSUE_TEMPLATE/bug_report.yml`,
     `feedback.yml` y `config.yml`) abiertas a reportes en ES / EU / EN.
-  - Actualizado `README.md` nombrando el estado actual como **MVP Base (`v1.1.0`)**,
-    con enlace de descarga directa al APK en GitHub Releases, sección de feedback
-    y roadmap `Soon` (Google Play, ajustes guiados por feedback y pulido UX `v1.2`,
-    sin avisos recurrentes) + `Later` (iOS nativo vía KMP `v2.0` y config remota).
   - Tag anotado `v1.1.0` y GitHub Release oficial (`Latest`) `v1.1.0 — MVP Base`
     con `badator-v1.1.0.apk` (copia exacta del binario firmado auditado
     `sha256:cc568f6c4fc5`, `classes.dex` `9648d959…`) y `SHA256SUMS.txt`.
+  - Rediseñado `README.md` orientado a perfiles técnicos/hiring (resumen
+    ejecutivo verificable, métricas de ingeniería, decisiones y trade-offs,
+    descarga MVP Base, feedback y roadmap `Soon` sin avisos recurrentes) y
+    creado espejo completo en castellano `README.es.md` con selector tipo tabs
+    en cabecera; índice `docs/README.md` actualizado.
   - **Árbol Android intacto:** `HEAD:apps/android` = `e0db74e7268f6878f43e6a86718d83a7a0d630f7`.
 
 ## Hecho en la sesión previa (publicación Fases 1–4)
