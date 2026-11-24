@@ -72,7 +72,7 @@ Geltokien koordenatuak OpenStreetMap-etik datoz, ODbL lizentziarekin.
 
 **Zenbat denboraz exekutatzen da?** Erabiltzaileak sortutako gutxienez abisu aktibo bat dagoen bitartean bakarrik. Automatikoki gelditzen da abisu aktiborik geratzen ez denean (erabiltzaileak pausatzen edo ezabatzen dituenean). Gainera:
 - Abisu bat **7 egunera** iraungitzen da abisatu ez badu.
-- Abisu bat gehienez **3 orduz** zaintzen da jarraian bat datorren busik aurkitu gabe (`alerts.maxWatchHours`, `config.json`-en); muga horren ondoren, aplikazioak zaintzeari uzten diola jakinarazi eta abisua ezabatzen du.
+- Abisua gorde eta **3 ordu** igarotakoan (`alerts.maxWatchHours`, `config.json`-en), une horretan iritsieretan bere lineako eta helmugako autobusik ez badago, aplikazioak zaintzeari uzten dio, jakinarazi eta abisua ezabatzen du. Ez da muga finkoa: lineak iritsierak baditu, abisua zaintzen jarraitzen da jo arte, iraungi arte edo Androidek zerbitzua gelditu arte.
 - Dbus-ek 60 min badaramatza zerbitzurik gabe edo erantzun gabe zaindutako geltoki guztietan, motorra gelditu eta jakinarazi egiten du.
 - Android 15+-ek `dataSync` FGSa 6 ordura mugatzen du 24 ordeko; muga iristean, aplikazioak jakinarazten du.
 - **Telefonoa berrabiarazi ondoren**, zaintza ez da berez hasten (Android 15-ek ez du `dataSync` `BOOT_COMPLETED`-etik hasten uzten): aplikazioa irekitzean berreskuratzen da.
