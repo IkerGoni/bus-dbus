@@ -1,6 +1,6 @@
 # Reauditoría de publicación (GitHub y Google Play) — 2026-11-24
 
-Base auditada: `756eb9c`. Remediación en `fix/repo-reauditoria-publicacion`.
+Base auditada: `756eb9c` (equivalente a `5ea5ef2` tras la purga del historial de ID-01). Remediación en `fix/repo-reauditoria-publicacion`.
 Valores sensibles redactados: los correos y rutas se citan por huella o por tipo,
 nunca en claro.
 
@@ -28,7 +28,7 @@ nunca en claro.
   positivos documentados: chat ids de test y nonces de excalidraw (teléfonos),
   marcadores genéricos de ruta de usuario que dejó la purga anterior (rutas), `env.local` y `test.local` (hosts),
   `this@composed` de Kotlin (correo).
-- Tests: 7 + 43 + 93 = 143 TS; Android 156 debug / 150 release, lint sin issues.
+- Tests: 7 + 43 + 93 = 143 TS; Android 156 debug / 150 release, 0 errores de lint.
 
 ## Hallazgos y estado
 

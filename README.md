@@ -40,7 +40,7 @@ The result is **Bus Donostia**: an operational Telegram bot (`@dbus/bot`) and a 
 | **Features** | Live arrivals, search, lines, favorites, nearby stops (OSM), alert scheduler | Home, nearby/search stops, lines, favorites, one-shot alerts, ES / EU / EN localization |
 | **Stack** | Node 22+, TypeScript, Telegraf, PostgreSQL (`pg`) + in-memory test driver, Zod, Vitest, Biome | Kotlin, Jetpack Compose, Material 3, Room, OkHttp, kotlinx.serialization, `minSdk 26`, `targetSdk 36` |
 | **Verification** | 93 automated tests + Biome + `tsc -b` (plus 50 shared tests in `packages/`) | 156 JVM/Robolectric tests (debug) / 150 (release) + Android Lint + signed release AAB |
-| **Status** | Production-ready (real Dbus API, single-instance lock, 409 retry) | Feature-complete MVP; signed release AAB and Play Store checklist at 29/29 |
+| **Status** | Production-ready (real Dbus API, single-instance lock, 409 retry) | Feature-complete MVP; signed release AAB ready, Play Store release gates in progress |
 
 Both clients consume live data from the Dbus JSON API. The bundled stop catalogue (`548` stops, `39` lines, `127` itineraries) powers instant offline discovery; **it never invents arrival times**.
 
@@ -54,18 +54,18 @@ Both clients consume live data from the Dbus JSON API. The bundled stop catalogu
 
 ## Built fast. Improved deliberately.
 
-The Git history is part of the engineering story. In the published Git tree, the repository went from its root commit (`2eabe0f`) to the merge of Android Sprint 4 (`00686f0`) — including the on-device alert engine — in **12 hours and 42 minutes of elapsed wall-clock time** (the workspace itself was started earlier, on Nov 21 at 18:32 UTC according to session notes; that pre-history is not part of Git), followed by targeted architecture audits, localization, token governance and release hardening.
+The Git history is part of the engineering story. In the published Git tree, the repository went from its root commit (`2eabe0f`) to the merge of Android Sprint 4 (`0fbdd74`) — including the on-device alert engine — in **12 hours and 42 minutes of elapsed wall-clock time** (the workspace itself was started earlier, on Nov 21 at 18:32 UTC according to session notes; that pre-history is not part of Git), followed by targeted architecture audits, localization, token governance and release hardening.
 
 | Elapsed from root commit (`2eabe0f`) | Recorded milestone |
 |---|---|
 | **0h 00m** | Root repository commit (`2eabe0f`) · **Nov 22, 2026, 03:56 UTC** |
-| **0h 52m** | Live Dbus JSON API integration in Telegram bot (`cdac19f`) · **04:49 UTC** |
-| **2h 19m** | Monorepo split with `@dbus/core` and `@dbus/contracts` (`8e7e294`) · **06:16 UTC** |
-| **7h 59m** | First Android Jetpack Compose foundation (`c129028`) · **11:56 UTC** |
-| **9h 50m** | Stops, stop detail and lines screens (`5fb7f7b`) · **13:46 UTC** |
-| **10h 34m** | Home, alerts, settings and onboarding (`4d55cc6`) · **14:31 UTC** |
-| **11h 34m** | Android foreground service alert and notification engine (`5f687c3`) · **15:31 UTC** |
-| **12h 42m** | Sprint 4 integrated into `main` (`00686f0`) · **16:39 UTC** |
+| **0h 52m** | Live Dbus JSON API integration in Telegram bot (`b724cd1`) · **04:49 UTC** |
+| **2h 19m** | Monorepo split with `@dbus/core` and `@dbus/contracts` (`643540b`) · **06:16 UTC** |
+| **7h 59m** | First Android Jetpack Compose foundation (`20479eb`) · **11:56 UTC** |
+| **9h 50m** | Stops, stop detail and lines screens (`281e6c0`) · **13:46 UTC** |
+| **10h 34m** | Home, alerts, settings and onboarding (`45e8fb0`) · **14:31 UTC** |
+| **11h 34m** | Android foreground service alert and notification engine (`172aee5`) · **15:31 UTC** |
+| **12h 42m** | Sprint 4 integrated into `main` (`0fbdd74`) · **16:39 UTC** |
 | **Afterwards** | Architecture audits, adaptive polling, ES/EU/EN parity, compiled `DesignTokens`, PostgreSQL migration, Play Store release pipeline |
 
 Elapsed times and UTC times come from Git commit dates and are truncated to the minute.
@@ -77,7 +77,7 @@ flowchart LR
     A["Root commit (2eabe0f)<br/>22 Nov · 03:56 UTC"] --> B["Android foundation<br/>22 Nov · 11:56 UTC"]
     B --> C["Core screens<br/>22 Nov · 14:31 UTC"]
     C --> D["Alert engine<br/>22 Nov · 15:31 UTC"]
-    D --> E["Sprint 4 merged (00686f0)<br/>22 Nov · 16:39 UTC"]
+    D --> E["Sprint 4 merged (0fbdd74)<br/>22 Nov · 16:39 UTC"]
     E --> F["Audits, ES/EU/EN,<br/>Postgres & Play release"]
     classDef milestone fill:#e6f6f4,stroke:#147e79,color:#143b41;
     class A,B,C,D,E,F milestone;

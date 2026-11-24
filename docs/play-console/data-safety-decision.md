@@ -41,8 +41,10 @@ HTTP).
   API `SSIIMovilWSv2`. No hay evidencia documental de qué registra Dbus de esas
   peticiones ni durante cuánto tiempo.
 - Las consultas de paradas, vistas en conjunto por Dbus junto a la IP, podrían
-  interpretarse como «App activity». Si Google lo pide en la revisión, la
-  alternativa es declarar «App activity → Other actions» como recogida, no
-  compartida, para la funcionalidad de la app y sin fines publicitarios.
+  interpretarse como «App activity». Si Google exigiera declararlo en la revisión,
+  la alternativa sería declarar «App activity → Other actions» para la funcionalidad
+  de la app y sin fines publicitarios; al tratarse de un servidor tercero sin contrato
+  de encargado de tratamiento, podría requerir marcar también compartición («shared»)
+  y activar «datos no cifrados en tránsito» (HTTP).
 - Las políticas de la app ya avisan de que el proveedor puede ver la IP, metadatos de
   conexión y los códigos de parada consultados.
