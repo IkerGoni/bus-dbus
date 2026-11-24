@@ -1,0 +1,39 @@
+name: Feedback & feature idea / Sugerencia
+description: Share real-world feedback on MVP Base or propose an improvement (ES / EU / EN welcome)
+title: "[Feedback]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        We are actively collecting real-world feedback on **MVP Base (`v1.1.0`)** to shape what comes next.
+        Puedes escribir en **español, euskara o inglés**.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area / Área
+      options:
+        - "Badator! Android — Live arrivals & stops"
+        - "Badator! Android — Alerts & notifications"
+        - "Badator! Android — UI / UX & accessibility"
+        - "Localization (ES / EU / EN)"
+        - "Telegram Bot (@dbus/bot)"
+        - "Roadmap / New idea"
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Feedback or idea / Comentario o sugerencia
+      description: What worked well, what felt awkward, or what would make your daily commute easier?
+      placeholder: "Tell us what you experienced or would like to see..."
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Everyday context / Contexto de uso (optional)
+      description: Optional details such as usual stop, line, or commute scenario.
+      placeholder: "e.g., checking line 28 in the morning rush..."
+    validations:
+      required: false

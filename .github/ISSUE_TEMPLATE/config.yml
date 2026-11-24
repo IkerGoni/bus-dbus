@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Download Badator! APK (MVP Base)
+    url: https://github.com/IkerGoni/bus-dbus/releases/latest
+    about: Get the latest signed Android APK and checksums from GitHub Releases.
+  - name: Privacy Policies (ES / EU / EN)
+    url: https://ikergoni.github.io/bus-dbus/privacy/privacy-policy-es.html
+    about: Read how Badator! handles data and permissions (zero tracking, zero ads).

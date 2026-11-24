@@ -1,0 +1,54 @@
+name: Bug report / Reportar un error
+description: Report a bug or unexpected behavior in Badator! (Android) or the Telegram bot (ES / EU / EN welcome)
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve **Bus Donostia — Badator!**.
+        Puedes escribir en **español, euskara o inglés**.
+  - type: dropdown
+    id: client
+    attributes:
+      label: Client / Cliente
+      options:
+        - "Badator! Android (APK / GitHub Release)"
+        - "Badator! Android (Google Play)"
+        - "Telegram Bot (@dbus/bot)"
+        - "Repository / Documentation"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version & device / Versión y dispositivo
+      description: App version and device/Android version (if applicable).
+      placeholder: "v1.1.0 (MVP Base) · Pixel 7 · Android 15"
+    validations:
+      required: false
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened? / ¿Qué ocurrió?
+      description: Describe the issue clearly. Mention the stop, line, or alert lead time if relevant.
+      placeholder: "When opening stop X / setting an alert for line 28..."
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce / Pasos para reproducirlo
+      placeholder: |
+        1. Open ...
+        2. Tap ...
+        3. See error ...
+    validations:
+      required: false
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior / Comportamiento esperado
+      placeholder: "What you expected to happen instead."
+    validations:
+      required: false
