@@ -35,6 +35,33 @@ class AlertDraftTest {
     }
 
     @Test
+    fun modoDeAvisoIdaYVueltaYPlanSaveConservaModo() {
+        // Default es NOTIFICATION
+        assertEquals(AlertMode.NOTIFICATION, AlertDraft().mode)
+        assertEquals(AlertMode.NOTIFICATION, base.toRule("id", 1_000).mode)
+
+        // Draft -> rule -> draft conserva ALARM
+        val alarmDraft = base.copy(mode = AlertMode.ALARM)
+        val alarmRule = alarmDraft.toRule("id", 1_000)
+        assertEquals(AlertMode.ALARM, alarmRule.mode)
+        assertEquals(alarmDraft, alarmRule.toDraft())
+
+        // planSave conserva modo del borrador (nuevo, editando y conflicto confirmado)
+        val existingNotif = base.toRule("old", 0).copy(mode = AlertMode.NOTIFICATION)
+        val planNew = planSave(alarmDraft, null, null, false, "new", 5) as SavePlan.Write
+        assertEquals(AlertMode.ALARM, planNew.rule.mode)
+
+        val planEdit = planSave(alarmDraft, "old", null, false, "new", 5) as SavePlan.Write
+        assertEquals(AlertMode.ALARM, planEdit.rule.mode)
+
+        val planConfirmed = planSave(alarmDraft, null, existingNotif, true, "new", 5) as SavePlan.Write
+        assertEquals(AlertMode.ALARM, planConfirmed.rule.mode)
+
+        val planNeedsConf = planSave(alarmDraft, null, existingNotif, false, "new", 5)
+        assertEquals(SavePlan.NeedsConfirmation(existingNotif), planNeedsConf)
+    }
+
+    @Test
     fun nombreDesconocidoNuncaEsElCodigoDeParada() {
         assertEquals("", base.copy(stopName = null).toRule("id", 1_000).stopName)
         assertEquals("", base.copy(stopName = "   ").toRule("id", 1_000).stopName)

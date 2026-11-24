@@ -15,6 +15,7 @@ data class AlertDraft(
     /** null = cualquier destino. */
     val destination: String? = null,
     val minutesAhead: Int = 5,
+    val mode: AlertMode = AlertMode.NOTIFICATION,
 )
 
 enum class DraftError { NO_STOP, NO_LINE, MINUTES_OUT_OF_RANGE }
@@ -50,6 +51,7 @@ fun AlertDraft.toRule(
     minutesAhead = minutesAhead.coerceIn(config.minMinutesAhead..config.maxMinutesAhead),
     active = true,
     createdAtMs = nowMs,
+    mode = mode,
 )
 
 /** Borrador para editar una regla existente. */
@@ -59,6 +61,7 @@ fun AlertRule.toDraft(): AlertDraft = AlertDraft(
     lineId = lineId,
     destination = destination,
     minutesAhead = minutesAhead,
+    mode = mode,
 )
 
 /** Qué hacer al pulsar Guardar. */

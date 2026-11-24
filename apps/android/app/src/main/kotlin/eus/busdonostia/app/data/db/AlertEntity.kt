@@ -1,5 +1,6 @@
 package eus.busdonostia.app.data.db
 
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Entity
 import androidx.room.Index
@@ -8,6 +9,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Update
+import eus.busdonostia.app.domain.AlertMode
 import eus.busdonostia.app.domain.AlertRule
 import kotlinx.coroutines.flow.Flow
 
@@ -22,6 +24,8 @@ data class AlertEntity(
     val minutesAhead: Int,
     val active: Boolean,
     val createdAtMs: Long,
+    @ColumnInfo(defaultValue = "NOTIFICATION")
+    val mode: String = "NOTIFICATION",
 )
 
 fun AlertRule.toEntity() = AlertEntity(
@@ -33,6 +37,7 @@ fun AlertRule.toEntity() = AlertEntity(
     minutesAhead = minutesAhead,
     active = active,
     createdAtMs = createdAtMs,
+    mode = mode.name,
 )
 
 fun AlertEntity.toDomain() = AlertRule(
@@ -44,6 +49,10 @@ fun AlertEntity.toDomain() = AlertRule(
     minutesAhead = minutesAhead,
     active = active,
     createdAtMs = createdAtMs,
+    mode = when (mode) {
+        AlertMode.ALARM.name -> AlertMode.ALARM
+        else -> AlertMode.NOTIFICATION
+    },
 )
 
 @Dao

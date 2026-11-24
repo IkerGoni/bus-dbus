@@ -6,6 +6,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.core.app.ApplicationProvider
+import eus.busdonostia.app.domain.AlertMode
 import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.Favorite
 import eus.busdonostia.app.domain.FavoriteType
@@ -112,6 +113,32 @@ class AppDatabaseTest {
     }
 
     @Test
+    fun `avisos - modo ALARM hace ida y vuelta`() = runTest {
+        val r = rule("a_alarm").copy(mode = AlertMode.ALARM)
+        db.alerts().insert(r.toEntity())
+        val loaded = db.alerts().findById("a_alarm")!!.toDomain()
+        assertEquals(AlertMode.ALARM, loaded.mode)
+        assertEquals(r, loaded)
+    }
+
+    @Test
+    fun `avisos - mapper toDomain con valor desconocido hace fallback a NOTIFICATION`() {
+        val entity = AlertEntity(
+            id = "a_unk",
+            stopId = "340",
+            stopName = "Easo",
+            lineId = "28",
+            destination = null,
+            minutesAhead = 5,
+            active = true,
+            createdAtMs = 10,
+            mode = "DESCONOCIDO",
+        )
+        val domain = entity.toDomain()
+        assertEquals(AlertMode.NOTIFICATION, domain.mode)
+    }
+
+    @Test
     fun `migracion 1 a 2 - borra recurrentes y disparados y conserva el resto`() = runTest {
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
         val name = "migration-test.db"
@@ -141,9 +168,9 @@ class AppDatabaseTest {
             execSQL("INSERT INTO alerts VALUES ('rec', '3', 'Urbieta', '35', NULL, 5, 'RECURRING', '1,2', '07:45', '08:30', 1, 10, NULL, NULL)")
         }
         v1.close()
-        // Room aplica la migración y valida el esquema v2 al abrir.
+        // Room aplica la migración y valida el esquema v3 al abrir.
         val migrated = Room.databaseBuilder(context, AppDatabase::class.java, name)
-            .addMigrations(MIGRATION_1_2)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .allowMainThreadQueries()
             .build()
         val rules = migrated.alerts().getAll().map { it.toDomain() }
@@ -151,6 +178,47 @@ class AppDatabaseTest {
         assertEquals(
             AlertRule("once", "340", "Easo", "28", "Amara", 5, active = true, createdAtMs = 10),
             rules.first { it.id == "once" },
+        )
+        migrated.close()
+        context.deleteDatabase(name)
+    }
+
+    @Test
+    fun `migracion 2 a 3 - anade columna mode con valor por defecto NOTIFICATION`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val name = "migration-test-2-3.db"
+        context.deleteDatabase(name)
+        val schema = Json.parseToJsonElement(File("schemas/eus.busdonostia.app.data.db.AppDatabase/2.json").readText())
+        val entities = schema.jsonObject["database"]!!.jsonObject["entities"]!!.jsonArray.map { it.jsonObject }
+        val v2 = FrameworkSQLiteOpenHelperFactory().create(
+            SupportSQLiteOpenHelper.Configuration.builder(context).name(name).callback(
+                object : SupportSQLiteOpenHelper.Callback(2) {
+                    override fun onCreate(db: SupportSQLiteDatabase) {
+                        entities.forEach { entity ->
+                            val table = entity["tableName"]!!.jsonPrimitive.content
+                            val sqls = listOf(entity["createSql"]!!) + entity["indices"]?.jsonArray.orEmpty().map { it.jsonObject["createSql"]!! }
+                            sqls.forEach { db.execSQL(it.jsonPrimitive.content.replace("\${TABLE_NAME}", table)) }
+                        }
+                    }
+
+                    override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) = Unit
+                },
+            ).build(),
+        )
+        v2.writableDatabase.apply {
+            execSQL("INSERT INTO alerts VALUES ('a1', '340', 'Easo', '28', 'Amara', 5, 1, 10)")
+        }
+        v2.close()
+        val migrated = Room.databaseBuilder(context, AppDatabase::class.java, name)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+            .allowMainThreadQueries()
+            .build()
+        val alert = migrated.alerts().findById("a1")!!.toDomain()
+        assertEquals("a1", alert.id)
+        assertEquals(AlertMode.NOTIFICATION, alert.mode)
+        assertEquals(
+            AlertRule("a1", "340", "Easo", "28", "Amara", 5, active = true, createdAtMs = 10, mode = AlertMode.NOTIFICATION),
+            alert,
         )
         migrated.close()
         context.deleteDatabase(name)

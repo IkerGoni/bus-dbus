@@ -10,7 +10,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 /** Base de datos local. Sin migración destructiva: cada cambio de esquema exige migración. */
 @Database(
     entities = [FavoriteEntity::class, AlertEntity::class, RecentStopEntity::class, LineColorEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -22,7 +22,7 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         fun build(context: Context): AppDatabase =
             Room.databaseBuilder(context.applicationContext, AppDatabase::class.java, "busdonostia.db")
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 .build()
     }
 }
@@ -46,5 +46,14 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
         db.execSQL("DROP TABLE `alerts`")
         db.execSQL("ALTER TABLE `alerts_v2` RENAME TO `alerts`")
         db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_alerts_stopId_lineId` ON `alerts` (`stopId`, `lineId`)")
+    }
+}
+
+/**
+ * v3: añade el modo de aviso (NOTIFICATION o ALARM) por aviso; por defecto NOTIFICATION.
+ */
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE alerts ADD COLUMN mode TEXT NOT NULL DEFAULT 'NOTIFICATION'")
     }
 }

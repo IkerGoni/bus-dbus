@@ -56,6 +56,8 @@ data class Favorite(
 fun favoriteId(type: FavoriteType, stopId: String?, lineId: String?): String =
     "${type.name}:${stopId.orEmpty()}:${lineId.orEmpty()}"
 
+enum class AlertMode { NOTIFICATION, ALARM }
+
 /**
  * Aviso de un solo uso: vigila desde que se guarda y, al avisar, se borra.
  * Caduca a los 7 días si no llega a avisar.
@@ -72,6 +74,7 @@ data class AlertRule(
     val minutesAhead: Int,
     val active: Boolean = true,
     val createdAtMs: Long,
+    val mode: AlertMode = AlertMode.NOTIFICATION,
 )
 
 enum class ComputedAlertStatus { INACTIVE, TRIGGERED, ACTIVE }
