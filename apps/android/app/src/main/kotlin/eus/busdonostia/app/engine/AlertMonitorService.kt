@@ -102,20 +102,29 @@ class AlertMonitorService : Service() {
         val ruleChanges = scope.launch { container.alerts.filterNotNull().drop(1).collect { wake.trySend(Unit) } }
         try {
             while (true) {
-                val action = watchUntilDone()
-                if (action == EngineAction.STOP_NO_SERVICE) {
+                val watch = watchUntilDone()
+                if (watch.action == EngineAction.STOP_NO_SERVICE) {
                     val stopMin = container.configRepository.config.value.polling.noServiceStopMin
                     notifyStopped(this, R.string.notif_stopped_no_service, stopMin)
                 }
+                val stopId = lastStartId
                 running = false
                 val alertsCfg = container.configRepository.config.value.alerts
                 // Un aviso guardado antes de soltar `running` no arrancó el servicio (lo veía vivo): se relee la BD.
-                if (resumeAfterStop(action, savedRules(), System.currentTimeMillis(), canNotifyArrivals(this), alertsCfg)) {
+                if (resumeAfterStop(
+                        action = watch.action,
+                        rules = savedRules(),
+                        nowMs = System.currentTimeMillis(),
+                        canNotify = { canNotifyAlert(this, it.mode) },
+                        skipRuleIds = watch.unnotifiedRuleIds,
+                        alertsConfig = alertsCfg,
+                    )
+                ) {
                     running = true
                     continue
                 }
                 // Uno guardado después sí pidió arranque: entonces stopSelfResult falla y se sigue vigilando.
-                if (stopSelfResult(lastStartId)) return
+                if (stopSelfResult(stopId)) return
                 running = true
             }
         } finally {
@@ -133,8 +142,9 @@ class AlertMonitorService : Service() {
     }
 
     /** Vueltas cada `baseBackgroundSec` (o el escalón adaptativo) hasta que el motor decide parar. */
-    private suspend fun watchUntilDone(): EngineAction {
+    private suspend fun watchUntilDone(): WatchResult {
         var troubleSinceMs: Long? = null
+        var lastUnnotifiedRuleIds = emptySet<String>()
         while (true) {
             val pollingCfg = container.configRepository.config.value.polling
             val baseMs = pollingCfg.baseBackgroundSec * 1_000L
@@ -144,6 +154,7 @@ class AlertMonitorService : Service() {
                 val result = tick(rules, baseMs, troubleSinceMs)
                 troubleSinceMs = result.troubleSinceMs
                 delayMs = result.delayMs
+                lastUnnotifiedRuleIds = result.unnotifiedRuleIds
                 result.action
             } catch (e: CancellationException) {
                 throw e
@@ -154,14 +165,25 @@ class AlertMonitorService : Service() {
                 val failed = failedTick(troubleSinceMs, System.currentTimeMillis(), pollingCfg)
                 troubleSinceMs = failed.troubleSinceMs
                 delayMs = pollDelayMs(null, baseMs, pollingCfg)
+                lastUnnotifiedRuleIds = emptySet()
                 failed.action
             }
-            if (action != EngineAction.CONTINUE) return action
+            if (action != EngineAction.CONTINUE) return WatchResult(action, lastUnnotifiedRuleIds)
             withTimeoutOrNull(delayMs) { wake.receive() }
         }
     }
 
-    private class TickResult(val troubleSinceMs: Long?, val action: EngineAction, val delayMs: Long)
+    private class TickResult(
+        val troubleSinceMs: Long?,
+        val action: EngineAction,
+        val delayMs: Long,
+        val unnotifiedRuleIds: Set<String> = emptySet(),
+    )
+
+    private data class WatchResult(
+        val action: EngineAction,
+        val unnotifiedRuleIds: Set<String> = emptySet(),
+    )
 
     private suspend fun tick(rules: List<AlertRule>, baseMs: Long, troubleSinceMs: Long?): TickResult {
         val cfg = container.configRepository.config.value
@@ -185,10 +207,13 @@ class AlertMonitorService : Service() {
         // Tope de vigilancia (A5-09): N horas sin bus que coincida → se notifica y se elimina igual que un disparo.
         tick.watchExpired.forEach { notifyWatchExpired(this, it, alertsCfg.maxWatchHours) }
         if (canNotifyArrivals(this)) tick.watchExpired.forEach { container.database.alerts().delete(it.id) }
+        val unnotifiedFirings = tick.firings.filterNot { canNotifyAlert(this, it.rule.mode) }.map { it.rule.id }
+        val unnotifiedExpired = if (!canNotifyArrivals(this)) tick.watchExpired.map { it.id } else emptyList()
+        val unnotifiedRuleIds = (unnotifiedFirings + unnotifiedExpired).toSet()
         // Sondeo adaptativo: más espaciado cuanto más lejos está el bus de la antelación.
         val delayMs = nextPollDelayMs(tick.watching, views, now, baseMs, pollingCfg)
         if (tick.action == EngineAction.CONTINUE) updateMonitoringNotification(this, tick.watching, (delayMs / 1_000).toInt())
-        return TickResult(tick.troubleSinceMs, tick.action, delayMs)
+        return TickResult(tick.troubleSinceMs, tick.action, delayMs, unnotifiedRuleIds)
     }
 
     companion object {

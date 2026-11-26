@@ -220,5 +220,21 @@ fun resumeAfterStop(
     nowMs: Long,
     canNotify: Boolean,
     alertsConfig: AlertsConfig = AlertsConfig(),
+): Boolean = resumeAfterStop(
+    action = action,
+    rules = rules,
+    nowMs = nowMs,
+    canNotify = { canNotify },
+    skipRuleIds = emptySet(),
+    alertsConfig = alertsConfig,
+)
+
+fun resumeAfterStop(
+    action: EngineAction,
+    rules: List<AlertRule>,
+    nowMs: Long,
+    canNotify: (AlertRule) -> Boolean,
+    skipRuleIds: Set<String> = emptySet(),
+    alertsConfig: AlertsConfig = AlertsConfig(),
 ): Boolean =
-    action == EngineAction.STOP_IDLE && canNotify && rules.any { isWatching(it, nowMs, alertsConfig) }
+    action == EngineAction.STOP_IDLE && rules.any { it.id !in skipRuleIds && isWatching(it, nowMs, alertsConfig) && canNotify(it) }

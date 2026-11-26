@@ -211,6 +211,58 @@ class AlertEngineTest {
     }
 
     @Test
+    fun resumeAfterStopEvitaBucleConCanalesBloqueadosYSkipRuleIds() {
+        val alarmRule = once("alarm").copy(mode = AlertMode.ALARM)
+        val notifRule = once("notif").copy(mode = AlertMode.NOTIFICATION)
+        val newAlarmRule = once("new_alarm").copy(mode = AlertMode.ALARM)
+        val expiredRule = once("expired").copy(mode = AlertMode.ALARM)
+
+        // 1. Alarma disparada no borrada (CHANNEL_ALARM bloqueado, CHANNEL_ARRIVALS activo) -> skipRuleIds evita el bucle (false)
+        val canNotifyOnlyArrivals: (AlertRule) -> Boolean = { it.mode == AlertMode.NOTIFICATION }
+        assertFalse(
+            resumeAfterStop(
+                action = EngineAction.STOP_IDLE,
+                rules = listOf(alarmRule),
+                nowMs = now,
+                canNotify = canNotifyOnlyArrivals,
+                skipRuleIds = setOf("alarm"),
+            ),
+        )
+
+        // 2. CHANNEL_ARRIVALS bloqueado y CHANNEL_ALARM activo con nueva alarma guardada -> true (sí reanuda)
+        val canNotifyOnlyAlarm: (AlertRule) -> Boolean = { it.mode == AlertMode.ALARM }
+        assertTrue(
+            resumeAfterStop(
+                action = EngineAction.STOP_IDLE,
+                rules = listOf(notifRule, newAlarmRule),
+                nowMs = now,
+                canNotify = canNotifyOnlyAlarm,
+                skipRuleIds = setOf("notif"),
+            ),
+        )
+
+        // 3. watchExpired no borrado (CHANNEL_ARRIVALS bloqueado, CHANNEL_ALARM activo) -> skipRuleIds evita el bucle (false)
+        assertTrue(
+            resumeAfterStop(
+                action = EngineAction.STOP_IDLE,
+                rules = listOf(expiredRule),
+                nowMs = now,
+                canNotify = canNotifyOnlyAlarm,
+                skipRuleIds = emptySet(),
+            ),
+        )
+        assertFalse(
+            resumeAfterStop(
+                action = EngineAction.STOP_IDLE,
+                rules = listOf(expiredRule),
+                nowMs = now,
+                canNotify = canNotifyOnlyAlarm,
+                skipRuleIds = setOf("expired"),
+            ),
+        )
+    }
+
+    @Test
     fun destinoDelTitulo() {
         assertEquals("Amara", firingDestination(once("a"), arrival("5", 3)))
         assertEquals("Ospitaleak", firingDestination(once("a").copy(destination = "Ospitaleak"), arrival("5", 3, destination = " ")))
