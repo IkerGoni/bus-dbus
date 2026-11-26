@@ -5,6 +5,8 @@
     <string name="channel_monitoring_description">Jakinarazpen isila, aplikazioak zure abisuetarako Dbus kontsultatzen duen bitartean.</string>
     <string name="channel_arrivals_name">Zure abisuen iritsierak</string>
     <string name="channel_arrivals_description">Zure autobusa aukeratutako minutuetara dagoenean abisatzen du.</string>
+    <string name="channel_alarm_name">Zure abisuen alarmak</string>
+    <string name="channel_alarm_description">Soinu-alarma sendo eta etengabea zure autobusa aukeratutako minutuetara dagoenean.</string>
 
     <string name="notif_monitoring_one">L%1$s zaintzen, %2$s geltokian</string>
     <plurals name="notif_monitoring_many">

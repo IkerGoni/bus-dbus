@@ -5,6 +5,8 @@
     <string name="channel_monitoring_description">Silent notification while the app queries Dbus for your alerts.</string>
     <string name="channel_arrivals_name">Your alert arrivals</string>
     <string name="channel_arrivals_description">Notifies when your bus is at the minutes you chose.</string>
+    <string name="channel_alarm_name">Your alert alarms</string>
+    <string name="channel_alarm_description">Insistent sound alarm when your bus is at the minutes you chose.</string>
 
     <string name="notif_monitoring_one">Monitoring L%1$s at %2$s</string>
     <plurals name="notif_monitoring_many">

@@ -181,6 +181,8 @@ class AlertMonitorService : Service() {
         val tick = evaluateTick(rules, views, now, troubleSinceMs, alertsCfg, pollingCfg)
         // Primero se notifica; solo se borra (un solo uso) si el usuario puede ver la notificación.
         tick.firings.forEach { notifyArrival(this, it, now, alertsCfg) }
+        // Limitación: firingsToDelete consulta solo canNotifyArrivals; si el usuario bloquea únicamente
+        // el canal de alarma, el aviso en modo alarma se borra aunque no se haya mostrado.
         firingsToDelete(tick.firings, canNotifyArrivals(this)).forEach { container.database.alerts().delete(it.rule.id) }
         // Tope de vigilancia (A5-09): N horas sin bus que coincida → se notifica y se elimina igual que un disparo.
         tick.watchExpired.forEach { notifyWatchExpired(this, it, alertsCfg.maxWatchHours) }

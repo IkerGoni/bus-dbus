@@ -5,6 +5,8 @@
     <string name="channel_monitoring_description">Notificación silenciosa mientras la app consulta Dbus para tus avisos.</string>
     <string name="channel_arrivals_name">Llegadas de tus avisos</string>
     <string name="channel_arrivals_description">Avisa cuando tu bus está a los minutos que elegiste.</string>
+    <string name="channel_alarm_name">Alarmas de tus avisos</string>
+    <string name="channel_alarm_description">Alarma sonora e insistente cuando tu bus está a los minutos que elegiste.</string>
 
     <string name="notif_monitoring_one">Vigilando L%1$s en %2$s</string>
     <plurals name="notif_monitoring_many">

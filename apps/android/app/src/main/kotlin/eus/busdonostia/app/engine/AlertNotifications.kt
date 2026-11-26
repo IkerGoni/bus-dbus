@@ -5,12 +5,15 @@ import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.media.AudioAttributes
+import android.media.RingtoneManager
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import eus.busdonostia.app.MainActivity
 import eus.busdonostia.app.R
+import eus.busdonostia.app.domain.AlertMode
 import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.AlertsConfig
 import eus.busdonostia.app.domain.ArrivalSource
@@ -26,6 +29,7 @@ import eus.busdonostia.app.domain.remainingMinutes
 
 const val CHANNEL_MONITORING = "dbus_monitoring"
 const val CHANNEL_ARRIVALS = "dbus_arrivals_high"
+const val CHANNEL_ALARM = "dbus_arrivals_alarm"
 
 const val MONITORING_NOTIFICATION_ID = 1
 private const val STOPPED_NOTIFICATION_ID = 2
@@ -51,6 +55,19 @@ fun createNotificationChannels(context: Context) {
             .setDescription(context.getString(R.string.channel_arrivals_description))
             .build(),
     )
+    val alarmAttributes = AudioAttributes.Builder()
+        .setUsage(AudioAttributes.USAGE_ALARM)
+        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+        .build()
+    val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+    manager.createNotificationChannel(
+        NotificationChannelCompat.Builder(CHANNEL_ALARM, NotificationManagerCompat.IMPORTANCE_HIGH)
+            .setName(context.getString(R.string.channel_alarm_name))
+            .setDescription(context.getString(R.string.channel_alarm_description))
+            .setSound(alarmSound, alarmAttributes)
+            .setVibrationEnabled(true)
+            .build(),
+    )
 }
 
 /** El aviso guardado sin catálogo no tiene nombre: mostrar «parada sin nombre», nunca el código de poste. */
@@ -69,6 +86,17 @@ fun canNotifyArrivals(context: Context): Boolean {
     val manager = NotificationManagerCompat.from(context)
     if (!manager.areNotificationsEnabled()) return false
     return manager.getNotificationChannelCompat(CHANNEL_ARRIVALS)?.importance != NotificationManagerCompat.IMPORTANCE_NONE
+}
+
+/** El usuario verá el aviso según el modo: notificaciones permitidas y el canal correspondiente sin bloquear. */
+fun canNotifyAlert(context: Context, mode: AlertMode): Boolean {
+    val manager = NotificationManagerCompat.from(context)
+    if (!manager.areNotificationsEnabled()) return false
+    val channelId = when (mode) {
+        AlertMode.NOTIFICATION -> CHANNEL_ARRIVALS
+        AlertMode.ALARM -> CHANNEL_ALARM
+    }
+    return manager.getNotificationChannelCompat(channelId)?.importance != NotificationManagerCompat.IMPORTANCE_NONE
 }
 
 /** «Vigilando L5 en Pío Baroja 10» (o «Vigilando N avisos»), silenciosa y fija mientras vive el servicio. */
@@ -125,17 +153,33 @@ fun notifyArrival(
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
     )
-    val notification = NotificationCompat.Builder(context, CHANNEL_ARRIVALS)
+    val isAlarm = rule.mode == AlertMode.ALARM
+    val channelId = if (isAlarm) CHANNEL_ALARM else CHANNEL_ARRIVALS
+    val builder = NotificationCompat.Builder(context, channelId)
         .setSmallIcon(R.drawable.ic_notification)
         .setContentTitle(title)
         .setContentText(body)
         .setContentIntent(open)
         .setAutoCancel(true)
-        .setPriority(NotificationCompat.PRIORITY_HIGH)
-        .setCategory(NotificationCompat.CATEGORY_REMINDER)
         .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         .setWhen(nowMs)
-        .build()
+
+    if (isAlarm) {
+        builder
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setTimeoutAfter(alertsConfig.alarmTimeoutSec * 1_000L)
+            .setSilent(false)
+    } else {
+        builder
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+    }
+
+    val notification = builder.build()
+    if (isAlarm) {
+        notification.flags = notification.flags or Notification.FLAG_INSISTENT
+    }
     NotificationManagerCompat.from(context).notify(rule.id, ARRIVAL_NOTIFICATION_ID, notification)
 }
 
