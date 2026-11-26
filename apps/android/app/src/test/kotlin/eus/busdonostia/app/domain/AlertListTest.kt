@@ -132,4 +132,22 @@ class AlertListTest {
         assertEquals(listOf(2, 4, 9), cards[1].arrivals.map { it.minutesAtFetch }) // toda la parada, máx. 3
         assertTrue(cards[2].view == ArrivalsView.Loading && cards[2].arrivals.isEmpty()) // aún sin consultar
     }
+
+    @Test
+    fun alertItemEnTriggeredAlineaRemainingMinConNotificacion() {
+        // Con triggerBufferSec = 30 y un dato obtenido hace 30 s que decía 6 min,
+        // a nowMs han pasado 30 s: remainingMinutes(nowMs) diría 6 min,
+        // pero evaluado con triggerBufferSec (nowMs + 30s) son 60 s transcurridos -> 5 min.
+        // Al disparar (TRIGGERED), alertItem debe devolver 5 min igual que notifyArrival.
+        val cfg = AlertsConfig(triggerBufferSec = 30)
+        val fetchedAt = now - 30_000L
+        val arr = Arrival("5", "5", "Amara", 6, null, ArrivalSource.LIVE, fetchedAt, null)
+        val item = alertItem(rule("a", "5", minutesAhead = 5), listOf(arr), now, cfg)
+
+        assertEquals(ComputedAlertStatus.TRIGGERED, item.status)
+        val notifyEarlyMs = cfg.triggerBufferSec * 1_000L
+        val notificationMinutes = remainingMinutes(arr, now + notifyEarlyMs)
+        assertEquals(5, notificationMinutes)
+        assertEquals(notificationMinutes, item.remainingMin)
+    }
 }

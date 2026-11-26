@@ -47,17 +47,47 @@ class AlertStatusTest {
     // ── «etaSeconds» → minutos enteros; el reloj solo decide cuándo baja el minuto ──
 
     @Test
-    fun disparaCuandoElMinutoRestanteEntraEnLaVentana() {
+    fun disparaCuandoElMinutoRestanteEntraEnLaVentanaPorDefecto() {
         val created = madrid("2026-11-02T08:00")
         val fetched = created
         val a = arrival(minutes = 7, fetchedAtMs = fetched)
         val alert = once(created, minutesAhead = 5)
-        // Avisa 30 s antes (NOTIFY_EARLY_MS): mejor pronto que tarde.
-        assertEquals(ACTIVE, computeAlertStatus(alert, fetched + 89_999, a)) // aún 6 min dentro de 30 s
-        assertEquals(TRIGGERED, computeAlertStatus(alert, fetched + 90_000, a)) // en 30 s serán 5 min
-        // Un bus que llega con un minuto de más que la antelación ya dispara: está a menos de 30 s de entrar.
-        assertEquals(ACTIVE, computeAlertStatus(alert, fetched, arrival(minutes = 6, fetchedAtMs = fetched)))
-        assertEquals(TRIGGERED, computeAlertStatus(alert, fetched + 30_000, arrival(minutes = 6, fetchedAtMs = fetched)))
+        // Por defecto (triggerBufferSec = 0), dispara al entrar en el minuto exacto.
+        assertEquals(ACTIVE, computeAlertStatus(alert, fetched + 119_999, a)) // aún 6 min restantes
+        assertEquals(TRIGGERED, computeAlertStatus(alert, fetched + 120_000, a)) // baja a 5 min exactos
+        // Un bus que llega con un minuto de más (6 min) dispara exactamente al bajar el primer minuto (60 s).
+        assertEquals(ACTIVE, computeAlertStatus(alert, fetched + 59_999, arrival(minutes = 6, fetchedAtMs = fetched)))
+        assertEquals(TRIGGERED, computeAlertStatus(alert, fetched + 60_000, arrival(minutes = 6, fetchedAtMs = fetched)))
+    }
+
+    @Test
+    fun disparaConBufferConfigurable30s() {
+        val created = madrid("2026-11-02T08:00")
+        val fetched = created
+        val a = arrival(minutes = 7, fetchedAtMs = fetched)
+        val alert = once(created, minutesAhead = 5)
+        val cfg30 = AlertsConfig(triggerBufferSec = 30)
+
+        // Con triggerBufferSec = 30, dispara 30 s antes de que baje el minuto.
+        assertEquals(ACTIVE, computeAlertStatus(alert, fetched + 89_999, a, cfg30)) // aún 6 min dentro de 30 s
+        assertEquals(TRIGGERED, computeAlertStatus(alert, fetched + 90_000, a, cfg30)) // en 30 s serán 5 min
+        assertEquals(ACTIVE, computeAlertStatus(alert, fetched, arrival(minutes = 6, fetchedAtMs = fetched), cfg30))
+        assertEquals(TRIGGERED, computeAlertStatus(alert, fetched + 30_000, arrival(minutes = 6, fetchedAtMs = fetched), cfg30))
+    }
+
+    @Test
+    fun disparaConBufferConfigurable60s() {
+        val created = madrid("2026-11-02T08:00")
+        val fetched = created
+        val a = arrival(minutes = 7, fetchedAtMs = fetched)
+        val alert = once(created, minutesAhead = 5)
+        val cfg60 = AlertsConfig(triggerBufferSec = 60)
+
+        // Con triggerBufferSec = 60, dispara 60 s antes de que baje el minuto.
+        assertEquals(ACTIVE, computeAlertStatus(alert, fetched + 59_999, a, cfg60))
+        assertEquals(TRIGGERED, computeAlertStatus(alert, fetched + 60_000, a, cfg60))
+        // Un bus con 6 min ya dispara inmediatamente en fetched (en 60 s serán 5 min).
+        assertEquals(TRIGGERED, computeAlertStatus(alert, fetched, arrival(minutes = 6, fetchedAtMs = fetched), cfg60))
     }
 
     @Test

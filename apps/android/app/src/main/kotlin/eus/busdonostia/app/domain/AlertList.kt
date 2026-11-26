@@ -64,7 +64,8 @@ fun alertItem(
         else -> AlertDetail.NONE
     }
     val next = matching ?: nextArrivalFor(arrivals, rule.lineId, rule.destination, nowMs)
-    return AlertItem(rule, status, detail, next, next?.let { remainingMinutes(it, nowMs) })
+    val evalNowMs = if (status == ComputedAlertStatus.TRIGGERED) nowMs + notifyEarlyMs else nowMs
+    return AlertItem(rule, status, detail, next, next?.let { remainingMinutes(it, evalNowMs) })
 }
 
 private fun ComputedAlertStatus.priority(): Int = when (this) {

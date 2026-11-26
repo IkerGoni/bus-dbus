@@ -27,7 +27,7 @@ Decisión de arquitectura: ADR 009 (`docs/03-architecture/adrs/009-android-nativ
   según lo que le falta al bus para entrar en la antelación del aviso: ≤ 7 min →
   30 s · 8–14 min → 1 min · ≥ 15 min → 2 min · sin bus de la línea, sin
   servicio o error → 1 min. Manda el aviso más urgente. La UI visible sigue a
-  30 s. Dispara 30 s antes de lo que dicen los minutos (`NOTIFY_EARLY_MS`).
+  30 s. Dispara al entrar en la antelación (`triggerBufferSec = 0` por defecto, configurable en `config.json`).
 - Se para cuando no queda ningún aviso en vigilancia, o tras 60 min seguidos
   sin servicio/errores (y entonces lo notifica). Android 15 limita `dataSync` a
   6 h/24 h: si se alcanza, se para y se avisa (`onTimeout`).

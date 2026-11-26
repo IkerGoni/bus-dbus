@@ -68,7 +68,7 @@ class ConfigTest {
         assertEquals(45, bundled.freshness.freshMaxSec)
         assertEquals(90, bundled.freshness.staleMaxSec)
         assertEquals(3, bundled.freshness.liveFeedHistorySize)
-        assertEquals(30, bundled.alerts.triggerBufferSec)
+        assertEquals(0, bundled.alerts.triggerBufferSec)
         assertEquals(7, bundled.alerts.expirationDays)
         assertEquals(1, bundled.alerts.minMinutesAhead)
         assertEquals(30, bundled.alerts.maxMinutesAhead)

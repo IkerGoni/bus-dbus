@@ -46,7 +46,7 @@
     "liveFeedHistorySize": 3
   },
   "alerts": {
-    "triggerBufferSec": 30,
+    "triggerBufferSec": 0,
     "expirationDays": 7,
     "minMinutesAhead": 1,
     "maxMinutesAhead": 30,

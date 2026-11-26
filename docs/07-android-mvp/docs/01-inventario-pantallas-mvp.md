@@ -42,5 +42,5 @@ bus-dbus (Android MVP v1)
    avisa una vez y se borra) → `Guardar aviso`.
 3. **Explorar línea y guardar parada:** `A03 Líneas` → elegir línea con color Dbus
    → `A03b Itinerario` → elegir sentido → tocar parada → `A05` (★ favorita o 🔔 aviso).
-4. **Aviso disparado (Push):** el Foreground Service local dispara cuando `remainingMinutes <= minutesAhead`, 30 s antes (`NOTIFY_EARLY_MS`) →
+4. **Aviso disparado (Push):** el Foreground Service local dispara cuando `remainingMinutes <= minutesAhead` (`triggerBufferSec = 0` por defecto, configurable en `config.json`) →
    notificación Android sin botones y el aviso se borra (un solo uso); tocarla abre `A05`.

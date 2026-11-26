@@ -35,7 +35,7 @@ data class FreshnessConfig(
 
 @Serializable
 data class AlertsConfig(
-    val triggerBufferSec: Int = 30,
+    val triggerBufferSec: Int = 0,
     val expirationDays: Int = 7,
     val minMinutesAhead: Int = 1,
     val maxMinutesAhead: Int = 30,
