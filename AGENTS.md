@@ -149,6 +149,23 @@ ramas/worktrees, merge, push, `restore`, `reset`, `fetch --prune`), leer
 sin sprint/versión en el asunto; merges `merge: <desc> (<rama>)`;
 `Co-authored-by` solo si es veraz. La política no concede permisos.
 
+### Repositorio público — auditoría obligatoria antes de `git push`
+
+Este repositorio es **público**. Queda **terminantemente prohibido** ejecutar
+`git push` sin verificar antes:
+
+1. `node tools/repo/check-identity.mjs` en verde (`0` correos no aprobados y
+   `0` rutas locales en el árbol versionado y en `HEAD`).
+2. Revisión de `git diff --stat origin/main..HEAD` y comprobación de que no hay
+   secretos ni datos sensibles en los cambios: cero tokens (`BOT_TOKEN`), claves
+   JSON de Service Account (`private_key`, `gserviceaccount.com`), keystores
+   (`*.jks`, `*.keystore`), contraseñas, IDs privados de cuenta/proyecto de
+   Google Cloud o Play, archivos `.env` reales ni binarios firmados
+   (`*.apk`, `*.aab`).
+3. Si un secreto llegó a un commit local sin publicar, rehacer el commit antes
+   del push; si ya llegó al remoto, rotar la credencial de inmediato y aplicar
+   `docs/contributing/03-seguridad.md`.
+
 ## Documentación
 
 - `docs/README.md` es el índice: actualizarlo al añadir, retirar o archivar
@@ -214,3 +231,4 @@ La interfaz está diseñada para personas en la calle, nunca para exponer claves
 - [ ] Ningún texto o `contentDescription` hardcodeado (`HardcodedText = ERROR` + paridad `values/` y `values-eu/`).
 - [ ] Ningún import `java.time.*` o Android en `domain/`.
 - [ ] `./gradlew check assembleDebug` ejecutado y en verde (incluyendo lint y todos los tests JVM/Robolectric).
+- [ ] Antes de `git push` (repo público): `node tools/repo/check-identity.mjs` en verde y `0` secretos, credenciales, rutas locales ni correos no aprobados en el diff.
