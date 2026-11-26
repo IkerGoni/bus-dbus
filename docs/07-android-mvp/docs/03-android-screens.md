@@ -58,7 +58,7 @@
 ### A06 · Configurar Aviso (`dbus://alert/new?stopId=&lineId=` · `dbus://alert/{id}/edit`)
 - **Paso 1 — Parada y Línea:** tarjeta de parada (precargada + `Cambiar`) + chips solo de las líneas reales de esa parada (más selector de destino si hay varios).
 - **Paso 2 — Antelación:** display grande `{n} min antes`, 6 chips rápidos (`2'`, `3'`, `5'`, `8'`, `10'`, `15'`) sincronizados con slider `1–30 min`.
-- **Paso 3 — Modo:** selector segmentado `Notificación` (campana) o `Alarma` (reloj despertador), con línea de ayuda según el modo elegido («Una notificación normal, con el sonido del móvil» o «Suena como una alarma, aunque el móvil esté en silencio, hasta que la apagues»).
+- **Paso 3 — Modo:** selector segmentado `Notificación` (campana) o `Alarma` (reloj despertador), con línea de ayuda según el modo elegido («Una notificación normal, con el sonido del móvil» o «Suena como alarma hasta que la apagues; el sonido depende del dispositivo y la configuración del canal»).
 - **Paso 4 — Un solo uso** (2026-11-22): texto `Vigila desde que lo guardas, avisa una vez y se borra. Caduca a los 7 días si no llega a avisar.` Sin avisos recurrentes ni alarmas exactas.
 - **Vista previa:** tarjeta con el texto que tendrá la notificación construido con los valores elegidos (`L5 → Amara en 5 min`, sin botones); etiquetada como vista previa. En modo alarma muestra el icono de alarma y la nota `Sonará como alarma hasta que la apagues`.
 - **Guardar:** dedup por `(stopId, lineId)` (ofrecer actualizar si ya existe), solicitar `POST_NOTIFICATIONS` si falta permiso y persistir en DB.

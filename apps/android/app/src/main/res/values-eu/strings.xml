@@ -162,7 +162,7 @@
     <string name="alert_mode_notification">Jakinarazpena</string>
     <string name="alert_mode_alarm">Alarma</string>
     <string name="alert_mode_notification_hint">Jakinarazpen arrunt bat, mugikorraren soinuarekin.</string>
-    <string name="alert_mode_alarm_hint">Alarma gisa jotzen du, mugikorra isilik egonda ere, itzali arte.</string>
+    <string name="alert_mode_alarm_hint">Alarma gisa jotzen du itzali arte; soinua gailuaren eta kanalaren konfigurazioaren araberakoa da.</string>
     <string name="alert_once_hint">Gordetzen duzunetik zaintzen du, behin abisatzen du eta ezabatu egiten da. %1$d egunera iraungitzen da, abisatu ez badu.</string>
     <string name="alert_preview">Jakinarazpenaren aurrebista</string>
     <string name="alert_preview_alarm_note">Alarma gisa joko du itzali arte</string>

@@ -161,7 +161,7 @@
     <string name="alert_mode_notification">Notification</string>
     <string name="alert_mode_alarm">Alarm</string>
     <string name="alert_mode_notification_hint">A standard notification using your device sound.</string>
-    <string name="alert_mode_alarm_hint">Rings like an alarm, even in silent mode, until dismissed.</string>
+    <string name="alert_mode_alarm_hint">Rings like an alarm until dismissed; sound depends on device and channel configuration.</string>
     <string name="alert_once_hint">Monitors from save, alerts once and deletes. Expires after %1$d days if no bus arrives.</string>
     <string name="alert_preview">Notification preview</string>
     <string name="alert_preview_alarm_note">Will sound as an alarm until you dismiss it</string>
