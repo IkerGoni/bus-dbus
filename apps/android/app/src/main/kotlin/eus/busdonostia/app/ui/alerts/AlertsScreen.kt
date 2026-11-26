@@ -115,11 +115,6 @@ fun AlertsScreen(
         blockedArrivals -> R.string.alerts_channel_arrivals_blocked
         else -> R.string.alerts_channel_alarm_blocked
     }
-    val channelsBannerIntent = when {
-        blockedArrivals && blockedAlarm -> notificationSettingsIntent(context)
-        blockedArrivals -> channelSettingsIntent(context, CHANNEL_ARRIVALS)
-        else -> channelSettingsIntent(context, CHANNEL_ALARM)
-    }
     val deletedText = stringResource(R.string.alert_deleted)
     val undoText = stringResource(R.string.undo)
     val onDelete: (AlertRule) -> Unit = { rule ->
@@ -169,7 +164,14 @@ fun AlertsScreen(
                             warning = true,
                         ) {
                             TextButton(
-                                onClick = { context.openSettings(channelsBannerIntent) },
+                                onClick = {
+                                    val intent = when {
+                                        blockedArrivals && blockedAlarm -> notificationSettingsIntent(context)
+                                        blockedArrivals -> channelSettingsIntent(context, CHANNEL_ARRIVALS)
+                                        else -> channelSettingsIntent(context, CHANNEL_ALARM)
+                                    }
+                                    context.openSettings(intent)
+                                },
                                 modifier = Modifier.heightIn(min = DesignTokens.touchTargetMin),
                             ) { Text(stringResource(R.string.alerts_notifications_enable)) }
                         }
