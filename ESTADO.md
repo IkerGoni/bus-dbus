@@ -1,22 +1,36 @@
 # Estado — bus-dbus
 
-Actualizado: 2026-11-24 · Última sesión: hito **MVP Base (`v1.1.0`)** en GitHub Releases, canal de feedback, roadmap y README bilingüe orientado a perfil técnico
+Actualizado: 2026-11-27 · Última sesión: verificación e integración del modo **Alarma (`v1.2.0`, `versionCode 3`)**, automatización CLI con `gplay` y subida a prueba cerrada (`alpha`) en Google Play
 
 ## Objetivo actual
 
-Hito **MVP Base (`v1.1.0`, `versionCode 2`)** etiquetado y publicado en
-`IkerGoni/bus-dbus` con el APK firmado de `Badator!` en GitHub Releases,
-plantillas de GitHub Issues para recoger feedback real, roadmap `Soon` (sin
-avisos recurrentes) y portada bilingüe (`README.md` + `README.es.md`) enfocada
-a decisores técnicos y recruiters. GitHub Pages sigue activo con las 3 políticas
-de privacidad en `HTTP 200` sin sesión, Secret Scanning + Push protection en `0`
-alertas y el paquete de Google Play en `$PLAY_PACK_DIR` listo para los pasos
-manuales en Play Console.
+Versión **`1.2.0` (`versionCode 3`)** de `Badator!` verificada, firmada y
+publicada en la pista **`alpha` (prueba cerrada)** de Google Play mediante la
+CLI `gplay` y [`tools/play-store/10-release-gplay.mjs`](tools/play-store/10-release-gplay.mjs),
+con el modo de aviso **Alarma** integrado de extremo a extremo. El hito público
+en GitHub Releases sigue en `v1.1.0` hasta decidir nueva publicación en GitHub,
+GitHub Pages mantiene las 3 políticas de privacidad en `HTTP 200` y el guard de
+identidad pública (`tools/repo/check-identity.mjs`) está en `0` hallazgos.
 
-Detalle y trazabilidad completa de la publicación:
+Detalle de automatización CLI con Google Play:
+[`docs/play-console/gplay-release-automation.md`](docs/play-console/gplay-release-automation.md).
+Trazabilidad de la publicación inicial (`v1.1.0`):
 [`docs/auditoria/2026-11-estado-publicacion.md`](docs/auditoria/2026-11-estado-publicacion.md).
 
 ## Hecho en esta sesión
+
+- **Modo alarma en avisos y endurecimiento (`v1.2.0`, `versionCode 3`):**
+  - Auditada de extremo a extremo la integración de `AlertMode.ALARM` (Room v3 con `MIGRATION_2_3`, canal `dbus_arrivals_alarm` con `USAGE_ALARM`, `FLAG_INSISTENT` y `alarmTimeoutSec`, prevención de bucles en `AlertMonitorService` y `triggerBufferSec = 0`).
+  - Extraída la resolución pura de canales bloqueados (`BlockedChannelNotice`) en `SystemStatus.kt`, añadido aviso con acceso directo en `AlertEditScreen.kt` (A06) cuando el canal del modo seleccionado está bloqueado y eliminado el truncado en la nota de vista previa de alarma.
+  - Ampliada la cobertura con tests de `SystemStatusTest`, `AlertNotificationsTest` (`AudioAttributes.USAGE_ALARM`, `triggerBufferSec`, ausencia de `stopId`) y `AlertModeUiTest` (Compose/Robolectric).
+  - Verificación completa en verde: `./gradlew check assembleDebug assembleRelease bundleRelease` (**187** tests debug / **179** tests release, `0` errores de lint) + `pnpm verify` (**143** tests TS/Node) + `check-identity.mjs` (`0` hallazgos).
+- **Acceso CLI a Google Play (`gplay`) y subida a prueba cerrada (`alpha`):**
+  - Movida la credencial de Service Account fuera del repo a `~/.config/gplay/devplayconsole.json` (`chmod 600`), añadido `devplayconsole*.json` a `.gitignore` y configurado el perfil `default` de `gplay`.
+  - Verificado el acceso real sobre `eus.busdonostia.app` con `gplay apps list` y `gplay status`.
+  - Creado [`tools/play-store/10-release-gplay.mjs`](tools/play-store/10-release-gplay.mjs) y la guía [`docs/play-console/gplay-release-automation.md`](docs/play-console/gplay-release-automation.md) (también documentado en `AGENTS.md`, `apps/android/README.md` y `docs/README.md`).
+  - Compilado y validado con `gplay preflight` (`0` errores) el AAB firmado `1.2.0` (`versionCode 3`, SHA-256 `884b63574002`) y subido con éxito a la pista `alpha` (`editId 08952291310920922115`, `status: completed`).
+
+## Hecho en sesiones previas (MVP Base `v1.1.0` y publicación Fases 1–4)
 
 - **Hito MVP Base (`v1.1.0`) y recogida de feedback:**
   - Añadidas plantillas de GitHub Issues (`.github/ISSUE_TEMPLATE/bug_report.yml`,
@@ -61,21 +75,15 @@ Detalle y trazabilidad completa de la publicación:
 
 ## Pendiente (pasos manuales de Iker en Google Play)
 
-1. Abrir las 3 políticas de privacidad desde **Ajustes** en la app instalada (ES/EU/EN)
-   para confirmar la navegación real en el dispositivo.
-2. Revisión del euskera por hablante competente (`$PLAY_PACK_DIR/01-listing/REVISION-EUSKERA.md`).
-3. Tras crear la app y subir `05-release/app-release-signed.aab`, cotejar la huella
-   SHA-256 de la clave de subida (`46:E6:55:…:AA:9B`) en Play Console.
-4. Confirmar si aplica el requisito de prueba cerrada (**12 testers / 14 días**) en la
-   cuenta personal y completar la verificación de identidad/teléfono y el vídeo FGS
-   (`04-console/fgs-demo.mp4` como oculto en YouTube).
+1. Revisión del euskera por hablante competente (`$PLAY_PACK_DIR/01-listing/REVISION-EUSKERA.md`).
+2. Completar la ventana de prueba cerrada (**12 testers / 14 días**) en la pista `alpha` y verificar en dispositivo real las 3 políticas de privacidad desde **Ajustes** y los avisos en modo alarma.
+3. Si se desea publicar `v1.2.0` también en GitHub Releases, crear el tag `v1.2.0` y adjuntar el APK firmado (`dc09add0d234`).
 
 ## Decisiones tomadas
 
 - El repositorio anterior se conservó renombrado como `IkerGoni/bus-dbus-archive-privado`
   en privado (sin borrarlo y sin hacerlo público nunca); el repositorio público
   `IkerGoni/bus-dbus` contiene exclusivamente el historial purgado.
-- No se toca `apps/android/**` para preservar la correspondencia exacta con los binarios
-  firmados del árbol `e0db74e7268f`.
+- Las futuras subidas a Google Play se automatizan mediante `tools/play-store/10-release-gplay.mjs` y `gplay`, manteniendo la credencial fuera del repositorio (`~/.config/gplay/devplayconsole.json`, `600`) y exigiendo autorización explícita por versión antes de publicar.
 - Integración con Dbus fuera del CI de cada push (no alcanzable desde los runners);
   Data Safety en «sin recogida» con el riesgo residual documentado.

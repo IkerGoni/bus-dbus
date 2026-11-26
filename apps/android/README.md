@@ -25,7 +25,7 @@ y `avdmanager create avd -n dbus36 -k "system-images;android-36;google_apis;arm6
 ./gradlew check assembleDebug   # lint (MissingTranslation/HardcodedText = error) + tests JVM + APK debug
 ```
 
-Resultado esperado: **156 tests JVM (debug) / 150 tests JVM (release)**, 0 fallos, 0 errores de lint. CI: `.github/workflows/android.yml`.
+Resultado esperado: **187 tests JVM (debug) / 179 tests JVM (release)**, 0 fallos, 0 errores de lint. CI: `.github/workflows/android.yml`.
 
 ## Release firmado (H8)
 
@@ -45,6 +45,23 @@ o de `DBUS_RELEASE_STORE_FILE`, `DBUS_RELEASE_STORE_PASSWORD`,
 Para medir tamaño sin firma: `./gradlew assembleRelease -Pdbus.release.unsigned=true`.
 Ojo: con la caché de configuración activa, Gradle guarda esos valores en
 `apps/android/.gradle/` (ignorado por git); bórrala si el equipo se comparte.
+
+### Publicación automatizada en Google Play (`gplay`)
+
+El flujo completo para compilar, validar con `gplay preflight` y publicar un
+AAB firmado en Google Play está automatizado en
+`tools/play-store/10-release-gplay.mjs` (ver guía operativa en
+`docs/play-console/gplay-release-automation.md`):
+
+```bash
+gplay status --package eus.busdonostia.app --pretty
+node tools/play-store/10-release-gplay.mjs --track alpha --status completed --dry-run
+node tools/play-store/10-release-gplay.mjs --track alpha --status completed --skip-build
+```
+
+La credencial de Service Account vive fuera del repositorio en
+`~/.config/gplay/devplayconsole.json` (`600`). No subir AABs, crear releases ni
+editar la ficha sin aprobación explícita para la versión concreta.
 
 ## Versiones
 

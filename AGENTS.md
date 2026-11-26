@@ -13,9 +13,10 @@ PWA, histórico); `docs/07-android-mvp/` = spec del MVP Android (ADR 009);
 - **Bot de Telegram** (`apps/bot/`): activo, datos reales de la API JSON de
   Dbus. Paquete `@dbus/bot`. Persistencia en PostgreSQL (`pg`, con driver en
   memoria en tests).
-- **App Android** (`apps/android/`): Sprints 0–4 hechos; Sprint 5 (publicación)
-  en cierre. MVP v1 nativo (`Badator!`), Kotlin + Compose, Gradle fuera de
-  pnpm. Spec en `docs/07-android-mvp/`, plan en
+- **App Android** (`apps/android/`): Sprints 0–4 hechos; publicación en prueba cerrada
+  (`alpha`) en Google Play (`v1.2.0`, `versionCode 3`, avisos con modo alarma) y
+  automatización de releases con `gplay`. MVP v1 nativo (`Badator!`), Kotlin +
+  Compose, Gradle fuera de pnpm. Spec en `docs/07-android-mvp/`, plan en
   `docs/07-android-mvp/SPRINTS.md`, prompt en
   `docs/07-android-mvp/prompts/SPRINT-5.md`, decisión en ADR 009.
 - **PWA** (`apps/mobile/`): **congelada** por ADR 009 (build roto, ver
@@ -97,7 +98,7 @@ pnpm --filter @dbus/bot build      # tsc -b -> apps/bot/dist
 Android (toolchain en `apps/android/README.md`):
 
 ```bash
-cd apps/android && ./gradlew check assembleDebug   # lint + 156 (debug) / 150 (release) JVM por variante + APK debug
+cd apps/android && ./gradlew check assembleDebug   # lint + 187 (debug) / 179 (release) JVM por variante + APK debug
 ```
 
 Root: `pnpm verify` (lint + typecheck + tests de `apps/bot` y `packages/**`).
@@ -112,6 +113,23 @@ Aplica a **toda versión nueva del bot**, sin excepción (regla 9): commit +
 push, parar el proceso anterior con SIGTERM, recompilar, arrancar desde
 `apps/bot` con `BOT_TOKEN` por entorno y `npm run start`, comprobar log, lock y
 PID nuevo. Un cambio solo de docs no requiere reiniciar el bot.
+
+### Publicación Android en Google Play (`gplay`)
+
+- La credencial de Service Account de Google Play vive fuera del repo en
+  `~/.config/gplay/devplayconsole.json` (permisos `600`), configurada en el
+  perfil `default` de `gplay` (`~/.gplay/config.json`). **Nunca** abrir,
+  imprimir ni commitear la clave (`devplayconsole*.json` está en `.gitignore`).
+- Consultas de solo lectura permitidas: `gplay apps list` y
+  `gplay status --package eus.busdonostia.app --pretty`.
+- **Prohibido** subir AABs, crear releases, publicar en ningún canal
+  (`internal`, `alpha`, `beta`, `production`) o editar la ficha de Play Store
+  sin orden explícita del usuario para esa versión concreta.
+- Cuando se autorice una versión: subir `versionCode`/`versionName` en
+  `apps/android/app/build.gradle.kts`, preparar las notas en
+  `build/outputs/play-store/release-notes-<versionName>.json` y ejecutar
+  `node tools/play-store/10-release-gplay.mjs --track <alpha|internal|...> [--dry-run] [--skip-build] [--notes <ruta>]`.
+  Guía completa en `docs/play-console/gplay-release-automation.md`.
 
 ## Convenciones
 

@@ -1,7 +1,7 @@
 # Índice de documentación — bus-dbus
 
 Qué doc mirar para cada cosa. Si un doc contradice a
-[`AGENTS.md`](../AGENTS.md), manda `AGENTS.md`. Revisado el 2026-11-24.
+[`AGENTS.md`](../AGENTS.md), manda `AGENTS.md`. Revisado el 2026-11-27.
 
 ## Por pregunta
 
@@ -24,6 +24,7 @@ Qué doc mirar para cada cosa. Si un doc contradice a
 | Prompt para la auditoría externa del plan de publicación | [`07-android-mvp/prompts/AUDIT-PUBLICACION-PLAN.md`](07-android-mvp/prompts/AUDIT-PUBLICACION-PLAN.md) |
 | Prompt de ejecución controlada de publicación (paquete Play + GitHub + Pages) | [`07-android-mvp/prompts/EJECUCION-PUBLICACION.md`](07-android-mvp/prompts/EJECUCION-PUBLICACION.md) |
 | Estado consolidado de publicación y traspaso entre sesiones/agentes | [`auditoria/2026-11-estado-publicacion.md`](auditoria/2026-11-estado-publicacion.md) |
+| Automatizar compilación y subida de releases Android a Google Play (`gplay`) | [`play-console/gplay-release-automation.md`](play-console/gplay-release-automation.md) |
 | Por qué Data Safety declara «sin recogida» | [`play-console/data-safety-decision.md`](play-console/data-safety-decision.md) |
 | Reglas duras para implementar Android | [`07-android-mvp/docs/00-agent-guardrails.md`](07-android-mvp/docs/00-agent-guardrails.md) |
 | Modelos, estados de aviso y matching | [`07-android-mvp/docs/02-domain-contracts.md`](07-android-mvp/docs/02-domain-contracts.md) |
