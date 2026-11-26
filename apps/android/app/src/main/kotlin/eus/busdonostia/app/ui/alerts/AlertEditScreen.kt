@@ -119,7 +119,7 @@ fun AlertEditScreen(
                 ) {
                     StopAndLine(state, vm)
                     MinutesAhead(state.draft.minutesAhead, state.minutesRange, vm::setMinutes)
-                    AlertModeSelector(state.draft.mode, vm::setMode)
+                    AlertModeSelector(state.draft.mode, state.alarmTimeoutSec, vm::setMode)
                     // Un solo uso: avisa una vez y se borra.
                     Text(
                         stringResource(R.string.alert_once_hint, state.expirationDays),
@@ -324,7 +324,11 @@ private fun MinutesAhead(minutes: Int, range: IntRange, onChange: (Int) -> Unit)
 
 /** Paso 3: selector de modo (Notificación o Alarma insistente). */
 @Composable
-private fun AlertModeSelector(mode: AlertMode, onChange: (AlertMode) -> Unit) {
+private fun AlertModeSelector(
+    mode: AlertMode,
+    alarmTimeoutSec: Int,
+    onChange: (AlertMode) -> Unit,
+) {
     SectionLabel(stringResource(R.string.alert_step_mode), modifier = Modifier.padding(horizontal = 0.dp))
     val modes = listOf(
         Triple(AlertMode.NOTIFICATION, R.string.alert_mode_notification, Icons.Outlined.Notifications),
@@ -350,13 +354,11 @@ private fun AlertModeSelector(mode: AlertMode, onChange: (AlertMode) -> Unit) {
         }
     }
     Text(
-        stringResource(
-            if (mode == AlertMode.NOTIFICATION) {
-                R.string.alert_mode_notification_hint
-            } else {
-                R.string.alert_mode_alarm_hint
-            }
-        ),
+        if (mode == AlertMode.NOTIFICATION) {
+            stringResource(R.string.alert_mode_notification_hint)
+        } else {
+            stringResource(R.string.alert_mode_alarm_hint, alarmTimeoutSec)
+        },
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         style = MaterialTheme.typography.bodyMedium,
     )
@@ -397,7 +399,7 @@ private fun Preview(state: AlertEditUiState) {
             )
             if (draft.mode == AlertMode.ALARM) {
                 Text(
-                    stringResource(R.string.alert_preview_alarm_note),
+                    stringResource(R.string.alert_preview_alarm_note, state.alarmTimeoutSec),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,

@@ -162,10 +162,10 @@
     <string name="alert_mode_notification">Jakinarazpena</string>
     <string name="alert_mode_alarm">Alarma</string>
     <string name="alert_mode_notification_hint">Jakinarazpen arrunt bat, mugikorraren soinuarekin.</string>
-    <string name="alert_mode_alarm_hint">Alarma gisa jotzen du itzali arte; soinua gailuaren eta kanalaren konfigurazioaren araberakoa da.</string>
+    <string name="alert_mode_alarm_hint">Alarma gisa jotzen du gehienez %1$d s edo itzali arte; soinua gailuaren eta kanalaren konfigurazioaren araberakoa da.</string>
     <string name="alert_once_hint">Gordetzen duzunetik zaintzen du, behin abisatzen du eta ezabatu egiten da. %1$d egunera iraungitzen da, abisatu ez badu.</string>
     <string name="alert_preview">Jakinarazpenaren aurrebista</string>
-    <string name="alert_preview_alarm_note">Alarma gisa joko du itzali arte</string>
+    <string name="alert_preview_alarm_note">Alarma gisa joko du gehienez %1$d s edo itzali arte</string>
     <string name="alert_save">Babestu abisua</string>
     <string name="alert_conflict_title">Abisu hau badaukazu</string>
     <string name="alert_conflict_body">%2$s geltokian badago %1$s linearen abisu bat. Balio hauekin eguneratu nahi duzu?</string>

@@ -161,10 +161,10 @@
     <string name="alert_mode_notification">Notificación</string>
     <string name="alert_mode_alarm">Alarma</string>
     <string name="alert_mode_notification_hint">Una notificación normal, con el sonido del móvil.</string>
-    <string name="alert_mode_alarm_hint">Suena como alarma hasta que la apagues; el sonido depende del dispositivo y la configuración del canal.</string>
+    <string name="alert_mode_alarm_hint">Suena como alarma hasta %1$d s o hasta que la apagues; el sonido depende del dispositivo y la configuración del canal.</string>
     <string name="alert_once_hint">Vigila desde que lo guardas, avisa una vez y se borra. Caduca a los %1$d días si no llega a avisar.</string>
     <string name="alert_preview">Vista previa de la notificación</string>
-    <string name="alert_preview_alarm_note">Sonará como alarma hasta que la apagues</string>
+    <string name="alert_preview_alarm_note">Sonará como alarma hasta %1$d s o hasta que la apagues</string>
     <string name="alert_save">Guardar aviso</string>
     <string name="alert_conflict_title">Ya tienes este aviso</string>
     <string name="alert_conflict_body">Ya hay un aviso de la línea %1$s en %2$s. ¿Lo actualizas con estos valores?</string>

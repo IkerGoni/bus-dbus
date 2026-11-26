@@ -1,6 +1,7 @@
 package eus.busdonostia.app
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
@@ -40,5 +41,18 @@ class StringsParityTest {
     fun ningunTextoVacio() {
         (load("values") + load("values-eu").mapKeys { "eu:${it.key}" } + load("values-en").mapKeys { "en:${it.key}" })
             .forEach { (k, v) -> assertTrue("Texto vacío: $k", v.isNotEmpty()) }
+    }
+
+    @Test
+    fun alertAlarmStringsContienenFormatoSegundos() {
+        listOf("values", "values-eu", "values-en").forEach { dir ->
+            val strings = load(dir)
+            val hint = strings["alert_mode_alarm_hint"]
+            val note = strings["alert_preview_alarm_note"]
+            assertNotNull("alert_mode_alarm_hint debe existir en $dir", hint)
+            assertNotNull("alert_preview_alarm_note debe existir en $dir", note)
+            assertTrue("alert_mode_alarm_hint en $dir debe contener %1\$d: $hint", hint!!.contains("%1\$d"))
+            assertTrue("alert_preview_alarm_note en $dir debe contener %1\$d: $note", note!!.contains("%1\$d"))
+        }
     }
 }

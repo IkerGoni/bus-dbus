@@ -4,6 +4,7 @@ import eus.busdonostia.app.TestData
 import eus.busdonostia.app.data.settings.AppLanguage
 import eus.busdonostia.app.domain.Favorite
 import eus.busdonostia.app.domain.FavoriteType
+import eus.busdonostia.app.ui.alerts.AlertEditUiState
 import eus.busdonostia.app.ui.lines.LinesFilter
 import eus.busdonostia.app.ui.lines.lineRows
 import eus.busdonostia.app.ui.lines.starredLines
@@ -107,5 +108,13 @@ class ScreenLogicTest {
             "https://ikergoni.github.io/bus-dbus/privacy/privacy-policy-en.html",
             privacyPolicyUrl(AppLanguage.EN),
         )
+    }
+
+    @Test
+    fun alertEditUiStateAlarmTimeoutSecPorDefecto() {
+        val state = AlertEditUiState()
+        assertEquals(60, state.alarmTimeoutSec)
+        val customState = AlertEditUiState(alarmTimeoutSec = 120)
+        assertEquals(120, customState.alarmTimeoutSec)
     }
 }
