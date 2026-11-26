@@ -229,7 +229,7 @@ class AlertEditViewModel(
                 val db = container.database
                 val dao = db.alerts()
                 val conflict = dao.findByStopAndLine(checkNotNull(draft.stopId), normalizeLine(checkNotNull(draft.lineId)))?.toDomain()
-                when (val plan = planSave(draft, alertId, conflict, confirmed, UUID.randomUUID().toString(), System.currentTimeMillis())) {
+                when (val plan = planSave(draft, alertId, conflict, confirmed, UUID.randomUUID().toString(), System.currentTimeMillis(), alertsCfg)) {
                     is SavePlan.NeedsConfirmation ->
                         form.update { it.copy(conflict = ConflictInfo(plan.existing.lineId, plan.existing.stopName)) }
                     is SavePlan.Write -> {

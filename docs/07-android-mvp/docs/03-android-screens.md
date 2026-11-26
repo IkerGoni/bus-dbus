@@ -19,7 +19,7 @@
 - **Cabecera (56 dp):** título `Bus Donostia` (`app_name`, no «Dbus»: la app no es oficial) a la izquierda y botón Ajustes (`48×48dp`) a la derecha → `A07`.
 - **Buscador rápido:** pill único limpio sin borde interior → abre búsqueda universal (`código`, `calle`, `línea`, `destino`).
 - **Sección `TU PRÓXIMO AVISO` (solo si existe alerta `TRIGGERED` o `ACTIVE`):**
-  - Fila 1: badge oficial Dbus + destino (`maxLines = 1`, elipsis) | cuenta atrás grande `JetBrains Mono` (`tabular-nums`, `nowrap`).
+  - Fila 1: badge oficial Dbus + icono de alarma (si `mode == ALARM`) + destino (`maxLines = 1`, elipsis) | cuenta atrás grande `JetBrains Mono` (`tabular-nums`, `nowrap`).
   - Fila 2: `{stopName} ({stopId})` | `● En vivo · Aviso {min}'` (o reloj `Horario`).
   - Fila 3: botón real `Pausar` (`min-h 48dp`) → persiste `active = false` + Snackbar con botón `Deshacer`. Sin `Posponer` (2026-11-22).
   - Tap en tarjeta → `A05` con `stopId`.

@@ -24,10 +24,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -56,6 +58,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import eus.busdonostia.app.R
 import eus.busdonostia.app.domain.AlertItem
+import eus.busdonostia.app.domain.AlertMode
 import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.ArrivalSource
 import eus.busdonostia.app.domain.ArrivalsView
@@ -82,6 +85,7 @@ import eus.busdonostia.app.ui.components.SkeletonList
 import eus.busdonostia.app.ui.screens.EmptyAction
 import eus.busdonostia.app.ui.screens.EmptyState
 import eus.busdonostia.app.ui.theme.CountdownHero
+import eus.busdonostia.app.ui.theme.DesignTokens
 import eus.busdonostia.app.ui.theme.LocalStatusColors
 import eus.busdonostia.app.ui.theme.MotionTokens
 import kotlinx.coroutines.launch
@@ -126,7 +130,7 @@ fun HomeScreen(
                 query = state.query,
                 onQueryChange = vm::onQueryChange,
                 placeholder = stringResource(R.string.home_search_hint),
-                modifier = Modifier.padding(horizontal = 16.dp),
+                modifier = Modifier.padding(horizontal = DesignTokens.spacingLg),
             )
             when {
                 state.catalogReady == false ->
@@ -144,8 +148,8 @@ fun HomeScreen(
                 else -> BrandPullToRefreshBox(isRefreshing = state.refreshing, onRefresh = vm::refresh, modifier = Modifier.fillMaxSize()) {
                     LazyColumn(
                         Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 24.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(start = DesignTokens.spacingLg, end = DesignTokens.spacingLg, top = DesignTokens.spacingSm, bottom = DesignTokens.spacingXl),
+                        verticalArrangement = Arrangement.spacedBy(DesignTokens.spacingMd),
                     ) {
                         state.nextAlert?.let { next ->
                             item(key = "next-label", contentType = "section_label") {
@@ -166,7 +170,7 @@ fun HomeScreen(
                 }
             }
         }
-        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(16.dp))
+        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(DesignTokens.spacingLg))
     }
 }
 
@@ -181,7 +185,7 @@ private fun SearchResults(
         return
     }
     val motion = rememberEffectiveMotionTokens()
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
+    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = DesignTokens.spacingXl)) {
         if (state.stopResults.isNotEmpty()) {
             item(key = "search-stops-label", contentType = "section_label") { SectionLabel(stringResource(R.string.nav_stops)) }
             items(state.stopResults, key = { "s-${it.cod}" }, contentType = { "stop_result" }) { stop ->
@@ -230,11 +234,11 @@ private fun ResultRow(
     Row(
         modifier
             .fillMaxWidth()
-            .heightIn(min = 56.dp)
+            .heightIn(min = DesignTokens.headerMinHeight)
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = DesignTokens.spacingLg, vertical = DesignTokens.spacingSm),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(DesignTokens.spacingMd),
         content = content,
     )
 }
@@ -252,16 +256,24 @@ private fun NextAlertCard(
     val arrival = item.nextArrival
     val colors = LocalStatusColors.current
     BorderedCard(onClick = onOpen) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.padding(DesignTokens.spacingLg), verticalArrangement = Arrangement.spacedBy(DesignTokens.spacingSm)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesignTokens.spacingMd)) {
                 LineBadge(
                     rule.lineId,
                     colorArgb,
-                    size = 36.dp,
+                    size = DesignTokens.lineBadgeMinWidth,
                     modifier = Modifier.optionalSharedElement(
                         SharedKeys.line(rule.stopId, rule.lineId, SharedOrigins.NEXT_ALERT),
                     ),
                 )
+                if (rule.mode == AlertMode.ALARM) {
+                    Icon(
+                        Icons.Outlined.Alarm,
+                        contentDescription = stringResource(R.string.alert_mode_alarm),
+                        modifier = Modifier.size(DesignTokens.iconSmall),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 Text(
                     alertDestination(rule),
                     style = MaterialTheme.typography.titleMedium,
@@ -272,7 +284,7 @@ private fun NextAlertCard(
                 if (arrival != null) {
                     val minutes = item.remainingMin ?: remainingMinutes(arrival, arrival.fetchedAtMs)
                     val isLive = arrival.source == ArrivalSource.LIVE
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesignTokens.spacingXxs)) {
                         LiveSignalDot(
                             isLive = isLive,
                             liveColor = colors.live,
@@ -297,7 +309,7 @@ private fun NextAlertCard(
                     SharedKeys.stopTitle(rule.stopId, SharedOrigins.NEXT_ALERT),
                 ),
             )
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesignTokens.spacingSm)) {
                 AlertStatusLabel(item)
                 Text(
                     nextAlertSourceText(item, view),
@@ -307,7 +319,7 @@ private fun NextAlertCard(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            OutlinedButton(onClick = onPause, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+            OutlinedButton(onClick = onPause, modifier = Modifier.fillMaxWidth().heightIn(min = DesignTokens.touchTargetMin)) {
                 Text(stringResource(R.string.alert_pause), maxLines = 1)
             }
         }
@@ -364,8 +376,8 @@ private fun FavoriteCard(
 ) {
     val row = card.row
     BorderedCard(modifier = modifier, onClick = onOpen) {
-        Column(Modifier.padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(start = DesignTokens.spacingLg, end = DesignTokens.spacingXs, top = DesignTokens.spacingXs, bottom = DesignTokens.spacingMd)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesignTokens.spacingSm)) {
                 Text(
                     row.name,
                     style = MaterialTheme.typography.titleMedium,
@@ -379,7 +391,7 @@ private fun FavoriteCard(
                     LineBadge(
                         it,
                         state.lineColors[it],
-                        size = 24.dp,
+                        size = DesignTokens.lineBadgeChipSize,
                         modifier = Modifier.optionalSharedElement(SharedKeys.line(row.stopId, it, origin)),
                     )
                 }
@@ -394,7 +406,7 @@ private fun FavoriteCard(
                     },
                 )
             }
-            Column(Modifier.padding(end = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(Modifier.padding(end = DesignTokens.spacingMd), verticalArrangement = Arrangement.spacedBy(DesignTokens.spacingXxs)) {
                 FavoriteArrivals(card, state, onRetry)
             }
         }
@@ -416,10 +428,10 @@ private fun FavoriteArrivals(card: FavoriteStopCard, state: HomeUiState, onRetry
         label = "arrivalsViewState",
     ) { view ->
         when (view) {
-            ArrivalsView.Loading -> SkeletonList(rows = 1, rowHeight = 24.dp)
+            ArrivalsView.Loading -> SkeletonList(rows = 1, rowHeight = DesignTokens.lineBadgeChipSize)
             ArrivalsView.Error -> Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.stop_error_title), color = muted, modifier = Modifier.weight(1f))
-                TextButton(onClick = onRetry, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.retry)) }
+                TextButton(onClick = onRetry, modifier = Modifier.heightIn(min = DesignTokens.touchTargetMin)) { Text(stringResource(R.string.retry)) }
             }
             is ArrivalsView.Empty -> Text(stringResource(R.string.stop_empty_title), color = muted)
             else -> if (view is ArrivalsView.Degraded && view.reason == DegradedReason.NO_SERVICE) {
@@ -436,8 +448,8 @@ private fun FavoriteArrivals(card: FavoriteStopCard, state: HomeUiState, onRetry
                 }
                 card.rows.forEach { arrivalRow ->
                     val arrival = arrivalRow.arrival
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        LineBadge(arrival.lineId, state.lineColors[arrival.lineId], size = 24.dp)
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesignTokens.spacingMd)) {
+                        LineBadge(arrival.lineId, state.lineColors[arrival.lineId], size = DesignTokens.lineBadgeChipSize)
                         Text(
                             arrival.destination.ifEmpty { stringResource(R.string.destination_unknown) },
                             maxLines = 1,

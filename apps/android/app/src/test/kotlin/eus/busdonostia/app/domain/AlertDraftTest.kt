@@ -94,6 +94,14 @@ class AlertDraftTest {
     }
 
     @Test
+    fun planSaveRespetaMaxMinutesAheadPersonalizado() {
+        val customConfig = AlertsConfig(maxMinutesAhead = 45)
+        val draft = base.copy(minutesAhead = 45)
+        val plan = planSave(draft, null, null, false, "new-id", 1_000L, customConfig) as SavePlan.Write
+        assertEquals(45, plan.rule.minutesAhead)
+    }
+
+    @Test
     fun dedupPorParadaYLinea() {
         val existing = base.toRule("old", 0)
         // Nuevo sin conflicto → insertar.

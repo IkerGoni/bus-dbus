@@ -31,6 +31,7 @@ Decisión de arquitectura: ADR 009 (`docs/03-architecture/adrs/009-android-nativ
 - Se para cuando no queda ningún aviso en vigilancia, o tras 60 min seguidos
   sin servicio/errores (y entonces lo notifica). Android 15 limita `dataSync` a
   6 h/24 h: si se alcanza, se para y se avisa (`onTimeout`).
+- **Límites de plataforma y suspensión (Doze):** `AlertMonitorService` arranca como servicio `START_NOT_STICKY` (si el sistema operativo mata el proceso bajo presión extrema de memoria, no se recrea automáticamente). En reposo prolongado (Doze profundo), el bucle de vigilancia espera con corrutinas (`withTimeoutOrNull`) sin retener un `WakeLock` ni programar alarmas con `AlarmManager`, por lo que la CPU puede suspenderse entre sondeos hasta la siguiente ventana de mantenimiento o interacción del usuario.
 - **Avisos de un solo uso** (2026-11-22): al disparar se notifica y el aviso
   se borra. Sin recurrentes, sin `AlarmManager` ni `SCHEDULE_EXACT_ALARM`.
 - **Arranque:** al guardar en A06 y al reactivar un aviso en la app (gestos

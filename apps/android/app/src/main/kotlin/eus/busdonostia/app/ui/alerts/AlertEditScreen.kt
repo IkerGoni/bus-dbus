@@ -345,7 +345,7 @@ private fun AlertModeSelector(mode: AlertMode, onChange: (AlertMode) -> Unit) {
                 },
                 modifier = Modifier.heightIn(min = DesignTokens.touchTargetMin),
             ) {
-                Text(stringResource(labelRes), maxLines = 1)
+                Text(stringResource(labelRes), maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
     }
