@@ -60,6 +60,7 @@ fun createNotificationChannels(context: Context) {
         .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
         .build()
     val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+        ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
     manager.createNotificationChannel(
         NotificationChannelCompat.Builder(CHANNEL_ALARM, NotificationManagerCompat.IMPORTANCE_HIGH)
             .setName(context.getString(R.string.channel_alarm_name))
@@ -147,7 +148,7 @@ fun notifyArrival(
     val body = context.getString(R.string.notif_body, rule.stopNameForDisplay(context), source)
     val open = PendingIntent.getActivity(
         context,
-        0,
+        rule.id.hashCode(),
         Intent(Intent.ACTION_VIEW, stopDeepLink(rule.stopId, rule.lineId).toUri())
             .setPackage(context.packageName)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK),
