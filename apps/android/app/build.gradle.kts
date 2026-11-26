@@ -452,8 +452,8 @@ android {
         applicationId = "eus.busdonostia.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = 3
+        versionName = "1.2.0"
         // URL HTTPS del config.json remoto (ADR 009). Vacía hasta configurar el hosting estático: solo la empaquetada.
         buildConfigField("String", "REMOTE_CONFIG_URL", "\"\"")
     }

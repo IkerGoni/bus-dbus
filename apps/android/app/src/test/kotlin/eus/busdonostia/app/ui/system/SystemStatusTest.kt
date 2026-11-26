@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.provider.Settings
 import androidx.test.core.app.ApplicationProvider
+import eus.busdonostia.app.domain.AlertMode
 import eus.busdonostia.app.engine.CHANNEL_ALARM
 import eus.busdonostia.app.engine.CHANNEL_ARRIVALS
 import eus.busdonostia.app.engine.createNotificationChannels
@@ -100,5 +101,97 @@ class SystemStatusTest {
         assertEquals(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS, alarmIntent.action)
         assertEquals(context.packageName, alarmIntent.getStringExtra(Settings.EXTRA_APP_PACKAGE))
         assertEquals(CHANNEL_ALARM, alarmIntent.getStringExtra(Settings.EXTRA_CHANNEL_ID))
+    }
+
+    @Test
+    fun `blockedChannelNoticeForAlerts resuelve aviso de canales segun estado y modos activos`() {
+        val disabledGlobally = SystemStatus(
+            notificationsEnabled = false,
+            batteryUnrestricted = true,
+            arrivalsChannelEnabled = false,
+            alarmChannelEnabled = false,
+        )
+        assertEquals(
+            BlockedChannelNotice.NONE,
+            blockedChannelNoticeForAlerts(disabledGlobally, listOf(AlertMode.NOTIFICATION, AlertMode.ALARM)),
+        )
+
+        val allEnabled = SystemStatus(
+            notificationsEnabled = true,
+            batteryUnrestricted = true,
+            arrivalsChannelEnabled = true,
+            alarmChannelEnabled = true,
+        )
+        assertEquals(
+            BlockedChannelNotice.NONE,
+            blockedChannelNoticeForAlerts(allEnabled, listOf(AlertMode.NOTIFICATION, AlertMode.ALARM)),
+        )
+
+        val bothBlocked = SystemStatus(
+            notificationsEnabled = true,
+            batteryUnrestricted = true,
+            arrivalsChannelEnabled = false,
+            alarmChannelEnabled = false,
+        )
+        assertEquals(BlockedChannelNotice.BOTH, blockedChannelNoticeForAlerts(bothBlocked, emptyList()))
+
+        val onlyArrivalsBlocked = SystemStatus(
+            notificationsEnabled = true,
+            batteryUnrestricted = true,
+            arrivalsChannelEnabled = false,
+            alarmChannelEnabled = true,
+        )
+        assertEquals(
+            BlockedChannelNotice.NONE,
+            blockedChannelNoticeForAlerts(onlyArrivalsBlocked, listOf(AlertMode.ALARM)),
+        )
+        assertEquals(
+            BlockedChannelNotice.ARRIVALS,
+            blockedChannelNoticeForAlerts(onlyArrivalsBlocked, listOf(AlertMode.NOTIFICATION)),
+        )
+
+        val onlyAlarmBlocked = SystemStatus(
+            notificationsEnabled = true,
+            batteryUnrestricted = true,
+            arrivalsChannelEnabled = true,
+            alarmChannelEnabled = false,
+        )
+        assertEquals(
+            BlockedChannelNotice.NONE,
+            blockedChannelNoticeForAlerts(onlyAlarmBlocked, listOf(AlertMode.NOTIFICATION)),
+        )
+        assertEquals(
+            BlockedChannelNotice.ALARM,
+            blockedChannelNoticeForAlerts(onlyAlarmBlocked, listOf(AlertMode.ALARM)),
+        )
+    }
+
+    @Test
+    fun `blockedChannelNoticeForMode resuelve aviso por modo seleccionado`() {
+        val globalOff = SystemStatus(
+            notificationsEnabled = false,
+            batteryUnrestricted = true,
+            arrivalsChannelEnabled = false,
+            alarmChannelEnabled = false,
+        )
+        assertEquals(BlockedChannelNotice.NONE, blockedChannelNoticeForMode(globalOff, AlertMode.NOTIFICATION))
+        assertEquals(BlockedChannelNotice.NONE, blockedChannelNoticeForMode(globalOff, AlertMode.ALARM))
+
+        val bothOk = SystemStatus(
+            notificationsEnabled = true,
+            batteryUnrestricted = true,
+            arrivalsChannelEnabled = true,
+            alarmChannelEnabled = true,
+        )
+        assertEquals(BlockedChannelNotice.NONE, blockedChannelNoticeForMode(bothOk, AlertMode.NOTIFICATION))
+        assertEquals(BlockedChannelNotice.NONE, blockedChannelNoticeForMode(bothOk, AlertMode.ALARM))
+
+        val alarmBlocked = bothOk.copy(alarmChannelEnabled = false)
+        assertEquals(BlockedChannelNotice.NONE, blockedChannelNoticeForMode(alarmBlocked, AlertMode.NOTIFICATION))
+        assertEquals(BlockedChannelNotice.ALARM, blockedChannelNoticeForMode(alarmBlocked, AlertMode.ALARM))
+
+        val arrivalsBlocked = bothOk.copy(arrivalsChannelEnabled = false)
+        assertEquals(BlockedChannelNotice.ARRIVALS, blockedChannelNoticeForMode(arrivalsBlocked, AlertMode.NOTIFICATION))
+        assertEquals(BlockedChannelNotice.NONE, blockedChannelNoticeForMode(arrivalsBlocked, AlertMode.ALARM))
     }
 }

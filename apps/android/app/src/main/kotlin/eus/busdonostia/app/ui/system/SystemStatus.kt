@@ -11,6 +11,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import eus.busdonostia.app.data.settings.AppLanguage
+import eus.busdonostia.app.domain.AlertMode
 import eus.busdonostia.app.engine.CHANNEL_ALARM
 import eus.busdonostia.app.engine.CHANNEL_ARRIVALS
 
@@ -45,6 +46,34 @@ data class SystemStatus(
     val arrivalsChannelEnabled: Boolean = true,
     val alarmChannelEnabled: Boolean = true,
 )
+
+enum class BlockedChannelNotice { NONE, BOTH, ARRIVALS, ALARM }
+
+fun blockedChannelNoticeForAlerts(
+    status: SystemStatus,
+    activeModes: Collection<AlertMode>,
+): BlockedChannelNotice {
+    if (!status.notificationsEnabled) return BlockedChannelNotice.NONE
+    val blockedArrivals = !status.arrivalsChannelEnabled
+    val blockedAlarm = !status.alarmChannelEnabled
+    return when {
+        blockedArrivals && blockedAlarm -> BlockedChannelNotice.BOTH
+        blockedArrivals && AlertMode.NOTIFICATION in activeModes -> BlockedChannelNotice.ARRIVALS
+        blockedAlarm && AlertMode.ALARM in activeModes -> BlockedChannelNotice.ALARM
+        else -> BlockedChannelNotice.NONE
+    }
+}
+
+fun blockedChannelNoticeForMode(
+    status: SystemStatus,
+    mode: AlertMode,
+): BlockedChannelNotice {
+    if (!status.notificationsEnabled) return BlockedChannelNotice.NONE
+    return when (mode) {
+        AlertMode.NOTIFICATION -> if (!status.arrivalsChannelEnabled) BlockedChannelNotice.ARRIVALS else BlockedChannelNotice.NONE
+        AlertMode.ALARM -> if (!status.alarmChannelEnabled) BlockedChannelNotice.ALARM else BlockedChannelNotice.NONE
+    }
+}
 
 fun readSystemStatus(context: Context): SystemStatus {
     val power = context.getSystemService(PowerManager::class.java)

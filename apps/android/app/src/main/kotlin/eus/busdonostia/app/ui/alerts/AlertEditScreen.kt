@@ -38,6 +38,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -46,14 +49,18 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eus.busdonostia.app.R
 import eus.busdonostia.app.domain.AlertMode
 import eus.busdonostia.app.domain.DraftError
 import eus.busdonostia.app.domain.QUICK_MINUTES
 import eus.busdonostia.app.domain.destinationChoices
+import eus.busdonostia.app.engine.CHANNEL_ALARM
+import eus.busdonostia.app.engine.CHANNEL_ARRIVALS
 import eus.busdonostia.app.ui.appViewModel
 import eus.busdonostia.app.ui.components.BorderedCard
+import eus.busdonostia.app.ui.components.InfoBanner
 import eus.busdonostia.app.ui.components.LineBadge
 import eus.busdonostia.app.ui.components.ScreenHeader
 import eus.busdonostia.app.ui.components.SearchPill
@@ -61,7 +68,12 @@ import eus.busdonostia.app.ui.components.SectionLabel
 import eus.busdonostia.app.ui.components.SkeletonList
 import eus.busdonostia.app.ui.screens.EmptyAction
 import eus.busdonostia.app.ui.screens.EmptyState
+import eus.busdonostia.app.ui.system.BlockedChannelNotice
+import eus.busdonostia.app.ui.system.blockedChannelNoticeForMode
+import eus.busdonostia.app.ui.system.channelSettingsIntent
 import eus.busdonostia.app.ui.system.needsNotificationPermission
+import eus.busdonostia.app.ui.system.openSettings
+import eus.busdonostia.app.ui.system.readSystemStatus
 import eus.busdonostia.app.ui.theme.DesignTokens
 import eus.busdonostia.app.ui.theme.MonoFamily
 
@@ -79,6 +91,12 @@ fun AlertEditScreen(
     }
     val state by vm.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    var system by remember { mutableStateOf(readSystemStatus(context)) }
+    LifecycleResumeEffect(Unit) {
+        system = readSystemStatus(context)
+        onPauseOrDispose { }
+    }
+    val modeChannelNotice = blockedChannelNoticeForMode(system, state.draft.mode)
     LaunchedEffect(state.saved) { if (state.saved) onDone() }
     // Se pide al guardar (gesto del usuario); el aviso se guarda lo acepte o no.
     val notificationLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { vm.save() }
@@ -120,6 +138,27 @@ fun AlertEditScreen(
                     StopAndLine(state, vm)
                     MinutesAhead(state.draft.minutesAhead, state.minutesRange, vm::setMinutes)
                     AlertModeSelector(state.draft.mode, state.alarmTimeoutSec, vm::setMode)
+                    InfoBanner(
+                        visible = modeChannelNotice != BlockedChannelNotice.NONE,
+                        text = stringResource(
+                            if (state.draft.mode == AlertMode.ALARM) {
+                                R.string.alerts_channel_alarm_blocked
+                            } else {
+                                R.string.alerts_channel_arrivals_blocked
+                            },
+                        ),
+                        warning = true,
+                    ) {
+                        TextButton(
+                            onClick = {
+                                val channelId = if (state.draft.mode == AlertMode.ALARM) CHANNEL_ALARM else CHANNEL_ARRIVALS
+                                context.openSettings(channelSettingsIntent(context, channelId))
+                            },
+                            modifier = Modifier.heightIn(min = DesignTokens.touchTargetMin),
+                        ) {
+                            Text(stringResource(R.string.alerts_notifications_enable))
+                        }
+                    }
                     // Un solo uso: avisa una vez y se borra.
                     Text(
                         stringResource(R.string.alert_once_hint, state.expirationDays),
@@ -324,7 +363,7 @@ private fun MinutesAhead(minutes: Int, range: IntRange, onChange: (Int) -> Unit)
 
 /** Paso 3: selector de modo (Notificación o Alarma insistente). */
 @Composable
-private fun AlertModeSelector(
+internal fun AlertModeSelector(
     mode: AlertMode,
     alarmTimeoutSec: Int,
     onChange: (AlertMode) -> Unit,
@@ -366,7 +405,7 @@ private fun AlertModeSelector(
 
 /** Vista previa etiquetada de la notificación con los valores elegidos. No tiene botones reales: es un dibujo. */
 @Composable
-private fun Preview(state: AlertEditUiState) {
+internal fun Preview(state: AlertEditUiState) {
     val draft = state.draft
     val line = draft.lineId ?: return
     if (draft.stopId == null) return
@@ -402,8 +441,6 @@ private fun Preview(state: AlertEditUiState) {
                     stringResource(R.string.alert_preview_alarm_note, state.alarmTimeoutSec),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }

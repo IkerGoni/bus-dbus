@@ -73,6 +73,8 @@ import eus.busdonostia.app.ui.components.SkeletonList
 import eus.busdonostia.app.ui.components.rememberEffectiveMotionTokens
 import eus.busdonostia.app.ui.screens.EmptyAction
 import eus.busdonostia.app.ui.screens.EmptyState
+import eus.busdonostia.app.ui.system.BlockedChannelNotice
+import eus.busdonostia.app.ui.system.blockedChannelNoticeForAlerts
 import eus.busdonostia.app.ui.system.channelSettingsIntent
 import eus.busdonostia.app.ui.system.notificationSettingsIntent
 import eus.busdonostia.app.ui.system.openSettings
@@ -103,17 +105,12 @@ fun AlertsScreen(
         system = readSystemStatus(context)
         onPauseOrDispose { }
     }
-    val blockedArrivals = !system.arrivalsChannelEnabled
-    val blockedAlarm = !system.alarmChannelEnabled
-    val hasBlockedArrivalsAlert = blockedArrivals && state.active.any { it.rule.mode == AlertMode.NOTIFICATION }
-    val hasBlockedAlarmAlert = blockedAlarm && state.active.any { it.rule.mode == AlertMode.ALARM }
-    val channelsBannerVisible = system.notificationsEnabled && (
-        (blockedArrivals && blockedAlarm) || hasBlockedArrivalsAlert || hasBlockedAlarmAlert
-    )
-    val channelsBannerTextRes = when {
-        blockedArrivals && blockedAlarm -> R.string.alerts_channels_blocked
-        blockedArrivals -> R.string.alerts_channel_arrivals_blocked
-        else -> R.string.alerts_channel_alarm_blocked
+    val channelNotice = blockedChannelNoticeForAlerts(system, state.active.map { it.rule.mode })
+    val channelsBannerVisible = channelNotice != BlockedChannelNotice.NONE
+    val channelsBannerTextRes = when (channelNotice) {
+        BlockedChannelNotice.BOTH -> R.string.alerts_channels_blocked
+        BlockedChannelNotice.ARRIVALS -> R.string.alerts_channel_arrivals_blocked
+        BlockedChannelNotice.ALARM, BlockedChannelNotice.NONE -> R.string.alerts_channel_alarm_blocked
     }
     val deletedText = stringResource(R.string.alert_deleted)
     val undoText = stringResource(R.string.undo)
@@ -165,10 +162,10 @@ fun AlertsScreen(
                         ) {
                             TextButton(
                                 onClick = {
-                                    val intent = when {
-                                        blockedArrivals && blockedAlarm -> notificationSettingsIntent(context)
-                                        blockedArrivals -> channelSettingsIntent(context, CHANNEL_ARRIVALS)
-                                        else -> channelSettingsIntent(context, CHANNEL_ALARM)
+                                    val intent = when (channelNotice) {
+                                        BlockedChannelNotice.BOTH -> notificationSettingsIntent(context)
+                                        BlockedChannelNotice.ARRIVALS -> channelSettingsIntent(context, CHANNEL_ARRIVALS)
+                                        BlockedChannelNotice.ALARM, BlockedChannelNotice.NONE -> channelSettingsIntent(context, CHANNEL_ALARM)
                                     }
                                     context.openSettings(intent)
                                 },

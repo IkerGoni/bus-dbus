@@ -24,7 +24,7 @@ import eus.busdonostia.app.domain.remainingMinutes
 /*
  * Canales y notificaciones del motor (04-android-platform.md §1–§2). Si el usuario
  * deniega `POST_NOTIFICATIONS`, `notify` no hace nada y A04 lo avisa; el motor
- * entonces no borra el aviso disparado ([canNotifyArrivals]).
+ * entonces no borra el aviso disparado ([canNotifyAlert]).
  */
 
 const val CHANNEL_MONITORING = "dbus_monitoring"
@@ -126,7 +126,7 @@ fun updateMonitoringNotification(context: Context, watching: List<AlertRule>, po
 }
 
 /**
- * `L5 → Amara en 4 min` · `Pío Baroja 10 (340) · En vivo`. Sin botones: el aviso ya se ha
+ * `L5 → Amara en 4 min` · `Pío Baroja 10 · En vivo`. Sin botones: el aviso ya se ha
  * borrado (un solo uso); tocarla abre A05 y deslizarla la cierra. Una por aviso (tag = id).
  */
 @SuppressLint("MissingPermission")

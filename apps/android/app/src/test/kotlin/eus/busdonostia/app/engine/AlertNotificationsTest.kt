@@ -5,6 +5,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.media.AudioAttributes
 import androidx.core.app.NotificationCompat
 import androidx.test.core.app.ApplicationProvider
 import eus.busdonostia.app.domain.AlertMode
@@ -92,10 +93,16 @@ class AlertNotificationsTest {
         assertNotNull("Alarma no publicada", notification)
         assertEquals(CHANNEL_ALARM, notification.channelId)
         assertTrue("FLAG_INSISTENT no activo", (notification.flags and Notification.FLAG_INSISTENT) != 0)
+        assertTrue("FLAG_AUTO_CANCEL no activo", (notification.flags and Notification.FLAG_AUTO_CANCEL) != 0)
+        assertEquals(NotificationCompat.VISIBILITY_PUBLIC, notification.visibility)
         assertEquals(75_000L, notification.timeoutAfter)
         @Suppress("DEPRECATION")
         assertEquals(NotificationCompat.PRIORITY_MAX, notification.priority)
         assertEquals(NotificationCompat.CATEGORY_ALARM, notification.category)
+        val title = notification.extras.getCharSequence(Notification.EXTRA_TITLE)?.toString().orEmpty()
+        val text = notification.extras.getCharSequence(Notification.EXTRA_TEXT)?.toString().orEmpty()
+        assertFalse("El título no debe mostrar el stopId", title.contains("340"))
+        assertFalse("El texto no debe mostrar el stopId", text.contains("340"))
     }
 
     @Test
@@ -138,6 +145,8 @@ class AlertNotificationsTest {
         assertEquals(NotificationManager.IMPORTANCE_HIGH, alarmChannel.importance)
         assertTrue(alarmChannel.shouldVibrate())
         assertNotNull("El canal de alarma debe tener sonido asignado", alarmChannel.sound)
+        assertEquals(AudioAttributes.USAGE_ALARM, alarmChannel.audioAttributes.usage)
+        assertEquals(AudioAttributes.CONTENT_TYPE_SONIFICATION, alarmChannel.audioAttributes.contentType)
     }
 
     @Test
@@ -189,5 +198,29 @@ class AlertNotificationsTest {
 
         assertEquals(stopDeepLink("340", "28"), shadowPi1.savedIntent.dataString)
         assertEquals(stopDeepLink("125", "5"), shadowPi2.savedIntent.dataString)
+    }
+
+    @Test
+    fun `alarma usa triggerBufferSec para los minutos mostrados en el titulo`() {
+        val fetchedAtMs = 50_000L
+        val nowMs = fetchedAtMs + 30_000L
+        val firing = Firing(
+            rule = sampleFiring(AlertMode.ALARM).rule,
+            arrival = sampleFiring(AlertMode.ALARM).arrival.copy(
+                minutesAtFetch = 6,
+                fetchedAtMs = fetchedAtMs,
+            ),
+        )
+
+        notifyArrival(context, firing, nowMs, AlertsConfig(triggerBufferSec = 0))
+        val shadow = shadowOf(notificationManager)
+        val titleNoBuffer = shadow.getNotification(firing.rule.id, 3)
+            .extras.getCharSequence(Notification.EXTRA_TITLE)?.toString().orEmpty()
+        assertTrue("Con triggerBufferSec=0 debe mostrar 6 min: $titleNoBuffer", titleNoBuffer.contains("6 min"))
+
+        notifyArrival(context, firing, nowMs, AlertsConfig(triggerBufferSec = 30))
+        val titleWithBuffer = shadow.getNotification(firing.rule.id, 3)
+            .extras.getCharSequence(Notification.EXTRA_TITLE)?.toString().orEmpty()
+        assertTrue("Con triggerBufferSec=30 debe mostrar 5 min: $titleWithBuffer", titleWithBuffer.contains("5 min"))
     }
 }

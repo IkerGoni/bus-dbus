@@ -17,6 +17,7 @@ play-service-account.json
 *.apk
 *.aab
 gplay-service-account*.json
+devplayconsole*.json
 
 # Bot & local databases
 apps/bot/.env
