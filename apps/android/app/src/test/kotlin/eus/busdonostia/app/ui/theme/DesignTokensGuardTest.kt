@@ -16,9 +16,9 @@ class DesignTokensGuardTest {
 
     private val uiDir = File("src/main/kotlin/eus/busdonostia/app/ui")
 
-    // Línea base tras auditoría 2026-11-23, migración de SettingsScreen (165 - 12 = 153) y AlertEditScreen (153 - 27 = 126).
+    // Línea base tras auditoría 2026-11-23, migración de SettingsScreen (165 - 12 = 153), AlertEditScreen (153 - 27 = 126) y alertas A04/A06 (126 - 20 = 106).
     // Cada refactorización del ticket A5-11 debe reducir este número.
-    private val maxAllowedInlineDp = 126
+    private val maxAllowedInlineDp = 106
 
     // Excepciones permitidas por Nivel 3 (AGENTS.md):
     // 0 = identidad matemática, 1 = hairline/borde sutil, 2 = ajuste óptico fino

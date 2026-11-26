@@ -173,6 +173,30 @@ class AlertEngineTest {
     }
 
     @Test
+    fun firingsToDeleteFiltraPorModoYSusCanales() {
+        val notifRule = once("notif").copy(mode = AlertMode.NOTIFICATION)
+        val alarmRule = once("alarm").copy(mode = AlertMode.ALARM)
+        val firings = evaluateTick(listOf(notifRule, alarmRule), mapOf("340" to live(arrival("5", 4))), now, null).firings
+        assertEquals(2, firings.size)
+
+        // Si solo se puede notificar la alarma (canal normal bloqueado)
+        val deleteAlarmOnly = firingsToDelete(firings) { it.rule.mode == AlertMode.ALARM }
+        assertEquals(listOf("alarm"), deleteAlarmOnly.map { it.rule.id })
+
+        // Si solo se puede notificar la normal (canal alarma bloqueado)
+        val deleteNotifOnly = firingsToDelete(firings) { it.rule.mode == AlertMode.NOTIFICATION }
+        assertEquals(listOf("notif"), deleteNotifOnly.map { it.rule.id })
+
+        // Si ambos canales están permitidos
+        val deleteBoth = firingsToDelete(firings) { true }
+        assertEquals(listOf("notif", "alarm"), deleteBoth.map { it.rule.id })
+
+        // Si ninguno está permitido
+        val deleteNone = firingsToDelete(firings) { false }
+        assertTrue(deleteNone.isEmpty())
+    }
+
+    @Test
     fun trasPararSeSigueSiSeGuardoUnAvisoEntretanto() {
         val saved = listOf(once("nuevo"))
         // Decidió STOP_IDLE, pero en la BD ya hay otro aviso en vigilancia (H15): se sigue.

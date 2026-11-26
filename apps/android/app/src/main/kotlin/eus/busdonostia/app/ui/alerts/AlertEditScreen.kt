@@ -370,9 +370,10 @@ private fun Preview(state: AlertEditUiState) {
     if (draft.stopId == null) return
     SectionLabel(stringResource(R.string.alert_preview), modifier = Modifier.padding(horizontal = 0.dp))
     BorderedCard {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(Icons.Outlined.Notifications, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        Column(Modifier.padding(DesignTokens.spacingLg), verticalArrangement = Arrangement.spacedBy(DesignTokens.spacingXs)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesignTokens.spacingSm)) {
+                val headerIcon = if (draft.mode == AlertMode.ALARM) Icons.Outlined.Alarm else Icons.Outlined.Notifications
+                Icon(headerIcon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 Text(
                     stringResource(R.string.app_name),
                     style = MaterialTheme.typography.labelMedium,
@@ -394,6 +395,15 @@ private fun Preview(state: AlertEditUiState) {
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
+            if (draft.mode == AlertMode.ALARM) {
+                Text(
+                    stringResource(R.string.alert_preview_alarm_note),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
     }
 }

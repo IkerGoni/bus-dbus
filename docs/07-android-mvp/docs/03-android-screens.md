@@ -43,7 +43,7 @@
 ### A04 · Mis Avisos (`dbus://alerts`)
 - **Cabecera:** `Mis avisos` + Ajustes. FAB inferior derecho: `+ Nuevo aviso` → `A06`.
 - **Agrupación:** `ACTIVOS` (`TRIGGERED`, `ACTIVE`) y `PAUSADOS` (`INACTIVE`: pausados o caducados). Los que ya avisaron no aparecen: se borran al avisar.
-- **Tarjeta:** badge Dbus + línea/destino + minutos actuales, subtítulo `{stopName} ({stopId}) · Aviso {min}'`, estado (`⚡ Llegando`, `● Activa`, `Caducada`, `Pausada`), switch `active`, Editar (`A06`) y Eliminar (con `Deshacer`).
+- **Tarjeta:** badge Dbus + icono de alarma (si `mode == ALARM`) + línea/destino + minutos actuales, subtítulo `{stopName} · Aviso {min}'`, estado (`⚡ Llegando`, `● Activa`, `Caducada`, `Pausada`), switch `active`, Editar (`A06`) y Eliminar (con `Deshacer`).
 - **Estado vacío:** explicación breve + CTA `Elegir parada y crear aviso` → `A02`.
 
 ### A05 · Detalle de parada (`dbus://stop/{stopId}`)
@@ -58,8 +58,9 @@
 ### A06 · Configurar Aviso (`dbus://alert/new?stopId=&lineId=` · `dbus://alert/{id}/edit`)
 - **Paso 1 — Parada y Línea:** tarjeta de parada (precargada + `Cambiar`) + chips solo de las líneas reales de esa parada (más selector de destino si hay varios).
 - **Paso 2 — Antelación:** display grande `{n} min antes`, 6 chips rápidos (`2'`, `3'`, `5'`, `8'`, `10'`, `15'`) sincronizados con slider `1–30 min`.
-- **Paso 3 — Un solo uso** (2026-11-22): sin selector de frecuencia; texto `Vigila desde que lo guardas, avisa una vez y se borra. Caduca a los 7 días si no llega a avisar.` Sin avisos recurrentes ni alarmas exactas.
-- **Vista previa:** tarjeta con el texto que tendrá la notificación construido con los valores elegidos (`L5 → Amara en 5 min`, sin botones); etiquetada como vista previa.
+- **Paso 3 — Modo:** selector segmentado `Notificación` (campana) o `Alarma` (reloj despertador), con línea de ayuda según el modo elegido («Una notificación normal, con el sonido del móvil» o «Suena como una alarma, aunque el móvil esté en silencio, hasta que la apagues»).
+- **Paso 4 — Un solo uso** (2026-11-22): texto `Vigila desde que lo guardas, avisa una vez y se borra. Caduca a los 7 días si no llega a avisar.` Sin avisos recurrentes ni alarmas exactas.
+- **Vista previa:** tarjeta con el texto que tendrá la notificación construido con los valores elegidos (`L5 → Amara en 5 min`, sin botones); etiquetada como vista previa. En modo alarma muestra el icono de alarma y la nota `Sonará como alarma hasta que la apagues`.
 - **Guardar:** dedup por `(stopId, lineId)` (ofrecer actualizar si ya existe), solicitar `POST_NOTIFICATIONS` si falta permiso y persistir en DB.
 
 ### A07 · Ajustes (`dbus://settings`)

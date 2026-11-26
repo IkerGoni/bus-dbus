@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Settings
@@ -51,6 +53,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import eus.busdonostia.app.R
 import eus.busdonostia.app.domain.AlertItem
+import eus.busdonostia.app.domain.AlertMode
 import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.ArrivalsView
 import eus.busdonostia.app.domain.FeedHint
@@ -71,6 +74,7 @@ import eus.busdonostia.app.ui.screens.EmptyState
 import eus.busdonostia.app.ui.system.notificationSettingsIntent
 import eus.busdonostia.app.ui.system.openSettings
 import eus.busdonostia.app.ui.system.readSystemStatus
+import eus.busdonostia.app.ui.theme.DesignTokens
 import kotlinx.coroutines.launch
 
 /** A04 · Mis avisos. */
@@ -123,8 +127,8 @@ fun AlertsScreen(
                 )
                 else -> LazyColumn(
                     Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 96.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(start = DesignTokens.spacingLg, end = DesignTokens.spacingLg, bottom = 96.dp),
+                    verticalArrangement = Arrangement.spacedBy(DesignTokens.spacingMd),
                 ) {
                     item(key = "banner-notifications-off", contentType = "info_banner") {
                         InfoBanner(
@@ -134,7 +138,7 @@ fun AlertsScreen(
                         ) {
                             TextButton(
                                 onClick = { context.openSettings(notificationSettingsIntent(context)) },
-                                modifier = Modifier.heightIn(min = 48.dp),
+                                modifier = Modifier.heightIn(min = DesignTokens.touchTargetMin),
                             ) { Text(stringResource(R.string.alerts_notifications_enable)) }
                         }
                     }
@@ -144,7 +148,7 @@ fun AlertsScreen(
                             text = stringResource(R.string.alerts_error_banner),
                             warning = true,
                         ) {
-                            TextButton(onClick = vm::refresh, modifier = Modifier.heightIn(min = 48.dp)) {
+                            TextButton(onClick = vm::refresh, modifier = Modifier.heightIn(min = DesignTokens.touchTargetMin)) {
                                 Text(stringResource(R.string.retry))
                             }
                         }
@@ -159,7 +163,7 @@ fun AlertsScreen(
                 onClick = onNewAlert,
                 icon = { Icon(Icons.Filled.Add, contentDescription = null) },
                 text = { Text(stringResource(R.string.alerts_new), maxLines = 1) },
-                modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+                modifier = Modifier.align(Alignment.BottomEnd).padding(DesignTokens.spacingLg),
             )
         }
         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp))
@@ -203,9 +207,27 @@ private fun AlertCard(
 ) {
     val rule = item.rule
     BorderedCard(modifier = modifier) {
-        Column(Modifier.padding(start = 16.dp, top = 12.dp, end = 4.dp, bottom = 4.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(
+            Modifier.padding(
+                start = DesignTokens.spacingLg,
+                top = DesignTokens.spacingMd,
+                end = DesignTokens.spacingXs,
+                bottom = DesignTokens.spacingXs,
+            )
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(DesignTokens.spacingMd),
+            ) {
                 LineBadge(rule.lineId, colorArgb)
+                if (rule.mode == AlertMode.ALARM) {
+                    Icon(
+                        Icons.Outlined.Alarm,
+                        contentDescription = stringResource(R.string.alert_mode_alarm),
+                        modifier = Modifier.size(DesignTokens.iconSmall),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 Text(
                     alertDestination(rule),
                     style = MaterialTheme.typography.titleMedium,
@@ -215,7 +237,7 @@ private fun AlertCard(
                 )
                 val arrival = item.nextArrival
                 if (rule.active && arrival != null && item.remainingMin != null) {
-                    Box(Modifier.padding(end = 12.dp)) { MinutesLabel(item.remainingMin, arrival.source) }
+                    Box(Modifier.padding(end = DesignTokens.spacingMd)) { MinutesLabel(item.remainingMin, arrival.source) }
                 }
             }
             Text(
@@ -228,14 +250,14 @@ private fun AlertCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(top = 4.dp, end = 12.dp),
+                modifier = Modifier.padding(top = DesignTokens.spacingXs, end = DesignTokens.spacingMd),
             )
             feedHintText(rule, stopView)?.let {
                 Text(
                     it,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 2.dp, end = 12.dp),
+                    modifier = Modifier.padding(top = 2.dp, end = DesignTokens.spacingMd),
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -251,8 +273,8 @@ private fun AlertCard(
                     checked = rule.active,
                     onCheckedChange = onActiveChange,
                     modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .heightIn(min = 48.dp)
+                        .padding(horizontal = DesignTokens.spacingSm)
+                        .heightIn(min = DesignTokens.touchTargetMin)
                         .semantics { contentDescription = switchLabel },
                 )
             }

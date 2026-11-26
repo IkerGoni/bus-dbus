@@ -164,6 +164,7 @@
     <string name="alert_mode_alarm_hint">Rings like an alarm, even in silent mode, until dismissed.</string>
     <string name="alert_once_hint">Monitors from save, alerts once and deletes. Expires after %1$d days if no bus arrives.</string>
     <string name="alert_preview">Notification preview</string>
+    <string name="alert_preview_alarm_note">Will sound as an alarm until you dismiss it</string>
     <string name="alert_save">Save alert</string>
     <string name="alert_conflict_title">You already have this alert</string>
     <string name="alert_conflict_body">There\'s already an alert for line %1$s at %2$s. Update it with these values?</string>

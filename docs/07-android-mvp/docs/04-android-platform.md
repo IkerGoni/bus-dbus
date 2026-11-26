@@ -41,9 +41,12 @@ Decisión de arquitectura: ADR 009 (`docs/03-architecture/adrs/009-android-nativ
   siempre encendido (otra IP única ante Dbus).
 
 ## 2. Canal y acciones directas de notificación
-- **Canal:** `dbus_arrivals_high` (`IMPORTANCE_HIGH`, sonido + vibración, visible en bloqueo).
+- **Canales:**
+  - `dbus_arrivals_high` (`IMPORTANCE_HIGH`, sonido + vibración, visible en bloqueo): avisos en modo notificación.
+  - `dbus_arrivals_alarm` (`IMPORTANCE_HIGH`, `USAGE_ALARM`, insistente, se para a los `alerts.alarmTimeoutSec` s o al tocar o deslizar, respeta No molestar, sin pantalla completa ni `AlarmManager` exacto): avisos en modo alarma.
+  - `dbus_monitoring` (`IMPORTANCE_LOW`): servicio en primer plano de vigilancia.
 - **Contenido:** título `L{lineId} → {destination} en {min} min` · cuerpo
-  `{stopName} ({stopId}) · {En vivo | Horario}`.
+  `{stopName} · {En vivo | Horario}`.
 - **Sin botones:** el aviso ya está borrado; deslizar la notificación la cierra.
 - **Tap en el cuerpo:** deep link `dbus://stop/{stopId}?highlightLine={lineId}`.
 

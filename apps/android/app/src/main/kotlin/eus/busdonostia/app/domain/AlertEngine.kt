@@ -201,9 +201,11 @@ fun failedTick(
 
 /**
  * Avisos disparados que se pueden borrar ya notificados. Si el usuario no puede ver la
- * notificación ([canNotify] false: permiso denegado o canal bloqueado), no se consume el aviso.
+ * notificación ([canNotify] devuelve false: permiso denegado o canal bloqueado), no se consume el aviso.
  */
-fun firingsToDelete(firings: List<Firing>, canNotify: Boolean): List<Firing> = if (canNotify) firings else emptyList()
+fun firingsToDelete(firings: List<Firing>, canNotify: (Firing) -> Boolean): List<Firing> = firings.filter(canNotify)
+
+fun firingsToDelete(firings: List<Firing>, canNotify: Boolean): List<Firing> = firingsToDelete(firings) { canNotify }
 
 /**
  * Tras decidir parar y soltar `running`, el servicio vuelve a leer la BD: si entretanto se
