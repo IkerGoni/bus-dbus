@@ -157,6 +157,11 @@
     <string name="alert_minutes_before_suffix">min antes</string>
     <string name="alert_minutes_chip">%1$d\'</string>
     <string name="alert_minutes_slider">Minutos de antelación</string>
+    <string name="alert_step_mode">Cómo avisarte</string>
+    <string name="alert_mode_notification">Notificación</string>
+    <string name="alert_mode_alarm">Alarma</string>
+    <string name="alert_mode_notification_hint">Una notificación normal, con el sonido del móvil.</string>
+    <string name="alert_mode_alarm_hint">Suena como una alarma, aunque el móvil esté en silencio, hasta que la apagues.</string>
     <string name="alert_once_hint">Vigila desde que lo guardas, avisa una vez y se borra. Caduca a los %1$d días si no llega a avisar.</string>
     <string name="alert_preview">Vista previa de la notificación</string>
     <string name="alert_save">Guardar aviso</string>

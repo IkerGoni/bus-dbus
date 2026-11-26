@@ -7,6 +7,7 @@ import eus.busdonostia.app.AppContainer
 import eus.busdonostia.app.data.db.toDomain
 import eus.busdonostia.app.data.db.toEntity
 import eus.busdonostia.app.domain.AlertDraft
+import eus.busdonostia.app.domain.AlertMode
 import eus.busdonostia.app.domain.AlertsConfig
 import eus.busdonostia.app.domain.CatalogStop
 import eus.busdonostia.app.domain.DraftError
@@ -19,6 +20,7 @@ import eus.busdonostia.app.domain.stopByCode
 import eus.busdonostia.app.domain.stopLineIds
 import eus.busdonostia.app.domain.toDraft
 import eus.busdonostia.app.domain.validateDraft
+import eus.busdonostia.app.domain.withMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -204,6 +206,8 @@ class AlertEditViewModel(
         val alertsCfg = container.configRepository.alertsConfig.value
         edit { it.copy(minutesAhead = minutes.coerceIn(alertsCfg.minMinutesAhead..alertsCfg.maxMinutesAhead)) }
     }
+
+    fun setMode(mode: AlertMode) = edit { it.withMode(mode) }
 
     /** Marca los errores visibles y dice si se puede guardar (antes de pedir permisos). */
     fun validateForSave(): Boolean {

@@ -62,6 +62,31 @@ class AlertDraftTest {
     }
 
     @Test
+    fun setModeCambiaDraftYToRuleConservaAlarm() {
+        // Función pura compartida que invoca AlertEditViewModel.setMode
+        val draft = base.withMode(AlertMode.NOTIFICATION)
+        assertEquals(AlertMode.NOTIFICATION, draft.mode)
+
+        val updated = draft.withMode(AlertMode.ALARM)
+        assertEquals(AlertMode.ALARM, updated.mode)
+
+        val rule = updated.toRule("rule-1", 1_000L)
+        assertEquals(AlertMode.ALARM, rule.mode)
+
+        val reverted = updated.withMode(AlertMode.NOTIFICATION)
+        assertEquals(AlertMode.NOTIFICATION, reverted.mode)
+        assertEquals(AlertMode.NOTIFICATION, reverted.toRule("rule-2", 1_000L).mode)
+    }
+
+    @Test
+    fun editarAvisoConModoAlarmCargaSelectorEnAlarm() {
+        // Al editar un aviso con AlertMode.ALARM, toDraft() carga el modo en el selector
+        val rule = base.toRule("rule-1", 1_000L).copy(mode = AlertMode.ALARM)
+        val draft = rule.toDraft()
+        assertEquals(AlertMode.ALARM, draft.mode)
+    }
+
+    @Test
     fun nombreDesconocidoNuncaEsElCodigoDeParada() {
         assertEquals("", base.copy(stopName = null).toRule("id", 1_000).stopName)
         assertEquals("", base.copy(stopName = "   ").toRule("id", 1_000).stopName)

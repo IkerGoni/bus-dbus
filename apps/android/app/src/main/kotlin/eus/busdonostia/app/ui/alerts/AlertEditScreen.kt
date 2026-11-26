@@ -14,11 +14,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Alarm
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -27,6 +29,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -43,6 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eus.busdonostia.app.R
+import eus.busdonostia.app.domain.AlertMode
 import eus.busdonostia.app.domain.DraftError
 import eus.busdonostia.app.domain.QUICK_MINUTES
 import eus.busdonostia.app.domain.destinationChoices
@@ -56,6 +62,7 @@ import eus.busdonostia.app.ui.components.SkeletonList
 import eus.busdonostia.app.ui.screens.EmptyAction
 import eus.busdonostia.app.ui.screens.EmptyState
 import eus.busdonostia.app.ui.system.needsNotificationPermission
+import eus.busdonostia.app.ui.theme.DesignTokens
 import eus.busdonostia.app.ui.theme.MonoFamily
 
 /** A06 · Configurar aviso. [alertId] null = nuevo (con parada, línea y destino precargados si llegan). */
@@ -107,11 +114,12 @@ fun AlertEditScreen(
                     Modifier
                         .weight(1f)
                         .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                        .padding(horizontal = DesignTokens.spacingLg),
+                    verticalArrangement = Arrangement.spacedBy(DesignTokens.spacingSm),
                 ) {
                     StopAndLine(state, vm)
                     MinutesAhead(state.draft.minutesAhead, state.minutesRange, vm::setMinutes)
+                    AlertModeSelector(state.draft.mode, vm::setMode)
                     // Un solo uso: avisa una vez y se borra.
                     Text(
                         stringResource(R.string.alert_once_hint, state.expirationDays),
@@ -132,7 +140,7 @@ fun AlertEditScreen(
                             )
                         }
                     }
-                    Spacer(Modifier.padding(4.dp))
+                    Spacer(Modifier.padding(DesignTokens.spacingXs))
                 }
                 HorizontalDivider()
                 Button(
@@ -140,8 +148,8 @@ fun AlertEditScreen(
                     enabled = !state.saving,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp)
-                        .heightIn(min = 48.dp),
+                        .padding(DesignTokens.spacingLg)
+                        .heightIn(min = DesignTokens.touchTargetMin),
                 ) {
                     Text(stringResource(R.string.alert_save))
                 }
@@ -163,12 +171,12 @@ fun AlertEditScreen(
                 )
             },
             confirmButton = {
-                TextButton(onClick = { vm.save(confirmed = true) }, modifier = Modifier.heightIn(min = 48.dp)) {
+                TextButton(onClick = { vm.save(confirmed = true) }, modifier = Modifier.heightIn(min = DesignTokens.touchTargetMin)) {
                     Text(stringResource(R.string.alert_conflict_update))
                 }
             },
             dismissButton = {
-                TextButton(onClick = vm::dismissConflict, modifier = Modifier.heightIn(min = 48.dp)) {
+                TextButton(onClick = vm::dismissConflict, modifier = Modifier.heightIn(min = DesignTokens.touchTargetMin)) {
                     Text(stringResource(R.string.cancel))
                 }
             },
@@ -194,11 +202,11 @@ private fun StopAndLine(state: AlertEditUiState, vm: AlertEditViewModel) {
             Row(
                 Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 48.dp)
+                    .heightIn(min = DesignTokens.touchTargetMin)
                     .clickable { vm.selectStop(stop) }
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = DesignTokens.spacingSm),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(DesignTokens.spacingMd),
             ) {
                 Text(stop.desc, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
             }
@@ -210,7 +218,7 @@ private fun StopAndLine(state: AlertEditUiState, vm: AlertEditViewModel) {
             )
         }
         if (stopId != null) {
-            TextButton(onClick = vm::closeStopPicker, modifier = Modifier.heightIn(min = 48.dp)) {
+            TextButton(onClick = vm::closeStopPicker, modifier = Modifier.heightIn(min = DesignTokens.touchTargetMin)) {
                 Text(stringResource(R.string.cancel))
             }
         }
@@ -218,7 +226,12 @@ private fun StopAndLine(state: AlertEditUiState, vm: AlertEditViewModel) {
     }
     BorderedCard {
         Row(
-            Modifier.padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+            Modifier.padding(
+                start = DesignTokens.spacingLg,
+                end = DesignTokens.spacingXs,
+                top = DesignTokens.spacingXs,
+                bottom = DesignTokens.spacingXs,
+            ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1f)) {
@@ -229,7 +242,7 @@ private fun StopAndLine(state: AlertEditUiState, vm: AlertEditViewModel) {
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            TextButton(onClick = vm::openStopPicker, modifier = Modifier.heightIn(min = 48.dp)) {
+            TextButton(onClick = vm::openStopPicker, modifier = Modifier.heightIn(min = DesignTokens.touchTargetMin)) {
                 Text(stringResource(R.string.alert_change_stop))
             }
         }
@@ -238,13 +251,13 @@ private fun StopAndLine(state: AlertEditUiState, vm: AlertEditViewModel) {
         Text(stringResource(R.string.alert_stop_no_lines), color = MaterialTheme.colorScheme.onSurfaceVariant)
         return
     }
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(DesignTokens.spacingSm)) {
         state.stopLines.forEach { line ->
             FilterChip(
                 selected = state.draft.lineId == line,
                 onClick = { vm.selectLine(line) },
-                label = { LineBadge(line, state.lineColors[line], size = 24.dp) },
-                modifier = Modifier.heightIn(min = 48.dp),
+                label = { LineBadge(line, state.lineColors[line], size = DesignTokens.lineBadgeChipSize) },
+                modifier = Modifier.heightIn(min = DesignTokens.touchTargetMin),
             )
         }
     }
@@ -253,19 +266,19 @@ private fun StopAndLine(state: AlertEditUiState, vm: AlertEditViewModel) {
     // Selector de destino si la línea tiene varios aquí (o si llega uno precargado desde una llegada).
     if (state.draft.lineId != null && (destinations.size > 1 || chosen != null)) {
         Text(stringResource(R.string.alert_destination_label), style = MaterialTheme.typography.labelLarge)
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(DesignTokens.spacingSm)) {
             FilterChip(
                 selected = chosen == null,
                 onClick = { vm.selectDestination(null) },
                 label = { Text(stringResource(R.string.alert_any_destination), maxLines = 1) },
-                modifier = Modifier.heightIn(min = 48.dp),
+                modifier = Modifier.heightIn(min = DesignTokens.touchTargetMin),
             )
             destinationChoices(destinations, chosen).forEach { dest ->
                 FilterChip(
                     selected = chosen.equals(dest, ignoreCase = true),
                     onClick = { vm.selectDestination(dest) },
                     label = { Text(dest, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                    modifier = Modifier.heightIn(min = 48.dp),
+                    modifier = Modifier.heightIn(min = DesignTokens.touchTargetMin),
                 )
             }
         }
@@ -278,7 +291,7 @@ private fun StopAndLine(state: AlertEditUiState, vm: AlertEditViewModel) {
 private fun MinutesAhead(minutes: Int, range: IntRange, onChange: (Int) -> Unit) {
     SectionLabel(stringResource(R.string.alert_step_minutes), modifier = Modifier.padding(horizontal = 0.dp))
     // Mono solo para la cifra (DESIGN.md §2); el resto del texto en la fuente de interfaz.
-    Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(DesignTokens.spacingSm)) {
         Text(
             minutes.toString(),
             style = MaterialTheme.typography.headlineMedium.copy(fontFeatureSettings = "tnum"),
@@ -287,13 +300,13 @@ private fun MinutesAhead(minutes: Int, range: IntRange, onChange: (Int) -> Unit)
         )
         Text(stringResource(R.string.alert_minutes_before_suffix), style = MaterialTheme.typography.titleMedium, maxLines = 1)
     }
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(DesignTokens.spacingSm)) {
         QUICK_MINUTES.filter { it in range }.forEach { value ->
             FilterChip(
                 selected = minutes == value,
                 onClick = { onChange(value) },
                 label = { Text(stringResource(R.string.alert_minutes_chip, value), fontFamily = MonoFamily, maxLines = 1) },
-                modifier = Modifier.heightIn(min = 48.dp).widthIn(min = 48.dp),
+                modifier = Modifier.heightIn(min = DesignTokens.touchTargetMin).widthIn(min = DesignTokens.touchTargetMin),
             )
         }
     }
@@ -304,8 +317,48 @@ private fun MinutesAhead(minutes: Int, range: IntRange, onChange: (Int) -> Unit)
         valueRange = range.first.toFloat()..range.last.toFloat(),
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 48.dp)
+            .heightIn(min = DesignTokens.touchTargetMin)
             .semantics { contentDescription = sliderLabel },
+    )
+}
+
+/** Paso 3: selector de modo (Notificación o Alarma insistente). */
+@Composable
+private fun AlertModeSelector(mode: AlertMode, onChange: (AlertMode) -> Unit) {
+    SectionLabel(stringResource(R.string.alert_step_mode), modifier = Modifier.padding(horizontal = 0.dp))
+    val modes = listOf(
+        Triple(AlertMode.NOTIFICATION, R.string.alert_mode_notification, Icons.Outlined.Notifications),
+        Triple(AlertMode.ALARM, R.string.alert_mode_alarm, Icons.Outlined.Alarm),
+    )
+    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+        modes.forEachIndexed { index, (m, labelRes, icon) ->
+            SegmentedButton(
+                selected = mode == m,
+                onClick = { onChange(m) },
+                shape = SegmentedButtonDefaults.itemShape(index, modes.size),
+                icon = {
+                    Icon(
+                        icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(DesignTokens.iconSmall),
+                    )
+                },
+                modifier = Modifier.heightIn(min = DesignTokens.touchTargetMin),
+            ) {
+                Text(stringResource(labelRes), maxLines = 1)
+            }
+        }
+    }
+    Text(
+        stringResource(
+            if (mode == AlertMode.NOTIFICATION) {
+                R.string.alert_mode_notification_hint
+            } else {
+                R.string.alert_mode_alarm_hint
+            }
+        ),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        style = MaterialTheme.typography.bodyMedium,
     )
 }
 

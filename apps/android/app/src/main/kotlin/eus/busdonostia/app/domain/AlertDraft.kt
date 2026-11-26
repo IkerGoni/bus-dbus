@@ -64,6 +64,9 @@ fun AlertRule.toDraft(): AlertDraft = AlertDraft(
     mode = mode,
 )
 
+/** Actualiza el modo del aviso (Notificación o Alarma insistente). */
+fun AlertDraft.withMode(mode: AlertMode): AlertDraft = copy(mode = mode)
+
 /** Qué hacer al pulsar Guardar. */
 sealed interface SavePlan {
     /** Ya hay otro aviso para (parada, línea): A06 pregunta si actualizarlo. */
