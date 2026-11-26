@@ -22,5 +22,8 @@
     <string name="notif_stopped_time_limit">Android ha limitado el tiempo de vigilancia en segundo plano. Abre la app para volver a vigilar.</string>
 
     <string name="alerts_notifications_off">Notificaciones desactivadas: tus avisos no sonarán.</string>
+    <string name="alerts_channels_blocked">Canales de aviso bloqueados: tus avisos no sonarán.</string>
+    <string name="alerts_channel_arrivals_blocked">Canal de llegadas bloqueado: tus avisos no sonarán.</string>
+    <string name="alerts_channel_alarm_blocked">Canal de alarmas bloqueado: tus alarmas no sonarán.</string>
     <string name="alerts_notifications_enable">Activar</string>
 </resources>

@@ -58,6 +58,8 @@ import eus.busdonostia.app.domain.AlertRule
 import eus.busdonostia.app.domain.ArrivalsView
 import eus.busdonostia.app.domain.FeedHint
 import eus.busdonostia.app.domain.feedHint
+import eus.busdonostia.app.engine.CHANNEL_ALARM
+import eus.busdonostia.app.engine.CHANNEL_ARRIVALS
 import eus.busdonostia.app.ui.appViewModel
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -71,6 +73,7 @@ import eus.busdonostia.app.ui.components.SkeletonList
 import eus.busdonostia.app.ui.components.rememberEffectiveMotionTokens
 import eus.busdonostia.app.ui.screens.EmptyAction
 import eus.busdonostia.app.ui.screens.EmptyState
+import eus.busdonostia.app.ui.system.channelSettingsIntent
 import eus.busdonostia.app.ui.system.notificationSettingsIntent
 import eus.busdonostia.app.ui.system.openSettings
 import eus.busdonostia.app.ui.system.readSystemStatus
@@ -99,6 +102,23 @@ fun AlertsScreen(
     LifecycleResumeEffect(Unit) {
         system = readSystemStatus(context)
         onPauseOrDispose { }
+    }
+    val blockedArrivals = !system.arrivalsChannelEnabled
+    val blockedAlarm = !system.alarmChannelEnabled
+    val hasBlockedArrivalsAlert = blockedArrivals && state.active.any { it.rule.mode == AlertMode.NOTIFICATION }
+    val hasBlockedAlarmAlert = blockedAlarm && state.active.any { it.rule.mode == AlertMode.ALARM }
+    val channelsBannerVisible = system.notificationsEnabled && (
+        (blockedArrivals && blockedAlarm) || hasBlockedArrivalsAlert || hasBlockedAlarmAlert
+    )
+    val channelsBannerTextRes = when {
+        blockedArrivals && blockedAlarm -> R.string.alerts_channels_blocked
+        blockedArrivals -> R.string.alerts_channel_arrivals_blocked
+        else -> R.string.alerts_channel_alarm_blocked
+    }
+    val channelsBannerIntent = when {
+        blockedArrivals && blockedAlarm -> notificationSettingsIntent(context)
+        blockedArrivals -> channelSettingsIntent(context, CHANNEL_ARRIVALS)
+        else -> channelSettingsIntent(context, CHANNEL_ALARM)
     }
     val deletedText = stringResource(R.string.alert_deleted)
     val undoText = stringResource(R.string.undo)
@@ -138,6 +158,18 @@ fun AlertsScreen(
                         ) {
                             TextButton(
                                 onClick = { context.openSettings(notificationSettingsIntent(context)) },
+                                modifier = Modifier.heightIn(min = DesignTokens.touchTargetMin),
+                            ) { Text(stringResource(R.string.alerts_notifications_enable)) }
+                        }
+                    }
+                    item(key = "banner-channels-blocked", contentType = "info_banner") {
+                        InfoBanner(
+                            visible = channelsBannerVisible,
+                            text = stringResource(channelsBannerTextRes),
+                            warning = true,
+                        ) {
+                            TextButton(
+                                onClick = { context.openSettings(channelsBannerIntent) },
                                 modifier = Modifier.heightIn(min = DesignTokens.touchTargetMin),
                             ) { Text(stringResource(R.string.alerts_notifications_enable)) }
                         }

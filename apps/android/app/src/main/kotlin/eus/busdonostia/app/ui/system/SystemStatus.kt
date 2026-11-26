@@ -11,6 +11,8 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import eus.busdonostia.app.data.settings.AppLanguage
+import eus.busdonostia.app.engine.CHANNEL_ALARM
+import eus.busdonostia.app.engine.CHANNEL_ARRIVALS
 
 /*
  * Estado real de permisos y ajustes del sistema que afectan a los avisos (A06, A07, A08).
@@ -40,13 +42,18 @@ data class SystemStatus(
     val notificationsEnabled: Boolean,
     /** La app está fuera de la optimización de batería. */
     val batteryUnrestricted: Boolean,
+    val arrivalsChannelEnabled: Boolean = true,
+    val alarmChannelEnabled: Boolean = true,
 )
 
 fun readSystemStatus(context: Context): SystemStatus {
     val power = context.getSystemService(PowerManager::class.java)
+    val manager = NotificationManagerCompat.from(context)
     return SystemStatus(
-        notificationsEnabled = NotificationManagerCompat.from(context).areNotificationsEnabled(),
-        batteryUnrestricted = power.isIgnoringBatteryOptimizations(context.packageName),
+        notificationsEnabled = manager.areNotificationsEnabled(),
+        batteryUnrestricted = power?.isIgnoringBatteryOptimizations(context.packageName) == true,
+        arrivalsChannelEnabled = manager.getNotificationChannelCompat(CHANNEL_ARRIVALS)?.importance != NotificationManagerCompat.IMPORTANCE_NONE,
+        alarmChannelEnabled = manager.getNotificationChannelCompat(CHANNEL_ALARM)?.importance != NotificationManagerCompat.IMPORTANCE_NONE,
     )
 }
 
@@ -58,6 +65,12 @@ fun needsNotificationPermission(context: Context): Boolean =
 /** Ajustes de notificaciones de la app. */
 fun notificationSettingsIntent(context: Context): Intent =
     Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+
+/** Ajustes de un canal de notificación específico de la app. */
+fun channelSettingsIntent(context: Context, channelId: String): Intent =
+    Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+        .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+        .putExtra(Settings.EXTRA_CHANNEL_ID, channelId)
 
 /** Lista de optimización de batería (sin `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`: el usuario decide). */
 fun batterySettingsIntent(): Intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)

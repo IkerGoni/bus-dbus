@@ -14,6 +14,8 @@
     <string name="settings_notifications_on">Aktibatuta</string>
     <string name="settings_notifications_off">Desaktibatuta</string>
     <string name="settings_notifications_off_hint">Jakinarazpenik gabe, abisuek ez dute joko.</string>
+    <string name="settings_notifications_channels_blocked">Kanalak blokeatuta</string>
+    <string name="settings_notifications_channels_blocked_hint">Abisu-kanal batzuk desaktibatuta daude: kaltetutako abisuek ez dute joko.</string>
     <string name="settings_open_system">Sistemaren ezarpenak</string>
     <string name="settings_section_background">Atzeko planoko abisuak</string>
     <string name="settings_battery">Bateriaren optimizazioa</string>

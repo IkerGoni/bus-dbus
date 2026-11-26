@@ -14,6 +14,8 @@
     <string name="settings_notifications_on">On</string>
     <string name="settings_notifications_off">Off</string>
     <string name="settings_notifications_off_hint">With notifications off, alerts won\'t sound.</string>
+    <string name="settings_notifications_channels_blocked">Channels blocked</string>
+    <string name="settings_notifications_channels_blocked_hint">Some alert channels are disabled: affected alerts won\'t sound.</string>
     <string name="settings_open_system">System settings</string>
     <string name="settings_section_background">Background alerts</string>
     <string name="settings_battery">Battery optimization</string>

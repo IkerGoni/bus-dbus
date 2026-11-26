@@ -120,12 +120,22 @@ fun SettingsScreen(onBack: () -> Unit) {
         SectionLabel(stringResource(R.string.settings_section_notifications))
         BorderedCard(Modifier.padding(horizontal = DesignTokens.spacingLg)) {
             CardColumn {
+                val hasBlockedChannels = status.notificationsEnabled && (!status.arrivalsChannelEnabled || !status.alarmChannelEnabled)
+                val statusTextRes = when {
+                    !status.notificationsEnabled -> R.string.settings_notifications_off
+                    hasBlockedChannels -> R.string.settings_notifications_channels_blocked
+                    else -> R.string.settings_notifications_on
+                }
                 Text(
-                    stringResource(if (status.notificationsEnabled) R.string.settings_notifications_on else R.string.settings_notifications_off),
+                    stringResource(statusTextRes),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
-                if (!status.notificationsEnabled) Hint(stringResource(R.string.settings_notifications_off_hint))
+                if (!status.notificationsEnabled) {
+                    Hint(stringResource(R.string.settings_notifications_off_hint))
+                } else if (hasBlockedChannels) {
+                    Hint(stringResource(R.string.settings_notifications_channels_blocked_hint))
+                }
                 ActionButton(stringResource(R.string.settings_open_system)) {
                     context.openSettings(notificationSettingsIntent(context))
                 }

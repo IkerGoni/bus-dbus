@@ -22,5 +22,8 @@
     <string name="notif_stopped_time_limit">Android has limited background monitoring time. Open the app to resume monitoring.</string>
 
     <string name="alerts_notifications_off">Notifications off: your alerts won\'t sound.</string>
+    <string name="alerts_channels_blocked">Alert channels blocked: your alerts won\'t sound.</string>
+    <string name="alerts_channel_arrivals_blocked">Arrivals channel blocked: your alerts won\'t sound.</string>
+    <string name="alerts_channel_alarm_blocked">Alarm channel blocked: your alarms won\'t sound.</string>
     <string name="alerts_notifications_enable">Enable</string>
 </resources>

@@ -22,5 +22,8 @@
     <string name="notif_stopped_time_limit">Androidek mugatu egin du atzeko planoko zaintza-denbora. Ireki aplikazioa berriro zaintzeko.</string>
 
     <string name="alerts_notifications_off">Jakinarazpenak desaktibatuta: zure abisuek ez dute joko.</string>
+    <string name="alerts_channels_blocked">Abisu-kanalak blokeatuta: zure abisuek ez dute joko.</string>
+    <string name="alerts_channel_arrivals_blocked">Helmugen kanala blokeatuta: zure abisuek ez dute joko.</string>
+    <string name="alerts_channel_alarm_blocked">Alarma-kanala blokeatuta: zure alarmek ez dute joko.</string>
     <string name="alerts_notifications_enable">Aktibatu</string>
 </resources>

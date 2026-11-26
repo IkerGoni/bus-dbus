@@ -14,6 +14,8 @@
     <string name="settings_notifications_on">Activadas</string>
     <string name="settings_notifications_off">Desactivadas</string>
     <string name="settings_notifications_off_hint">Sin notificaciones, los avisos no sonarán.</string>
+    <string name="settings_notifications_channels_blocked">Canales bloqueados</string>
+    <string name="settings_notifications_channels_blocked_hint">Hay canales de aviso desactivados: los avisos afectados no sonarán.</string>
     <string name="settings_open_system">Ajustes del sistema</string>
     <string name="settings_section_background">Avisos en segundo plano</string>
     <string name="settings_battery">Optimización de batería</string>
