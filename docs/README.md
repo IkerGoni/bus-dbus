@@ -31,6 +31,7 @@ Qué doc mirar para cada cosa. Si un doc contradice a
 | Spec de pantallas A01–A08 | [`07-android-mvp/docs/03-android-screens.md`](07-android-mvp/docs/03-android-screens.md) |
 | Motor de avisos, permisos y red | [`07-android-mvp/docs/04-android-platform.md`](07-android-mvp/docs/04-android-platform.md) |
 | Colores, tipografía y componentes | [`07-android-mvp/design-system/DESIGN.md`](07-android-mvp/design-system/DESIGN.md) |
+| Rediseño visual, UX y motion (`v1`–`v4`) y auditoría | [`design/DESIGN_MANIFESTO.md`](design/DESIGN_MANIFESTO.md) · [`design/AUDIT_REPORT.md`](design/AUDIT_REPORT.md) |
 | Toolchain, versiones y datos de la app | [`apps/android/README.md`](../apps/android/README.md) |
 | Endpoints de Dbus y riesgo de corte | [`06-api-externa/01-endpoints-y-riesgo.md`](06-api-externa/01-endpoints-y-riesgo.md) |
 | Fixtures reales de la API | [`packages/contracts/fixtures/README.md`](../packages/contracts/fixtures/README.md) |
