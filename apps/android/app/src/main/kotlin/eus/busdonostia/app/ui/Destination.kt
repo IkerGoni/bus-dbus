@@ -16,7 +16,7 @@ import eus.busdonostia.app.R
 /** Los 4 destinos fijos de la NavigationBar (03-android-screens.md §1). */
 enum class Destination(
     val route: String,
-    @StringRes val label: Int,
+    @param:StringRes val label: Int,
     val icon: ImageVector,
     val selectedIcon: ImageVector,
 ) {

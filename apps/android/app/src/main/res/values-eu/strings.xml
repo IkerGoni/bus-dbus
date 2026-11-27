@@ -67,8 +67,10 @@
     <string name="stop_not_found_title">Ez da geltokia aurkitu</string>
     <string name="stop_not_found_body">Estekak ez du katalogoko geltokirik adierazten. Itzuli Geltokiak atalera eta hautatu bat.</string>
     <string name="stop_directions">Nola iritsi</string>
+    <string name="stop_next_bus">Hurrengo autobusa</string>
     <string name="stop_next_arrivals">Hurrengo iritsierak</string>
-    <string name="stop_line_star">Babestu %1$s linea geltoki herein</string>
+    <string name="stop_following_arrivals">Ondorengo irteerak</string>
+    <string name="stop_line_star">Babestu %1$s linea geltoki honetan</string>
     <string name="stop_line_starred">%1$s linea geltoki honetan gordeta</string>
     <string name="stop_notice">Dbus-en oharra: %1$s</string>
     <string name="stop_empty_title">Ez dago iritsiera hurbilik</string>

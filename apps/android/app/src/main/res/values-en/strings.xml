@@ -67,7 +67,9 @@
     <string name="stop_not_found_title">Stop not found</string>
     <string name="stop_not_found_body">This link doesn\'t match any stop in the catalog. Go back to Stops and pick one.</string>
     <string name="stop_directions">Directions</string>
+    <string name="stop_next_bus">Next bus</string>
     <string name="stop_next_arrivals">Next arrivals</string>
+    <string name="stop_following_arrivals">Following departures</string>
     <string name="stop_line_star">Save line %1$s at this stop</string>
     <string name="stop_line_starred">Line %1$s saved at this stop</string>
     <string name="stop_notice">Dbus notice: %1$s</string>

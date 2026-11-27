@@ -117,7 +117,7 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
             trans, "motion.transitions",
             "arrivalsStateFadeInMs", "arrivalsStateFadeOutMs", "arrivalsStateSlideFraction",
             "minutesSlideInMs", "minutesSlideOutMs", "searchClearButtonMs", "infoBannerMs",
-            "lineDirectionCrossfadeMs", "wizardStepSlideMs",
+            "lineDirectionCrossfadeMs", "wizardStepSlideMs", "dockVisibilityMs",
         )
         requireKeys(
             micro, "motion.microInteractions",
@@ -125,17 +125,21 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
             "springNoBounceDamping", "springMediumBounceDamping", "springMediumStiffness",
             "searchClearScaleFactor", "chipIndicatorStartScale",
         )
-        requireKeys(pulse, "motion.livePulse", "durationMs", "minAlpha", "maxAlpha")
+        requireKeys(pulse, "motion.livePulse", "durationMs", "shimmerDurationMs", "minAlpha", "maxAlpha")
         requireKeys(stagger, "motion.stagger", "itemDelayMs", "maxAnimatedIndex")
         requireKeys(celebration, "motion.celebration", "particlesDurationMs")
-        requireKeys(spacing, "style.spacingDp", "xxs", "xs", "sm", "md", "lg", "xl")
-        requireKeys(radius, "style.cornerRadiusDp", "chip", "banner", "card", "pill")
+        requireKeys(spacing, "style.spacingDp", "xxs", "xs", "sm", "md", "lg", "xl", "xxl")
+        requireKeys(radius, "style.cornerRadiusDp", "chip", "banner", "card", "hero", "dock", "pill")
         requireKeys(
             comps, "style.componentsDp",
             "timelineTerminalNode", "timelineIntermediateNode", "liveSignalDot", "lineBadgeMinWidth",
-            "lineBadgeSize", "chipVisualHeight", "touchTargetMin", "headerMinHeight", "skeletonRowHeight",
-            "iconSmall", "iconLarge", "lineBadgeChipSize", "progressIndicatorSize", "progressIndicatorStroke",
+            "lineBadgeSize", "lineBadgeLarge", "chipVisualHeight", "touchTargetMin", "headerMinHeight",
+            "skeletonRowHeight", "heroSkeletonHeight", "alertSkeletonHeight",
+            "iconSmall", "iconMedium", "iconDefault", "iconLarge", "lineBadgeChipSize",
+            "progressIndicatorSize", "progressIndicatorStroke",
             "arrivalRowMinHeight", "arrivalDividerInset", "stateMessageVerticalPadding",
+            "floatingDockHeight", "bottomDockClearance", "accentRailWidth", "illustrationSize",
+            "timelineColumnWidth", "timelineStroke",
         )
 
         val maxBlockingMs = intVal(motion, "maxBlockingDurationMs")
@@ -206,6 +210,7 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                     const val INFO_BANNER_MS = ${intVal(trans, "infoBannerMs")}
                     const val LINE_DIRECTION_CROSSFADE_MS = ${intVal(trans, "lineDirectionCrossfadeMs")}
                     const val WIZARD_STEP_SLIDE_MS = ${intVal(trans, "wizardStepSlideMs")}
+                    const val DOCK_VISIBILITY_MS = ${intVal(trans, "dockVisibilityMs")}
                 }
 
                 object MicroInteractions {
@@ -222,6 +227,7 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
 
                 object LivePulse {
                     const val DURATION_MS = ${intVal(pulse, "durationMs")}
+                    const val SHIMMER_DURATION_MS = ${intVal(pulse, "shimmerDurationMs")}
                     const val MIN_ALPHA = ${floatLiteral(pulse, "minAlpha")}
                     const val MAX_ALPHA = ${floatLiteral(pulse, "maxAlpha")}
                 }
@@ -252,6 +258,7 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                     val infoBannerMs: Int,
                     val lineDirectionCrossfadeMs: Int,
                     val wizardStepSlideMs: Int,
+                    val dockVisibilityMs: Int,
                     val pressScaleFactor: Float,
                     val favoriteStarMinScale: Float,
                     val favoriteStarPeakScale: Float,
@@ -262,6 +269,7 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                     val searchClearScaleFactor: Float,
                     val chipIndicatorStartScale: Float,
                     val livePulseDurationMs: Int,
+                    val livePulseShimmerDurationMs: Int,
                     val livePulseMinAlpha: Float,
                     val livePulseMaxAlpha: Float,
                     val staggerItemDelayMs: Int,
@@ -286,6 +294,7 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                             infoBannerMs = Transitions.INFO_BANNER_MS,
                             lineDirectionCrossfadeMs = Transitions.LINE_DIRECTION_CROSSFADE_MS,
                             wizardStepSlideMs = Transitions.WIZARD_STEP_SLIDE_MS,
+                            dockVisibilityMs = Transitions.DOCK_VISIBILITY_MS,
                             pressScaleFactor = MicroInteractions.PRESS_SCALE_FACTOR,
                             favoriteStarMinScale = MicroInteractions.FAVORITE_STAR_MIN_SCALE,
                             favoriteStarPeakScale = MicroInteractions.FAVORITE_STAR_PEAK_SCALE,
@@ -296,6 +305,7 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                             searchClearScaleFactor = MicroInteractions.SEARCH_CLEAR_SCALE_FACTOR,
                             chipIndicatorStartScale = MicroInteractions.CHIP_INDICATOR_START_SCALE,
                             livePulseDurationMs = LivePulse.DURATION_MS,
+                            livePulseShimmerDurationMs = LivePulse.SHIMMER_DURATION_MS,
                             livePulseMinAlpha = LivePulse.MIN_ALPHA,
                             livePulseMaxAlpha = LivePulse.MAX_ALPHA,
                             staggerItemDelayMs = Stagger.ITEM_DELAY_MS,
@@ -320,6 +330,7 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                             infoBannerMs = 0,
                             lineDirectionCrossfadeMs = 0,
                             wizardStepSlideMs = 0,
+                            dockVisibilityMs = 0,
                             pressScaleFactor = 1f,
                             favoriteStarMinScale = 1f,
                             favoriteStarPeakScale = 1f,
@@ -330,6 +341,7 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                             searchClearScaleFactor = 1f,
                             chipIndicatorStartScale = 1f,
                             livePulseDurationMs = 0,
+                            livePulseShimmerDurationMs = 0,
                             livePulseMinAlpha = 1f,
                             livePulseMaxAlpha = 1f,
                             staggerItemDelayMs = 0,
@@ -358,12 +370,15 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                     val MD = ${intVal(spacing, "md")}.dp
                     val LG = ${intVal(spacing, "lg")}.dp
                     val XL = ${intVal(spacing, "xl")}.dp
+                    val XXL = ${intVal(spacing, "xxl")}.dp
                 }
 
                 object CornerRadius {
                     val CHIP = ${intVal(radius, "chip")}.dp
                     val BANNER = ${intVal(radius, "banner")}.dp
                     val CARD = ${intVal(radius, "card")}.dp
+                    val HERO = ${intVal(radius, "hero")}.dp
+                    val DOCK = ${intVal(radius, "dock")}.dp
                     val PILL = ${intVal(radius, "pill")}.dp
                 }
 
@@ -374,10 +389,15 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                     val LINE_BADGE_MIN_WIDTH = ${intVal(comps, "lineBadgeMinWidth")}.dp
                     val CHIP_VISUAL_HEIGHT = ${intVal(comps, "chipVisualHeight")}.dp
                     val LINE_BADGE_SIZE = ${intVal(comps, "lineBadgeSize")}.dp
+                    val LINE_BADGE_LARGE = ${intVal(comps, "lineBadgeLarge")}.dp
                     val TOUCH_TARGET_MIN = ${intVal(comps, "touchTargetMin")}.dp
                     val HEADER_MIN_HEIGHT = ${intVal(comps, "headerMinHeight")}.dp
                     val SKELETON_ROW_HEIGHT = ${intVal(comps, "skeletonRowHeight")}.dp
+                    val HERO_SKELETON_HEIGHT = ${intVal(comps, "heroSkeletonHeight")}.dp
+                    val ALERT_SKELETON_HEIGHT = ${intVal(comps, "alertSkeletonHeight")}.dp
                     val ICON_SMALL = ${intVal(comps, "iconSmall")}.dp
+                    val ICON_MEDIUM = ${intVal(comps, "iconMedium")}.dp
+                    val ICON_DEFAULT = ${intVal(comps, "iconDefault")}.dp
                     val ICON_LARGE = ${intVal(comps, "iconLarge")}.dp
                     val LINE_BADGE_CHIP_SIZE = ${intVal(comps, "lineBadgeChipSize")}.dp
                     val PROGRESS_INDICATOR_SIZE = ${intVal(comps, "progressIndicatorSize")}.dp
@@ -385,6 +405,12 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                     val ARRIVAL_ROW_MIN_HEIGHT = ${intVal(comps, "arrivalRowMinHeight")}.dp
                     val ARRIVAL_DIVIDER_INSET = ${intVal(comps, "arrivalDividerInset")}.dp
                     val STATE_MESSAGE_VERTICAL_PADDING = ${intVal(comps, "stateMessageVerticalPadding")}.dp
+                    val FLOATING_DOCK_HEIGHT = ${intVal(comps, "floatingDockHeight")}.dp
+                    val BOTTOM_DOCK_CLEARANCE = ${intVal(comps, "bottomDockClearance")}.dp
+                    val ACCENT_RAIL_WIDTH = ${intVal(comps, "accentRailWidth")}.dp
+                    val ILLUSTRATION_SIZE = ${intVal(comps, "illustrationSize")}.dp
+                    val TIMELINE_COLUMN_WIDTH = ${intVal(comps, "timelineColumnWidth")}.dp
+                    val TIMELINE_STROKE = ${intVal(comps, "timelineStroke")}.dp
                 }
 
                 val spacingXxs: Dp = Spacing.XXS
@@ -393,10 +419,13 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                 val spacingMd: Dp = Spacing.MD
                 val spacingLg: Dp = Spacing.LG
                 val spacingXl: Dp = Spacing.XL
+                val spacingXxl: Dp = Spacing.XXL
 
                 val cornerRadiusChip: Dp = CornerRadius.CHIP
                 val cornerRadiusBanner: Dp = CornerRadius.BANNER
                 val cornerRadiusCard: Dp = CornerRadius.CARD
+                val cornerRadiusHero: Dp = CornerRadius.HERO
+                val cornerRadiusDock: Dp = CornerRadius.DOCK
                 val cornerRadiusPill: Dp = CornerRadius.PILL
 
                 val timelineTerminalNode: Dp = Components.TIMELINE_TERMINAL_NODE
@@ -405,10 +434,15 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                 val lineBadgeMinWidth: Dp = Components.LINE_BADGE_MIN_WIDTH
                 val chipVisualHeight: Dp = Components.CHIP_VISUAL_HEIGHT
                 val lineBadgeSize: Dp = Components.LINE_BADGE_SIZE
+                val lineBadgeLarge: Dp = Components.LINE_BADGE_LARGE
                 val touchTargetMin: Dp = Components.TOUCH_TARGET_MIN
                 val headerMinHeight: Dp = Components.HEADER_MIN_HEIGHT
                 val skeletonRowHeight: Dp = Components.SKELETON_ROW_HEIGHT
+                val heroSkeletonHeight: Dp = Components.HERO_SKELETON_HEIGHT
+                val alertSkeletonHeight: Dp = Components.ALERT_SKELETON_HEIGHT
                 val iconSmall: Dp = Components.ICON_SMALL
+                val iconMedium: Dp = Components.ICON_MEDIUM
+                val iconDefault: Dp = Components.ICON_DEFAULT
                 val iconLarge: Dp = Components.ICON_LARGE
                 val lineBadgeChipSize: Dp = Components.LINE_BADGE_CHIP_SIZE
                 val progressIndicatorSize: Dp = Components.PROGRESS_INDICATOR_SIZE
@@ -416,6 +450,12 @@ abstract class GenerateDesignTokensTask : DefaultTask() {
                 val arrivalRowMinHeight: Dp = Components.ARRIVAL_ROW_MIN_HEIGHT
                 val arrivalDividerInset: Dp = Components.ARRIVAL_DIVIDER_INSET
                 val stateMessageVerticalPadding: Dp = Components.STATE_MESSAGE_VERTICAL_PADDING
+                val floatingDockHeight: Dp = Components.FLOATING_DOCK_HEIGHT
+                val bottomDockClearance: Dp = Components.BOTTOM_DOCK_CLEARANCE
+                val accentRailWidth: Dp = Components.ACCENT_RAIL_WIDTH
+                val illustrationSize: Dp = Components.ILLUSTRATION_SIZE
+                val timelineColumnWidth: Dp = Components.TIMELINE_COLUMN_WIDTH
+                val timelineStroke: Dp = Components.TIMELINE_STROKE
             }
         """.trimIndent() + "\n"
 

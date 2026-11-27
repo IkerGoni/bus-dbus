@@ -30,6 +30,8 @@ class MotionTokensTest {
         assertEquals(220, full.arrivalsStateFadeInMs)
         assertEquals(150, full.arrivalsStateFadeOutMs)
         assertEquals(150, full.bottomTabFadeInMs)
+        assertEquals(200, full.dockVisibilityMs)
+        assertEquals(1200, full.livePulseShimmerDurationMs)
     }
 
     @Test

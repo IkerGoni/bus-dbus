@@ -39,7 +39,7 @@
     <!-- A08 · Onboarding -->
     <string name="onboarding_bullet_live">Dbusen benetako iristeak eta inguruko geltokiak</string>
     <string name="onboarding_bullet_alerts">Autobusa iritsi baino lehen nahi duzun minutu-kopuruarekin abisatuko dizugu</string>
-    <string name="onboarding_bullet_free">Iragarkirik gabe, gaztelaniaz eta euskaraz</string>
+    <string name="onboarding_bullet_free">Iragarkirik gabe, gaztelaniaz, euskaraz eta ingelesez</string>
     <string name="onboarding_privacy">Konturik eta zerbitzari propiorik gabe: zure gogokoak eta abisuak telefono honetan geratzen dira.</string>
     <string name="onboarding_allow">Baimendu jakinarazpenak eta hasi</string>
     <string name="onboarding_skip">Hasi jakinarazpenik gabe</string>

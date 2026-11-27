@@ -39,7 +39,7 @@
     <!-- A08 · Onboarding -->
     <string name="onboarding_bullet_live">Real Dbus arrivals and nearby stops</string>
     <string name="onboarding_bullet_alerts">Alerts the minutes you choose before your bus arrives</string>
-    <string name="onboarding_bullet_free">No ads, in Spanish and Basque</string>
+    <string name="onboarding_bullet_free">No ads, in Spanish, Basque, and English</string>
     <string name="onboarding_privacy">No account or own server: your favorites and alerts stay on this phone.</string>
     <string name="onboarding_allow">Allow notifications and start</string>
     <string name="onboarding_skip">Start without notifications</string>

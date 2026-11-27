@@ -21,6 +21,7 @@
       "infoBannerMs": 200,
       "lineDirectionCrossfadeMs": 200,
       "wizardStepSlideMs": 240,
+      "dockVisibilityMs": 200,
       "arrivalsStateSlideFraction": 0.0625
     },
     "microInteractions": {
@@ -36,6 +37,7 @@
     },
     "livePulse": {
       "durationMs": 1100,
+      "shimmerDurationMs": 1200,
       "minAlpha": 0.3,
       "maxAlpha": 1.0
     },
@@ -54,12 +56,15 @@
       "sm": 8,
       "md": 12,
       "lg": 16,
-      "xl": 24
+      "xl": 24,
+      "xxl": 32
     },
     "cornerRadiusDp": {
       "chip": 8,
       "banner": 12,
       "card": 16,
+      "hero": 22,
+      "dock": 28,
       "pill": 999
     },
     "componentsDp": {
@@ -68,18 +73,29 @@
       "liveSignalDot": 8,
       "lineBadgeMinWidth": 36,
       "lineBadgeSize": 28,
+      "lineBadgeLarge": 40,
       "chipVisualHeight": 32,
       "touchTargetMin": 48,
       "headerMinHeight": 56,
       "skeletonRowHeight": 72,
+      "heroSkeletonHeight": 144,
+      "alertSkeletonHeight": 116,
       "iconSmall": 16,
+      "iconMedium": 20,
+      "iconDefault": 24,
       "iconLarge": 32,
       "lineBadgeChipSize": 24,
       "progressIndicatorSize": 20,
       "progressIndicatorStroke": 2,
       "arrivalRowMinHeight": 56,
       "arrivalDividerInset": 60,
-      "stateMessageVerticalPadding": 32
+      "stateMessageVerticalPadding": 32,
+      "floatingDockHeight": 64,
+      "bottomDockClearance": 96,
+      "accentRailWidth": 4,
+      "illustrationSize": 96,
+      "timelineColumnWidth": 32,
+      "timelineStroke": 4
     }
   }
 }

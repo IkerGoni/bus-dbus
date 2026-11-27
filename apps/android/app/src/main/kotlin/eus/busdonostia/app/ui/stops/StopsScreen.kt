@@ -1,15 +1,19 @@
 package eus.busdonostia.app.ui.stops
 
-import eus.busdonostia.app.ui.components.motionAnimateItem
-
 import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import androidx.activity.compose.PredictiveBackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,13 +21,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.MyLocation
@@ -34,6 +39,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -43,35 +49,51 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import eus.busdonostia.app.R
 import eus.busdonostia.app.ui.appViewModel
 import eus.busdonostia.app.ui.components.BorderedCard
+import eus.busdonostia.app.ui.components.EmptyStopsIllustration
+import eus.busdonostia.app.ui.components.ErrorSignalIllustration
 import eus.busdonostia.app.ui.components.FavoriteStar
 import eus.busdonostia.app.ui.components.InfoBanner
 import eus.busdonostia.app.ui.components.LineBadge
+import eus.busdonostia.app.ui.components.LocalBottomDockInset
 import eus.busdonostia.app.ui.components.MotionFilterChip
 import eus.busdonostia.app.ui.components.ScreenHeader
+import eus.busdonostia.app.ui.components.SearchEmptyIllustration
 import eus.busdonostia.app.ui.components.SearchPill
 import eus.busdonostia.app.ui.components.SectionLabel
 import eus.busdonostia.app.ui.components.SharedKeys
 import eus.busdonostia.app.ui.components.SharedOrigins
 import eus.busdonostia.app.ui.components.SkeletonList
+import eus.busdonostia.app.ui.components.motionAnimateItem
 import eus.busdonostia.app.ui.components.optionalSharedElement
-import eus.busdonostia.app.ui.components.rememberEffectiveMotionTokens
 import eus.busdonostia.app.ui.screens.EmptyAction
 import eus.busdonostia.app.ui.screens.EmptyState
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
+import eus.busdonostia.app.ui.theme.BusDonostiaTheme
+import eus.busdonostia.app.ui.theme.DesignTokens
+import eus.busdonostia.app.ui.theme.MonoClock
+import kotlinx.coroutines.CancellationException
 
 private val LOCATION_PERMISSIONS = arrayOf(
     Manifest.permission.ACCESS_COARSE_LOCATION,
     Manifest.permission.ACCESS_FINE_LOCATION,
 )
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
 
 /** A02 · Paradas. [onOpenStop] recibe parada y, si la fila es parada+línea, la línea. */
 @Composable
@@ -79,15 +101,21 @@ fun StopsScreen(onOpenStop: (stopId: String, lineId: String?, from: String?) -> 
     val vm = appViewModel { StopsViewModel(it) }
     val state by vm.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    // Tras una negativa, el sistema puede no volver a mostrar el diálogo: entonces se abre Ajustes.
-    var denied by rememberSaveable { mutableStateOf(false) }
+    val haptic = LocalHapticFeedback.current
+    var askedOnce by rememberSaveable { mutableStateOf(false) }
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
         val granted = result.values.any { it }
-        denied = !granted
+        askedOnce = true
         vm.onPermissionResult(granted)
     }
     val askLocation: () -> Unit = {
-        if (denied) {
+        val activity = context.findActivity()
+        val canAskAgain = !askedOnce || (
+            activity != null && LOCATION_PERMISSIONS.any {
+                ActivityCompat.shouldShowRequestPermissionRationale(activity, it)
+            }
+            )
+        if (!canAskAgain) {
             context.startActivity(
                 Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", context.packageName, null)),
             )
@@ -96,27 +124,66 @@ fun StopsScreen(onOpenStop: (stopId: String, lineId: String?, from: String?) -> 
         }
     }
 
-    Column(Modifier.fillMaxSize()) {
+    PredictiveBackHandler(enabled = state.query.isNotBlank()) { progress ->
+        try {
+            progress.collect { }
+            vm.onQueryChange("")
+        } catch (_: CancellationException) {
+        }
+    }
+
+    StopsContentView(
+        state = state,
+        onQueryChange = vm::onQueryChange,
+        onTabChange = vm::onTabChange,
+        onRefreshLocation = {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            if (state.location == LocationState.NoPermission) askLocation() else vm.refreshLocation()
+        },
+        onOpenStop = onOpenStop,
+        onToggleStar = vm::toggleStar,
+        onAskLocation = askLocation,
+        onRetryLocation = vm::refreshLocation,
+    )
+}
+
+@Composable
+internal fun StopsContentView(
+    state: StopsUiState,
+    onQueryChange: (String) -> Unit,
+    onTabChange: (StopsTab) -> Unit,
+    onRefreshLocation: () -> Unit,
+    onOpenStop: (stopId: String, lineId: String?, from: String?) -> Unit,
+    onToggleStar: (StopRow) -> Unit,
+    onAskLocation: () -> Unit,
+    onRetryLocation: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier.fillMaxSize()) {
         ScreenHeader(title = stringResource(R.string.stops_title)) {
-            IconButton(onClick = { if (state.location == LocationState.NoPermission) askLocation() else vm.refreshLocation() }) {
+            IconButton(onClick = onRefreshLocation) {
                 Icon(Icons.Filled.MyLocation, contentDescription = stringResource(R.string.stops_refresh_location))
             }
         }
         SearchPill(
             query = state.query,
-            onQueryChange = vm::onQueryChange,
+            onQueryChange = onQueryChange,
             placeholder = stringResource(R.string.stops_search_hint),
-            modifier = Modifier.padding(horizontal = 16.dp),
+            modifier = Modifier.padding(horizontal = DesignTokens.spacingLg),
         )
         if (state.query.isBlank()) {
-            TabChips(state.tab, vm::onTabChange)
+            TabChips(state.tab, onTabChange)
         } else {
-            Spacer(Modifier.padding(top = 8.dp))
+            Spacer(Modifier.padding(top = DesignTokens.spacingSm))
         }
         when (state.catalogReady) {
             null -> SkeletonList()
-            false -> EmptyState(stringResource(R.string.catalog_error_title), stringResource(R.string.catalog_error_body))
-            true -> StopsContent(state, onOpenStop, vm::toggleStar, askLocation, vm::refreshLocation) { vm.onTabChange(it) }
+            false -> EmptyState(
+                title = stringResource(R.string.catalog_error_title),
+                body = stringResource(R.string.catalog_error_body),
+                illustration = { ErrorSignalIllustration() },
+            )
+            true -> StopsListContent(state, onOpenStop, onToggleStar, onAskLocation, onRetryLocation, onTabChange)
         }
     }
 }
@@ -127,8 +194,8 @@ private fun TabChips(selected: StopsTab, onSelect: (StopsTab) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+            .padding(horizontal = DesignTokens.spacingLg, vertical = DesignTokens.spacingSm),
+        horizontalArrangement = Arrangement.spacedBy(DesignTokens.spacingSm),
     ) {
         StopsTab.entries.forEach { tab ->
             MotionFilterChip(
@@ -155,6 +222,7 @@ private fun TabChips(selected: StopsTab, onSelect: (StopsTab) -> Unit) {
                             StopsTab.RECENTS -> Icons.Outlined.History
                         },
                         contentDescription = null,
+                        modifier = Modifier.size(DesignTokens.iconSmall),
                     )
                 },
             )
@@ -163,7 +231,7 @@ private fun TabChips(selected: StopsTab, onSelect: (StopsTab) -> Unit) {
 }
 
 @Composable
-private fun StopsContent(
+private fun StopsListContent(
     state: StopsUiState,
     onOpenStop: (String, String?, String?) -> Unit,
     onStar: (StopRow) -> Unit,
@@ -171,11 +239,17 @@ private fun StopsContent(
     retryLocation: () -> Unit,
     onTab: (StopsTab) -> Unit,
 ) {
+    val bottomDockInset = LocalBottomDockInset.current
     if (state.query.isNotBlank()) {
         if (state.rows.isEmpty()) {
-            EmptyState(stringResource(R.string.stops_no_results_title, state.query), stringResource(R.string.stops_no_results_body))
+            EmptyState(
+                title = stringResource(R.string.stops_no_results_title, state.query),
+                body = stringResource(R.string.stops_no_results_body),
+                modifier = Modifier.imePadding().padding(bottom = bottomDockInset),
+                illustration = { SearchEmptyIllustration() },
+            )
         } else {
-            StopList {
+            StopList(bottomDockInset = bottomDockInset, imeAware = true) {
                 section(R.string.stops_section_results)
                 rows(state.rows, state, "query", onOpenStop, onStar)
             }
@@ -185,12 +259,14 @@ private fun StopsContent(
     when (state.tab) {
         StopsTab.NEARBY -> when (val location = state.location) {
             LocationState.Locating -> SkeletonList()
-            is LocationState.Located -> StopList {
+            is LocationState.Located -> StopList(bottomDockInset = bottomDockInset) {
                 section(R.string.stops_section_nearby, R.string.stops_by_distance)
                 rows(state.rows, state, state.tab.name, onOpenStop, onStar)
-                item(key = "nearby-footnote", contentType = "footnote") { NearbyFootnote(state.coordinatesAttribution, state.walkMetersPerMin) }
+                item(key = "nearby-footnote", contentType = "footnote") {
+                    NearbyFootnote(state.coordinatesAttribution, state.walkMetersPerMin)
+                }
             }
-            LocationState.NoPermission, LocationState.Unavailable -> StopList {
+            LocationState.NoPermission, LocationState.Unavailable -> StopList(bottomDockInset = bottomDockInset) {
                 item(key = "nearby-location", contentType = "info_banner") {
                     if (location == LocationState.NoPermission) {
                         LocationPrompt(askLocation)
@@ -199,9 +275,9 @@ private fun StopsContent(
                             visible = true,
                             text = stringResource(R.string.stops_location_unavailable),
                             warning = true,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            modifier = Modifier.padding(horizontal = DesignTokens.spacingLg, vertical = DesignTokens.spacingSm),
                         ) {
-                            TextButton(onClick = retryLocation, modifier = Modifier.heightIn(min = 48.dp)) {
+                            TextButton(onClick = retryLocation, modifier = Modifier.heightIn(min = DesignTokens.touchTargetMin)) {
                                 Text(stringResource(R.string.retry))
                             }
                         }
@@ -216,31 +292,41 @@ private fun StopsContent(
         StopsTab.FAVORITES ->
             if (state.rows.isEmpty()) {
                 EmptyState(
-                    stringResource(R.string.stops_favorites_empty_title),
-                    stringResource(R.string.stops_favorites_empty_body),
-                    listOf(EmptyAction(stringResource(R.string.home_cta_nearby), primary = true) { onTab(StopsTab.NEARBY) }),
+                    title = stringResource(R.string.stops_favorites_empty_title),
+                    body = stringResource(R.string.stops_favorites_empty_body),
+                    actions = listOf(EmptyAction(stringResource(R.string.home_cta_nearby), primary = true) { onTab(StopsTab.NEARBY) }),
+                    modifier = Modifier.padding(bottom = bottomDockInset),
+                    illustration = { EmptyStopsIllustration() },
                 )
             } else {
-                StopList { rows(state.rows, state, state.tab.name, onOpenStop, onStar) }
+                StopList(bottomDockInset = bottomDockInset) { rows(state.rows, state, state.tab.name, onOpenStop, onStar) }
             }
         StopsTab.RECENTS ->
             if (state.rows.isEmpty()) {
                 EmptyState(
-                    stringResource(R.string.stops_recents_empty_title),
-                    stringResource(R.string.stops_recents_empty_body, state.recentStopsLimit),
-                    listOf(EmptyAction(stringResource(R.string.home_cta_nearby), primary = true) { onTab(StopsTab.NEARBY) }),
+                    title = stringResource(R.string.stops_recents_empty_title),
+                    body = stringResource(R.string.stops_recents_empty_body, state.recentStopsLimit),
+                    actions = listOf(EmptyAction(stringResource(R.string.home_cta_nearby), primary = true) { onTab(StopsTab.NEARBY) }),
+                    modifier = Modifier.padding(bottom = bottomDockInset),
+                    illustration = { EmptyStopsIllustration() },
                 )
             } else {
-                StopList { rows(state.rows, state, state.tab.name, onOpenStop, onStar) }
+                StopList(bottomDockInset = bottomDockInset) { rows(state.rows, state, state.tab.name, onOpenStop, onStar) }
             }
     }
 }
 
 @Composable
-private fun StopList(content: LazyListScope.() -> Unit) {
+private fun StopList(
+    bottomDockInset: Dp,
+    imeAware: Boolean = false,
+    content: LazyListScope.() -> Unit,
+) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = 16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .then(if (imeAware) Modifier.imePadding() else Modifier),
+        contentPadding = PaddingValues(bottom = DesignTokens.spacingLg + bottomDockInset),
         content = content,
     )
 }
@@ -273,15 +359,32 @@ private fun LazyListScope.rows(
 
 @Composable
 private fun LocationPrompt(onAllow: () -> Unit) {
-    BorderedCard(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(stringResource(R.string.stops_location_title), style = MaterialTheme.typography.titleMedium)
-            Text(
-                stringResource(R.string.stops_location_body),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Button(onClick = onAllow, modifier = Modifier.heightIn(min = 48.dp)) {
+    BorderedCard(
+        modifier = Modifier.padding(horizontal = DesignTokens.spacingLg, vertical = DesignTokens.spacingSm),
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+    ) {
+        Column(
+            modifier = Modifier.padding(DesignTokens.spacingLg),
+            verticalArrangement = Arrangement.spacedBy(DesignTokens.spacingMd),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(DesignTokens.spacingMd),
+            ) {
+                EmptyStopsIllustration(size = DesignTokens.headerMinHeight)
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(DesignTokens.spacingXs)) {
+                    Text(stringResource(R.string.stops_location_title), style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        stringResource(R.string.stops_location_body),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            Button(
+                onClick = onAllow,
+                modifier = Modifier.fillMaxWidth().heightIn(min = DesignTokens.touchTargetMin),
+            ) {
                 Text(stringResource(R.string.stops_location_allow))
             }
         }
@@ -290,10 +393,13 @@ private fun LocationPrompt(onAllow: () -> Unit) {
 
 @Composable
 private fun NearbyFootnote(attribution: String?, walkMetersPerMin: Int) {
-    Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(
+        Modifier.padding(horizontal = DesignTokens.spacingLg, vertical = DesignTokens.spacingMd),
+        verticalArrangement = Arrangement.spacedBy(DesignTokens.spacingXs),
+    ) {
         Text(
             stringResource(R.string.stops_walk_estimate_note, walkMetersPerMin),
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         if (attribution != null) {
@@ -311,6 +417,7 @@ private fun NearbyFootnote(attribution: String?, walkMetersPerMin: Int) {
 fun distanceText(meters: Long): String =
     if (meters < 1_000) stringResource(R.string.distance_m, meters) else stringResource(R.string.distance_km, meters / 1_000.0)
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun StopCard(
     row: StopRow,
@@ -320,12 +427,22 @@ private fun StopCard(
     onStar: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    BorderedCard(modifier = modifier.padding(horizontal = 16.dp, vertical = 6.dp), onClick = onClick) {
-        Column(Modifier.padding(start = 16.dp, top = 4.dp, bottom = 12.dp)) {
+    BorderedCard(
+        modifier = modifier.padding(horizontal = DesignTokens.spacingLg, vertical = DesignTokens.spacingXxs),
+        onClick = onClick,
+    ) {
+        Column(
+            modifier = Modifier.padding(
+                start = DesignTokens.spacingLg,
+                top = DesignTokens.spacingXs,
+                bottom = DesignTokens.spacingMd,
+            ),
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = row.name,
                     style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
@@ -343,21 +460,23 @@ private fun StopCard(
                     },
                 )
             }
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(end = DesignTokens.spacingMd),
+            ) {
                 Column(modifier = Modifier.weight(1f)) {
                     FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(DesignTokens.spacingXxs),
+                        verticalArrangement = Arrangement.spacedBy(DesignTokens.spacingXxs),
                     ) {
-                        row.lineIds.forEach {
+                        row.lineIds.forEach { line ->
                             LineBadge(
-                                lineId = it,
-                                colorArgb = lineColors[it],
-                                modifier = Modifier.optionalSharedElement(SharedKeys.line(row.stopId, it, origin)),
+                                lineId = line,
+                                colorArgb = lineColors[line],
+                                modifier = Modifier.optionalSharedElement(SharedKeys.line(row.stopId, line, origin)),
                             )
                         }
                     }
-                    // Desambiguación legible para paradas homónimas: sentido/destino principal.
                     row.mainDestination?.let { dest ->
                         Text(
                             text = dest,
@@ -365,28 +484,61 @@ private fun StopCard(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(top = 4.dp),
+                            modifier = Modifier.padding(top = DesignTokens.spacingXs),
                         )
                     }
                 }
-                // Distancia en la fila de líneas para no recortar el nombre de la parada.
                 if (row.meters != null && row.walkMinutes != null) {
-                    Text(
-                        text = stringResource(R.string.stops_distance_walk, distanceText(row.meters), row.walkMinutes),
-                        style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum"),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        softWrap = false,
-                        modifier = Modifier.padding(start = 8.dp),
-                    )
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        shape = RoundedCornerShape(DesignTokens.cornerRadiusPill),
+                        modifier = Modifier.padding(start = DesignTokens.spacingSm),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.stops_distance_walk, distanceText(row.meters), row.walkMinutes),
+                            style = MonoClock,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            softWrap = false,
+                            modifier = Modifier.padding(horizontal = DesignTokens.spacingSm, vertical = DesignTokens.spacingXs),
+                        )
+                    }
                 }
                 Icon(
-                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(end = 12.dp),
+                    modifier = Modifier.padding(start = DesignTokens.spacingXs),
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Preview(showBackground = true, fontScale = 1.5f)
+@Composable
+private fun StopsNearbyPreview() {
+    val state = StopsUiState(
+        catalogReady = true,
+        tab = StopsTab.NEARBY,
+        location = LocationState.Located(43.32, -1.98),
+        rows = listOf(
+            StopRow("1281", "Boulevard 15", listOf("5", "28", "13"), meters = 140, walkMinutes = 2, mainDestination = "Hacia Ospitaleak", starred = true),
+            StopRow("340", "Pío Baroja 10", listOf("16", "24"), meters = 420, walkMinutes = 5, mainDestination = "Hacia Centro", starred = false),
+        ),
+    )
+    BusDonostiaTheme {
+        StopsContentView(
+            state = state,
+            onQueryChange = {},
+            onTabChange = {},
+            onRefreshLocation = {},
+            onOpenStop = { _, _, _ -> },
+            onToggleStar = {},
+            onAskLocation = {},
+            onRetryLocation = {},
+        )
     }
 }

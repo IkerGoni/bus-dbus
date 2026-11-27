@@ -7,6 +7,7 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
@@ -24,7 +25,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.LocalTextStyle
@@ -35,19 +41,27 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import eus.busdonostia.app.ui.theme.DesignTokens
 import eus.busdonostia.app.ui.theme.MotionTokens
 
 /** CompositionLocal para accesibilidad: true cuando el usuario tiene "Quitar animaciones" activado. */
 val LocalReducedMotion = compositionLocalOf { false }
+
+/** Espacio inferior reservado para el Floating Pill Dock en pestañas raíz (`0.dp` en detalles). */
+val LocalBottomDockInset = compositionLocalOf { 0.dp }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 val LocalSharedTransitionScope = compositionLocalOf<SharedTransitionScope?> { null }
@@ -96,15 +110,17 @@ fun AnimatedMinutesText(
                 val enterOffset: (Int) -> Int = { height -> if (isDecreasing) -height else height }
                 val exitOffset: (Int) -> Int = { height -> if (isDecreasing) height else -height }
 
-                (slideInVertically(
-                    animationSpec = tween(
-                        durationMillis = motion.minutesSlideInMs,
-                        easing = FastOutSlowInEasing,
-                    ),
-                    initialOffsetY = enterOffset,
-                ) + fadeIn(
-                    animationSpec = tween(durationMillis = motion.minutesSlideInMs),
-                )).togetherWith(
+                (
+                    slideInVertically(
+                        animationSpec = tween(
+                            durationMillis = motion.minutesSlideInMs,
+                            easing = FastOutSlowInEasing,
+                        ),
+                        initialOffsetY = enterOffset,
+                    ) + fadeIn(
+                        animationSpec = tween(durationMillis = motion.minutesSlideInMs),
+                    )
+                    ).togetherWith(
                     slideOutVertically(
                         animationSpec = tween(
                             durationMillis = motion.minutesSlideOutMs,
@@ -150,7 +166,6 @@ fun rememberSystemReducedMotion(): Boolean {
 /**
  * Devuelve los tokens de motion resueltos según accesibilidad.
  * Cuando `reducedMotion == true`, colapsa todas las duraciones a 0 y desactiva pulsos/rotaciones.
- * Usar en lugar de `MotionTokens` directamente en composables.
  */
 @Composable
 fun rememberEffectiveMotionTokens(): MotionTokens.ResolvedMotionTokens {
@@ -164,10 +179,14 @@ fun <T> rememberMotionSpring(bouncy: Boolean = false): FiniteAnimationSpec<T> {
     val reduced = LocalReducedMotion.current
     val m = rememberEffectiveMotionTokens()
     return remember(reduced, bouncy) {
-        if (reduced) snap() else spring(
-            dampingRatio = if (bouncy) m.springMediumBounceDamping else m.springNoBounceDamping,
-            stiffness = m.springMediumStiffness,
-        )
+        if (reduced) {
+            snap()
+        } else {
+            spring(
+                dampingRatio = if (bouncy) m.springMediumBounceDamping else m.springNoBounceDamping,
+                stiffness = m.springMediumStiffness,
+            )
+        }
     }
 }
 
@@ -176,27 +195,33 @@ fun <T> rememberMotionSpring(bouncy: Boolean = false): FiniteAnimationSpec<T> {
 fun LazyItemScope.motionAnimateItem(modifier: Modifier = Modifier): Modifier {
     val reduced = LocalReducedMotion.current
     val m = rememberEffectiveMotionTokens()
-    return if (reduced) modifier.animateItem(fadeInSpec = null, placementSpec = null, fadeOutSpec = null)
-    else modifier.animateItem(
-        fadeInSpec = tween(m.arrivalsStateFadeInMs),
-        placementSpec = spring(m.springNoBounceDamping, m.springMediumStiffness),
-        fadeOutSpec = tween(m.arrivalsStateFadeOutMs),
-    )
+    return if (reduced) {
+        modifier.animateItem(fadeInSpec = null, placementSpec = null, fadeOutSpec = null)
+    } else {
+        modifier.animateItem(
+            fadeInSpec = tween(m.arrivalsStateFadeInMs),
+            placementSpec = spring(m.springNoBounceDamping, m.springMediumStiffness),
+            fadeOutSpec = tween(m.arrivalsStateFadeOutMs),
+        )
+    }
 }
 
 /**
  * Modifier de escala al pulsar (press feedback) operando EXCLUSIVAMENTE en `graphicsLayer`.
  * No dispara recomposición ni cambios de layout. Respeta `LocalReducedMotion`.
  */
-fun Modifier.pressScale(interactionSource: MutableInteractionSource): Modifier = composed {
+fun Modifier.pressScale(
+    interactionSource: MutableInteractionSource,
+    enabled: Boolean = true,
+): Modifier = composed {
     val reducedMotion = LocalReducedMotion.current
     val isPressed by interactionSource.collectIsPressedAsState()
     val motion = rememberEffectiveMotionTokens()
     val springSpec = rememberMotionSpring<Float>()
     val scale by animateFloatAsState(
-        targetValue = if (isPressed && !reducedMotion) motion.pressScaleFactor else 1f,
+        targetValue = if (enabled && isPressed && !reducedMotion) motion.pressScaleFactor else 1f,
         animationSpec = springSpec,
-        label = "pressScale"
+        label = "pressScale",
     )
     graphicsLayer {
         this.scaleX = scale
@@ -228,11 +253,11 @@ fun LiveSignalDot(
             animationSpec = infiniteRepeatable(
                 animation = tween(
                     durationMillis = motion.livePulseDurationMs,
-                    easing = FastOutSlowInEasing
+                    easing = FastOutSlowInEasing,
                 ),
-                repeatMode = RepeatMode.Reverse
+                repeatMode = RepeatMode.Reverse,
             ),
-            label = "liveDotAlpha"
+            label = "liveDotAlpha",
         )
     } else {
         remember { mutableFloatStateOf(1f) }
@@ -246,5 +271,95 @@ fun LiveSignalDot(
                 color = if (isLive) liveColor else scheduledColor,
                 shape = CircleShape,
             ),
+    )
+}
+
+/**
+ * Baliza radar concéntrica para Hero Boards (`NextAlertCard`, `NextBusHeroBoard`).
+ * Dibuja un núcleo sólido + halo expansivo sutil en fase de dibujo (`graphicsLayer`).
+ * Desactivada bajo `LocalReducedMotion` y `LocalInspectionMode`.
+ */
+@Composable
+fun LiveRadarBeacon(
+    isLive: Boolean,
+    liveColor: Color,
+    scheduledColor: Color,
+    modifier: Modifier = Modifier,
+    coreSize: Dp = DesignTokens.liveSignalDotSize,
+) {
+    val reducedMotion = LocalReducedMotion.current
+    val motion = rememberEffectiveMotionTokens()
+    val animatePulse = isLive && !reducedMotion && !LocalInspectionMode.current
+
+    val pulseProgress = if (animatePulse) {
+        val transition = rememberInfiniteTransition(label = "liveRadarBeacon")
+        transition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = motion.livePulseDurationMs,
+                    easing = LinearEasing,
+                ),
+                repeatMode = RepeatMode.Restart,
+            ),
+            label = "radarProgress",
+        )
+    } else {
+        remember { mutableFloatStateOf(0f) }
+    }
+
+    Box(
+        modifier = modifier.size(DesignTokens.iconMedium),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (animatePulse) {
+            Box(
+                modifier = Modifier
+                    .size(DesignTokens.iconMedium)
+                    .graphicsLayer {
+                        val p = pulseProgress.value
+                        val scale = 0.55f + (0.75f * p)
+                        scaleX = scale
+                        scaleY = scale
+                        alpha = (1f - p) * 0.32f
+                    }
+                    .background(liveColor, CircleShape),
+            )
+        }
+        Box(
+            modifier = Modifier
+                .size(coreSize)
+                .background(if (isLive) liveColor else scheduledColor, CircleShape),
+        )
+    }
+}
+
+/** Protección sutil superior para garantizar legibilidad de iconos de estado al hacer scroll. */
+@Composable
+fun StatusBarScrim(
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.background,
+) {
+    val density = LocalDensity.current
+    val topPx = WindowInsets.statusBars.getTop(density)
+    if (topPx <= 0) return
+    val heightDp = with(density) { (topPx * 1.15f).toDp() }
+    Spacer(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(heightDp)
+            .drawWithCache {
+                val brush = Brush.verticalGradient(
+                    colors = listOf(
+                        color.copy(alpha = 0.92f),
+                        color.copy(alpha = 0.55f),
+                        Color.Transparent,
+                    ),
+                )
+                onDrawBehind {
+                    drawRect(brush = brush)
+                }
+            },
     )
 }

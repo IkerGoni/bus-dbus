@@ -67,7 +67,9 @@
     <string name="stop_not_found_title">Parada no encontrada</string>
     <string name="stop_not_found_body">El enlace no corresponde a ninguna parada del catálogo. Vuelve a Paradas y elige una.</string>
     <string name="stop_directions">Cómo llegar</string>
+    <string name="stop_next_bus">Próximo autobús</string>
     <string name="stop_next_arrivals">Próximas llegadas</string>
+    <string name="stop_following_arrivals">Siguientes salidas</string>
     <string name="stop_line_star">Guardar la línea %1$s en esta parada</string>
     <string name="stop_line_starred">Línea %1$s guardada en esta parada</string>
     <string name="stop_notice">Aviso de Dbus: %1$s</string>

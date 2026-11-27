@@ -39,7 +39,7 @@
     <!-- A08 · Onboarding -->
     <string name="onboarding_bullet_live">Llegadas reales de Dbus y paradas cercanas</string>
     <string name="onboarding_bullet_alerts">Avisos los minutos que elijas antes de que llegue tu bus</string>
-    <string name="onboarding_bullet_free">Sin anuncios, en castellano y euskera</string>
+    <string name="onboarding_bullet_free">Sin anuncios, en castellano, euskera e inglés</string>
     <string name="onboarding_privacy">Sin cuenta ni servidor propio: tus favoritos y avisos se quedan en este móvil.</string>
     <string name="onboarding_allow">Permitir notificaciones y empezar</string>
     <string name="onboarding_skip">Empezar sin notificaciones</string>
